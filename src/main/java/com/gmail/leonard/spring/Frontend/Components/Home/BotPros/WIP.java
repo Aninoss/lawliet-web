@@ -1,0 +1,16 @@
+package com.gmail.leonard.spring.Frontend.Components.Home.BotPros;
+
+import com.vaadin.flow.component.html.Label;
+
+public class WIP extends Label {
+
+    public WIP() {
+        super("WORK IN PROGRESS");
+        getStyle()
+                .set("color", "var(--lumo-error-color)")
+                .set("transform", "rotate(15deg)")
+                .set("font-size", "150%")
+                .set("margin-bottom", "50px")
+                .set("margin-top", "50px");
+    }
+}
