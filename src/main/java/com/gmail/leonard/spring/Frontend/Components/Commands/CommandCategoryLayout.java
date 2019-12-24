@@ -27,6 +27,7 @@ public class CommandCategoryLayout extends VerticalLayout {
         this.showNsfw = showNsfw;
 
         setWidthFull();
+        setHeight((commandListCategory.size(showNsfw) * 68) + "px");
         setPadding(false);
         setSpacing(false);
 
@@ -41,6 +42,7 @@ public class CommandCategoryLayout extends VerticalLayout {
         build = true;
 
         remove(loadingDiv);
+        setHeight("auto");
 
         Locale locale = getLocale();
 
@@ -98,6 +100,7 @@ public class CommandCategoryLayout extends VerticalLayout {
             Details component = new Details(titleContent, openedContent);
             component.addThemeVariants(DetailsVariant.REVERSE, DetailsVariant.FILLED);
             component.getElement().getStyle().set("width", "100%");
+            component.getElement().setAttribute("class", "fadein-class");
             if (!slot.isNsfw() || showNsfw) add(component);
             commandFields.put(slot.getTrigger(), component);
         }

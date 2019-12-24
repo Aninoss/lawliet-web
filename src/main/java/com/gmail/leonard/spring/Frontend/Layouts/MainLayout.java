@@ -7,6 +7,7 @@ import com.gmail.leonard.spring.Frontend.Components.FooterArea;
 import com.gmail.leonard.spring.Frontend.Components.Header.HeaderComponent;
 import com.gmail.leonard.spring.Frontend.Components.Header.VerticalMenuBarComponent;
 import com.gmail.leonard.spring.Frontend.Views.IEView;
+import com.gmail.leonard.spring.Frontend.Views.PageNotFoundView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
@@ -68,7 +69,7 @@ public class MainLayout extends VerticalLayout implements RouterLayout, BeforeEn
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         Class<?> c = event.getNavigationTarget();
-        sessionData.setCurrentTarget(c);
+        if (c != PageNotFoundView.class) sessionData.setCurrentTarget(c);
         if (VaadinSession.getCurrent().getBrowser().isIE() && event.getNavigationTarget() != IEView.class) event.rerouteTo(IEView.class);
     }
 

@@ -22,6 +22,8 @@
 
     .round { border-radius: 50%; }
 
+    .round-edges { border-radius: 5%; }
+
     .center-text { text-align: center; }
 
     .center-fixed {
@@ -275,7 +277,33 @@
 
     #commands-resultslabel {
         margin-bottom: 16px;
-        margin-top: 0px;
+         margin-top: 0px;
+    }
+
+
+    .dashboard-card {
+        border-radius: 2%;
+        transition: background-color 200ms;
+    }
+    .dashboard-card:hover {
+        background-color: var(--lumo-tint-5pct);
+        cursor: pointer;
+    }
+    .dashboard-card:active {
+        background-color: var(--lumo-tint-10pct);
+        transition: color 0ms;
+    }
+
+    #dashboard-title {
+        transition: color 200ms;
+    }
+    #dashboard-title:hover {
+        cursor: pointer;
+        color: var(--lumo-primary-text-color);
+    }
+    #dashboard-title:active {
+        color: var(--lumo-primary-color);
+        transition: color 0ms;
     }
 
 

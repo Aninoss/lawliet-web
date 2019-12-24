@@ -29,7 +29,7 @@ public class FAQView extends Main implements HasDynamicTitle {
 
         Accordion accordion = new Accordion();
         accordion.setWidthFull();
-        for(int i = 0; i < 7; i++) {
+        for(int i = 0; i < 8; i++) {
             Label header = new Label(getTranslation(String.format("faq.%d.question", i)));
             //header.getStyle().set("font-weight", "bold");
 
@@ -43,6 +43,7 @@ public class FAQView extends Main implements HasDynamicTitle {
                     .set("margin-bottom", "-8px");
 
             AccordionPanel accordionPanel = new AccordionPanel(header, labelDiv);
+            accordionPanel.getElement().getStyle().set("margin-bottom", "12px");
             accordion.add(accordionPanel)
                     .addThemeVariants(DetailsVariant.FILLED);
         }

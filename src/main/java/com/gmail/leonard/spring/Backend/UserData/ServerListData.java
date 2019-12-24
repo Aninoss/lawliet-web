@@ -29,4 +29,8 @@ public class ServerListData {
         return servers.size();
     }
 
+    public ArrayList<DiscordServerData> getServers() {
+        return servers;
+    }
+
 }
