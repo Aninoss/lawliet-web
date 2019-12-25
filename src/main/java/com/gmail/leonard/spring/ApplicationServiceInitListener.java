@@ -25,6 +25,7 @@ public class ApplicationServiceInitListener implements VaadinServiceInitListener
                         ).toString());
 
                         response.getDocument().head().append("<script src=\"js/scripts.js\"></script>");
+                        response.getDocument().body().attr("overflow-x", "hidden");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

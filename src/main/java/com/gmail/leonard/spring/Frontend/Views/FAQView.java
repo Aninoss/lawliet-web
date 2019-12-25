@@ -31,11 +31,9 @@ public class FAQView extends Main implements HasDynamicTitle {
         accordion.setWidthFull();
         for(int i = 0; i < 8; i++) {
             Label header = new Label(getTranslation(String.format("faq.%d.question", i)));
-            //header.getStyle().set("font-weight", "bold");
 
             Div labelDiv = new Div(new Label(getTranslation(String.format("faq.%d.answer", i))));
             labelDiv.getStyle()
-                    //.set("margin-left", "14px")
                     .set("background-color", "var(--lumo-secondary)")
                     .set("padding", "12px")
                     .set("margin-left", "-16px")

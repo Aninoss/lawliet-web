@@ -46,7 +46,7 @@ public class DashboardServerListLayout extends VerticalLayout {
         }
 
         FlexibleGridLayout layout = new FlexibleGridLayout()
-                .withColumns(Repeat.RepeatMode.AUTO_FILL, new MinMax(new Length("160px"), new Flex(1)))
+                .withColumns(Repeat.RepeatMode.AUTO_FILL, new MinMax(new Length("130px"), new Flex(0.5)))
                 .withItems(serverCards)
                 .withPadding(false)
                 .withSpacing(true)

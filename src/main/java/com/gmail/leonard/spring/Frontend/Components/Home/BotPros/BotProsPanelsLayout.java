@@ -71,6 +71,8 @@ public class BotProsPanelsLayout extends VerticalLayout {
                 .withAutoFlow(GridLayoutComponent.AutoFlow.ROW_DENSE)
                 .withOverflow(GridLayoutComponent.Overflow.AUTO);
 
+        layout.getStyle().set("overflow", "hidden");
+
         layout.setSizeFull();
         setSizeFull();
         setPadding(false);

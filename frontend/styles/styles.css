@@ -406,6 +406,8 @@
             height: 100px;
         }
 
+        .dashboard-small-title { font-size: 130%; }
+
     }
 
 </style>

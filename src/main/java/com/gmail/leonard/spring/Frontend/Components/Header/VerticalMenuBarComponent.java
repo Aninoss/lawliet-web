@@ -38,7 +38,9 @@ public class VerticalMenuBarComponent extends VerticalLayout {
                 CustomButton logout = new CustomButton(getTranslation("logout"), VaadinIcon.SIGN_OUT_ALT.create());
                 logout.setWidthFull();
                 Anchor logoutAnchor = new Anchor("/discordlogout", logout);
-                logoutAnchor.getStyle().set("margin-bottom", "16px");
+                logoutAnchor.getStyle()
+                        .set("margin-bottom", "16px")
+                        .set("margin-top", "8px");
                 logoutAnchor.setWidthFull();
                 add(logoutAnchor);
             } else {

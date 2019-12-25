@@ -75,12 +75,14 @@ public class HeaderComponent extends Header {
                 accountName.setSpacing(false);
                 accountName.setPadding(false);
                 accountName.setSizeUndefined();
+                accountName.addClassName("visible-not-xsmall");
 
                 Span username = new Span(sessionData.getUserName());
                 username.getStyle()
                         .set("margin-top", "-3px")
                         .set("margin-left", "-4px")
                         .set("color", "white");
+                username.addClassName("visible-not-xsmall");
                 RouterLink link = new RouterLink(getTranslation("logout"), DiscordLogout.class);
                 link.getStyle()
                         .set("margin-top", "-4px")
@@ -88,8 +90,7 @@ public class HeaderComponent extends Header {
                         .set("margin-left", "-4px");
                 link.addClassName("visible-not-xsmall");
 
-                accountName.add(username);
-                accountName.add(link);
+                accountName.add(username, link);
                 content.add(accountName);
             } else {
                 CustomButton login = new CustomButton(getTranslation("login"), new DiscordIcon());

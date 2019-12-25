@@ -15,10 +15,15 @@ import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.History;
 import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.router.*;
+import elemental.json.JsonValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaddon.css.query.MediaQueryUnit;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Route(value = DashboardServerView.ID, layout = MainLayout.class)
 public class DashboardServerView extends Main implements HasDynamicTitle, BeforeEnterObserver {
@@ -92,5 +97,4 @@ public class DashboardServerView extends Main implements HasDynamicTitle, Before
     public boolean isServerSelected() {
         return discordServerData != null;
     }
-
 }
