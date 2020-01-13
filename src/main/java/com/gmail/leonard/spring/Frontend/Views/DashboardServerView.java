@@ -24,15 +24,15 @@ import org.vaddon.css.query.MediaQueryUnit;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Route(value = DashboardServerView.ID, layout = MainLayout.class)
-public class DashboardServerView extends Main implements HasDynamicTitle, BeforeEnterObserver {
+public class DashboardServerView extends Main implements HasDynamicTitle, BeforeEnterObserver, HasUrlParameter<Long> {
 
     public static final String ID = "dashboard";
+
     private SessionData sessionData;
     private VerticalLayout mainContent = new VerticalLayout();
-    private DashboardTitle dashboardTitle;
-    private DiscordServerData discordServerData = null;
 
     public DashboardServerView(@Autowired SessionData sessionData) {
         this.sessionData = sessionData;
@@ -41,46 +41,12 @@ public class DashboardServerView extends Main implements HasDynamicTitle, Before
         mainContent.addClassName("app-width");
         mainContent.setPadding(true);
 
-        WebComClient.getInstance().updateServers(sessionData);
-        ServerListData serverListData = sessionData.getServerListData();
-
-        dashboardTitle = new DashboardTitle(this, serverListData);
-        mainContent.add(dashboardTitle);
-
         if (!sessionData.isLoggedIn()) {
+            mainContent.add(new DashboardTitle());
             mainContent.add(getTranslation("dashboard.redirect"));
-        } else {
-            if (serverListData.size() == 0) {
-                Paragraph p = new Paragraph(getTranslation("dashboard.noserver"));
-                p.getStyle().set("color", "var(--lumo-error-text-color)");
-                mainContent.add(p);
-            } else {
-                if (serverListData.size() == 1) {
-                    build(null, serverListData.getServers().get(0));
-                } else {
-                    debuild(serverListData);
-                }
-            }
         }
 
         add(mainContent);
-    }
-
-    public void build(DashboardServerListLayout dashboardServerListLayout, DiscordServerData discordServerData) {
-        if (dashboardServerListLayout != null) mainContent.remove(dashboardServerListLayout);
-        this.discordServerData = discordServerData;
-        dashboardTitle.setServer(discordServerData);
-
-        Paragraph p = new Paragraph(getTranslation("dashboard.notavailable"));
-        p.getStyle().set("color", "var(--lumo-error-text-color)");
-        mainContent.add(p);
-    }
-
-    public void debuild(ServerListData serverListData) {
-        mainContent.getChildren().skip(1).forEach(mainContent::remove);
-        discordServerData = null;
-        mainContent.add(new DashboardServerListLayout(serverListData, this));
-        dashboardTitle.setServer(null);
     }
 
     @Override
@@ -94,7 +60,41 @@ public class DashboardServerView extends Main implements HasDynamicTitle, Before
         return PageTitleFactory.getPageTitle(ID);
     }
 
-    public boolean isServerSelected() {
-        return discordServerData != null;
+    @Override
+    public void setParameter(BeforeEvent beforeEvent, @OptionalParameter Long serverId) {
+        if (!sessionData.isLoggedIn()) return;
+        mainContent.getChildren().forEach(mainContent::remove);
+
+        WebComClient.getInstance().updateServers(sessionData);
+        ServerListData serverListData = sessionData.getServerListData();
+        if (serverListData.size() == 1) serverId = serverListData.getServers().get(0).getId();
+        Optional<DiscordServerData> optionalServerListData;
+
+        if (serverId == null || !(optionalServerListData = serverListData.find(serverId)).isPresent()) {
+            mainContent.add(new DashboardTitle());
+
+            if (serverListData.size() == 0) {
+                Paragraph p = new Paragraph(getTranslation("dashboard.noserver"));
+                p.getStyle().set("color", "var(--lumo-error-text-color)");
+                mainContent.add(p);
+            } else {
+                mainContent.add(new DashboardServerListLayout(this, serverListData));
+            }
+            return;
+        }
+
+        DiscordServerData discordServerData = optionalServerListData.get();
+
+        DashboardTitle dashboardTitle = new DashboardTitle(this, discordServerData);
+        Paragraph p = new Paragraph(getTranslation("dashboard.notavailable"));
+        p.getStyle().set("color", "var(--lumo-error-text-color)");
+
+        mainContent.add(dashboardTitle, p);
     }
+
+    public void setServer(long serverId) {
+        if (serverId == 0) UI.getCurrent().navigate(DashboardServerView.class);
+        else UI.getCurrent().navigate(DashboardServerView.class, serverId);
+    }
+
 }

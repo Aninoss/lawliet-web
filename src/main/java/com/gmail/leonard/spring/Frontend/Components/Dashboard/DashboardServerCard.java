@@ -36,7 +36,6 @@ public class DashboardServerCard extends Card {
                 .set("font-weight", "bold")
                 .set("overflow", "hidden");
 
-        //ComponentChanger.setNotInteractive(image, titleLabel);
         content.add(image, titleLabel);
         content.setHeightFull();
         content.setFlexGrow(1, titleLabel);

@@ -8,25 +8,16 @@ import com.github.appreciated.css.grid.sizes.Repeat;
 import com.github.appreciated.layout.FlexibleGridLayout;
 import com.gmail.leonard.spring.Backend.UserData.DiscordServerData;
 import com.gmail.leonard.spring.Backend.UserData.ServerListData;
-import com.gmail.leonard.spring.Backend.UserData.UIData;
-import com.gmail.leonard.spring.Frontend.ComponentChanger;
-import com.gmail.leonard.spring.Frontend.Components.CustomButton;
-import com.gmail.leonard.spring.Frontend.Components.Home.BotPros.WIP;
-import com.gmail.leonard.spring.Frontend.Components.InfoCard;
-import com.gmail.leonard.spring.Frontend.Views.CommandsView;
 import com.gmail.leonard.spring.Frontend.Views.DashboardServerView;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Article;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.server.VaadinServletService;
 import com.vaadin.flow.server.VaadinSession;
 
 public class DashboardServerListLayout extends VerticalLayout {
 
-    public DashboardServerListLayout(ServerListData serverListData, DashboardServerView dashboardServerView) {
+    public DashboardServerListLayout(DashboardServerView dashboardServerView, ServerListData serverListData) {
         Article[] serverCards = new Article[serverListData.size()];
 
         for(int i = 0; i < serverListData.size(); i++) {
@@ -42,7 +33,7 @@ public class DashboardServerListLayout extends VerticalLayout {
             );
             serverCards[i] = new Article(dashboardServerCard);
             serverCards[i].addClassName("dashboard-card");
-            serverCards[i].addClickListener(listener -> dashboardServerView.build(this, discordServerData));
+            serverCards[i].addClickListener(listener -> dashboardServerView.setServer(discordServerData.getId()));
         }
 
         FlexibleGridLayout layout = new FlexibleGridLayout()
