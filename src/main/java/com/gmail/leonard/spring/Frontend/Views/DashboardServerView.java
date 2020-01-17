@@ -8,6 +8,7 @@ import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.WebComClient;
 import com.gmail.leonard.spring.Frontend.Components.Dashboard.DashboardServerListLayout;
 import com.gmail.leonard.spring.Frontend.Components.Dashboard.DashboardTitle;
+import com.gmail.leonard.spring.Frontend.Components.IconLabel;
 import com.gmail.leonard.spring.Frontend.Layouts.MainLayout;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
@@ -67,7 +68,7 @@ public class DashboardServerView extends Main implements HasDynamicTitle, Before
 
         WebComClient.getInstance().updateServers(sessionData);
         ServerListData serverListData = sessionData.getServerListData();
-        if (serverListData.size() == 1) serverId = serverListData.getServers().get(0).getId();
+        //if (serverListData.size() == 1) serverId = serverListData.getServers().get(0).getId();
         Optional<DiscordServerData> optionalServerListData;
 
         if (serverId == null || !(optionalServerListData = serverListData.find(serverId)).isPresent()) {
@@ -78,6 +79,7 @@ public class DashboardServerView extends Main implements HasDynamicTitle, Before
                 p.getStyle().set("color", "var(--lumo-error-text-color)");
                 mainContent.add(p);
             } else {
+                mainContent.add(new IconLabel(VaadinIcon.WARNING.create(), getTranslation("dashboard.admin")));
                 mainContent.add(new DashboardServerListLayout(this, serverListData));
             }
             return;

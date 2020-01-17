@@ -3,6 +3,7 @@ package com.gmail.leonard.spring.Frontend.Components.Commands;
 import com.gmail.leonard.spring.Backend.CommandList.CommandListContainer;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
 import com.gmail.leonard.spring.Frontend.Components.CustomButton;
+import com.gmail.leonard.spring.Frontend.Components.IconLabel;
 import com.gmail.leonard.spring.Frontend.Views.CommandsView;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
@@ -59,17 +60,7 @@ public class CommandSearchArea extends Div {
         mainContent.add(searchResults);
 
         if (uiData.isNSFWDisabled()) {
-            Label hideLabel = new Label(getTranslation("commands.hide"));
-            hideLabel.getStyle().set("font-size", "80%");
-
-            Icon icon = VaadinIcon.INFO_CIRCLE.create();
-            icon.setSize("18px");
-            icon.getStyle().set("margin-right", "4px");
-
-            HorizontalLayout info = new HorizontalLayout(icon, hideLabel);
-            info.setSpacing(false);
-            info.setAlignItems(FlexComponent.Alignment.CENTER);
-            mainContent.add(info);
+            mainContent.add(new IconLabel(VaadinIcon.WARNING.create(), getTranslation("commands.hide")));
         }
 
         add(mainContent);
