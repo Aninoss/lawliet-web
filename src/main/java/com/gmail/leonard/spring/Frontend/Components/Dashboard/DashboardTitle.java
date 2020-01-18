@@ -19,13 +19,17 @@ public class DashboardTitle extends HorizontalLayout {
 
         H2 title = new H2(getTranslation("category." + DashboardServerView.ID));
         title.setId("dashboard-title");
-        title.addClassName("dashboard-small-title");
+
         add(title);
 
         if (discordServerData != null) {
+            title.addClassName("dashboard-small-title");
             title.addClickListener(event -> dashboardServerView.setServer(0));
 
-            H2 arrow = new H2(">");
+            H2 arrow = new H2("»");
+            arrow.getStyle()
+                    .set("margin-left", "8px")
+                    .set("margin-right", "-8px");
             arrow.addClassName("dashboard-small-title");
             H2 name = new H2(discordServerData.getName());
             name.addClassName("dashboard-small-title");

@@ -11,8 +11,12 @@ import com.gmail.leonard.spring.Frontend.Views.HomeView;
 import com.vaadin.flow.server.*;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import org.springframework.stereotype.Component;
+
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 @Component
 @VaadinSessionScope
@@ -24,6 +28,8 @@ public class SessionData {
     private boolean loggedIn;
     private Class<?> currentTarget = HomeView.class;
     private ServerListData serverListData = new ServerListData();
+
+    public static HashMap<Long, Optional<SessionData>> userCache = new HashMap<>();
 
     public SessionData() {
         id = StringTools.getRandomString();
@@ -60,19 +66,29 @@ public class SessionData {
         if (state.equals(id)) {
             Response response = builder.exchange(code);
             if (response != Response.ERROR) {
-                loggedIn = true;
                 User user = builder.getUser();
-                userId = Long.parseLong(user.getId());
-                username = user.getUsername();
-                avatarId = user.getAvatar();
-                WebComClient.getInstance().updateServers(this);
-                return true;
+                if (!userCache.containsKey(Long.parseLong(user.getId()))) {
+                    userId = Long.parseLong(user.getId());
+                    username = user.getUsername();
+                    avatarId = user.getAvatar();
+                    loggedIn = true;
+                    userCache.put(userId, Optional.of(this));
+                    try {
+                        WebComClient.getInstance().getServerListData(this).get();
+                    } catch (InterruptedException | ExecutionException e) {
+                        e.printStackTrace();
+                    }
+                    return true;
+                } else {
+                    return false;
+                }
             }
         }
         return false;
     }
 
     public void logout() {
+        if (isLoggedIn()) userCache.remove(getUserId());
         setData();
     }
 
@@ -108,6 +124,10 @@ public class SessionData {
 
     public ServerListData getServerListData() {
         return serverListData;
+    }
+
+    public static Optional<SessionData> getSessionData(long userId) {
+        return userCache.computeIfAbsent(userId, id -> Optional.empty());
     }
 
 }

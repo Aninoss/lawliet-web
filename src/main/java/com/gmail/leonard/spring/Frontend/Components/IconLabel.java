@@ -8,17 +8,27 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 public class IconLabel extends HorizontalLayout {
 
+    private Label label;
+
     public IconLabel(Icon icon, String string) {
         setSpacing(false);
         setAlignItems(FlexComponent.Alignment.CENTER);
 
-        Label hideLabel = new Label(string);
-        hideLabel.getStyle().set("font-size", "80%");
-
         icon.setSize("18px");
         icon.getStyle().set("margin-right", "6px");
 
-        add(icon, hideLabel);
+        add(icon, createLabel(string));
+    }
+
+    public void setText(String string) {
+        remove(label);
+        add(createLabel(string));
+    }
+
+    private Label createLabel(String string) {
+        label = new Label(string);
+        label.getStyle().set("font-size", "80%");
+        return label;
     }
 
 }

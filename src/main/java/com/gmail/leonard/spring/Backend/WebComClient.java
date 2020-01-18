@@ -13,11 +13,10 @@ import io.socket.client.IO;
 import io.socket.client.Socket;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import javax.validation.constraints.NotNull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.net.URISyntaxException;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class WebComClient {
@@ -26,20 +25,36 @@ public class WebComClient {
 
     private static final String EVENT_COMMANDLIST = "command_list";
     private static final String EVENT_SERVERLIST = "server_list";
+    private static final String EVENT_SERVERMEMBERS = "server_members";
 
     private boolean areCommandsReady = false;
     private boolean started = false;
     private Socket socket;
-    private LoadingCache<Long, Optional<SessionData>> loadingCache;
+
+    private LoadingCache<Long, Optional<CompletableFuture<ServerListData>>> serverListLoadingCache;
+    private LoadingCache<Long, Optional<CompletableFuture<Optional<Pair<Long, Long>>>>> serverMembersCountLoadingCache;
 
     private WebComClient() {
-        loadingCache = CacheBuilder.newBuilder()
+        serverListLoadingCache = CacheBuilder.newBuilder()
                 .maximumSize(500)
-                .expireAfterWrite(30, TimeUnit.SECONDS)
+                .expireAfterWrite(1, TimeUnit.MINUTES)
                 .build(
-                        new CacheLoader<Long, Optional<SessionData>>() {
+                        new CacheLoader<Long, Optional<CompletableFuture<ServerListData>>>() {
                             @Override
-                            public Optional<SessionData> load(Long userId) {
+                            @ParametersAreNonnullByDefault
+                            public Optional<CompletableFuture<ServerListData>> load(Long userId) {
+                                return Optional.empty();
+                            }
+                        });
+
+        serverMembersCountLoadingCache = CacheBuilder.newBuilder()
+                .maximumSize(500)
+                .expireAfterWrite(1, TimeUnit.MINUTES)
+                .build(
+                        new CacheLoader<Long, Optional<CompletableFuture<Optional<Pair<Long, Long>>>>>() {
+                            @Override
+                            @ParametersAreNonnullByDefault
+                            public Optional<CompletableFuture<Optional<Pair<Long, Long>>>> load(Long userId) {
                                 return Optional.empty();
                             }
                         });
@@ -102,20 +117,16 @@ public class WebComClient {
                 JSONObject mainJSON = new JSONObject((String)args[0]);
 
                 long userId = mainJSON.getLong("user_id");
-                Optional<SessionData> sessionDataOptional;
-                try {
-                    sessionDataOptional = loadingCache.get(userId);
-                    if (!sessionDataOptional.isPresent()) {
-                        loadingCache.invalidate(userId);
-                        return;
-                    }
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                    loadingCache.invalidate(userId);
-                    return;
-                }
+                Optional<CompletableFuture<ServerListData>> completableFutureOptional;
 
+                completableFutureOptional = serverListLoadingCache.getUnchecked(userId);
+                serverListLoadingCache.invalidate(userId);
+                if (!completableFutureOptional.isPresent()) return;
+
+                Optional<SessionData> sessionDataOptional = SessionData.getSessionData(userId);
+                if (!sessionDataOptional.isPresent()) return;
                 SessionData sessionData = sessionDataOptional.get();
+
                 ServerListData serverListData = sessionData.getServerListData();
                 serverListData.clear();
                 JSONArray serverArray = mainJSON.getJSONArray("server_list");
@@ -133,7 +144,29 @@ public class WebComClient {
                     DiscordServerData discordServerData = new DiscordServerData(serverId, name, iconURL);
                     serverListData.put(discordServerData);
                 }
-                loadingCache.invalidate(userId);
+
+                CompletableFuture<ServerListData> completableFuture = completableFutureOptional.get();
+                completableFuture.complete(serverListData);
+            });
+
+            //On Individual Server List
+            socket.on(EVENT_SERVERMEMBERS, args -> {
+                JSONObject mainJSON = new JSONObject((String)args[0]);
+
+                long userId = mainJSON.getLong("user_id");
+                boolean success = mainJSON.getBoolean("success");
+
+                Optional<CompletableFuture<Optional<Pair<Long, Long>>>> completableFutureOptional = serverMembersCountLoadingCache.getUnchecked(userId);
+                serverListLoadingCache.invalidate(userId);
+                if (!completableFutureOptional.isPresent()) return;
+
+                CompletableFuture<Optional<Pair<Long, Long>>> completableFuture = completableFutureOptional.get();
+                if (success) {
+                    Optional<Pair<Long, Long>> count = Optional.of(new Pair<>(mainJSON.getLong("members_online"), mainJSON.getLong("members_total")));
+                    completableFuture.complete(count);
+                } else {
+                    completableFuture.complete(Optional.empty());
+                }
             });
 
             socket.connect();
@@ -147,19 +180,33 @@ public class WebComClient {
         return areCommandsReady;
     }
 
-    public void updateServers(SessionData sessionData) {
+    public CompletableFuture<ServerListData> getServerListData(SessionData sessionData) {
         if (sessionData.isLoggedIn()) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("user_id", sessionData.getUserId());
-            loadingCache.put(sessionData.getUserId(), Optional.of(sessionData));
             socket.emit(EVENT_SERVERLIST, jsonObject.toString());
-            try {
-                while (loadingCache.get(sessionData.getUserId()).isPresent())
-                        Thread.sleep(1000);
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
+
+            CompletableFuture<ServerListData> completableFuture = new CompletableFuture<>();
+            serverListLoadingCache.put(sessionData.getUserId(), Optional.of(completableFuture));
+            return completableFuture;
         }
+
+        return CompletableFuture.completedFuture(null);
+    }
+
+    public CompletableFuture<Optional<Pair<Long, Long>>> getServerMembersCount(SessionData sessionData, long serverId) {
+        if (sessionData.isLoggedIn()) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("user_id", sessionData.getUserId());
+            jsonObject.put("server_id", serverId);
+            socket.emit(EVENT_SERVERMEMBERS, jsonObject.toString());
+
+            CompletableFuture<Optional<Pair<Long, Long>>> completableFuture = new CompletableFuture<>();
+            serverMembersCountLoadingCache.put(sessionData.getUserId(), Optional.of(completableFuture));
+            return completableFuture;
+        }
+
+        return CompletableFuture.completedFuture(null);
     }
 
 }

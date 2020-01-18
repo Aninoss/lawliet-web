@@ -78,6 +78,6 @@ public class MainLayout extends VerticalLayout implements RouterLayout, BeforeEn
         settings.addMetaTag("og:title", "Lawliet Bot");
         settings.addMetaTag("og:description", "The official website for the Lawliet Bot");
         settings.addMetaTag("og:image", "http://lawlietbot.xyz/styles/img/bot_icon.png");
-        settings.getLoadingIndicatorConfiguration().setFirstDelay(0);
+        settings.getLoadingIndicatorConfiguration().setFirstDelay(50);
     }
 }

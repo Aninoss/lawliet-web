@@ -32,7 +32,7 @@ public class CommandCategoryLayout extends VerticalLayout {
         setSpacing(false);
 
         loadingDiv = new Div(new Div(), new Div(), new Div(), new Div());
-        loadingDiv.addClassName("lds-ellipsis");
+        loadingDiv.addClassName("lds-ring2");
 
         add(loadingDiv);
     }
