@@ -1,7 +1,10 @@
 package com.gmail.leonard.spring.Backend.CommandList;
 
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
+
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
 
 public class CommandListContainer {
 
@@ -11,8 +14,6 @@ public class CommandListContainer {
     public static CommandListContainer getInstance() {
         return ourInstance;
     }
-
-    private CommandListContainer() {}
 
 
     public void add(CommandListCategory commandListCategory) {
@@ -31,14 +32,17 @@ public class CommandListContainer {
     }
 
     public List<CommandListCategory> getCategories() {
+        loadIfEmpty();
         return categories;
     }
 
     public int size() {
+        loadIfEmpty();
         return categories.size();
     }
 
     public int allCommandsSize(boolean showNsfw) {
+        loadIfEmpty();
         int n = 0;
         for(CommandListCategory category: categories) {
             n += category.size(showNsfw);
@@ -48,4 +52,16 @@ public class CommandListContainer {
     }
 
     public void clear() { categories.clear(); }
+
+    private void loadIfEmpty() {
+        if (categories.size() == 0) {
+            try {
+                System.out.println("Update command list...");
+                WebComClient.getInstance().updateCommandList().get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

@@ -21,17 +21,21 @@ import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.rmi.server.UID;
+
 @CssImport("./styles/styles.css")
 @Theme(value = Lumo.class, variant = Lumo.DARK)
 @BodySize(width = "100%", height = "100%")
 public class MainLayout extends VerticalLayout implements RouterLayout, BeforeEnterObserver, PageConfigurator {
 
     private SessionData sessionData;
+    private UIData uiData;
 
     public MainLayout(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         if (VaadinSession.getCurrent().getBrowser().isIE()) return;
 
         this.sessionData = sessionData;
+        this.uiData = uiData;
 
         if(UI.getCurrent() != null)
             UI.getCurrent().getElement().getStyle().set("width", "100%");
@@ -64,6 +68,9 @@ public class MainLayout extends VerticalLayout implements RouterLayout, BeforeEn
         setFlexGrow(1, divStretch);
 
         UI.getCurrent().getPage().executeJs("onLoad()");
+        if (sessionData.isLoggedIn()) {
+            uiData.login(sessionData.getUserId());
+        }
     }
 
     @Override
@@ -71,6 +78,12 @@ public class MainLayout extends VerticalLayout implements RouterLayout, BeforeEn
         Class<?> c = event.getNavigationTarget();
         if (c != PageNotFoundView.class) sessionData.setCurrentTarget(c);
         if (VaadinSession.getCurrent().getBrowser().isIE() && event.getNavigationTarget() != IEView.class) event.rerouteTo(IEView.class);
+        if ((sessionData.isLoggedIn() && !uiData.getUserId().isPresent()) ||
+                (!sessionData.isLoggedIn() && uiData.getUserId().isPresent()) ||
+                (sessionData.isLoggedIn() && uiData.getUserId().get() != sessionData.getUserId())
+        ) {
+            UI.getCurrent().getPage().reload();
+        }
     }
 
     @Override
@@ -78,6 +91,6 @@ public class MainLayout extends VerticalLayout implements RouterLayout, BeforeEn
         settings.addMetaTag("og:title", "Lawliet Bot");
         settings.addMetaTag("og:description", "The official website for the Lawliet Bot");
         settings.addMetaTag("og:image", "http://lawlietbot.xyz/styles/img/bot_icon.png");
-        settings.getLoadingIndicatorConfiguration().setFirstDelay(50);
+        settings.getLoadingIndicatorConfiguration().setFirstDelay(150);
     }
 }

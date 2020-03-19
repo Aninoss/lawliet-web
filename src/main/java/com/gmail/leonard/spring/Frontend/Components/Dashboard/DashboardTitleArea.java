@@ -1,27 +1,18 @@
 package com.gmail.leonard.spring.Frontend.Components.Dashboard;
 
-import com.gmail.leonard.spring.Backend.CommandList.CommandListContainer;
 import com.gmail.leonard.spring.Backend.Pair;
 import com.gmail.leonard.spring.Backend.StringTools;
 import com.gmail.leonard.spring.Backend.UserData.DiscordServerData;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
-import com.gmail.leonard.spring.Backend.UserData.UIData;
-import com.gmail.leonard.spring.Backend.WebComClient;
-import com.gmail.leonard.spring.Frontend.Components.Commands.CommandCategoryLayout;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
 import com.gmail.leonard.spring.Frontend.Components.IconLabel;
-import com.gmail.leonard.spring.Frontend.Views.CommandsView;
 import com.gmail.leonard.spring.Frontend.Views.DashboardServerView;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.value.ValueChangeMode;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;

@@ -6,5 +6,6 @@ public interface ExternalLinks {
     String SERVER_INVITE_URL = "https://discord.gg/qUe8dYt";
     String DONATION_URL = "https://donatebot.io/checkout/557953262305804308";
     String UPVOTE_URL = "https://top.gg/bot/368521195940741122/vote";
+    String BOT_URL = "https://top.gg/bot/368521195940741122";
 
 }

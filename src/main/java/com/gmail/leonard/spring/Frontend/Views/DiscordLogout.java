@@ -2,6 +2,7 @@ package com.gmail.leonard.spring.Frontend.Views;
 
 import com.gmail.leonard.spring.Backend.Language.PageTitleFactory;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
+import com.gmail.leonard.spring.Backend.UserData.UIData;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Main;
@@ -14,9 +15,11 @@ public class DiscordLogout extends Main implements HasDynamicTitle, BeforeEnterO
     public static final String ID = "discordlogout";
 
     private SessionData sessionData;
+    private UIData uiData;
 
-    public DiscordLogout(@Autowired SessionData sessionData) {
+    public DiscordLogout(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         this.sessionData = sessionData;
+        this.uiData = uiData;
     }
 
     @Override
@@ -27,7 +30,7 @@ public class DiscordLogout extends Main implements HasDynamicTitle, BeforeEnterO
     @Override
     public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
         if (sessionData.isLoggedIn())
-            sessionData.logout();
+            sessionData.logout(uiData);
 
         Class<? extends Component> resumeClass = HomeView.class;
 

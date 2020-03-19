@@ -2,9 +2,8 @@ package com.gmail.leonard.spring.Frontend.Views;
 
 import com.gmail.leonard.spring.Backend.Language.PageTitleFactory;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
-import com.gmail.leonard.spring.Frontend.Components.Commands.CommandIcon;
+import com.gmail.leonard.spring.Frontend.Components.HtmlText;
 import com.gmail.leonard.spring.Frontend.Layouts.MainLayout;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.accordion.AccordionPanel;
 import com.vaadin.flow.component.details.DetailsVariant;
@@ -31,11 +30,11 @@ public class FAQView extends Main implements HasDynamicTitle {
 
         Accordion accordion = new Accordion();
         accordion.setWidthFull();
-        for(int i = 0; i < 8; i++) {
+        for(int i = 0; i < 9; i++) {
             if (i != 3 || !uiData.isNSFWDisabled()) {
                 Label header = new Label(getTranslation(String.format("faq.%d.question", i)));
 
-                Div labelDiv = new Div(new Label(getTranslation(String.format("faq.%d.answer", i))));
+                Div labelDiv = new Div(new HtmlText(getTranslation(String.format("faq.%d.answer", i))));
                 labelDiv.getStyle()
                         .set("background-color", "var(--lumo-secondary)")
                         .set("padding", "12px")

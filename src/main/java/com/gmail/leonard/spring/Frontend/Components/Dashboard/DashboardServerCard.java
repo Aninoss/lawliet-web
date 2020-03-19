@@ -26,7 +26,7 @@ public class DashboardServerCard extends Card {
         content.setAlignItems(Alignment.CENTER);
 
         Image image = new Image(iconURL, "");
-        image.setWidth("80%");
+        image.setWidth("70%");
         image.addClassName("round");
 
         Span titleLabel = new Span(name);
@@ -34,7 +34,12 @@ public class DashboardServerCard extends Card {
                 .set("width", "100%")
                 .set("text-align", "center")
                 .set("font-weight", "bold")
-                .set("overflow", "hidden");
+                .set("overflow", "hidden")
+                .set("white-space", "nowrap");
+
+        if (name.length() < 14) titleLabel.getElement().getStyle().set("font-size", "100%");
+        else if (name.length() < 18) titleLabel.getElement().getStyle().set("font-size", "90%");
+        else titleLabel.getElement().getStyle().set("font-size", "80%");
 
         content.add(image, titleLabel);
         content.setHeightFull();

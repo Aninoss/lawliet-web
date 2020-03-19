@@ -5,17 +5,16 @@ import bell.oauth.discord.main.OAuthBuilder;
 import bell.oauth.discord.main.Response;
 import com.gmail.leonard.spring.Backend.SecretManager;
 import com.gmail.leonard.spring.Backend.StringTools;
-import com.gmail.leonard.spring.Backend.WebComClient;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
 import com.gmail.leonard.spring.Frontend.Views.DiscordLogin;
 import com.gmail.leonard.spring.Frontend.Views.HomeView;
 import com.vaadin.flow.server.*;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import org.springframework.stereotype.Component;
-
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 @Component
@@ -29,7 +28,7 @@ public class SessionData {
     private Class<?> currentTarget = HomeView.class;
     private ServerListData serverListData = new ServerListData();
 
-    public static HashMap<Long, Optional<SessionData>> userCache = new HashMap<>();
+    public static HashMap<Long, ArrayList<SessionData>> userCache = new HashMap<>();
 
     public SessionData() {
         id = StringTools.getRandomString();
@@ -62,33 +61,33 @@ public class SessionData {
         return builder.getAuthorizationUrl(id);
     }
 
-    public boolean login(String code, String state) {
+    public boolean login(String code, String state, UIData uiData) {
         if (state.equals(id)) {
             Response response = builder.exchange(code);
             if (response != Response.ERROR) {
                 User user = builder.getUser();
-                if (!userCache.containsKey(Long.parseLong(user.getId()))) {
-                    userId = Long.parseLong(user.getId());
-                    username = user.getUsername();
-                    avatarId = user.getAvatar();
-                    loggedIn = true;
-                    userCache.put(userId, Optional.of(this));
-                    try {
-                        WebComClient.getInstance().getServerListData(this).get();
-                    } catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
-                    }
-                    return true;
-                } else {
-                    return false;
+                userId = Long.parseLong(user.getId());
+                username = user.getUsername();
+                avatarId = user.getAvatar();
+                loggedIn = true;
+                userCache.computeIfAbsent(userId, id -> new ArrayList<>()).add(this);
+                uiData.login(userId);
+                try {
+                    WebComClient.getInstance().getServerListData(this).get();
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
                 }
+                return true;
             }
         }
         return false;
     }
 
-    public void logout() {
-        if (isLoggedIn()) userCache.remove(getUserId());
+    public void logout(UIData uiData) {
+        if (isLoggedIn()) {
+            userCache.computeIfAbsent(userId, id -> new ArrayList<>()).remove(this);
+        }
+        uiData.logout();
         setData();
     }
 
@@ -126,8 +125,8 @@ public class SessionData {
         return serverListData;
     }
 
-    public static Optional<SessionData> getSessionData(long userId) {
-        return userCache.computeIfAbsent(userId, id -> Optional.empty());
+    public static ArrayList<SessionData> getSessionData(long userId) {
+        return userCache.computeIfAbsent(userId, id -> new ArrayList<>());
     }
 
 }

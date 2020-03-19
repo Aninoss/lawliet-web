@@ -53,8 +53,7 @@ public class TranslationProvider implements I18NProvider {
 
         String value;
         try {
-            value = bundle.getString(key)
-                .replace("\n", "<br>");
+            value = bundle.getString(key);
         } catch (final MissingResourceException e) {
             LoggerFactory.getLogger(TranslationProvider.class.getName())
                     .warn("Missing resource", e);

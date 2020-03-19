@@ -8,14 +8,17 @@ import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import org.springframework.stereotype.Component;
 
+import javax.swing.text.html.Option;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 @UIScope
 public class UIData {
 
     private boolean lite = false, noNSFW = false;
+    private Optional<Long> userId = Optional.empty();
 
     public UIData() {
         Map<String, String[]> parametersMap = VaadinService.getCurrentRequest().getParameterMap();
@@ -35,6 +38,18 @@ public class UIData {
 
     public boolean isNSFWDisabled() {
         return noNSFW;
+    }
+
+    public void login(long userId) {
+        this.userId = Optional.of(userId);
+    }
+
+    public void logout() {
+        this.userId = Optional.empty();
+    }
+
+    public Optional<Long> getUserId() {
+        return userId;
     }
 
 }

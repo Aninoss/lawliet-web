@@ -1,6 +1,6 @@
 package com.gmail.leonard.spring;
 
-import com.gmail.leonard.spring.Backend.WebComClient;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.security.Security;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 

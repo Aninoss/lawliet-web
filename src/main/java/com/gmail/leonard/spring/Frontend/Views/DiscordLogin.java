@@ -2,6 +2,7 @@ package com.gmail.leonard.spring.Frontend.Views;
 
 import com.gmail.leonard.spring.Backend.Language.PageTitleFactory;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
+import com.gmail.leonard.spring.Backend.UserData.UIData;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Main;
@@ -17,9 +18,11 @@ public class DiscordLogin extends Main implements HasDynamicTitle, HasUrlParamet
 
     public static final String ID = "discordlogin";
     private SessionData sessionData;
+    private UIData uiData;
 
-    public DiscordLogin(@Autowired SessionData sessionData) {
+    public DiscordLogin(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         this.sessionData = sessionData;
+        this.uiData = uiData;
     }
 
     @Override
@@ -42,7 +45,7 @@ public class DiscordLogin extends Main implements HasDynamicTitle, HasUrlParamet
             String code = parametersMap.get("code").get(0);
             String state = parametersMap.get("state").get(0);
 
-            if (!sessionData.login(code, state)) {
+            if (!sessionData.login(code, state, uiData)) {
                 Notification.show(getTranslation("login.error"));
             }
         }

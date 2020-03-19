@@ -5,7 +5,7 @@ import com.gmail.leonard.spring.Backend.Redirector;
 import com.gmail.leonard.spring.Backend.UserData.DiscordServerData;
 import com.gmail.leonard.spring.Backend.UserData.ServerListData;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
-import com.gmail.leonard.spring.Backend.WebComClient;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
 import com.gmail.leonard.spring.Frontend.Components.Dashboard.DashboardServerListLayout;
 import com.gmail.leonard.spring.Frontend.Components.Dashboard.DashboardTitle;
 import com.gmail.leonard.spring.Frontend.Components.Dashboard.DashboardTitleArea;

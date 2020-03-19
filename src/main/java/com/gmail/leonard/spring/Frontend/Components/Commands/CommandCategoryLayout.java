@@ -2,6 +2,7 @@ package com.gmail.leonard.spring.Frontend.Components.Commands;
 
 import com.gmail.leonard.spring.Backend.CommandList.CommandListCategory;
 import com.gmail.leonard.spring.Backend.CommandList.CommandListSlot;
+import com.gmail.leonard.spring.Frontend.Components.HtmlText;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.accordion.AccordionPanel;
 import com.vaadin.flow.component.details.Details;
@@ -9,7 +10,7 @@ import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import org.apache.commons.lang3.StringEscapeUtils;
+
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -86,10 +87,9 @@ public class CommandCategoryLayout extends VerticalLayout {
 
                     spec.add(new H5(getTranslation("commands.specs" + i)));
 
-                    Span specContentText = new Span();
-                    specContentText.getElement().setProperty("innerHTML", StringEscapeUtils.escapeHtml4(specContent[i]).replace("\n", "<br>"));
-                    specContentText.getStyle().set("margin-top", "0px");
-                    spec.add(specContentText);
+                    HtmlText htmlText = new HtmlText(specContent[i]);
+                    htmlText.getStyle().set("margin-top", "0px");
+                    spec.add(htmlText);
 
                     specs.add(spec);
                 }
