@@ -1,18 +1,17 @@
 package com.gmail.leonard.spring.Frontend.Views;
 
-import com.gmail.leonard.spring.Backend.Language.PageTitleFactory;
+import com.gmail.leonard.spring.Backend.Language.PageTitleGen;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
+import com.gmail.leonard.spring.Frontend.Layouts.PageLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.router.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route(value = DiscordLogout.ID)
-public class DiscordLogout extends Main implements HasDynamicTitle, BeforeEnterObserver {
-
-    public static final String ID = "discordlogout";
+@Route(value = "discordlogout")
+public class DiscordLogout extends PageLayout implements BeforeEnterObserver {
 
     private SessionData sessionData;
     private UIData uiData;
@@ -20,11 +19,6 @@ public class DiscordLogout extends Main implements HasDynamicTitle, BeforeEnterO
     public DiscordLogout(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         this.sessionData = sessionData;
         this.uiData = uiData;
-    }
-
-    @Override
-    public String getPageTitle() {
-        return PageTitleFactory.getPageTitle(ID);
     }
 
     @Override

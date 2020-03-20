@@ -1,6 +1,7 @@
 package com.gmail.leonard.spring.Frontend.Components.Header;
 
-import com.gmail.leonard.spring.Backend.Language.PageTitleFactory;
+import com.gmail.leonard.spring.Backend.Language.PageTitleGen;
+import com.gmail.leonard.spring.Frontend.Layouts.PageLayout;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.router.RouterLink;
 
@@ -18,18 +19,18 @@ public class NavigationBarLink {
     }
 
     public NavigationBarLink(String externalLink, String id) {
-        anchor = new Anchor(externalLink, PageTitleFactory.getTitle(id));
+        anchor = new Anchor(externalLink, PageTitleGen.getTitle(id));
         anchor.setTarget("_blank");
         anchor.setWidthFull();
     }
 
-    public NavigationBarLink(Class c, String id, boolean hiddenInLiteVersion) {
-        this(c, id);
+    public NavigationBarLink(Class<? extends PageLayout> page, boolean hiddenInLiteVersion) {
+        this(page);
         this.hiddenInLiteVersion = hiddenInLiteVersion;
     }
 
-    public NavigationBarLink(Class c, String id) {
-        this.routerLink = new RouterLink(PageTitleFactory.getTitle(id), c);
+    public NavigationBarLink(Class<? extends PageLayout> page) {
+        this.routerLink = new RouterLink(PageTitleGen.getTitle(PageLayout.getRouteStatic(page)), page);
     }
 
     public Optional<Anchor> getAnchor() {

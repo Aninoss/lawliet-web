@@ -1,5 +1,6 @@
 package com.gmail.leonard.spring.Frontend.Layouts;
 
+import com.gmail.leonard.spring.Backend.Language.PageTitleGen;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
 import com.gmail.leonard.spring.Frontend.Components.CookieConsent;
@@ -19,6 +20,7 @@ import com.vaadin.flow.server.PageConfigurator;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
+import net.bytebuddy.implementation.bind.annotation.Super;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.rmi.server.UID;
@@ -30,6 +32,7 @@ public class MainLayout extends VerticalLayout implements RouterLayout, BeforeEn
 
     private SessionData sessionData;
     private UIData uiData;
+    private String target;
 
     public MainLayout(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         if (VaadinSession.getCurrent().getBrowser().isIE()) return;
@@ -75,22 +78,32 @@ public class MainLayout extends VerticalLayout implements RouterLayout, BeforeEn
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        Class<?> c = event.getNavigationTarget();
-        if (c != PageNotFoundView.class) sessionData.setCurrentTarget(c);
-        if (VaadinSession.getCurrent().getBrowser().isIE() && event.getNavigationTarget() != IEView.class) event.rerouteTo(IEView.class);
-        if ((sessionData.isLoggedIn() && !uiData.getUserId().isPresent()) ||
-                (!sessionData.isLoggedIn() && uiData.getUserId().isPresent()) ||
-                (sessionData.isLoggedIn() && uiData.getUserId().get() != sessionData.getUserId())
-        ) {
-            UI.getCurrent().getPage().reload();
+        Class<?> cTemp = event.getNavigationTarget();
+
+        if (PageLayout.class.isAssignableFrom(cTemp)) {
+            Class<? extends PageLayout> c = (Class<? extends PageLayout>)cTemp;
+
+            target = PageLayout.getRouteStatic(c);
+
+            if (c != PageNotFoundView.class) sessionData.setCurrentTarget(c);
+            if (VaadinSession.getCurrent().getBrowser().isIE() && event.getNavigationTarget() != IEView.class) event.rerouteTo(IEView.class);
+            if ((sessionData.isLoggedIn() && !uiData.getUserId().isPresent()) ||
+                    (!sessionData.isLoggedIn() && uiData.getUserId().isPresent()) ||
+                    (sessionData.isLoggedIn() && uiData.getUserId().get() != sessionData.getUserId())
+            ) {
+                UI.getCurrent().getPage().reload();
+            }
         }
     }
 
     @Override
     public void configurePage(InitialPageSettings settings) {
-        settings.addMetaTag("og:title", "Lawliet Bot");
-        settings.addMetaTag("og:description", "The official website for the Lawliet Bot");
+        settings.addMetaTag("og:type", "website");
+        settings.addMetaTag("og:site_name", getTranslation("bot.name"));
+        settings.addMetaTag("og:title", PageTitleGen.getPageTitle(target));
+        settings.addMetaTag("og:description", getTranslation("bot.desc"));
         settings.addMetaTag("og:image", "http://lawlietbot.xyz/styles/img/bot_icon.png");
         settings.getLoadingIndicatorConfiguration().setFirstDelay(150);
     }
+
 }

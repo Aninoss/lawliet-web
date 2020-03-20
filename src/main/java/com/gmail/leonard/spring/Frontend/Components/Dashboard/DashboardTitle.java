@@ -8,8 +8,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 public class DashboardTitle extends HorizontalLayout {
 
-    public DashboardTitle() {
-        this(null, null);
+    public DashboardTitle(DashboardServerView dashboardServerView) {
+        this(dashboardServerView, null);
     }
 
     public DashboardTitle(DashboardServerView dashboardServerView, DiscordServerData discordServerData) {
@@ -17,7 +17,7 @@ public class DashboardTitle extends HorizontalLayout {
         setWidthFull();
         getStyle().set("overflow", "visible");
 
-        H2 title = new H2(getTranslation("category." + DashboardServerView.ID));
+        H2 title = new H2(dashboardServerView.getTitleText());
         title.setId("dashboard-title");
 
         add(title);

@@ -10,7 +10,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.ParentLayout;
 
 @ParentLayout(MainLayout.class)
-public class ErrorLayout extends Main {
+public class ErrorLayout extends PageLayout {
 
     public ErrorLayout(String typeString) {
         setWidthFull();
@@ -31,4 +31,5 @@ public class ErrorLayout extends Main {
         mainContent.add(button);
         add(mainContent);
     }
+
 }

@@ -11,6 +11,8 @@ public class CommandListContainer {
     private static CommandListContainer ourInstance = new CommandListContainer();
     private CopyOnWriteArrayList<CommandListCategory> categories = new CopyOnWriteArrayList<>();
 
+    private CommandListContainer() {}
+
     public static CommandListContainer getInstance() {
         return ourInstance;
     }

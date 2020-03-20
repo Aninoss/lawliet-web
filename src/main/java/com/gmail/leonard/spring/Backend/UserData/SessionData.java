@@ -6,6 +6,7 @@ import bell.oauth.discord.main.Response;
 import com.gmail.leonard.spring.Backend.SecretManager;
 import com.gmail.leonard.spring.Backend.StringTools;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
+import com.gmail.leonard.spring.Frontend.Layouts.PageLayout;
 import com.gmail.leonard.spring.Frontend.Views.DiscordLogin;
 import com.gmail.leonard.spring.Frontend.Views.HomeView;
 import com.vaadin.flow.server.*;
@@ -25,7 +26,7 @@ public class SessionData {
     private String id, username, avatarId;
     private long userId;
     private boolean loggedIn;
-    private Class<?> currentTarget = HomeView.class;
+    private Class<? extends PageLayout> currentTarget = HomeView.class;
     private ServerListData serverListData = new ServerListData();
 
     public static HashMap<Long, ArrayList<SessionData>> userCache = new HashMap<>();
@@ -44,7 +45,7 @@ public class SessionData {
         try {
             builder = new OAuthBuilder(SecretManager.getString("bot.clientid"), SecretManager.getString("bot.clientsecret"))
                     .setScopes(new String[]{"identify"})
-                    .setRedirectURI(getCurrentDomain() + DiscordLogin.ID);
+                    .setRedirectURI(getCurrentDomain() + PageLayout.getRouteStatic(DiscordLogin.class));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -113,11 +114,11 @@ public class SessionData {
         return loggedIn;
     }
 
-    public void setCurrentTarget(Class<?> c) {
+    public void setCurrentTarget(Class<? extends PageLayout> c) {
         currentTarget = c;
     }
 
-    public Class<?> getCurrentTarget() {
+    public Class<? extends PageLayout> getCurrentTarget() {
         return currentTarget;
     }
 

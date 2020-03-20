@@ -32,7 +32,7 @@ public class CommandSearchArea extends Div {
         searchArea.setSpacing(false);
         searchArea.setWidthFull();
 
-        H2 title = new H2(getTranslation("category." + CommandsView.ID));
+        H2 title = new H2(parent.getTitleText());
         mainContent.add(title);
 
         TextField searchField = new TextField();

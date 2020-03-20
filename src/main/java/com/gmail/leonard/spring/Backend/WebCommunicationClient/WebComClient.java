@@ -5,6 +5,7 @@ import com.gmail.leonard.spring.Backend.UserData.DiscordServerData;
 import com.gmail.leonard.spring.Backend.UserData.ServerListData;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.Events.OnCommandList;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.Events.OnFAQList;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.Events.OnServerList;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.Events.OnServerMembers;
 import com.google.common.cache.CacheBuilder;
@@ -28,8 +29,12 @@ public class WebComClient {
     private static WebComClient instance = new WebComClient();
 
     private static final String EVENT_COMMANDLIST = "command_list";
+    public static final String EVENT_FAQLIST = "faq_list";
     private static final String EVENT_SERVERLIST = "server_list";
     private static final String EVENT_SERVERMEMBERS = "server_members";
+    private static final String EVENT_TOPGG = "topgg";
+    private static final String EVENT_DONATEBOT_IO = "donatebot.io";
+
 
     private boolean started = false;
     private Socket socket;
@@ -37,6 +42,7 @@ public class WebComClient {
     private LoadingCache<Long, Optional<CompletableFuture<ServerListData>>> serverListLoadingCache;
     private LoadingCache<Long, Optional<CompletableFuture<Optional<Pair<Long, Long>>>>> serverMembersCountLoadingCache;
     private List<CompletableFuture<Void>> commandListRequests;
+    private List<CompletableFuture<Void>> faqListRequests;
 
     private WebComClient() {
         serverListLoadingCache = CacheBuilder.newBuilder()
@@ -64,6 +70,7 @@ public class WebComClient {
                         });
 
         commandListRequests = Collections.synchronizedList(new ArrayList<>());
+        faqListRequests = Collections.synchronizedList(new ArrayList<>());
     }
 
     public static WebComClient getInstance() { return instance; }
@@ -79,6 +86,7 @@ public class WebComClient {
 
             //Events
             socket.on(EVENT_COMMANDLIST, new OnCommandList(commandListRequests));
+            socket.on(EVENT_FAQLIST, new OnFAQList(faqListRequests));
             socket.on(EVENT_SERVERLIST, new OnServerList(serverListLoadingCache));
             socket.on(EVENT_SERVERMEMBERS, new OnServerMembers(serverMembersCountLoadingCache));
 
@@ -93,6 +101,13 @@ public class WebComClient {
         socket.emit(EVENT_COMMANDLIST);
         CompletableFuture<Void> completableFuture = new CompletableFuture<>();
         commandListRequests.add(completableFuture);
+        return completableFuture;
+    }
+
+    public CompletableFuture<Void> updateFAQList() {
+        socket.emit(EVENT_FAQLIST);
+        CompletableFuture<Void> completableFuture = new CompletableFuture<>();
+        faqListRequests.add(completableFuture);
         return completableFuture;
     }
 
@@ -124,5 +139,8 @@ public class WebComClient {
 
         return CompletableFuture.completedFuture(null);
     }
+
+    public void sendTopGG(String data) { socket.emit(EVENT_TOPGG, data); }
+    public void sendDonatebotIO(String data) { socket.emit(EVENT_DONATEBOT_IO, data); }
 
 }

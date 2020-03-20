@@ -1,9 +1,12 @@
 package com.gmail.leonard.spring.Frontend.Views;
 
-import com.gmail.leonard.spring.Backend.Language.PageTitleFactory;
+import com.gmail.leonard.spring.Backend.FAQ.FAQListContainer;
+import com.gmail.leonard.spring.Backend.FAQ.FAQListSlot;
+import com.gmail.leonard.spring.Backend.Language.PageTitleGen;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
 import com.gmail.leonard.spring.Frontend.Components.HtmlText;
 import com.gmail.leonard.spring.Frontend.Layouts.MainLayout;
+import com.gmail.leonard.spring.Frontend.Layouts.PageLayout;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.accordion.AccordionPanel;
 import com.vaadin.flow.component.details.DetailsVariant;
@@ -13,10 +16,8 @@ import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route(value = FAQView.ID, layout = MainLayout.class)
-public class FAQView extends Main implements HasDynamicTitle {
-
-    public static final String ID = "faq";
+@Route(value = "faq", layout = MainLayout.class)
+public class FAQView extends PageLayout {
 
     public FAQView(@Autowired UIData uiData) {
         setWidthFull();
@@ -25,16 +26,18 @@ public class FAQView extends Main implements HasDynamicTitle {
         mainContent.addClassName("app-width");
         mainContent.setPadding(true);
 
-        H2 title = new H2(getTranslation("category." + ID));
+        H2 title = new H2(getTitleText());
         mainContent.add(title);
 
         Accordion accordion = new Accordion();
         accordion.setWidthFull();
-        for(int i = 0; i < 9; i++) {
-            if (i != 3 || !uiData.isNSFWDisabled()) {
-                Label header = new Label(getTranslation(String.format("faq.%d.question", i)));
+        for(int i = 0; i < FAQListContainer.getInstance().size(); i++) {
+            FAQListSlot slot = FAQListContainer.getInstance().get(i);
 
-                Div labelDiv = new Div(new HtmlText(getTranslation(String.format("faq.%d.answer", i))));
+            if (i != 3 || !uiData.isNSFWDisabled()) {
+                Label header = new Label(slot.getQuestion().get(getLocale()));
+
+                Div labelDiv = new Div(new HtmlText(slot.getAnswer().get(getLocale())));
                 labelDiv.getStyle()
                         .set("background-color", "var(--lumo-secondary)")
                         .set("padding", "12px")
@@ -51,11 +54,6 @@ public class FAQView extends Main implements HasDynamicTitle {
 
         mainContent.add(accordion);
         add(mainContent);
-    }
-
-    @Override
-    public String getPageTitle() {
-        return PageTitleFactory.getPageTitle(ID);
     }
 
 }

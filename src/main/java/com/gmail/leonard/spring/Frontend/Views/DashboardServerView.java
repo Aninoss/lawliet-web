@@ -1,6 +1,6 @@
 package com.gmail.leonard.spring.Frontend.Views;
 
-import com.gmail.leonard.spring.Backend.Language.PageTitleFactory;
+import com.gmail.leonard.spring.Backend.Language.PageTitleGen;
 import com.gmail.leonard.spring.Backend.Redirector;
 import com.gmail.leonard.spring.Backend.UserData.DiscordServerData;
 import com.gmail.leonard.spring.Backend.UserData.ServerListData;
@@ -11,6 +11,7 @@ import com.gmail.leonard.spring.Frontend.Components.Dashboard.DashboardTitle;
 import com.gmail.leonard.spring.Frontend.Components.Dashboard.DashboardTitleArea;
 import com.gmail.leonard.spring.Frontend.Components.IconLabel;
 import com.gmail.leonard.spring.Frontend.Layouts.MainLayout;
+import com.gmail.leonard.spring.Frontend.Layouts.PageLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -21,10 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
-@Route(value = DashboardServerView.ID, layout = MainLayout.class)
-public class DashboardServerView extends Main implements HasDynamicTitle, BeforeEnterObserver, HasUrlParameter<Long> {
-
-    public static final String ID = "dashboard";
+@Route(value = "dashboard", layout = MainLayout.class)
+public class DashboardServerView extends PageLayout implements BeforeEnterObserver, HasUrlParameter<Long> {
 
     private SessionData sessionData;
     private VerticalLayout mainContent = new VerticalLayout();
@@ -37,7 +36,7 @@ public class DashboardServerView extends Main implements HasDynamicTitle, Before
 
         if (!sessionData.isLoggedIn()) {
             VerticalLayout usedContent = generateUsedContent();
-            usedContent.add(new DashboardTitle());
+            usedContent.add(new DashboardTitle(this));
             usedContent.add(getTranslation("dashboard.redirect"));
             mainContent.add(usedContent);
         }
@@ -49,11 +48,6 @@ public class DashboardServerView extends Main implements HasDynamicTitle, Before
     public void beforeEnter(BeforeEnterEvent event) {
         if (!sessionData.isLoggedIn())
             new Redirector().redirect(sessionData.getLoginUrl());
-    }
-
-    @Override
-    public String getPageTitle() {
-        return PageTitleFactory.getPageTitle(ID);
     }
 
     @Override
@@ -73,7 +67,7 @@ public class DashboardServerView extends Main implements HasDynamicTitle, Before
 
         if (serverId == null || !(optionalServerListData = serverListData.find(serverId)).isPresent()) {
             VerticalLayout usedContent = generateUsedContent();
-            usedContent.add(new DashboardTitle());
+            usedContent.add(new DashboardTitle(this));
 
             if (serverListData.size() == 0) {
                 Paragraph p = new Paragraph(getTranslation("dashboard.noserver"));

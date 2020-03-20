@@ -1,8 +1,9 @@
 package com.gmail.leonard.spring.Frontend.Views;
 
-import com.gmail.leonard.spring.Backend.Language.PageTitleFactory;
+import com.gmail.leonard.spring.Backend.Language.PageTitleGen;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
+import com.gmail.leonard.spring.Frontend.Layouts.PageLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Main;
@@ -13,21 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Map;
 
-@Route(value = DiscordLogin.ID)
-public class DiscordLogin extends Main implements HasDynamicTitle, HasUrlParameter<String> {
+@Route(value = "discordlogin")
+public class DiscordLogin extends PageLayout implements HasUrlParameter<String> {
 
-    public static final String ID = "discordlogin";
     private SessionData sessionData;
     private UIData uiData;
 
     public DiscordLogin(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         this.sessionData = sessionData;
         this.uiData = uiData;
-    }
-
-    @Override
-    public String getPageTitle() {
-        return PageTitleFactory.getPageTitle(ID);
     }
 
     @Override
