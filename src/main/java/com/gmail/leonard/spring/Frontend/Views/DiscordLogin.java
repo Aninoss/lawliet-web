@@ -3,6 +3,7 @@ package com.gmail.leonard.spring.Frontend.Views;
 import com.gmail.leonard.spring.Backend.Language.PageTitleGen;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
+import com.gmail.leonard.spring.Frontend.Components.CustomNotification;
 import com.gmail.leonard.spring.Frontend.Layouts.PageLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -41,7 +42,7 @@ public class DiscordLogin extends PageLayout implements HasUrlParameter<String> 
             String state = parametersMap.get("state").get(0);
 
             if (!sessionData.login(code, state, uiData)) {
-                Notification.show(getTranslation("login.error"));
+                CustomNotification.showError(getTranslation("login.error"));
             }
         }
 

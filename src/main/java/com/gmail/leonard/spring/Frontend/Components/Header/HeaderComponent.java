@@ -66,7 +66,7 @@ public class HeaderComponent extends Header {
         //Login Elements
         if (!uiData.isLite()) {
             if (sessionData.isLoggedIn()) {
-                Image userIcon = new Image(sessionData.getUserAvatar(), "");
+                Image userIcon = new Image(sessionData.getUserAvatar().get(), "");
                 userIcon.setHeightFull();
                 userIcon.addClassName("round");
                 content.add(userIcon);
@@ -77,7 +77,7 @@ public class HeaderComponent extends Header {
                 accountName.setSizeUndefined();
                 accountName.addClassName("visible-not-xsmall");
 
-                Span username = new Span(sessionData.getUserName());
+                Span username = new Span(sessionData.getUserName().get());
                 username.getStyle()
                         .set("margin-top", "-3px")
                         .set("margin-left", "-4px")

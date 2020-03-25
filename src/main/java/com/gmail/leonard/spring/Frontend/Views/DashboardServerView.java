@@ -21,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Route(value = "dashboard", layout = MainLayout.class)
 public class DashboardServerView extends PageLayout implements BeforeEnterObserver, HasUrlParameter<Long> {
@@ -55,14 +57,7 @@ public class DashboardServerView extends PageLayout implements BeforeEnterObserv
         if (!sessionData.isLoggedIn()) return;
         mainContent.getChildren().forEach(mainContent::remove);
 
-        ServerListData serverListData;
-        try {
-            serverListData = WebComClient.getInstance().getServerListData(sessionData).get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-            return;
-        }
-        //if (serverListData.size() == 1) serverId = serverListData.getServers().get(0).getId();
+        ServerListData serverListData = WebComClient.getInstance().getServerListData(sessionData).join();
         Optional<DiscordServerData> optionalServerListData;
 
         if (serverId == null || !(optionalServerListData = serverListData.find(serverId)).isPresent()) {

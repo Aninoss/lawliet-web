@@ -1,19 +1,18 @@
 package com.gmail.leonard.spring.Backend.WebCommunicationClient;
 
 import com.gmail.leonard.spring.Backend.Pair;
-import com.gmail.leonard.spring.Backend.UserData.DiscordServerData;
 import com.gmail.leonard.spring.Backend.UserData.ServerListData;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.Events.OnCommandList;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.Events.OnFAQList;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.Events.OnServerList;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.Events.OnServerMembers;
+import com.gmail.leonard.spring.TimedCompletableFuture;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import io.socket.client.IO;
 import io.socket.client.Socket;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.net.URISyntaxException;
@@ -21,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class WebComClient {
@@ -34,25 +32,26 @@ public class WebComClient {
     private static final String EVENT_SERVERMEMBERS = "server_members";
     private static final String EVENT_TOPGG = "topgg";
     private static final String EVENT_DONATEBOT_IO = "donatebot.io";
+    private static final String EVENT_FEEDBACK = "feedback";
 
 
     private boolean started = false;
     private Socket socket;
 
-    private LoadingCache<Long, Optional<CompletableFuture<ServerListData>>> serverListLoadingCache;
-    private LoadingCache<Long, Optional<CompletableFuture<Optional<Pair<Long, Long>>>>> serverMembersCountLoadingCache;
-    private List<CompletableFuture<Void>> commandListRequests;
-    private List<CompletableFuture<Void>> faqListRequests;
+    private LoadingCache<Long, Optional<TimedCompletableFuture<ServerListData>>> serverListLoadingCache;
+    private LoadingCache<Long, Optional<TimedCompletableFuture<Optional<Pair<Long, Long>>>>> serverMembersCountLoadingCache;
+    private List<TimedCompletableFuture<Void>> commandListRequests;
+    private List<TimedCompletableFuture<Void>> faqListRequests;
 
     private WebComClient() {
         serverListLoadingCache = CacheBuilder.newBuilder()
                 .maximumSize(500)
                 .expireAfterWrite(1, TimeUnit.MINUTES)
                 .build(
-                        new CacheLoader<Long, Optional<CompletableFuture<ServerListData>>>() {
+                        new CacheLoader<Long, Optional<TimedCompletableFuture<ServerListData>>>() {
                             @Override
                             @ParametersAreNonnullByDefault
-                            public Optional<CompletableFuture<ServerListData>> load(Long userId) {
+                            public Optional<TimedCompletableFuture<ServerListData>> load(Long userId) {
                                 return Optional.empty();
                             }
                         });
@@ -61,10 +60,10 @@ public class WebComClient {
                 .maximumSize(500)
                 .expireAfterWrite(1, TimeUnit.MINUTES)
                 .build(
-                        new CacheLoader<Long, Optional<CompletableFuture<Optional<Pair<Long, Long>>>>>() {
+                        new CacheLoader<Long, Optional<TimedCompletableFuture<Optional<Pair<Long, Long>>>>>() {
                             @Override
                             @ParametersAreNonnullByDefault
-                            public Optional<CompletableFuture<Optional<Pair<Long, Long>>>> load(Long userId) {
+                            public Optional<TimedCompletableFuture<Optional<Pair<Long, Long>>>> load(Long userId) {
                                 return Optional.empty();
                             }
                         });
@@ -97,50 +96,57 @@ public class WebComClient {
         }
     }
 
-    public CompletableFuture<Void> updateCommandList() {
+    public TimedCompletableFuture<Void> updateCommandList() {
         socket.emit(EVENT_COMMANDLIST);
-        CompletableFuture<Void> completableFuture = new CompletableFuture<>();
+        TimedCompletableFuture<Void> completableFuture = new TimedCompletableFuture<>();
         commandListRequests.add(completableFuture);
         return completableFuture;
     }
 
-    public CompletableFuture<Void> updateFAQList() {
+    public TimedCompletableFuture<Void> updateFAQList() {
         socket.emit(EVENT_FAQLIST);
-        CompletableFuture<Void> completableFuture = new CompletableFuture<>();
+        TimedCompletableFuture<Void> completableFuture = new TimedCompletableFuture<>();
         faqListRequests.add(completableFuture);
         return completableFuture;
     }
 
-    public CompletableFuture<ServerListData> getServerListData(SessionData sessionData) {
+    public TimedCompletableFuture<ServerListData> getServerListData(SessionData sessionData) {
         if (sessionData.isLoggedIn()) {
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("user_id", sessionData.getUserId());
+            jsonObject.put("user_id", sessionData.getUserId().get());
             socket.emit(EVENT_SERVERLIST, jsonObject.toString());
 
-            CompletableFuture<ServerListData> completableFuture = new CompletableFuture<>();
-            serverListLoadingCache.put(sessionData.getUserId(), Optional.of(completableFuture));
+            TimedCompletableFuture<ServerListData> completableFuture = new TimedCompletableFuture<>();
+            serverListLoadingCache.put(sessionData.getUserId().get(), Optional.of(completableFuture));
             return completableFuture;
         }
 
-        return CompletableFuture.completedFuture(null);
+        return new TimedCompletableFuture<>(null);
     }
 
-    public CompletableFuture<Optional<Pair<Long, Long>>> getServerMembersCount(SessionData sessionData, long serverId) {
+    public TimedCompletableFuture<Optional<Pair<Long, Long>>> getServerMembersCount(SessionData sessionData, long serverId) {
         if (sessionData.isLoggedIn()) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("user_id", sessionData.getUserId());
             jsonObject.put("server_id", serverId);
             socket.emit(EVENT_SERVERMEMBERS, jsonObject.toString());
 
-            CompletableFuture<Optional<Pair<Long, Long>>> completableFuture = new CompletableFuture<>();
-            serverMembersCountLoadingCache.put(sessionData.getUserId(), Optional.of(completableFuture));
+            TimedCompletableFuture<Optional<Pair<Long, Long>>> completableFuture = new TimedCompletableFuture<>();
+            serverMembersCountLoadingCache.put(sessionData.getUserId().get(), Optional.of(completableFuture));
             return completableFuture;
         }
 
-        return CompletableFuture.completedFuture(null);
+        return new TimedCompletableFuture<>(null);
     }
 
     public void sendTopGG(String data) { socket.emit(EVENT_TOPGG, data); }
     public void sendDonatebotIO(String data) { socket.emit(EVENT_DONATEBOT_IO, data); }
+
+    public void sendFeedback(String reason, String explanation) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("reason", reason);
+        jsonObject.put("explanation", explanation);
+        socket.emit(EVENT_FEEDBACK, jsonObject.toString());
+    }
 
 }

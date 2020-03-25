@@ -33,12 +33,8 @@ public class FAQListContainer {
 
     private void loadIfEmpty() {
         if (entries.size() == 0) {
-            try {
-                System.out.println("Update faq list...");
-                WebComClient.getInstance().updateFAQList().get();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
+            System.out.println("Update faq list...");
+            WebComClient.getInstance().updateFAQList().join();
         }
     }
 

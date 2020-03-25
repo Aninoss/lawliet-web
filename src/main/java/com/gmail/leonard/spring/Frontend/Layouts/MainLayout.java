@@ -7,6 +7,7 @@ import com.gmail.leonard.spring.Frontend.Components.CookieConsent;
 import com.gmail.leonard.spring.Frontend.Components.FooterArea;
 import com.gmail.leonard.spring.Frontend.Components.Header.HeaderComponent;
 import com.gmail.leonard.spring.Frontend.Components.Header.VerticalMenuBarComponent;
+import com.gmail.leonard.spring.Frontend.Views.ExceptionView;
 import com.gmail.leonard.spring.Frontend.Views.IEView;
 import com.gmail.leonard.spring.Frontend.Views.PageNotFoundView;
 import com.vaadin.flow.component.UI;
@@ -23,12 +24,13 @@ import com.vaadin.flow.theme.lumo.Lumo;
 import net.bytebuddy.implementation.bind.annotation.Super;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.rmi.server.UID;
 
 @CssImport("./styles/styles.css")
 @Theme(value = Lumo.class, variant = Lumo.DARK)
 @BodySize(width = "100%", height = "100%")
-public class MainLayout extends VerticalLayout implements RouterLayout, BeforeEnterObserver, PageConfigurator {
+public class MainLayout extends VerticalLayout implements RouterLayout, BeforeEnterObserver, PageConfigurator, HasErrorParameter<Exception> {
 
     private SessionData sessionData;
     private UIData uiData;
@@ -72,7 +74,7 @@ public class MainLayout extends VerticalLayout implements RouterLayout, BeforeEn
 
         UI.getCurrent().getPage().executeJs("onLoad()");
         if (sessionData.isLoggedIn()) {
-            uiData.login(sessionData.getUserId());
+            uiData.login(sessionData.getUserId().get());
         }
     }
 
@@ -89,7 +91,7 @@ public class MainLayout extends VerticalLayout implements RouterLayout, BeforeEn
             if (VaadinSession.getCurrent().getBrowser().isIE() && event.getNavigationTarget() != IEView.class) event.rerouteTo(IEView.class);
             if ((sessionData.isLoggedIn() && !uiData.getUserId().isPresent()) ||
                     (!sessionData.isLoggedIn() && uiData.getUserId().isPresent()) ||
-                    (sessionData.isLoggedIn() && uiData.getUserId().get() != sessionData.getUserId())
+                    (sessionData.isLoggedIn() && !uiData.getUserId().get().equals(sessionData.getUserId().get()))
             ) {
                 UI.getCurrent().getPage().reload();
             }
@@ -103,7 +105,13 @@ public class MainLayout extends VerticalLayout implements RouterLayout, BeforeEn
         settings.addMetaTag("og:title", PageTitleGen.getPageTitle(target));
         settings.addMetaTag("og:description", getTranslation("bot.desc"));
         settings.addMetaTag("og:image", "http://lawlietbot.xyz/styles/img/bot_icon.png");
+        settings.addMetaTag("msapplication-config", "/browserconfig.xml");
         settings.getLoadingIndicatorConfiguration().setFirstDelay(150);
     }
 
+    @Override
+    public int setErrorParameter(BeforeEnterEvent beforeEnterEvent, ErrorParameter<Exception> errorParameter) {
+        beforeEnterEvent.rerouteTo(ExceptionView.class);
+        return 500;
+    }
 }

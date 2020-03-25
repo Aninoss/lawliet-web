@@ -3,17 +3,17 @@ package com.gmail.leonard.spring.Backend.WebCommunicationClient.Events;
 import com.gmail.leonard.spring.Backend.CommandList.CommandListCategory;
 import com.gmail.leonard.spring.Backend.CommandList.CommandListContainer;
 import com.gmail.leonard.spring.Backend.CommandList.CommandListSlot;
+import com.gmail.leonard.spring.TimedCompletableFuture;
 import io.socket.emitter.Emitter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class OnCommandList implements Emitter.Listener {
 
-    private List<CompletableFuture<Void>> commandListRequests;
+    private List<TimedCompletableFuture<Void>> commandListRequests;
 
-    public OnCommandList(List<CompletableFuture<Void>> commandListRequests) {
+    public OnCommandList(List<TimedCompletableFuture<Void>> commandListRequests) {
         this.commandListRequests = commandListRequests;
     }
 
@@ -54,7 +54,7 @@ public class OnCommandList implements Emitter.Listener {
             CommandListContainer.getInstance().add(commandListCategory);
         }
 
-        for(CompletableFuture<Void> cf: commandListRequests)
+        for(TimedCompletableFuture<Void> cf: commandListRequests)
             cf.complete(null);
         commandListRequests.clear();
 

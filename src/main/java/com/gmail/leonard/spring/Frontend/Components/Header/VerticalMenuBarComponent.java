@@ -29,7 +29,7 @@ public class VerticalMenuBarComponent extends VerticalLayout {
 
         if (!uiData.isLite()) {
             if (sessionData.isLoggedIn()) {
-                Span status = new Span(getTranslation("login.status", sessionData.getUserName()));
+                Span status = new Span(getTranslation("login.status", sessionData.getUserName().get()));
                 status.setWidthFull();
                 status.addClassName("center-text");
                 status.getStyle().set("margin-bottom", "-4px");

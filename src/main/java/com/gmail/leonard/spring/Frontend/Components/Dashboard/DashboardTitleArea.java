@@ -16,6 +16,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class DashboardTitleArea extends Div {
 
@@ -40,19 +41,15 @@ public class DashboardTitleArea extends Div {
         serverInfoLayout.setPadding(false);
         serverInfoLayout.add(dashboardTitle);
 
-        try {
-            Optional<Pair<Long, Long>> pairOptional = WebComClient.getInstance().getServerMembersCount(sessionData, discordServerData.getId()).get();
-            if (pairOptional.isPresent()) {
-                Pair<Long, Long> membersCount = pairOptional.get();
+        Optional<Pair<Long, Long>> pairOptional = WebComClient.getInstance().getServerMembersCount(sessionData, discordServerData.getId()).join();
+        if (pairOptional.isPresent()) {
+            Pair<Long, Long> membersCount = pairOptional.get();
 
-                IconLabel iconLabel = new IconLabel(VaadinIcon.USER.create(), StringTools.numToString(membersCount.getKey()) + " / " + StringTools.numToString(membersCount.getValue()));
-                iconLabel.getStyle()
-                        .set("margin-bottom", "32px")
-                        .set("margin-top", "-4px");
-                serverInfoLayout.add(iconLabel);
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            IconLabel iconLabel = new IconLabel(VaadinIcon.USER.create(), StringTools.numToString(membersCount.getKey()) + " / " + StringTools.numToString(membersCount.getValue()));
+            iconLabel.getStyle()
+                    .set("margin-bottom", "32px")
+                    .set("margin-top", "-4px");
+            serverInfoLayout.add(iconLabel);
         }
 
         mainContent.add(serverInfoLayout);

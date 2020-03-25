@@ -59,7 +59,7 @@ public class NavigationBar extends Tabs implements AfterNavigationObserver {
                 boolean found = c.getChildren()
                         .filter(child -> child instanceof RouterLink)
                         .map(routerLink -> (RouterLink) routerLink)
-                        .anyMatch(routerLink -> path.startsWith(routerLink.getHref()));
+                        .anyMatch(routerLink -> (path.startsWith(routerLink.getHref()) && !routerLink.getHref().isEmpty()) || path.equals(routerLink.getHref()));
 
                 if (found) setSelectedIndex(i);
             }

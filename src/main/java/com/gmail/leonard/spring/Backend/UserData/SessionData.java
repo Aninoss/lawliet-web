@@ -16,7 +16,10 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Component
 @VaadinSessionScope
@@ -73,11 +76,6 @@ public class SessionData {
                 loggedIn = true;
                 userCache.computeIfAbsent(userId, id -> new ArrayList<>()).add(this);
                 uiData.login(userId);
-                try {
-                    WebComClient.getInstance().getServerListData(this).get();
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                }
                 return true;
             }
         }
@@ -92,22 +90,22 @@ public class SessionData {
         setData();
     }
 
-    public long getUserId() {
+    public Optional<Long> getUserId() {
         if (loggedIn) {
-            return userId;
-        } return 0;
+            return Optional.of(userId);
+        } return Optional.empty();
     }
 
-    public String getUserName() {
+    public Optional<String> getUserName() {
         if (loggedIn) {
-            return username;
-        } return null;
+            return Optional.of(username);
+        } return Optional.empty();
     }
 
-    public String getUserAvatar() {
+    public Optional<String> getUserAvatar() {
         if (loggedIn) {
-            return "https://cdn.discordapp.com/avatars/" + userId + "/" + avatarId + ".png";
-        } return null;
+            return Optional.of("https://cdn.discordapp.com/avatars/" + userId + "/" + avatarId + ".png");
+        } return Optional.empty();
     }
 
     public boolean isLoggedIn() {

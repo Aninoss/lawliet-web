@@ -1,23 +1,18 @@
 package com.gmail.leonard.spring.Backend.WebCommunicationClient.Events;
 
-import com.gmail.leonard.spring.Backend.CommandList.CommandListCategory;
-import com.gmail.leonard.spring.Backend.CommandList.CommandListContainer;
-import com.gmail.leonard.spring.Backend.CommandList.CommandListSlot;
 import com.gmail.leonard.spring.Backend.FAQ.FAQListContainer;
 import com.gmail.leonard.spring.Backend.FAQ.FAQListSlot;
-import com.gmail.leonard.spring.Backend.LanguageString;
+import com.gmail.leonard.spring.TimedCompletableFuture;
 import io.socket.emitter.Emitter;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class OnFAQList implements Emitter.Listener {
 
-    private List<CompletableFuture<Void>> faqListRequests;
+    private List<TimedCompletableFuture<Void>> faqListRequests;
 
-    public OnFAQList(List<CompletableFuture<Void>> faqListRequests) {
+    public OnFAQList(List<TimedCompletableFuture<Void>> faqListRequests) {
         this.faqListRequests = faqListRequests;
     }
 
@@ -36,7 +31,7 @@ public class OnFAQList implements Emitter.Listener {
             FAQListContainer.getInstance().add(faqListSlot);
         }
 
-        for(CompletableFuture<Void> cf: faqListRequests)
+        for(TimedCompletableFuture<Void> cf: faqListRequests)
             cf.complete(null);
         faqListRequests.clear();
 

@@ -57,12 +57,8 @@ public class CommandListContainer {
 
     private void loadIfEmpty() {
         if (categories.size() == 0) {
-            try {
-                System.out.println("Update command list...");
-                WebComClient.getInstance().updateCommandList().get();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
+            System.out.println("Update command list...");
+            WebComClient.getInstance().updateCommandList().join();
         }
     }
 

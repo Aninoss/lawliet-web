@@ -1,12 +1,10 @@
 package com.gmail.leonard.spring.Backend.WebCommunicationClient.Events;
 
-import com.gmail.leonard.spring.Backend.CommandList.CommandListCategory;
-import com.gmail.leonard.spring.Backend.CommandList.CommandListContainer;
-import com.gmail.leonard.spring.Backend.CommandList.CommandListSlot;
 import com.gmail.leonard.spring.Backend.UserData.DiscordServerData;
 import com.gmail.leonard.spring.Backend.UserData.ServerListData;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
+import com.gmail.leonard.spring.TimedCompletableFuture;
 import com.google.common.cache.LoadingCache;
 import io.socket.emitter.Emitter;
 import org.json.JSONArray;
@@ -14,14 +12,13 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 public class OnServerList implements Emitter.Listener {
 
     private WebComClient webComClient;
-    private LoadingCache<Long, Optional<CompletableFuture<ServerListData>>> serverListLoadingCache;
+    private LoadingCache<Long, Optional<TimedCompletableFuture<ServerListData>>> serverListLoadingCache;
 
-    public OnServerList(LoadingCache<Long, Optional<CompletableFuture<ServerListData>>> serverListLoadingCache) {
+    public OnServerList(LoadingCache<Long, Optional<TimedCompletableFuture<ServerListData>>> serverListLoadingCache) {
         this.serverListLoadingCache = serverListLoadingCache;
     }
 
@@ -30,7 +27,7 @@ public class OnServerList implements Emitter.Listener {
         JSONObject mainJSON = new JSONObject((String) args[0]);
 
         long userId = mainJSON.getLong("user_id");
-        Optional<CompletableFuture<ServerListData>> completableFutureOptional;
+        Optional<TimedCompletableFuture<ServerListData>> completableFutureOptional;
 
         completableFutureOptional = serverListLoadingCache.getUnchecked(userId);
         serverListLoadingCache.invalidate(userId);
@@ -60,7 +57,7 @@ public class OnServerList implements Emitter.Listener {
         }
 
         if (serverListData != null) {
-            CompletableFuture<ServerListData> completableFuture = completableFutureOptional.get();
+            TimedCompletableFuture<ServerListData> completableFuture = completableFutureOptional.get();
             completableFuture.complete(serverListData);
         }
     }

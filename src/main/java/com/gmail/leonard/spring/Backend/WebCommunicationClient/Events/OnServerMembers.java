@@ -1,25 +1,19 @@
 package com.gmail.leonard.spring.Backend.WebCommunicationClient.Events;
 
 import com.gmail.leonard.spring.Backend.Pair;
-import com.gmail.leonard.spring.Backend.UserData.DiscordServerData;
-import com.gmail.leonard.spring.Backend.UserData.ServerListData;
-import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
+import com.gmail.leonard.spring.TimedCompletableFuture;
 import com.google.common.cache.LoadingCache;
 import io.socket.emitter.Emitter;
-import org.json.JSONArray;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 public class OnServerMembers implements Emitter.Listener {
 
     private WebComClient webComClient;
-    private LoadingCache<Long, Optional<CompletableFuture<Optional<Pair<Long, Long>>>>> serverMembersCountLoadingCache;
+    private LoadingCache<Long, Optional<TimedCompletableFuture<Optional<Pair<Long, Long>>>>> serverMembersCountLoadingCache;
 
-    public OnServerMembers(LoadingCache<Long, Optional<CompletableFuture<Optional<Pair<Long, Long>>>>> serverMembersCountLoadingCache) {
+    public OnServerMembers(LoadingCache<Long, Optional<TimedCompletableFuture<Optional<Pair<Long, Long>>>>> serverMembersCountLoadingCache) {
         this.serverMembersCountLoadingCache = serverMembersCountLoadingCache;
     }
 
@@ -30,11 +24,11 @@ public class OnServerMembers implements Emitter.Listener {
         long userId = mainJSON.getLong("user_id");
         boolean success = mainJSON.getBoolean("success");
 
-        Optional<CompletableFuture<Optional<Pair<Long, Long>>>> completableFutureOptional = serverMembersCountLoadingCache.getUnchecked(userId);
+        Optional<TimedCompletableFuture<Optional<Pair<Long, Long>>>> completableFutureOptional = serverMembersCountLoadingCache.getUnchecked(userId);
         serverMembersCountLoadingCache.invalidate(userId);
         if (!completableFutureOptional.isPresent()) return;
 
-        CompletableFuture<Optional<Pair<Long, Long>>> completableFuture = completableFutureOptional.get();
+        TimedCompletableFuture<Optional<Pair<Long, Long>>> completableFuture = completableFutureOptional.get();
         if (success) {
             Optional<Pair<Long, Long>> count = Optional.of(new Pair<>(mainJSON.getLong("members_online"), mainJSON.getLong("members_total")));
             completableFuture.complete(count);
