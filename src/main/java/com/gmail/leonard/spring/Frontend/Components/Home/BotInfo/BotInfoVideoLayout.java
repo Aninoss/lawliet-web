@@ -2,17 +2,17 @@ package com.gmail.leonard.spring.Frontend.Components.Home.BotInfo;
 
 import com.gmail.leonard.spring.Frontend.ComponentChanger;
 import com.gmail.leonard.spring.Frontend.Components.Video;
+import com.gmail.leonard.spring.Frontend.Styles;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.server.VaadinServletService;
 import com.vaadin.flow.server.VaadinSession;
 
-public class BotInfoVideoLayout extends HorizontalLayout {
+public class BotInfoVideoLayout extends Div {
     public BotInfoVideoLayout() {
         setId("bot-info-video");
-        addClassName("visible-not-xsmall");
+        addClassName(Styles.VISIBLE_NOTMOBILE);
         setWidthFull();
-        setSpacing(false);
 
         //Video
         String videoURL = VaadinServletService.getCurrent()
@@ -47,7 +47,7 @@ public class BotInfoVideoLayout extends HorizontalLayout {
         Image fade = new Image(fadeStr, "");
         ComponentChanger.setNotInteractive(fade);
         fade.addClassName("videofade");
-        fade.addClassName("visible-large");
+        fade.addClassName(Styles.VISIBLE_PC);
         add(fade);
 
         //Gradient foreground small
@@ -58,7 +58,7 @@ public class BotInfoVideoLayout extends HorizontalLayout {
         Image fade2 = new Image(fadeStr2, "");
         ComponentChanger.setNotInteractive(fade2);
         fade2.addClassName("videofade");
-        fade2.addClassName("visible-small");
+        fade2.addClassName(Styles.VISIBLE_TABLET);
         add(fade2);
     }
 }

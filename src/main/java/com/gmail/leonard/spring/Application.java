@@ -1,6 +1,7 @@
 package com.gmail.leonard.spring;
 
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
+import com.vaadin.flow.component.UI;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
@@ -19,13 +20,6 @@ import java.util.Date;
 public class Application extends SpringBootServletInitializer {
 
     public static void main(String[] args) throws FileNotFoundException {
-        //Redirect error outputs to a file
-        String fileName = new SimpleDateFormat("yyyy-MM-dd HH_mm_ss").format(new Date());
-        File file = new File("error_log/" + fileName + "_err.log");
-        FileOutputStream fos = new FileOutputStream(file);
-        PrintStream ps = new PrintStream(fos);
-        System.setErr(ps);
-
         SpringApplication.run(Application.class, args);
         System.out.println("###########################");
         Console.getInstance().start();

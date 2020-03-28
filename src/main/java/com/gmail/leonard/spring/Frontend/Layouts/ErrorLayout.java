@@ -1,7 +1,10 @@
 package com.gmail.leonard.spring.Frontend.Layouts;
 
 import com.gmail.leonard.spring.Frontend.Components.*;
+import com.gmail.leonard.spring.Frontend.Styles;
 import com.gmail.leonard.spring.Frontend.Views.HomeView;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.cookieconsent.CookieConsent;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
@@ -16,14 +19,15 @@ public class ErrorLayout extends PageLayout {
         setWidthFull();
         VerticalLayout mainContent = new VerticalLayout();
 
-        mainContent.addClassName("app-width");
+        mainContent.addClassName(Styles.APP_WIDTH);
         mainContent.setPadding(true);
 
         mainContent.add(new H1(getTranslation("err." + typeString + ".title")));
         mainContent.add(new Hr());
         mainContent.add(new Paragraph(getTranslation("err." + typeString + ".des")));
 
-        CustomButton button = new CustomButton(getTranslation("err.button.home"), new Icon(VaadinIcon.ARROW_LEFT));
+        Button button = new Button(getTranslation("err.button.home"), new Icon(VaadinIcon.ARROW_LEFT));
+        button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         button.addClickListener(click -> button.getUI().ifPresent(ui ->
                 ui.navigate(HomeView.class))
         );

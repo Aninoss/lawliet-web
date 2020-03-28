@@ -3,6 +3,7 @@ package com.gmail.leonard.spring.Frontend.Components.Commands;
 import com.gmail.leonard.spring.Backend.CommandList.CommandListCategory;
 import com.gmail.leonard.spring.Backend.CommandList.CommandListContainer;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
+import com.gmail.leonard.spring.Frontend.Styles;
 import com.gmail.leonard.spring.Frontend.Views.CommandsView;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.accordion.Accordion;
@@ -14,7 +15,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 public class CommandList extends VerticalLayout {
 
     public CommandList(CommandsView parent, UIData uiData) {
-        addClassName("app-width");
+        addClassName(Styles.APP_WIDTH);
 
         Accordion accordion = new Accordion();
         accordion.setWidthFull();
@@ -44,7 +45,7 @@ public class CommandList extends VerticalLayout {
                 CommandIcon commandIcon = new CommandIcon(type);
                 commandIcon.getStyle().set("margin-right", "8px");
 
-                Label equalSignLabel = new Label("=");
+                Div equalSignLabel = new Div(new Text("="));
                 equalSignLabel.getStyle().set("margin-right", "8px");
 
                 Text contentLabel = new Text(getTranslation("commands.icon." + type.name()));

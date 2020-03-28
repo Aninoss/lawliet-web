@@ -1,5 +1,6 @@
 package com.gmail.leonard.spring.Frontend.Components;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
@@ -37,7 +38,8 @@ public class CookieConsent extends HorizontalLayout {
         Anchor moreInfo = new Anchor("https://www.cookiesandyou.com/", new Paragraph(getTranslation("cookie.learnmore")));
         moreInfo.setTarget("_blank");
         Div divEmpty = new Div();
-        CustomButton gotItButtom = new CustomButton(getTranslation("cookie.button"));
+
+        Button gotItButtom = new Button(getTranslation("cookie.button"));
         gotItButtom.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         gotItButtom.getElement().setAttribute("onclick", String.format("closeCookieConsent(\"%s\", \"%s\");", COOKIE_NAME, COOKIE_VALUE));
 

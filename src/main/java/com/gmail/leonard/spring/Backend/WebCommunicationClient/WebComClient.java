@@ -127,7 +127,7 @@ public class WebComClient {
     public TimedCompletableFuture<Optional<Pair<Long, Long>>> getServerMembersCount(SessionData sessionData, long serverId) {
         if (sessionData.isLoggedIn()) {
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("user_id", sessionData.getUserId());
+            jsonObject.put("user_id", sessionData.getUserId().get());
             jsonObject.put("server_id", serverId);
             socket.emit(EVENT_SERVERMEMBERS, jsonObject.toString());
 

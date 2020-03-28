@@ -7,13 +7,14 @@ import com.gmail.leonard.spring.Frontend.Components.CookieConsent;
 import com.gmail.leonard.spring.Frontend.Components.FooterArea;
 import com.gmail.leonard.spring.Frontend.Components.Header.HeaderComponent;
 import com.gmail.leonard.spring.Frontend.Components.Header.VerticalMenuBarComponent;
+import com.gmail.leonard.spring.Frontend.Styles;
 import com.gmail.leonard.spring.Frontend.Views.ExceptionView;
 import com.gmail.leonard.spring.Frontend.Views.IEView;
 import com.gmail.leonard.spring.Frontend.Views.PageNotFoundView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.InitialPageSettings;
@@ -21,16 +22,14 @@ import com.vaadin.flow.server.PageConfigurator;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
-import net.bytebuddy.implementation.bind.annotation.Super;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
-import java.rmi.server.UID;
-
 @CssImport("./styles/styles.css")
+@CssImport("./styles/bootstrap.css")
+@CssImport("./styles/main.css")
 @Theme(value = Lumo.class, variant = Lumo.DARK)
 @BodySize(width = "100%", height = "100%")
-public class MainLayout extends VerticalLayout implements RouterLayout, BeforeEnterObserver, PageConfigurator, HasErrorParameter<Exception> {
+public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterObserver, PageConfigurator, HasErrorParameter<Exception> {
 
     private SessionData sessionData;
     private UIData uiData;
@@ -45,8 +44,6 @@ public class MainLayout extends VerticalLayout implements RouterLayout, BeforeEn
         if(UI.getCurrent() != null)
             UI.getCurrent().getElement().getStyle().set("width", "100%");
 
-        setPadding(false);
-        setSpacing(false);
         setMinHeight("100vh");
         setId("main-page");
         getStyle()
@@ -54,7 +51,7 @@ public class MainLayout extends VerticalLayout implements RouterLayout, BeforeEn
 
         Div blackscreen = new Div();
         blackscreen.setId("blackscreen");
-        blackscreen.addClassName("visible-xsmall");
+        blackscreen.addClassName(Styles.VISIBLE_MOBILE);
         blackscreen.addClassName("expandable");
         blackscreen.getElement().setAttribute("onclick", "verticalBarHide()");
 
@@ -111,6 +108,7 @@ public class MainLayout extends VerticalLayout implements RouterLayout, BeforeEn
 
     @Override
     public int setErrorParameter(BeforeEnterEvent beforeEnterEvent, ErrorParameter<Exception> errorParameter) {
+        errorParameter.getException().printStackTrace();
         beforeEnterEvent.rerouteTo(ExceptionView.class);
         return 500;
     }

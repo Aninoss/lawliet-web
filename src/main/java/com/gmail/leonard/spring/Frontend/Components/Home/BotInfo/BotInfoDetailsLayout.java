@@ -2,7 +2,8 @@ package com.gmail.leonard.spring.Frontend.Components.Home.BotInfo;
 
 import com.gmail.leonard.spring.Backend.UserData.UIData;
 import com.gmail.leonard.spring.ExternalLinks;
-import com.gmail.leonard.spring.Frontend.Components.CustomButton;
+import com.gmail.leonard.spring.Frontend.Styles;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.*;
@@ -15,7 +16,7 @@ public class BotInfoDetailsLayout extends VerticalLayout {
     public BotInfoDetailsLayout(UIData uiData) {
         setId("bot-info-details");
         if (!uiData.isLite()) {
-            addClassName("flex-small-row");
+            addClassName(Styles.FLEX_NOTPC_SWITCH_ROW);
             addClassName("size-small-fullwidth");
         } else {
             getStyle().set("flex-direction", "row");
@@ -38,15 +39,16 @@ public class BotInfoDetailsLayout extends VerticalLayout {
         icon.setId("bot-info-details-icon");
 
         //Title
-        Span title = new Span(getTranslation("bot.name"));
+        Div title = new Div(new Text(getTranslation("bot.name")));
         title.getStyle()
                 .set("font-size", "150%")
                 .set("font-weight", "bold")
                 .set("margin-top", "-12px");
         title.addClassName("bot-info-details-width");
+        title.setWidthFull();
 
         //Description
-        Span description = new Span(getTranslation("bot.desc"));
+        Div description = new Div(new Text(getTranslation("bot.desc")));
         description.getStyle().set("font-size", "80%");
         if (!uiData.isLite()) {
             description.addClassName("bot-info-details-width");
@@ -56,20 +58,18 @@ public class BotInfoDetailsLayout extends VerticalLayout {
         }
 
         //Button
-        Button inviteButton = new CustomButton(getTranslation("bot.invite"), VaadinIcon.ARROW_RIGHT.create());
+        Button inviteButton = new Button(getTranslation("bot.invite"), VaadinIcon.ARROW_RIGHT.create());
         inviteButton.setWidthFull();
         inviteButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         inviteButton.setIconAfterText(true);
 
         Anchor a = new Anchor(ExternalLinks.BOT_INVITE_URL, inviteButton);
         a.setTarget("_blank");
-        a.setWidthFull();
-        a.addClassName("bot-info-details-width");
+        a.setMaxWidth("var(--bot-info-width)");
+        a.setWidth("100%");
 
         //Title & Description
-        VerticalLayout texts = new VerticalLayout();
-        texts.setSpacing(false);
-        texts.setPadding(false);
+        Div texts = new Div();
         texts.add(title, description);
 
         //Title, Description & Button

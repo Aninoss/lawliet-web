@@ -1,6 +1,5 @@
 package com.gmail.leonard.spring.Frontend.Views;
 
-import com.gmail.leonard.spring.Backend.Language.PageTitleGen;
 import com.gmail.leonard.spring.Backend.Redirector;
 import com.gmail.leonard.spring.Backend.UserData.DiscordServerData;
 import com.gmail.leonard.spring.Backend.UserData.ServerListData;
@@ -12,7 +11,9 @@ import com.gmail.leonard.spring.Frontend.Components.Dashboard.DashboardTitleArea
 import com.gmail.leonard.spring.Frontend.Components.IconLabel;
 import com.gmail.leonard.spring.Frontend.Layouts.MainLayout;
 import com.gmail.leonard.spring.Frontend.Layouts.PageLayout;
+import com.gmail.leonard.spring.Frontend.Styles;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -20,17 +21,15 @@ import com.vaadin.flow.router.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 @Route(value = "dashboard", layout = MainLayout.class)
-public class DashboardServerView extends PageLayout implements BeforeEnterObserver, HasUrlParameter<Long> {
+@CssImport("./styles/dashboard.css")
+public class DashboardView extends PageLayout implements BeforeEnterObserver, HasUrlParameter<Long> {
 
     private SessionData sessionData;
     private VerticalLayout mainContent = new VerticalLayout();
 
-    public DashboardServerView(@Autowired SessionData sessionData) {
+    public DashboardView(@Autowired SessionData sessionData) {
         this.sessionData = sessionData;
 
         setWidthFull();
@@ -94,13 +93,13 @@ public class DashboardServerView extends PageLayout implements BeforeEnterObserv
     }
 
     public void setServer(long serverId) {
-        if (serverId == 0) UI.getCurrent().navigate(DashboardServerView.class);
-        else UI.getCurrent().navigate(DashboardServerView.class, serverId);
+        if (serverId == 0) UI.getCurrent().navigate(DashboardView.class);
+        else UI.getCurrent().navigate(DashboardView.class, serverId);
     }
 
     private VerticalLayout generateUsedContent() {
         VerticalLayout usedContent = new VerticalLayout();
-        usedContent.addClassName("app-width");
+        usedContent.addClassName(Styles.APP_WIDTH);
         usedContent.setPadding(true);
         return usedContent;
     }

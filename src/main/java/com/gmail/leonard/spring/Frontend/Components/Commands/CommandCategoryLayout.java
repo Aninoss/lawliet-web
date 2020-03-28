@@ -3,6 +3,7 @@ package com.gmail.leonard.spring.Frontend.Components.Commands;
 import com.gmail.leonard.spring.Backend.CommandList.CommandListCategory;
 import com.gmail.leonard.spring.Backend.CommandList.CommandListSlot;
 import com.gmail.leonard.spring.Frontend.Components.HtmlText;
+import com.gmail.leonard.spring.Frontend.Styles;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.accordion.AccordionPanel;
 import com.vaadin.flow.component.details.Details;
@@ -16,6 +17,8 @@ import java.util.Locale;
 
 public class CommandCategoryLayout extends VerticalLayout {
 
+    private static final int PX_PER_SLOT = 70;
+
     private CommandListCategory commandListCategory;
     private HashMap<String, Details> commandFields = new HashMap<>();
     private AccordionPanel accordionPanel;
@@ -28,7 +31,7 @@ public class CommandCategoryLayout extends VerticalLayout {
         this.showNsfw = showNsfw;
 
         setWidthFull();
-        setHeight((commandListCategory.size(showNsfw) * 68) + "px");
+        setHeight((commandListCategory.size(showNsfw) * PX_PER_SLOT) + "px");
         setPadding(false);
         setSpacing(false);
 
@@ -100,7 +103,7 @@ public class CommandCategoryLayout extends VerticalLayout {
             Details component = new Details(titleContent, openedContent);
             component.addThemeVariants(DetailsVariant.REVERSE, DetailsVariant.FILLED);
             component.getElement().getStyle().set("width", "100%");
-            component.getElement().setAttribute("class", "fadein-class");
+            component.getElement().setAttribute("class", Styles.FADE_IN_FAST);
             if (!slot.isNsfw() || showNsfw) add(component);
             commandFields.put(slot.getTrigger(), component);
         }
@@ -134,6 +137,8 @@ public class CommandCategoryLayout extends VerticalLayout {
                     if (visible) found++;
                 }
             }
+
+            if (!build) setHeight((found * PX_PER_SLOT) + "px");
 
             if (changeAccordionPanel) {
                 accordionPanel.setEnabled(found > 0);

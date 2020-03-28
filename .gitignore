@@ -12,6 +12,7 @@ hs_err_pid*
 
 secrets.properties
 application.properties
+application-prod.properties
 workspace.xml
 usage.statistics.xml
 tasks.xml

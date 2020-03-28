@@ -1,0 +1,57 @@
+.dashboard-card {
+    border-radius: 2%;
+    transition: background-color 200ms;
+}
+.dashboard-card:hover {
+    background-color: var(--lumo-tint-5pct);
+    cursor: pointer;
+}
+.dashboard-card:active {
+    background-color: var(--lumo-tint-10pct);
+    transition: color 0ms;
+}
+
+#dashboard-title {
+    transition: color 200ms;
+}
+#dashboard-title:hover {
+    cursor: pointer;
+    color: var(--lumo-primary-text-color);
+}
+#dashboard-title:active {
+    color: var(--lumo-primary-color);
+    transition: color 0ms;
+}
+
+#dashboard-servericon {
+    height: 96px;
+    margin-right: 16px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+#dashboard-titlearea {
+    background: var(--lumo-secondary);
+    -webkit-box-shadow: 0 2px 8px 0 rgba(0,0,0,0.3);
+    -moz-box-shadow: 0 2px 8px 0 rgba(0,0,0,0.3);
+    box-shadow: 0 2px 8px 0 rgba(0,0,0,0.3);
+}
+
+.dashboard-small-title {
+    font-size: 160%;
+    margin-top: 0;
+}
+
+
+
+/* Mobile */
+@media (max-width: 700px) {
+
+    .dashboard-small-title { font-size: 130%; }
+
+    #dashboard-servericon {
+        height: 64px;
+        margin-right: 0;
+    }
+
+}

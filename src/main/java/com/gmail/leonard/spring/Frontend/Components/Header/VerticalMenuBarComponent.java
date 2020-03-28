@@ -2,8 +2,10 @@ package com.gmail.leonard.spring.Frontend.Components.Header;
 
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
-import com.gmail.leonard.spring.Frontend.Components.CustomButton;
 import com.gmail.leonard.spring.Frontend.Components.DiscordIcon;
+import com.gmail.leonard.spring.Frontend.Styles;
+import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -29,13 +31,13 @@ public class VerticalMenuBarComponent extends VerticalLayout {
 
         if (!uiData.isLite()) {
             if (sessionData.isLoggedIn()) {
-                Span status = new Span(getTranslation("login.status", sessionData.getUserName().get()));
+                Div status = new Div(new Text(getTranslation("login.status", sessionData.getUserName().get())));
                 status.setWidthFull();
-                status.addClassName("center-text");
+                status.addClassName(Styles.CENTER_TEXT);
                 status.getStyle().set("margin-bottom", "-4px");
                 add(status);
 
-                CustomButton logout = new CustomButton(getTranslation("logout"), VaadinIcon.SIGN_OUT_ALT.create());
+                Button logout = new Button(getTranslation("logout"), VaadinIcon.SIGN_OUT_ALT.create());
                 logout.setWidthFull();
                 Anchor logoutAnchor = new Anchor("/discordlogout", logout);
                 logoutAnchor.getStyle()
@@ -44,13 +46,13 @@ public class VerticalMenuBarComponent extends VerticalLayout {
                 logoutAnchor.setWidthFull();
                 add(logoutAnchor);
             } else {
-                Span status = new Span(getTranslation("logout.status"));
+                Div status = new Div(new Text((getTranslation("logout.status"))));
                 status.setWidthFull();
-                status.addClassName("center-text");
+                status.addClassName(Styles.CENTER_TEXT);
                 status.getStyle().set("margin-bottom", "-12px");
                 add(status);
 
-                CustomButton login = new CustomButton(getTranslation("login"), new DiscordIcon());
+                Button login = new Button(getTranslation("login"), new DiscordIcon());
                 login.setWidthFull();
                 login.setHeight("42px");
                 login.getStyle().set("color", "white");

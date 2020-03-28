@@ -2,13 +2,12 @@ package com.gmail.leonard.spring.Frontend.Components.Dashboard;
 
 import com.github.appreciated.card.Card;
 import com.gmail.leonard.spring.Frontend.ComponentChanger;
+import com.gmail.leonard.spring.Frontend.Styles;
 import com.gmail.leonard.spring.Frontend.Views.HomeView;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.server.VaadinServletService;
@@ -27,9 +26,9 @@ public class DashboardServerCard extends Card {
 
         Image image = new Image(iconURL, "");
         image.setWidth("70%");
-        image.addClassName("round");
+        image.addClassName(Styles.ROUND);
 
-        Span titleLabel = new Span(name);
+        Div titleLabel = new Div(new Text(name));
         titleLabel.getElement().getStyle()
                 .set("width", "100%")
                 .set("text-align", "center")

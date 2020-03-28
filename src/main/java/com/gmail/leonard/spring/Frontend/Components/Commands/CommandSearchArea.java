@@ -2,16 +2,14 @@ package com.gmail.leonard.spring.Frontend.Components.Commands;
 
 import com.gmail.leonard.spring.Backend.CommandList.CommandListContainer;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
-import com.gmail.leonard.spring.Frontend.Components.CustomButton;
 import com.gmail.leonard.spring.Frontend.Components.IconLabel;
+import com.gmail.leonard.spring.Frontend.Styles;
 import com.gmail.leonard.spring.Frontend.Views.CommandsView;
-import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -24,7 +22,7 @@ public class CommandSearchArea extends Div {
         setId("commands-searcharea");
 
         VerticalLayout mainContent = new VerticalLayout();
-        mainContent.addClassName("app-width");
+        mainContent.addClassName(Styles.APP_WIDTH);
         mainContent.setPadding(true);
 
         HorizontalLayout searchArea = new HorizontalLayout();
@@ -32,15 +30,17 @@ public class CommandSearchArea extends Div {
         searchArea.setSpacing(false);
         searchArea.setWidthFull();
 
-        H2 title = new H2(parent.getTitleText());
+        H1 title = new H1(parent.getTitleText());
+        title.setWidthFull();
         mainContent.add(title);
 
         TextField searchField = new TextField();
+        searchField.getStyle().set("margin-top", "0");
         searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
         searchField.setClearButtonVisible(true);
         searchField.setWidthFull();
         int n = CommandListContainer.getInstance().allCommandsSize(!uiData.isNSFWDisabled());
-        Label searchResults = new Label(getTranslation("commands.searchresults", n != 1, n));
+        Div searchResults = new Div(new Text(getTranslation("commands.searchresults", n != 1, n)));
         searchResults.setId("commands-resultslabel");
         searchField.setPlaceholder(getTranslation("commands.search"));
         searchField.setValueChangeMode(ValueChangeMode.LAZY);

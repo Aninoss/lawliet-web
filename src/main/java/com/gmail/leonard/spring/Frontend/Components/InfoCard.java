@@ -2,6 +2,7 @@ package com.gmail.leonard.spring.Frontend.Components;
 
 import com.github.appreciated.card.Card;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -18,7 +19,7 @@ public class InfoCard extends Card {
         VerticalLayout content = new VerticalLayout();
         content.setAlignItems(FlexComponent.Alignment.CENTER);
 
-        Span titleLabel = new Span(title);
+        Div titleLabel = new Div(new Text(title));
         titleLabel.getElement().getStyle()
                 .set("font-size", "120%")
                 .set("width", "100%")
@@ -26,7 +27,7 @@ public class InfoCard extends Card {
                 .set("margin-top", "6px")
                 .set("font-weight", "bold");
 
-        Label subtitleLabel = new Label(subtitle);
+        Div subtitleLabel = new Div(new Text(subtitle));
         subtitleLabel.setWidthFull();
         subtitleLabel.addClassName("center");
         subtitleLabel.getElement().getStyle()
@@ -35,7 +36,7 @@ public class InfoCard extends Card {
                 .set("opacity", "0.5")
                 .set("margin-top", "2px");
 
-        Label descLabel = new Label(desc);
+        Div descLabel = new Div(new Text(desc));
         descLabel.setWidthFull();
         descLabel.addClassName("center");
 

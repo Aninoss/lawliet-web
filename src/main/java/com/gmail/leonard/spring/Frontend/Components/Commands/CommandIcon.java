@@ -1,5 +1,6 @@
 package com.gmail.leonard.spring.Frontend.Components.Commands;
 
+import com.gmail.leonard.spring.Frontend.Styles;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.server.VaadinServletService;
@@ -41,7 +42,7 @@ public class CommandIcon extends Div {
                         VaadinSession.getCurrent().getBrowser());
 
         Image image = new Image(IconStr, "");
-        image.addClassName("round");
+        image.addClassName(Styles.ROUND);
         image.setWidth(size);
         image.setHeight(size);
         if (showTitle) image.setTitle(getTranslation("commands.icon." + type.name()));

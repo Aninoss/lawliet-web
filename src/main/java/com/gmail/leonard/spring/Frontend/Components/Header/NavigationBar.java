@@ -1,11 +1,9 @@
 package com.gmail.leonard.spring.Frontend.Components.Header;
 
-import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
 import com.gmail.leonard.spring.ExternalLinks;
-import com.gmail.leonard.spring.Frontend.Layouts.PageLayout;
 import com.gmail.leonard.spring.Frontend.Views.CommandsView;
-import com.gmail.leonard.spring.Frontend.Views.DashboardServerView;
+import com.gmail.leonard.spring.Frontend.Views.DashboardView;
 import com.gmail.leonard.spring.Frontend.Views.FAQView;
 import com.gmail.leonard.spring.Frontend.Views.HomeView;
 import com.vaadin.flow.component.Component;
@@ -25,7 +23,7 @@ public class NavigationBar extends Tabs implements AfterNavigationObserver {
                 new NavigationBarLink(HomeView.class),
                 new NavigationBarLink(CommandsView.class),
                 new NavigationBarLink(FAQView.class),
-                new NavigationBarLink(DashboardServerView.class, true),
+                new NavigationBarLink(DashboardView.class, true),
                 new NavigationBarLink(ExternalLinks.BOT_INVITE_URL, "invite"),
                 new NavigationBarLink(ExternalLinks.SERVER_INVITE_URL, "server")
         };

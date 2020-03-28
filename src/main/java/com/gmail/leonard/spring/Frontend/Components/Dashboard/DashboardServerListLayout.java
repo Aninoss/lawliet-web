@@ -8,8 +8,7 @@ import com.github.appreciated.css.grid.sizes.Repeat;
 import com.github.appreciated.layout.FlexibleGridLayout;
 import com.gmail.leonard.spring.Backend.UserData.DiscordServerData;
 import com.gmail.leonard.spring.Backend.UserData.ServerListData;
-import com.gmail.leonard.spring.Frontend.Views.DashboardServerView;
-import com.vaadin.flow.component.UI;
+import com.gmail.leonard.spring.Frontend.Views.DashboardView;
 import com.vaadin.flow.component.html.Article;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.server.VaadinServletService;
@@ -17,7 +16,7 @@ import com.vaadin.flow.server.VaadinSession;
 
 public class DashboardServerListLayout extends VerticalLayout {
 
-    public DashboardServerListLayout(DashboardServerView dashboardServerView, ServerListData serverListData) {
+    public DashboardServerListLayout(DashboardView dashboardView, ServerListData serverListData) {
         Article[] serverCards = new Article[serverListData.size()];
 
         for(int i = 0; i < serverListData.size(); i++) {
@@ -33,7 +32,7 @@ public class DashboardServerListLayout extends VerticalLayout {
             );
             serverCards[i] = new Article(dashboardServerCard);
             serverCards[i].addClassName("dashboard-card");
-            serverCards[i].addClickListener(listener -> dashboardServerView.setServer(discordServerData.getId()));
+            serverCards[i].addClickListener(listener -> dashboardView.setServer(discordServerData.getId()));
         }
 
         FlexibleGridLayout layout = new FlexibleGridLayout()
