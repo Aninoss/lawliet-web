@@ -5,7 +5,6 @@ import bell.oauth.discord.main.OAuthBuilder;
 import bell.oauth.discord.main.Response;
 import com.gmail.leonard.spring.Backend.SecretManager;
 import com.gmail.leonard.spring.Backend.StringTools;
-import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
 import com.gmail.leonard.spring.Frontend.Layouts.PageLayout;
 import com.gmail.leonard.spring.Frontend.Views.DiscordLogin;
 import com.gmail.leonard.spring.Frontend.Views.HomeView;
@@ -17,16 +16,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 @Component
 @VaadinSessionScope
 public class SessionData {
 
     private OAuthBuilder builder;
-    private String id, username, avatarId;
+    private String id, username, avatarId, discriminator;
     private long userId;
     private boolean loggedIn;
     private Class<? extends PageLayout> currentTarget = HomeView.class;
@@ -43,6 +39,7 @@ public class SessionData {
         userId = 0;
         username = null;
         avatarId = null;
+        discriminator = null;
         loggedIn = false;
 
         try {
@@ -73,6 +70,7 @@ public class SessionData {
                 userId = Long.parseLong(user.getId());
                 username = user.getUsername();
                 avatarId = user.getAvatar();
+                discriminator = user.getDiscriminator();
                 loggedIn = true;
                 userCache.computeIfAbsent(userId, id -> new ArrayList<>()).add(this);
                 uiData.login(userId);
@@ -99,6 +97,12 @@ public class SessionData {
     public Optional<String> getUserName() {
         if (loggedIn) {
             return Optional.of(username);
+        } return Optional.empty();
+    }
+
+    public Optional<String> getDiscriminator() {
+        if (loggedIn) {
+            return Optional.of(discriminator);
         } return Optional.empty();
     }
 

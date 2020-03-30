@@ -13,17 +13,9 @@ import com.vaadin.flow.server.VaadinServletService;
 import com.vaadin.flow.server.VaadinSession;
 
 public class BotInfoDetailsLayout extends VerticalLayout {
-    public BotInfoDetailsLayout(UIData uiData) {
+    public BotInfoDetailsLayout() {
         setId("bot-info-details");
-        if (uiData.isLite()) addClassName("lite-class");
-
-        if (!uiData.isLite()) {
-            addClassName(Styles.FLEX_NOTPC_SWITCH_ROW);
-            addClassName("size-small-fullwidth");
-        } else {
-            getStyle().set("flex-direction", "row");
-            setMaxWidth("100%");
-        }
+        addClassNames(Styles.FLEX_NOTPC_SWITCH_ROW, "size-small-fullwidth");
         setPadding(true);
 
         //Bot Icon
@@ -32,11 +24,6 @@ public class BotInfoDetailsLayout extends VerticalLayout {
                         VaadinSession.getCurrent().getBrowser());
 
         Image icon = new Image(iconStr, "");
-        if (uiData.isLite()) {
-            icon.setMaxWidth("125px");
-            icon.setMaxHeight("125px");
-            icon.getStyle().set("margin-right", "16px");
-        }
         icon.setId("bot-info-details-icon");
 
         //Title
@@ -51,12 +38,7 @@ public class BotInfoDetailsLayout extends VerticalLayout {
         //Description
         Div description = new Div(new Text(getTranslation("bot.desc")));
         description.getStyle().set("font-size", "80%");
-        if (!uiData.isLite()) {
-            description.addClassName("bot-info-details-width");
-            description.addClassName("size-small-fullwidth");
-        } else {
-            description.setMaxWidth("100%");
-        }
+        description.addClassNames("bot-info-details-width", "size-small-fullwidth");
 
         //Button
         Button inviteButton = new Button(getTranslation("bot.invite"), VaadinIcon.ARROW_RIGHT.create());

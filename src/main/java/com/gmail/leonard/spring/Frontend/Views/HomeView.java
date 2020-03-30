@@ -18,7 +18,7 @@ public class HomeView extends PageLayout {
     public HomeView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         super(sessionData, uiData);
         add(
-                new BotInfoLayout(uiData),
+                new BotInfoLayout(),
                 new BotProsLayout(uiData)
         );
     }

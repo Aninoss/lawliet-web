@@ -9,16 +9,16 @@ import com.vaadin.flow.component.polymertemplate.Id;
 
 public class BotInfoLayout extends Div {
 
-    public BotInfoLayout(UIData uiData) {
+    public BotInfoLayout() {
         setId("bot-info");
-        if (!uiData.isLite()) addClassName("tablet-switch");
+        addClassName("tablet-switch");
         setWidthFull();
 
         FlexLayout parts = new FlexLayout();
         parts.addClassNames(Styles.APP_WIDTH, Styles.FLEX_NOTPC_SWITCH_COLUMN_REVERSE);
 
-        if (!uiData.isLite()) parts.add(new BotInfoVideoLayout());
-        parts.add(new BotInfoDetailsLayout(uiData));
+        parts.add(new BotInfoVideoLayout());
+        parts.add(new BotInfoDetailsLayout());
 
         add(new HeaderDummy(), parts);
     }

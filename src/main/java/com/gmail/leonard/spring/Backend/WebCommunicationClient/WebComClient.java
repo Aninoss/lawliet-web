@@ -2,6 +2,7 @@ package com.gmail.leonard.spring.Backend.WebCommunicationClient;
 
 import com.gmail.leonard.spring.Backend.CommandList.CommandListContainer;
 import com.gmail.leonard.spring.Backend.FAQ.FAQListContainer;
+import com.gmail.leonard.spring.Backend.Feedback.FeedbackBean;
 import com.gmail.leonard.spring.Backend.UserData.ServerListData;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.Events.*;
@@ -126,10 +127,12 @@ public class WebComClient {
         return send(EVENT_DONATEBOT_IO, jsonObject, Void.class);
     }
 
-    public CompletableFuture<Void> sendFeedback(String reason, String explanation) {
+    public CompletableFuture<Void> sendFeedback(FeedbackBean feedbackBean) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("reason", reason);
-        jsonObject.put("explanation", explanation);
+        jsonObject.put("cause", feedbackBean.getCause(feedbackBean));
+        jsonObject.put("reason", feedbackBean.getReason(feedbackBean));
+        if (feedbackBean.getContact(feedbackBean))
+            jsonObject.put("username_discriminated", feedbackBean.getUsernameDiscriminated(feedbackBean));
         return send(EVENT_FEEDBACK, jsonObject, Void.class);
     }
 

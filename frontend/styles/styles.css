@@ -64,7 +64,7 @@ vaadin-button { cursor: pointer; }
     animation: fadein 0.5s;
 }
 
-#header-dummy { height: 88px; }
+#header-dummy { height: 80px; }
 
 #page-header {
     margin-top: -32px;

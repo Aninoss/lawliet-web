@@ -17,7 +17,7 @@ import java.util.Locale;
 
 public class CommandCategoryLayout extends VerticalLayout {
 
-    private static final int PX_PER_SLOT = 68;
+    private static final int PX_PER_SLOT = 66, PX_ABSOLUTE = 4;
 
     private CommandListCategory commandListCategory;
     private HashMap<String, Details> commandFields = new HashMap<>();
@@ -138,7 +138,7 @@ public class CommandCategoryLayout extends VerticalLayout {
                 }
             }
 
-            if (!build) setHeight((found * PX_PER_SLOT) + "px");
+            if (!build) setHeight((found * PX_PER_SLOT + PX_ABSOLUTE) + "px");
 
             if (changeAccordionPanel) {
                 accordionPanel.setEnabled(found > 0);
