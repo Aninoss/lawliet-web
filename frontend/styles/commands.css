@@ -1,12 +1,4 @@
-#commands-searcharea {
-    background: var(--lumo-secondary);
-    -webkit-box-shadow: 0 2px 8px 0 rgba(0,0,0,0.3);
-    -moz-box-shadow: 0 2px 8px 0 rgba(0,0,0,0.3);
-    box-shadow: 0 2px 8px 0 rgba(0,0,0,0.3);
-}
-
 #commands-resultslabel {
-    margin-bottom: 16px;
     margin-top: 0;
 }
 
@@ -39,22 +31,4 @@
 }
 .lds-ring2 div:nth-child(3) {
     animation-delay: -0.15s;
-}
-
-
-
-/* Tablet */
-@media (max-width: 1000px) {
-
-    #commands-searcharea {
-        background: rgba(0,0,0,0);
-        -webkit-box-shadow: 0 2px 12px 0 rgba(0,0,0,0);
-        -moz-box-shadow: 0 2px 12px 0 rgba(0,0,0,0);
-        box-shadow: 0 2px 12px 0 rgba(0,0,0,0);
-    }
-
-    #commands-resultslabel {
-        margin-bottom: -8px;
-    }
-
 }

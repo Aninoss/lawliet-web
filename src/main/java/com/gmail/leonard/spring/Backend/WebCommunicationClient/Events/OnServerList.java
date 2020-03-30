@@ -3,9 +3,7 @@ package com.gmail.leonard.spring.Backend.WebCommunicationClient.Events;
 import com.gmail.leonard.spring.Backend.UserData.DiscordServerData;
 import com.gmail.leonard.spring.Backend.UserData.ServerListData;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
-import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
-import com.gmail.leonard.spring.TimedCompletableFuture;
-import com.google.common.cache.LoadingCache;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.TransferCache;
 import io.socket.emitter.Emitter;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -15,11 +13,10 @@ import java.util.Optional;
 
 public class OnServerList implements Emitter.Listener {
 
-    private WebComClient webComClient;
-    private LoadingCache<Long, Optional<TimedCompletableFuture<ServerListData>>> serverListLoadingCache;
+    private TransferCache transferCache;
 
-    public OnServerList(LoadingCache<Long, Optional<TimedCompletableFuture<ServerListData>>> serverListLoadingCache) {
-        this.serverListLoadingCache = serverListLoadingCache;
+    public OnServerList(TransferCache transferCache) {
+        this.transferCache = transferCache;
     }
 
     @Override
@@ -27,11 +24,6 @@ public class OnServerList implements Emitter.Listener {
         JSONObject mainJSON = new JSONObject((String) args[0]);
 
         long userId = mainJSON.getLong("user_id");
-        Optional<TimedCompletableFuture<ServerListData>> completableFutureOptional;
-
-        completableFutureOptional = serverListLoadingCache.getUnchecked(userId);
-        serverListLoadingCache.invalidate(userId);
-        if (!completableFutureOptional.isPresent()) return;
 
         ArrayList<SessionData> sessionDataList = SessionData.getSessionData(userId);
 
@@ -57,8 +49,7 @@ public class OnServerList implements Emitter.Listener {
         }
 
         if (serverListData != null) {
-            TimedCompletableFuture<ServerListData> completableFuture = completableFutureOptional.get();
-            completableFuture.complete(serverListData);
+            transferCache.complete(mainJSON, serverListData, ServerListData.class);
         }
     }
 }

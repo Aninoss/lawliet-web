@@ -1,30 +1,22 @@
 package com.gmail.leonard.spring.Backend.WebCommunicationClient;
 
-import com.gmail.leonard.spring.Backend.Pair;
+import com.gmail.leonard.spring.Backend.CommandList.CommandListContainer;
+import com.gmail.leonard.spring.Backend.FAQ.FAQListContainer;
 import com.gmail.leonard.spring.Backend.UserData.ServerListData;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
-import com.gmail.leonard.spring.Backend.WebCommunicationClient.Events.OnCommandList;
-import com.gmail.leonard.spring.Backend.WebCommunicationClient.Events.OnFAQList;
-import com.gmail.leonard.spring.Backend.WebCommunicationClient.Events.OnServerList;
-import com.gmail.leonard.spring.Backend.WebCommunicationClient.Events.OnServerMembers;
-import com.gmail.leonard.spring.TimedCompletableFuture;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.Events.*;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import org.json.JSONObject;
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 public class WebComClient {
 
     private static WebComClient instance = new WebComClient();
+    public static WebComClient getInstance() { return instance; }
 
     private static final String EVENT_COMMANDLIST = "command_list";
     public static final String EVENT_FAQLIST = "faq_list";
@@ -34,45 +26,40 @@ public class WebComClient {
     private static final String EVENT_DONATEBOT_IO = "donatebot.io";
     private static final String EVENT_FEEDBACK = "feedback";
 
+    private HashMap<String, TransferCache> transferCaches = new HashMap<>();
 
     private boolean started = false;
     private Socket socket;
 
-    private LoadingCache<Long, Optional<TimedCompletableFuture<ServerListData>>> serverListLoadingCache;
-    private LoadingCache<Long, Optional<TimedCompletableFuture<Optional<Pair<Long, Long>>>>> serverMembersCountLoadingCache;
-    private List<TimedCompletableFuture<Void>> commandListRequests;
-    private List<TimedCompletableFuture<Void>> faqListRequests;
-
     private WebComClient() {
-        serverListLoadingCache = CacheBuilder.newBuilder()
-                .maximumSize(500)
-                .expireAfterWrite(1, TimeUnit.MINUTES)
-                .build(
-                        new CacheLoader<Long, Optional<TimedCompletableFuture<ServerListData>>>() {
-                            @Override
-                            @ParametersAreNonnullByDefault
-                            public Optional<TimedCompletableFuture<ServerListData>> load(Long userId) {
-                                return Optional.empty();
-                            }
-                        });
-
-        serverMembersCountLoadingCache = CacheBuilder.newBuilder()
-                .maximumSize(500)
-                .expireAfterWrite(1, TimeUnit.MINUTES)
-                .build(
-                        new CacheLoader<Long, Optional<TimedCompletableFuture<Optional<Pair<Long, Long>>>>>() {
-                            @Override
-                            @ParametersAreNonnullByDefault
-                            public Optional<TimedCompletableFuture<Optional<Pair<Long, Long>>>> load(Long userId) {
-                                return Optional.empty();
-                            }
-                        });
-
-        commandListRequests = Collections.synchronizedList(new ArrayList<>());
-        faqListRequests = Collections.synchronizedList(new ArrayList<>());
+        addTransferCaches(
+                new TransferCache(EVENT_COMMANDLIST),
+                new TransferCache(EVENT_FAQLIST),
+                new TransferCache(EVENT_SERVERLIST, "user_id"),
+                new TransferCache(EVENT_SERVERMEMBERS, "user_id"),
+                new TransferCache(EVENT_TOPGG),
+                new TransferCache(EVENT_DONATEBOT_IO),
+                new TransferCache(EVENT_FEEDBACK)
+        );
     }
 
-    public static WebComClient getInstance() { return instance; }
+    private void addTransferCaches(TransferCache... newTransferCaches) {
+        Stream.of(newTransferCaches)
+                .forEach(transferCache -> transferCaches.put(transferCache.getEvent(), transferCache));
+    }
+
+    private <T> CompletableFuture<T> send(String event, Class<T> c) {
+        return send(event, null, c);
+    }
+
+    private <T> CompletableFuture<T> send(String event, JSONObject jsonObject, Class<T> c) {
+        CompletableFuture<T> CompletableFuture = transferCaches.get(event).register(jsonObject, c);
+
+        if (jsonObject != null) socket.emit(event, jsonObject.toString());
+        else socket.emit(event);
+
+        return CompletableFuture;
+    }
 
     public void start(int port) {
         if (started) return;
@@ -84,10 +71,14 @@ public class WebComClient {
             socket = IO.socket("http://127.0.0.1:" + port + "/");
 
             //Events
-            socket.on(EVENT_COMMANDLIST, new OnCommandList(commandListRequests));
-            socket.on(EVENT_FAQLIST, new OnFAQList(faqListRequests));
-            socket.on(EVENT_SERVERLIST, new OnServerList(serverListLoadingCache));
-            socket.on(EVENT_SERVERMEMBERS, new OnServerMembers(serverMembersCountLoadingCache));
+            socket.on(EVENT_COMMANDLIST, new OnCommandList(transferCaches.get(EVENT_COMMANDLIST)));
+            socket.on(EVENT_FAQLIST, new OnFAQList(transferCaches.get(EVENT_FAQLIST)));
+            socket.on(EVENT_SERVERLIST, new OnServerList(transferCaches.get(EVENT_SERVERLIST)));
+            socket.on(EVENT_SERVERMEMBERS, new OnServerMembers(transferCaches.get(EVENT_SERVERMEMBERS)));
+
+            socket.on(EVENT_TOPGG, new OnGenericResponseless(transferCaches.get(EVENT_TOPGG)));
+            socket.on(EVENT_DONATEBOT_IO, new OnGenericResponseless(transferCaches.get(EVENT_DONATEBOT_IO)));
+            socket.on(EVENT_FEEDBACK, new OnGenericResponseless(transferCaches.get(EVENT_FEEDBACK)));
 
             socket.connect();
             System.out.println("The WebCom client has been started!");
@@ -96,57 +87,50 @@ public class WebComClient {
         }
     }
 
-    public TimedCompletableFuture<Void> updateCommandList() {
-        socket.emit(EVENT_COMMANDLIST);
-        TimedCompletableFuture<Void> completableFuture = new TimedCompletableFuture<>();
-        commandListRequests.add(completableFuture);
-        return completableFuture;
+    public CompletableFuture<CommandListContainer> updateCommandList() {
+        return send(EVENT_COMMANDLIST, CommandListContainer.class);
     }
 
-    public TimedCompletableFuture<Void> updateFAQList() {
-        socket.emit(EVENT_FAQLIST);
-        TimedCompletableFuture<Void> completableFuture = new TimedCompletableFuture<>();
-        faqListRequests.add(completableFuture);
-        return completableFuture;
+    public CompletableFuture<FAQListContainer> updateFAQList() {
+        return send(EVENT_FAQLIST, FAQListContainer.class);
     }
 
-    public TimedCompletableFuture<ServerListData> getServerListData(SessionData sessionData) {
+    public CompletableFuture<ServerListData> getServerListData(SessionData sessionData) {
         if (sessionData.isLoggedIn()) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("user_id", sessionData.getUserId().get());
-            socket.emit(EVENT_SERVERLIST, jsonObject.toString());
-
-            TimedCompletableFuture<ServerListData> completableFuture = new TimedCompletableFuture<>();
-            serverListLoadingCache.put(sessionData.getUserId().get(), Optional.of(completableFuture));
-            return completableFuture;
+            return send(EVENT_SERVERLIST, jsonObject, ServerListData.class);
         }
 
-        return new TimedCompletableFuture<>(null);
+        return CompletableFuture.completedFuture(null);
     }
 
-    public TimedCompletableFuture<Optional<Pair<Long, Long>>> getServerMembersCount(SessionData sessionData, long serverId) {
+    public CompletableFuture<JSONObject> getServerMembersCount(SessionData sessionData, long serverId) {
         if (sessionData.isLoggedIn()) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("user_id", sessionData.getUserId().get());
             jsonObject.put("server_id", serverId);
             socket.emit(EVENT_SERVERMEMBERS, jsonObject.toString());
 
-            TimedCompletableFuture<Optional<Pair<Long, Long>>> completableFuture = new TimedCompletableFuture<>();
-            serverMembersCountLoadingCache.put(sessionData.getUserId().get(), Optional.of(completableFuture));
-            return completableFuture;
+            return send(EVENT_SERVERMEMBERS, jsonObject, JSONObject.class);
         }
 
-        return new TimedCompletableFuture<>(null);
+        return CompletableFuture.completedFuture(null);
     }
 
-    public void sendTopGG(String data) { socket.emit(EVENT_TOPGG, data); }
-    public void sendDonatebotIO(String data) { socket.emit(EVENT_DONATEBOT_IO, data); }
+    public CompletableFuture<Void> sendTopGG(JSONObject jsonObject) {
+        return send(EVENT_TOPGG, jsonObject, Void.class);
+    }
 
-    public void sendFeedback(String reason, String explanation) {
+    public CompletableFuture<Void> sendDonatebotIO(JSONObject jsonObject) {
+        return send(EVENT_DONATEBOT_IO, jsonObject, Void.class);
+    }
+
+    public CompletableFuture<Void> sendFeedback(String reason, String explanation) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("reason", reason);
         jsonObject.put("explanation", explanation);
-        socket.emit(EVENT_FEEDBACK, jsonObject.toString());
+        return send(EVENT_FEEDBACK, jsonObject, Void.class);
     }
 
 }

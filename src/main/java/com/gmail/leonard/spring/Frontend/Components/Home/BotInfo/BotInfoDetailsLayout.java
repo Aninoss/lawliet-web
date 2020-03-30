@@ -15,6 +15,8 @@ import com.vaadin.flow.server.VaadinSession;
 public class BotInfoDetailsLayout extends VerticalLayout {
     public BotInfoDetailsLayout(UIData uiData) {
         setId("bot-info-details");
+        if (uiData.isLite()) addClassName("lite-class");
+
         if (!uiData.isLite()) {
             addClassName(Styles.FLEX_NOTPC_SWITCH_ROW);
             addClassName("size-small-fullwidth");
@@ -23,7 +25,6 @@ public class BotInfoDetailsLayout extends VerticalLayout {
             setMaxWidth("100%");
         }
         setPadding(true);
-        setAlignItems(Alignment.CENTER);
 
         //Bot Icon
         String iconStr = VaadinServletService.getCurrent()

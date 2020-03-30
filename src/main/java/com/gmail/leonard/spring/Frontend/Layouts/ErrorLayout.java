@@ -1,5 +1,7 @@
 package com.gmail.leonard.spring.Frontend.Layouts;
 
+import com.gmail.leonard.spring.Backend.UserData.SessionData;
+import com.gmail.leonard.spring.Backend.UserData.UIData;
 import com.gmail.leonard.spring.Frontend.Components.*;
 import com.gmail.leonard.spring.Frontend.Styles;
 import com.gmail.leonard.spring.Frontend.Views.HomeView;
@@ -15,15 +17,16 @@ import com.vaadin.flow.router.ParentLayout;
 @ParentLayout(MainLayout.class)
 public class ErrorLayout extends PageLayout {
 
-    public ErrorLayout(String typeString) {
+    public ErrorLayout(SessionData sessionData, UIData uiData, String typeString) {
+        super(sessionData, uiData);
+
         setWidthFull();
         VerticalLayout mainContent = new VerticalLayout();
 
         mainContent.addClassName(Styles.APP_WIDTH);
         mainContent.setPadding(true);
 
-        mainContent.add(new H1(getTranslation("err." + typeString + ".title")));
-        mainContent.add(new Hr());
+        add(new PageHeader(getTranslation("err." + typeString + ".title")));
         mainContent.add(new Paragraph(getTranslation("err." + typeString + ".des")));
 
         Button button = new Button(getTranslation("err.button.home"), new Icon(VaadinIcon.ARROW_LEFT));

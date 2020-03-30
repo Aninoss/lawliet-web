@@ -3,18 +3,17 @@ package com.gmail.leonard.spring.Backend.WebCommunicationClient.Events;
 import com.gmail.leonard.spring.Backend.CommandList.CommandListCategory;
 import com.gmail.leonard.spring.Backend.CommandList.CommandListContainer;
 import com.gmail.leonard.spring.Backend.CommandList.CommandListSlot;
-import com.gmail.leonard.spring.TimedCompletableFuture;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.TransferCache;
 import io.socket.emitter.Emitter;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import java.util.List;
 
 public class OnCommandList implements Emitter.Listener {
 
-    private List<TimedCompletableFuture<Void>> commandListRequests;
+    private TransferCache transferCache;
 
-    public OnCommandList(List<TimedCompletableFuture<Void>> commandListRequests) {
-        this.commandListRequests = commandListRequests;
+    public OnCommandList(TransferCache transferCache) {
+        this.transferCache = transferCache;
     }
 
     @Override
@@ -54,10 +53,7 @@ public class OnCommandList implements Emitter.Listener {
             CommandListContainer.getInstance().add(commandListCategory);
         }
 
-        for(TimedCompletableFuture<Void> cf: commandListRequests)
-            cf.complete(null);
-        commandListRequests.clear();
-
+        transferCache.complete(CommandListContainer.getInstance(), CommandListContainer.class);
         System.out.println("Commands ready");
     }
 }

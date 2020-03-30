@@ -25,29 +25,39 @@
 
 #dashboard-servericon {
     height: 96px;
-    margin-right: 16px;
+    margin-right: 8px;
     margin-top: 12px;
     margin-bottom: 12px;
 }
 
-#dashboard-titlearea {
-    background: var(--lumo-secondary);
-    -webkit-box-shadow: 0 2px 8px 0 rgba(0,0,0,0.3);
-    -moz-box-shadow: 0 2px 8px 0 rgba(0,0,0,0.3);
-    box-shadow: 0 2px 8px 0 rgba(0,0,0,0.3);
-}
-
-.dashboard-small-title {
-    font-size: 160%;
+.dashboard-title {
+    font-size: 170%;
+    margin-bottom: 4px;
     margin-top: 0;
 }
 
+#dashboard-info {
+    margin-top: 22px;
+    margin-bottom: -18px;
+}
+
+
+
+/* Tablet */
+@media (max-width: 1000px) {
+
+    #dashboard-info {
+        margin-top: 20px;
+        margin-bottom: -28px;
+    }
+
+}
 
 
 /* Mobile */
 @media (max-width: 700px) {
 
-    .dashboard-small-title { font-size: 130%; }
+    .dashboard-title { font-size: 130%; }
 
     #dashboard-servericon {
         height: 64px;

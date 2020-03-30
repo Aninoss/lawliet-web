@@ -2,6 +2,7 @@ package com.gmail.leonard.spring.Frontend.Components.Header;
 
 import com.gmail.leonard.spring.Backend.Language.PageTitleGen;
 import com.gmail.leonard.spring.Frontend.Layouts.PageLayout;
+import com.gmail.leonard.spring.NoLiteAccess;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.router.RouterLink;
 
@@ -24,13 +25,9 @@ public class NavigationBarLink {
         anchor.setWidthFull();
     }
 
-    public NavigationBarLink(Class<? extends PageLayout> page, boolean hiddenInLiteVersion) {
-        this(page);
-        this.hiddenInLiteVersion = hiddenInLiteVersion;
-    }
-
     public NavigationBarLink(Class<? extends PageLayout> page) {
         this.routerLink = new RouterLink(PageTitleGen.getTitle(PageLayout.getRouteStatic(page)), page);
+        hiddenInLiteVersion = page.isAnnotationPresent(NoLiteAccess.class);
     }
 
     public Optional<Anchor> getAnchor() {

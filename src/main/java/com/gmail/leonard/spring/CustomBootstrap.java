@@ -21,7 +21,7 @@ public class CustomBootstrap implements BootstrapListener {
                 ).toString());
 
                 response.getDocument().head().append("<script src=\"js/scripts.js\"></script>");
-                response.getDocument().body().attr("overflow-x", "hidden");
+                response.getDocument().body().attr("onscroll", "onScroll()");
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -1,5 +1,6 @@
 package com.gmail.leonard.spring.Frontend.Views;
 
+import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
 import com.gmail.leonard.spring.Frontend.Components.Commands.CommandCategoryLayout;
 import com.gmail.leonard.spring.Frontend.Components.Commands.CommandList;
@@ -18,7 +19,8 @@ public class CommandsView extends PageLayout {
 
     private ArrayList<CommandCategoryLayout> categories = new ArrayList<>();
 
-    public CommandsView(@Autowired UIData uiData) {
+    public CommandsView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
+        super(sessionData, uiData);
         add(new CommandSearchArea(this, uiData), new CommandList(this, uiData));
     }
 

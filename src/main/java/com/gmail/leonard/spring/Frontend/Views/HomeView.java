@@ -1,5 +1,6 @@
 package com.gmail.leonard.spring.Frontend.Views;
 
+import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
 import com.gmail.leonard.spring.Frontend.Components.Home.BotInfo.BotInfoLayout;
 import com.gmail.leonard.spring.Frontend.Components.Home.BotPros.BotProsLayout;
@@ -14,7 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 @CssImport("./styles/home.css")
 public class HomeView extends PageLayout {
 
-    public HomeView(@Autowired UIData uiData) {
+    public HomeView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
+        super(sessionData, uiData);
         add(
                 new BotInfoLayout(uiData),
                 new BotProsLayout(uiData)

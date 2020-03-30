@@ -2,18 +2,17 @@ package com.gmail.leonard.spring.Backend.WebCommunicationClient.Events;
 
 import com.gmail.leonard.spring.Backend.FAQ.FAQListContainer;
 import com.gmail.leonard.spring.Backend.FAQ.FAQListSlot;
-import com.gmail.leonard.spring.TimedCompletableFuture;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.TransferCache;
 import io.socket.emitter.Emitter;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import java.util.List;
 
 public class OnFAQList implements Emitter.Listener {
 
-    private List<TimedCompletableFuture<Void>> faqListRequests;
+    private TransferCache transferCache;
 
-    public OnFAQList(List<TimedCompletableFuture<Void>> faqListRequests) {
-        this.faqListRequests = faqListRequests;
+    public OnFAQList(TransferCache transferCache) {
+        this.transferCache = transferCache;
     }
 
     @Override
@@ -31,10 +30,7 @@ public class OnFAQList implements Emitter.Listener {
             FAQListContainer.getInstance().add(faqListSlot);
         }
 
-        for(TimedCompletableFuture<Void> cf: faqListRequests)
-            cf.complete(null);
-        faqListRequests.clear();
-
+        transferCache.complete(FAQListContainer.getInstance(), FAQListContainer.class);
         System.out.println("FAQ list ready");
     }
 }

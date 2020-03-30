@@ -8,21 +8,13 @@ import com.gmail.leonard.spring.Backend.UserData.UIData;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
 import com.gmail.leonard.spring.Frontend.Components.CustomNotification;
 import com.gmail.leonard.spring.Frontend.Components.HtmlText;
+import com.gmail.leonard.spring.Frontend.Components.PageHeader;
 import com.gmail.leonard.spring.Frontend.Layouts.MainLayout;
 import com.gmail.leonard.spring.Frontend.Layouts.PageLayout;
 import com.gmail.leonard.spring.Frontend.Styles;
-import com.vaadin.flow.component.accordion.Accordion;
-import com.vaadin.flow.component.accordion.AccordionPanel;
+import com.gmail.leonard.spring.NoLiteAccess;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.details.DetailsVariant;
-import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
@@ -30,19 +22,23 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.concurrent.ExecutionException;
+
 @Route(value = "feedback", layout = MainLayout.class)
+@NoLiteAccess
 public class FeedbackView extends PageLayout {
 
-    public FeedbackView() {
+    public FeedbackView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
+        super(sessionData, uiData);
+
+        HtmlText htmlText = new HtmlText(getTranslation("feedback.desc"));
+        add(new PageHeader(getTitleText(), htmlText));
+
         setWidthFull();
         VerticalLayout mainContent = new VerticalLayout();
 
         mainContent.addClassName(Styles.APP_WIDTH);
         mainContent.setPadding(true);
-
-        H1 title = new H1(getTitleText());
-        title.setWidthFull();
-        mainContent.add(title, new HtmlText(getTranslation("feedback.desc")));
 
         String[] options = getTranslation("feedback.options").split("\n");
 
@@ -68,9 +64,14 @@ public class FeedbackView extends PageLayout {
 
     private void onSubmitPress(VerticalLayout mainContent, String reason, String explanation) {
         mainContent.setEnabled(false);
-        WebComClient.getInstance().sendFeedback(reason, explanation);
-        CustomNotification.showSuccess(getTranslation("feedback.confirm"));
-        mainContent.getUI().get().navigate(HomeView.class);
+        try {
+            WebComClient.getInstance().sendFeedback(reason, explanation).get();
+            CustomNotification.showSuccess(getTranslation("feedback.confirm"));
+            mainContent.getUI().get().navigate(HomeView.class);
+        } catch (InterruptedException | ExecutionException e) {
+            CustomNotification.showError(getTranslation("feedback.error"));
+            e.printStackTrace();
+        }
     }
 
 }

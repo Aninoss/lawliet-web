@@ -24,17 +24,16 @@ import com.vaadin.flow.server.VaadinSession;
 public class HeaderComponent extends Header {
 
     public HeaderComponent(SessionData sessionData, UIData uiData)  {
-        getStyle()
-                .set("position", "fixed")
-                .set("z-index", "6");
-        addClassName("app-width-wide");
-        addClassNames(Styles.CENTER_FIXED_WIDTH, Styles.FADE_IN);
+        setId("header-out");
+        if (uiData.isLite()) getStyle()
+                .set("background-color", "var(--lumo-shade)")
+                .set("transform", "translateY(0px)");
 
         HorizontalLayout content = new HorizontalLayout();
-        content.setId("header-size");
-
+        content.setId("header-content");
         content.setPadding(false);
-        content.setAlignItems(FlexComponent.Alignment.CENTER);
+        content.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
+        content.addClassNames(Styles.FADE_IN);
 
         //Show Menu Button
         Button showMenu = new Button("");
@@ -49,9 +48,14 @@ public class HeaderComponent extends Header {
                 .resolveResource("/styles/img/logo.png",
                         VaadinSession.getCurrent().getBrowser());
 
-        Image logo = new Image(logoString, "");
-        logo.setHeightFull();
-        logo.addClassName(Styles.POINTER);
+        Image logoImage = new Image(logoString, "");
+        logoImage.setHeight("48px");
+
+        Button logo = new Button(logoImage);
+        logo.setMinWidth("200px");
+        logo.getStyle().set("margin-left", "8px")
+                .set("margin-top", "6px");
+        logo.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         logo.addClickListener(click -> UI.getCurrent().navigate(HomeView.class));
         content.add(logo);
 
@@ -68,7 +72,7 @@ public class HeaderComponent extends Header {
         if (!uiData.isLite()) {
             if (sessionData.isLoggedIn()) {
                 Image userIcon = new Image(sessionData.getUserAvatar().get(), "");
-                userIcon.setHeightFull();
+                userIcon.setHeight("48px");
                 userIcon.addClassName(Styles.ROUND);
                 content.add(userIcon);
 
@@ -80,7 +84,6 @@ public class HeaderComponent extends Header {
 
                 Div username = new Div(new Text(sessionData.getUserName().get()));
                 username.getStyle()
-                        .set("margin-top", "-3px")
                         .set("margin-left", "-4px")
                         .set("color", "white");
                 username.addClassName(Styles.VISIBLE_NOTMOBILE);
@@ -95,8 +98,8 @@ public class HeaderComponent extends Header {
                 content.add(accountName);
             } else {
                 Button login = new Button(getTranslation("login"), new DiscordIcon());
-                login.setHeight("42px");
-                login.getStyle().set("color", "white");
+                login.getStyle().set("color", "white")
+                        .set("margin-right", "-6px");
                 login.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
                 Anchor loginAnchor = new Anchor(sessionData.getLoginUrl(), login);
                 loginAnchor.addClassName(Styles.VISIBLE_NOTMOBILE);

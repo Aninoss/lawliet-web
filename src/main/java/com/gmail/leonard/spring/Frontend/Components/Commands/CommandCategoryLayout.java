@@ -17,7 +17,7 @@ import java.util.Locale;
 
 public class CommandCategoryLayout extends VerticalLayout {
 
-    private static final int PX_PER_SLOT = 70;
+    private static final int PX_PER_SLOT = 68;
 
     private CommandListCategory commandListCategory;
     private HashMap<String, Details> commandFields = new HashMap<>();

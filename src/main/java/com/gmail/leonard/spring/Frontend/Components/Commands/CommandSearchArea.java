@@ -3,6 +3,7 @@ package com.gmail.leonard.spring.Frontend.Components.Commands;
 import com.gmail.leonard.spring.Backend.CommandList.CommandListContainer;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
 import com.gmail.leonard.spring.Frontend.Components.IconLabel;
+import com.gmail.leonard.spring.Frontend.Components.PageHeader;
 import com.gmail.leonard.spring.Frontend.Styles;
 import com.gmail.leonard.spring.Frontend.Views.CommandsView;
 import com.vaadin.flow.component.Text;
@@ -15,27 +16,17 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
-public class CommandSearchArea extends Div {
+public class CommandSearchArea extends PageHeader {
 
     public CommandSearchArea(CommandsView parent, UIData uiData) {
-        setWidthFull();
-        setId("commands-searcharea");
-
-        VerticalLayout mainContent = new VerticalLayout();
-        mainContent.addClassName(Styles.APP_WIDTH);
-        mainContent.setPadding(true);
+        super(parent.getTitleText());
 
         HorizontalLayout searchArea = new HorizontalLayout();
         searchArea.setPadding(false);
         searchArea.setSpacing(false);
         searchArea.setWidthFull();
 
-        H1 title = new H1(parent.getTitleText());
-        title.setWidthFull();
-        mainContent.add(title);
-
         TextField searchField = new TextField();
-        searchField.getStyle().set("margin-top", "0");
         searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
         searchField.setClearButtonVisible(true);
         searchField.setWidthFull();
@@ -56,13 +47,10 @@ public class CommandSearchArea extends Div {
             searchResults.setText(getTranslation("commands.searchresults", found != 1, found));
         });
 
-        mainContent.add(searchField);
-        mainContent.add(searchResults);
+        getMainLayout().add(searchField, searchResults);
 
         if (uiData.isNSFWDisabled()) {
-            mainContent.add(new IconLabel(VaadinIcon.WARNING.create(), getTranslation("commands.hide")));
+            getMainLayout().add(new IconLabel(VaadinIcon.WARNING.create(), getTranslation("commands.hide")));
         }
-
-        add(mainContent);
     }
 }

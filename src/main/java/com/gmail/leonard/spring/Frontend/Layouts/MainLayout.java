@@ -1,6 +1,7 @@
 package com.gmail.leonard.spring.Frontend.Layouts;
 
 import com.gmail.leonard.spring.Backend.Language.PageTitleGen;
+import com.gmail.leonard.spring.Backend.Redirector;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
 import com.gmail.leonard.spring.Frontend.Components.CookieConsent;
@@ -11,6 +12,8 @@ import com.gmail.leonard.spring.Frontend.Styles;
 import com.gmail.leonard.spring.Frontend.Views.ExceptionView;
 import com.gmail.leonard.spring.Frontend.Views.IEView;
 import com.gmail.leonard.spring.Frontend.Views.PageNotFoundView;
+import com.gmail.leonard.spring.LoginAccess;
+import com.gmail.leonard.spring.NoLiteAccess;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
@@ -29,7 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @CssImport("./styles/main.css")
 @Theme(value = Lumo.class, variant = Lumo.DARK)
 @BodySize(width = "100%", height = "100%")
-public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterObserver, PageConfigurator, HasErrorParameter<Exception> {
+public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterObserver, PageConfigurator, HasErrorParameter<Exception>, BeforeLeaveObserver {
 
     private SessionData sessionData;
     private UIData uiData;
@@ -82,10 +85,21 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
         if (PageLayout.class.isAssignableFrom(cTemp)) {
             Class<? extends PageLayout> c = (Class<? extends PageLayout>)cTemp;
 
+            if (uiData.isLite() && event.getNavigationTarget().isAnnotationPresent(NoLiteAccess.class)) {
+                event.rerouteToError(Exception.class);
+                return;
+            }
+
             target = PageLayout.getRouteStatic(c);
 
             if (c != PageNotFoundView.class) sessionData.setCurrentTarget(c);
             if (VaadinSession.getCurrent().getBrowser().isIE() && event.getNavigationTarget() != IEView.class) event.rerouteTo(IEView.class);
+
+            if (!sessionData.isLoggedIn() && event.getNavigationTarget().isAnnotationPresent(LoginAccess.class)) {
+                new Redirector().redirect(sessionData.getLoginUrl());
+                return;
+            }
+
             if ((sessionData.isLoggedIn() && !uiData.getUserId().isPresent()) ||
                     (!sessionData.isLoggedIn() && uiData.getUserId().isPresent()) ||
                     (sessionData.isLoggedIn() && !uiData.getUserId().get().equals(sessionData.getUserId().get()))
@@ -111,5 +125,23 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
         errorParameter.getException().printStackTrace();
         beforeEnterEvent.rerouteTo(ExceptionView.class);
         return 500;
+    }
+
+    @Override
+    public void beforeLeave(BeforeLeaveEvent event) {
+        Class<?> target = event.getNavigationTarget();
+
+        if (uiData.isLite() && target.isAnnotationPresent(NoLiteAccess.class)) {
+            event.postpone();
+            return;
+        }
+
+        if (!sessionData.isLoggedIn() && target.isAnnotationPresent(LoginAccess.class)) {
+            if (PageLayout.class.isAssignableFrom(target))
+                sessionData.setCurrentTarget((Class<? extends PageLayout>)target);
+
+            new Redirector().redirect(sessionData.getLoginUrl());
+            event.postpone();
+        }
     }
 }

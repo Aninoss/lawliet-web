@@ -49,3 +49,11 @@ function createCookie(name, value, days) {
     }
     document.cookie = name+"="+value+expires+"; path=/";
 }
+
+function onScroll() {
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+        document.getElementById("header-out").classList.add("scroll-class");
+    } else {
+        document.getElementById("header-out").classList.remove("scroll-class");
+    }
+}

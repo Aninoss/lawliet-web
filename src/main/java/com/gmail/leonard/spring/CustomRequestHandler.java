@@ -6,9 +6,11 @@ import com.vaadin.flow.server.RequestHandler;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinSession;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 public class CustomRequestHandler implements RequestHandler {
 
@@ -51,10 +53,10 @@ public class CustomRequestHandler implements RequestHandler {
                     sb.append("\n").append(line);
                 }
 
-                if (sb.length() > 0) WebComClient.getInstance().sendTopGG(sb.toString().substring(1));
+                if (sb.length() > 0) WebComClient.getInstance().sendTopGG(new JSONObject(sb.toString().substring(1))).get();
                 return true;
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
 
@@ -72,10 +74,10 @@ public class CustomRequestHandler implements RequestHandler {
                     sb.append("\n").append(line);
                 }
 
-                if (sb.length() > 0) WebComClient.getInstance().sendDonatebotIO(sb.toString().substring(1));
+                if (sb.length() > 0) WebComClient.getInstance().sendDonatebotIO(new JSONObject(sb.toString().substring(1))).get();
                 return true;
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
 

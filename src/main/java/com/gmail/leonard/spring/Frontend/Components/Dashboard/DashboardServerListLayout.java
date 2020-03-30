@@ -14,9 +14,14 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.server.VaadinServletService;
 import com.vaadin.flow.server.VaadinSession;
 
+import java.util.ArrayList;
+import java.util.Optional;
+
 public class DashboardServerListLayout extends VerticalLayout {
 
-    public DashboardServerListLayout(DashboardView dashboardView, ServerListData serverListData) {
+    ArrayList<DashboardServerClickListener> serverClickListeners = new ArrayList<>();
+
+    public DashboardServerListLayout(ServerListData serverListData) {
         Article[] serverCards = new Article[serverListData.size()];
 
         for(int i = 0; i < serverListData.size(); i++) {
@@ -32,7 +37,7 @@ public class DashboardServerListLayout extends VerticalLayout {
             );
             serverCards[i] = new Article(dashboardServerCard);
             serverCards[i].addClassName("dashboard-card");
-            serverCards[i].addClickListener(listener -> dashboardView.setServer(discordServerData.getId()));
+            serverCards[i].addClickListener(click -> serverClickListeners.forEach(listener -> listener.onServerClick(discordServerData.getId())));
         }
 
         FlexibleGridLayout layout = new FlexibleGridLayout()
@@ -49,4 +54,9 @@ public class DashboardServerListLayout extends VerticalLayout {
         setPadding(false);
         add(layout);
     }
+
+    public void addServerClickListener(DashboardServerClickListener listener) { serverClickListeners.add(listener); }
+
+    public void removeServerClickListener(DashboardServerClickListener listener) { serverClickListeners.remove(listener); }
+
 }

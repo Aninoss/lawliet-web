@@ -7,22 +7,15 @@ html {
     --lumo-secondary: var(--lumo-shade-80pct);
 }
 
-vaadin-button {
-    cursor: pointer;
-}
+body { overflow-x: hidden; }
+
+vaadin-button { cursor: pointer; }
 
 .pointer { cursor: pointer; }
 
 .app-width {
-    width: 100%;
+    width: 100vw;
     max-width: 1000px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.app-width-wide {
-    width: 100%;
-    max-width: 1280px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -39,9 +32,9 @@ vaadin-button {
 
 .center-fixed-full {
     left: 50vw;
-    top: 50vh;
+    top: 50vw;
     position: fixed;
-    transform: translate(-50%, 50%);
+    transform: translate(-50%, -50%);
 }
 
 .unselectable {
@@ -53,6 +46,8 @@ vaadin-button {
 
 .v-reconnect-dialog {
     position: fixed !important;
+    background-color: var(--lumo-error-color) !important;
+    color: white !important;
 }
 
 .fadein-class {
@@ -67,6 +62,18 @@ vaadin-button {
     -moz-animation: fadein 0.5s;
     -o-animation: fadein 0.5s;
     animation: fadein 0.5s;
+}
+
+#header-dummy { height: 88px; }
+
+#page-header {
+    margin-top: -32px;
+    margin-bottom: 16px;
+    background: var(--lumo-secondary);
+    -webkit-box-shadow: 0 2px 8px 0 rgba(0,0,0,0.3);
+    -moz-box-shadow: 0 2px 8px 0 rgba(0,0,0,0.3);
+    box-shadow: 0 2px 8px 0 rgba(0,0,0,0.3);
+    padding-bottom: 16px;
 }
 
 
@@ -112,6 +119,18 @@ vaadin-button {
         left: 50%;
         top: 50%;
         transform: translate(-50%, -50%);
+    }
+
+    #header-dummy { height: 60px; }
+
+    .only-pc#page-header {
+        margin-top: -16px;
+        margin-bottom: 0;
+        background: rgba(0,0,0,0);
+        -webkit-box-shadow: 0 2px 12px 0 rgba(0,0,0,0);
+        -moz-box-shadow: 0 2px 12px 0 rgba(0,0,0,0);
+        box-shadow: 0 2px 12px 0 rgba(0,0,0,0);
+        padding-bottom: 0px;
     }
 
 }
