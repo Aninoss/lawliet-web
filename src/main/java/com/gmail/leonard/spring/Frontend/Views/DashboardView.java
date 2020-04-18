@@ -35,12 +35,13 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
 
     public DashboardView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         super(sessionData, uiData);
-        setWidthFull();
 
         if (!sessionData.isLoggedIn()) {
             /* Not logged in */
             VerticalLayout mainLayout = generateMainLayout();
-            mainLayout.add(new Div(new Text(getTranslation("dashboard.redirect"))));
+            Div div = new Div(new Text(getTranslation("dashboard.redirect")));
+            div.setWidthFull();
+            mainLayout.add(div);
 
             add(new PageHeader(getTitleText()), mainLayout);
         }
@@ -62,6 +63,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
             if (serverListData.size() == 0) {
                 Div div = new Div(new Text(getTranslation("dashboard.noserver")));
                 div.getStyle().set("color", "var(--lumo-error-text-color)");
+                div.setWidthFull();
                 mainLayout.add(div);
             } else {
                 DashboardServerListLayout dashboardServerListLayout = new DashboardServerListLayout(serverListData);
@@ -75,7 +77,9 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                     .set("margin-bottom", "-8px");
 
             mainLayout.add(hr);
-            mainLayout.add(new IconLabel(VaadinIcon.WARNING.create(), getTranslation("dashboard.admin")));
+            IconLabel iconLabel = new IconLabel(VaadinIcon.WARNING.create(), getTranslation("dashboard.admin"));
+            iconLabel.setWidthFull();
+            mainLayout.add(iconLabel);
 
             HtmlText htmlText = new HtmlText(getTranslation("dashboard.desc"));
             add(new PageHeader(getTitleText(), htmlText), mainLayout);

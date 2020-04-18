@@ -1,6 +1,8 @@
 package com.gmail.leonard.spring.Backend.CommandList;
 
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -8,6 +10,7 @@ import java.util.concurrent.ExecutionException;
 
 public class CommandListContainer {
 
+    final static Logger LOGGER = LoggerFactory.getLogger(CommandListContainer.class);
     private static CommandListContainer ourInstance = new CommandListContainer();
     private CopyOnWriteArrayList<CommandListCategory> categories = new CopyOnWriteArrayList<>();
 
@@ -57,7 +60,7 @@ public class CommandListContainer {
 
     private void loadIfEmpty() {
         if (categories.size() == 0) {
-            System.out.println("Update command list...");
+            LOGGER.info("Updating command list");
             WebComClient.getInstance().updateCommandList().join();
         }
     }

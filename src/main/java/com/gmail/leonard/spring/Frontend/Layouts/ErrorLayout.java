@@ -19,8 +19,6 @@ public class ErrorLayout extends PageLayout {
 
     public ErrorLayout(SessionData sessionData, UIData uiData, String typeString) {
         super(sessionData, uiData);
-
-        setWidthFull();
         VerticalLayout mainContent = new VerticalLayout();
 
         mainContent.addClassName(Styles.APP_WIDTH);

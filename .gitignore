@@ -4,7 +4,6 @@
 .mtj.tmp/
 *.jar
 *.war
-*.war
 *.zip
 *.tar.gz
 *.rar
@@ -22,9 +21,9 @@ modules.xml
 .idea/libraries
 .build
 .config
+*.p12
 *.iml
 *.sql
-*.log
 /node/
 /node_modules/
 /target/

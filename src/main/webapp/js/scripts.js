@@ -7,10 +7,10 @@ function verticalBarSwitch() {
         var element = elements[i];
         if (element.classList.contains(classUse)) {
             element.classList.remove(classUse);
-            if (i == 0) toggleElement.setAttribute("theme", "icon");
+            if (i === 0) toggleElement.setAttribute("theme", "icon");
         } else {
             element.classList.add(classUse);
-            if (i == 0) toggleElement.setAttribute("theme", "icon primary");
+            if (i === 0) toggleElement.setAttribute("theme", "icon primary");
         }
     }
 }
@@ -22,7 +22,7 @@ function verticalBarHide() {
         var element = elements[i];
         if (element.classList.contains(classUse)) {
             element.classList.remove(classUse);
-            if (i == 0) toggleElement.setAttribute("theme", "icon");
+            if (i === 0) toggleElement.setAttribute("theme", "icon");
         }
     }
 }

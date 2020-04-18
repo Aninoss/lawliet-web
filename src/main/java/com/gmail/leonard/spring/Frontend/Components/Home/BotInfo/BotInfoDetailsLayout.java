@@ -13,7 +13,8 @@ import com.vaadin.flow.server.VaadinServletService;
 import com.vaadin.flow.server.VaadinSession;
 
 public class BotInfoDetailsLayout extends VerticalLayout {
-    public BotInfoDetailsLayout() {
+
+    public BotInfoDetailsLayout(UIData uiData) {
         setId("bot-info-details");
         addClassNames(Styles.FLEX_NOTPC_SWITCH_ROW, "size-small-fullwidth");
         setPadding(true);
@@ -27,16 +28,17 @@ public class BotInfoDetailsLayout extends VerticalLayout {
         icon.setId("bot-info-details-icon");
 
         //Title
-        Div title = new Div(new Text(getTranslation("bot.name")));
+        H1 title = new H1(getTranslation("bot.name"));
         title.getStyle()
                 .set("font-size", "150%")
                 .set("font-weight", "bold")
-                .set("margin-top", "-12px");
+                .set("margin-top", "-8px")
+                .set("margin-bottom", "5px");
         title.addClassName("bot-info-details-width");
         title.setWidthFull();
 
         //Description
-        Div description = new Div(new Text(getTranslation("bot.desc")));
+        Div description = new Div(new Text(getTranslation(uiData.isNSFWDisabled() ? "bot.desc.nonsfw" : "bot.desc")));
         description.getStyle().set("font-size", "80%");
         description.addClassNames("bot-info-details-width", "size-small-fullwidth");
 
@@ -65,4 +67,5 @@ public class BotInfoDetailsLayout extends VerticalLayout {
 
         add(div, notIconElements);
     }
+
 }

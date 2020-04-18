@@ -10,6 +10,8 @@ import com.gmail.leonard.spring.Frontend.Views.DiscordLogin;
 import com.gmail.leonard.spring.Frontend.Views.HomeView;
 import com.vaadin.flow.server.*;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -21,12 +23,15 @@ import java.util.Optional;
 @VaadinSessionScope
 public class SessionData {
 
+    final static Logger LOGGER = LoggerFactory.getLogger(SessionData.class);
+
     private OAuthBuilder builder;
-    private String id, username, avatarId, discriminator;
+    private final String id;
+    private String username, avatarId, discriminator;
     private long userId;
     private boolean loggedIn;
     private Class<? extends PageLayout> currentTarget = HomeView.class;
-    private ServerListData serverListData = new ServerListData();
+    private final ServerListData serverListData = new ServerListData();
 
     public static HashMap<Long, ArrayList<SessionData>> userCache = new HashMap<>();
 
@@ -47,7 +52,7 @@ public class SessionData {
                     .setScopes(new String[]{"identify"})
                     .setRedirectURI(getCurrentDomain() + PageLayout.getRouteStatic(DiscordLogin.class));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("Error while trying to log in user", e);
         }
     }
 

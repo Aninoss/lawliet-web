@@ -9,14 +9,18 @@ import com.gmail.leonard.spring.Backend.WebCommunicationClient.Events.*;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.URISyntaxException;
+import java.nio.channels.NotYetConnectedException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 public class WebComClient {
 
-    private static WebComClient instance = new WebComClient();
+    private static final WebComClient instance = new WebComClient();
     public static WebComClient getInstance() { return instance; }
 
     private static final String EVENT_COMMANDLIST = "command_list";
@@ -27,7 +31,8 @@ public class WebComClient {
     private static final String EVENT_DONATEBOT_IO = "donatebot.io";
     private static final String EVENT_FEEDBACK = "feedback";
 
-    private HashMap<String, TransferCache> transferCaches = new HashMap<>();
+    final static Logger LOGGER = LoggerFactory.getLogger(WebComClient.class);
+    private final HashMap<String, TransferCache> transferCaches = new HashMap<>();
 
     private boolean started = false;
     private Socket socket;
@@ -49,17 +54,41 @@ public class WebComClient {
                 .forEach(transferCache -> transferCaches.put(transferCache.getEvent(), transferCache));
     }
 
+    private synchronized void blockWhileDisconnected() {
+        if (!socket.connected()) {
+            try {
+                while (!socket.connected()) {
+                    Thread.sleep(100);
+                }
+            } catch (InterruptedException e) {
+                LOGGER.error("Interrupted", e);
+            }
+        }
+    }
+
+    private <T> CompletableFuture<T> sendSecure(String event, Class<T> c) {
+        return sendSecure(event, null, c);
+    }
+
+    private <T> CompletableFuture<T> sendSecure(String event, JSONObject jsonObject, Class<T> c) {
+        blockWhileDisconnected();
+        return send(event, jsonObject, c);
+    }
+
     private <T> CompletableFuture<T> send(String event, Class<T> c) {
         return send(event, null, c);
     }
 
     private <T> CompletableFuture<T> send(String event, JSONObject jsonObject, Class<T> c) {
-        CompletableFuture<T> CompletableFuture = transferCaches.get(event).register(jsonObject, c);
+        CompletableFuture<T> completableFuture = transferCaches.get(event).register(jsonObject, c);
 
-        if (jsonObject != null) socket.emit(event, jsonObject.toString());
-        else socket.emit(event);
+        if (socket.connected()) {
+            if (jsonObject != null) socket.emit(event, jsonObject.toString());
+            else socket.emit(event);
+        } else
+            completableFuture.completeExceptionally(new NotYetConnectedException());
 
-        return CompletableFuture;
+        return completableFuture;
     }
 
     public void start(int port) {
@@ -82,9 +111,9 @@ public class WebComClient {
             socket.on(EVENT_FEEDBACK, new OnGenericResponseless(transferCaches.get(EVENT_FEEDBACK)));
 
             socket.connect();
-            System.out.println("The WebCom client has been started!");
+            LOGGER.info("The WebCom client has been started!");
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            LOGGER.error("Could not initialize web com client", e);
         }
     }
 
@@ -120,19 +149,21 @@ public class WebComClient {
     }
 
     public CompletableFuture<Void> sendTopGG(JSONObject jsonObject) {
-        return send(EVENT_TOPGG, jsonObject, Void.class);
+        return sendSecure(EVENT_TOPGG, jsonObject, Void.class);
     }
 
     public CompletableFuture<Void> sendDonatebotIO(JSONObject jsonObject) {
-        return send(EVENT_DONATEBOT_IO, jsonObject, Void.class);
+        return sendSecure(EVENT_DONATEBOT_IO, jsonObject, Void.class);
     }
 
-    public CompletableFuture<Void> sendFeedback(FeedbackBean feedbackBean) {
+    public CompletableFuture<Void> sendFeedback(FeedbackBean feedbackBean, Long serverId) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("cause", feedbackBean.getCause(feedbackBean));
         jsonObject.put("reason", feedbackBean.getReason(feedbackBean));
         if (feedbackBean.getContact(feedbackBean))
             jsonObject.put("username_discriminated", feedbackBean.getUsernameDiscriminated(feedbackBean));
+        if (serverId != null)
+            jsonObject.put("server_id", serverId);
         return send(EVENT_FEEDBACK, jsonObject, Void.class);
     }
 

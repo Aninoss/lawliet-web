@@ -3,7 +3,7 @@ package com.gmail.leonard.spring.Backend.Feedback;
 public class FeedbackBean {
 
     private String cause, reason, usernameDiscriminated;
-    private boolean contact;
+    private boolean contact, serverDetails;
 
     public String getReason(FeedbackBean feedbackBean) {
         return feedbackBean.reason;
@@ -35,6 +35,14 @@ public class FeedbackBean {
 
     public void setUsernameDiscriminated(FeedbackBean feedbackBean, String s) {
         feedbackBean.usernameDiscriminated = s;
+    }
+
+    public Boolean getServerDetails(FeedbackBean feedbackBean) {
+        return feedbackBean.serverDetails;
+    }
+
+    public void setServerDetails(FeedbackBean feedbackBean, Boolean aBoolean) {
+        feedbackBean.serverDetails = aBoolean;
     }
 
 }

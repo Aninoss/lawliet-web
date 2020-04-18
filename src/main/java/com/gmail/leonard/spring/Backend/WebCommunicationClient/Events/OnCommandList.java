@@ -7,10 +7,13 @@ import com.gmail.leonard.spring.Backend.WebCommunicationClient.TransferCache;
 import io.socket.emitter.Emitter;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OnCommandList implements Emitter.Listener {
 
-    private TransferCache transferCache;
+    final static Logger LOGGER = LoggerFactory.getLogger(OnCommandList.class);
+    private final TransferCache transferCache;
 
     public OnCommandList(TransferCache transferCache) {
         this.transferCache = transferCache;
@@ -54,6 +57,6 @@ public class OnCommandList implements Emitter.Listener {
         }
 
         transferCache.complete(CommandListContainer.getInstance(), CommandListContainer.class);
-        System.out.println("Commands ready");
+        LOGGER.info("Commands ready");
     }
 }

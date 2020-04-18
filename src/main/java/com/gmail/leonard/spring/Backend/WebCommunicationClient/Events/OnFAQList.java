@@ -6,10 +6,13 @@ import com.gmail.leonard.spring.Backend.WebCommunicationClient.TransferCache;
 import io.socket.emitter.Emitter;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OnFAQList implements Emitter.Listener {
 
-    private TransferCache transferCache;
+    final static Logger LOGGER = LoggerFactory.getLogger(OnFAQList.class);
+    private final TransferCache transferCache;
 
     public OnFAQList(TransferCache transferCache) {
         this.transferCache = transferCache;
@@ -31,6 +34,6 @@ public class OnFAQList implements Emitter.Listener {
         }
 
         transferCache.complete(FAQListContainer.getInstance(), FAQListContainer.class);
-        System.out.println("FAQ list ready");
+        LOGGER.info("FAQ list ready");
     }
 }

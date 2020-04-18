@@ -21,7 +21,6 @@ public class FAQView extends PageLayout {
 
     public FAQView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         super(sessionData, uiData);
-        setWidthFull();
         VerticalLayout mainContent = new VerticalLayout();
 
         mainContent.addClassName(Styles.APP_WIDTH);

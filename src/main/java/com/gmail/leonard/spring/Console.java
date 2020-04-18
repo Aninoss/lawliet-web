@@ -1,6 +1,10 @@
 package com.gmail.leonard.spring;
 
+import com.gmail.leonard.spring.Backend.CustomThread;
 import com.sun.management.OperatingSystemMXBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,6 +14,7 @@ public class Console {
 
     private static Console instance = new Console();
     private double maxMemory = 0;
+    final static Logger LOGGER = LoggerFactory.getLogger(Console.class);
 
     private Console() {}
 
@@ -18,15 +23,8 @@ public class Console {
     }
 
     public void start() {
-        Thread t1 = new Thread(this::manageConsole);
-        t1.setName("console");
-        t1.setPriority(1);
-        t1.start();
-
-        Thread t3 = new Thread(this::trackMemory);
-        t3.setName("console_memorytracker");
-        t3.setPriority(1);
-        t3.start();
+        new CustomThread(this::manageConsole, "Console", 1).start();
+        new CustomThread(this::trackMemory, "Console MemoryTracker", 1).start();
     }
 
     private void manageConsole() {
@@ -35,8 +33,14 @@ public class Console {
             try {
                 if (br.ready()) {
                     String s = br.readLine();
+                    String command = s;
+                    String arg = "";
                     if (s != null) {
-                        switch (s) {
+                        if (command.contains(" ")) {
+                            command = command.split(" ")[0];
+                            arg = s.substring(command.length() + 1);
+                        }
+                        switch (command) {
                             case "quit":
                                 System.exit(0);
                                 break;
@@ -46,36 +50,44 @@ public class Console {
                                 break;
 
                             case "threads":
-                                StringBuilder sb = new StringBuilder();
-                                for(Thread t: Thread.getAllStackTraces().keySet())
-                                    sb.append(t.getName()).append(", ");
+                                try {
+                                    StringBuilder sb = new StringBuilder();
 
-                                String str = sb.toString();
-                                str = str.substring(0, str.length() - 2);
+                                    for (Thread t : Thread.getAllStackTraces().keySet()) {
+                                        if (arg.isEmpty() || t.getName().matches(arg)) {
+                                            sb.append(t.getName()).append(", ");
+                                        }
+                                    }
 
-                                System.out.println("\n--- THREADS (" + Thread.getAllStackTraces().size() + ") ---");
-                                System.out.println(str + "\n");
+                                    String str = sb.toString();
+                                    if (str.length() >= 2) str = str.substring(0, str.length() - 2);
+
+                                    System.out.println("\n--- THREADS (" + Thread.getAllStackTraces().size() + ") ---");
+                                    System.out.println(str + "\n");
+                                } catch (Throwable e) {
+                                    LOGGER.error("Could not list threads", e);
+                                }
 
                                 break;
                         }
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.error("Error in console");
             }
         }
     }
 
     private void trackMemory() {
-        while(true) {
-            double memoryTotal = Runtime.getRuntime().totalMemory() / (1024.0 * 1024.0);
-            double memoryUsed = memoryTotal - (Runtime.getRuntime().freeMemory() / (1024.0 * 1024.0));
-            maxMemory = Math.max(maxMemory, memoryUsed);
-            try {
+        try {
+            while (true) {
+                double memoryTotal = Runtime.getRuntime().totalMemory() / (1024.0 * 1024.0);
+                double memoryUsed = memoryTotal - (Runtime.getRuntime().freeMemory() / (1024.0 * 1024.0));
+                maxMemory = Math.max(maxMemory, memoryUsed);
                 Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
+        } catch (InterruptedException e) {
+            LOGGER.error("Interrupted", e);
         }
     }
 

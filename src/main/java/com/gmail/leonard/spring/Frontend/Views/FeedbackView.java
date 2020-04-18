@@ -23,13 +23,19 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.concurrent.ExecutionException;
 
 @Route(value = "feedback", layout = MainLayout.class)
 @NoLiteAccess
-public class FeedbackView extends PageLayout {
+public class FeedbackView extends PageLayout implements HasUrlParameter<Long> {
+
+    final static Logger LOGGER = LoggerFactory.getLogger(FeedbackView.class);
+
+    private long serverId = 0;
 
     public FeedbackView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         super(sessionData, uiData);
@@ -40,7 +46,6 @@ public class FeedbackView extends PageLayout {
         FeedbackBean feedbackBean = new FeedbackBean();
         Binder<FeedbackBean> binder = new Binder<>(FeedbackBean.class);
 
-        setWidthFull();
         VerticalLayout mainContent = new VerticalLayout();
 
         mainContent.addClassName(Styles.APP_WIDTH);
@@ -50,59 +55,67 @@ public class FeedbackView extends PageLayout {
 
 
         /* Cause */
-        RadioButtonGroup<String> radioGroup = new RadioButtonGroup<>();
-        radioGroup.setLabel(getTranslation("feedback.radiolabel"));
-        radioGroup.setItems(options);
-        radioGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
-        radioGroup.setValue(options[0]);
+        RadioButtonGroup<String> rbCause = new RadioButtonGroup<>();
+        rbCause.setLabel(getTranslation("feedback.radiolabel"));
+        rbCause.setItems(options);
+        rbCause.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+        rbCause.setValue(options[0]);
 
-        binder.forField(radioGroup)
+        binder.forField(rbCause)
                 .bind(feedbackBean::getCause, feedbackBean::setCause);
 
 
         /* Reason */
-        TextArea textArea = new TextArea(getTranslation("feedback.textarea"));
-        textArea.setWidthFull();
-        textArea.setHeight("200px");
+        TextArea txReason = new TextArea(getTranslation("feedback.textarea"));
+        txReason.setWidthFull();
+        txReason.setHeight("200px");
 
-        binder.forField(textArea)
+        binder.forField(txReason)
                 .withValidator(
-                        reason -> reason.length() > 0 || !radioGroup.getValue().equals(options[options.length - 1]),
+                        reason -> reason.length() > 0 || !rbCause.getValue().equals(options[options.length - 1]),
                         getTranslation("feedback.textarea.invalid")
                 )
                 .bind(feedbackBean::getReason, feedbackBean::setReason);
 
 
         /* Contact */
-        Checkbox checkbox = new Checkbox(getTranslation("feedback.username"));
-        checkbox.setWidthFull();
+        Checkbox cbUsername = new Checkbox(getTranslation("feedback.username"));
+        cbUsername.setWidthFull();
 
-        binder.forField(checkbox)
+        binder.forField(cbUsername)
                 .bind(feedbackBean::getContact, feedbackBean::setContact);
 
 
         /* Username */
-        TextField textField = new TextField();
-        textField.setPlaceholder(getTranslation("feedback.username.pre"));
+        TextField txUsername = new TextField();
+        txUsername.setPlaceholder(getTranslation("feedback.username.pre"));
         if (sessionData.isLoggedIn())
-            textField.setValue(sessionData.getUserName().get() + "#" + sessionData.getDiscriminator().get());
-        textField.setWidth("300px");
-        textField.getStyle().set("margin-top", "0");
-        textField.setEnabled(false);
+            txUsername.setValue(sessionData.getUserName().get() + "#" + sessionData.getDiscriminator().get());
+        txUsername.setWidth("300px");
+        txUsername.getStyle().set("margin-top", "0");
+        txUsername.setEnabled(false);
 
-        binder.forField(textField)
+        binder.forField(txUsername)
                 .withValidator(
-                        username -> !checkbox.getValue() || username.matches(".+#\\d{4}"),
+                        username -> !cbUsername.getValue() || username.matches(".+#\\d{4}"),
                         getTranslation("feedback.username.invalid")
                 )
                 .bind(feedbackBean::getUsernameDiscriminated, feedbackBean::setUsernameDiscriminated);
-        checkbox.addValueChangeListener(event -> textField.setEnabled(event.getValue()));
+        cbUsername.addValueChangeListener(event -> txUsername.setEnabled(event.getValue()));
+
+
+        /* Send Server Details */
+        Checkbox cbServerDetails = new Checkbox(getTranslation("feedback.serverDetails"), true);
+        cbServerDetails.setWidthFull();
+
+        binder.forField(cbServerDetails)
+                .bind(feedbackBean::getServerDetails, feedbackBean::setServerDetails);
 
 
         /* Submit */
-        Button submit = new Button(getTranslation("feedback.button"));
-        submit.addThemeName(ButtonVariant.LUMO_PRIMARY.getVariantName());
-        submit.addClickListener(event -> {
+        Button btSubmit = new Button(getTranslation("feedback.button"));
+        btSubmit.addThemeName(ButtonVariant.LUMO_PRIMARY.getVariantName());
+        btSubmit.addClickListener(event -> {
             try {
                 binder.writeBean(feedbackBean);
                 onSubmitPress(mainContent, feedbackBean);
@@ -111,21 +124,30 @@ public class FeedbackView extends PageLayout {
             }
         });
 
-        mainContent.add(radioGroup, textArea, checkbox, textField, new Hr(), submit);
+        mainContent.add(rbCause, txReason, cbUsername, txUsername, new Hr(), cbServerDetails, btSubmit);
         add(mainContent);
     }
 
     private void onSubmitPress(VerticalLayout mainContent, FeedbackBean feedbackBean) {
         mainContent.setEnabled(false);
         try {
-            WebComClient.getInstance().sendFeedback(feedbackBean).get();
+            WebComClient.getInstance().sendFeedback(feedbackBean, feedbackBean.getServerDetails(feedbackBean) ? serverId : null).get();
             CustomNotification.showSuccess(getTranslation("feedback.confirm"));
             mainContent.getUI().get().navigate(HomeView.class);
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (ExecutionException e) {
             CustomNotification.showError(getTranslation("feedback.error"));
-            e.printStackTrace();
+            LOGGER.error("Error while submitting feedback form", e);
+            mainContent.setEnabled(true);
+        } catch (InterruptedException e) {
+            CustomNotification.showError(getTranslation("feedback.error"));
+            LOGGER.error("Interrupted");
             mainContent.setEnabled(true);
         }
+    }
+
+    @Override
+    public void setParameter(BeforeEvent beforeEvent, Long serverId) {
+        this.serverId = serverId;
     }
 
 }

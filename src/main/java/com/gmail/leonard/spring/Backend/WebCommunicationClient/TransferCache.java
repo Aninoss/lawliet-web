@@ -1,8 +1,12 @@
 package com.gmail.leonard.spring.Backend.WebCommunicationClient;
 
 import com.github.appreciated.css.grid.sizes.Int;
+import com.gmail.leonard.spring.Backend.CustomThread;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
@@ -11,8 +15,11 @@ import java.util.concurrent.TimeoutException;
 
 public class TransferCache {
 
-    private String event, key = null;
-    private HashMap<Integer, CompletableFuture<?>> futuresMap = new HashMap<>();
+    final static Logger LOGGER = LoggerFactory.getLogger(TransferCache.class);
+
+    private final String event;
+    private String key = null;
+    private final HashMap<Integer, CompletableFuture<?>> futuresMap = new HashMap<>();
     private ArrayList<CompletableFuture<?>> futuresList = new ArrayList<>();
 
     public TransferCache(String event) {
@@ -41,7 +48,7 @@ public class TransferCache {
     private <T> void startTimer(Integer dataKey, CompletableFuture<T> future, Class<T> c) {
         final int SECONDS = 5;
 
-        Thread t = new Thread(() -> {
+        new CustomThread(() -> {
             try {
                 for (int i = 0; i < SECONDS; i++) {
                     Thread.sleep(1000);
@@ -52,12 +59,9 @@ public class TransferCache {
                 if (hasKey()) futuresMap.remove(dataKey);
                 else futuresList.remove(future);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                LOGGER.error("Interrupted", e);
             }
-        });
-        t.setPriority(1);
-        t.setName("CustomCompletableFuture Timeout");
-        t.start();
+        }, "CustomCompletableFuture Timeout", 1).start();
     }
 
     public <T> void complete(@NonNull JSONObject data, T value, Class<T> c) {

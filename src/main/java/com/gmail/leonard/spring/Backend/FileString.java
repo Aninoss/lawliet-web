@@ -7,8 +7,6 @@ public class FileString {
     private String content = "";
 
     public FileString(File file) throws IOException {
-        System.out.println(file.exists());
-
         FileReader fr = new FileReader(file);
         BufferedReader br = new BufferedReader(fr);
 

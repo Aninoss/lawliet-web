@@ -25,6 +25,8 @@ import com.vaadin.flow.server.PageConfigurator;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @CssImport("./styles/styles.css")
@@ -33,6 +35,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Theme(value = Lumo.class, variant = Lumo.DARK)
 @BodySize(width = "100%", height = "100%")
 public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterObserver, PageConfigurator, HasErrorParameter<Exception>, BeforeLeaveObserver {
+
+    final static Logger LOGGER = LoggerFactory.getLogger(MainLayout.class);
 
     private SessionData sessionData;
     private UIData uiData;
@@ -117,12 +121,11 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
         settings.addMetaTag("og:description", getTranslation("bot.desc"));
         settings.addMetaTag("og:image", "http://lawlietbot.xyz/styles/img/bot_icon.png");
         settings.addMetaTag("msapplication-config", "/browserconfig.xml");
-        settings.getLoadingIndicatorConfiguration().setFirstDelay(150);
     }
 
     @Override
     public int setErrorParameter(BeforeEnterEvent beforeEnterEvent, ErrorParameter<Exception> errorParameter) {
-        errorParameter.getException().printStackTrace();
+        LOGGER.error("Error in page initialization", errorParameter.getException());
         beforeEnterEvent.rerouteTo(ExceptionView.class);
         return 500;
     }

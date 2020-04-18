@@ -9,7 +9,7 @@ import com.vaadin.flow.component.polymertemplate.Id;
 
 public class BotInfoLayout extends Div {
 
-    public BotInfoLayout() {
+    public BotInfoLayout(UIData uiData) {
         setId("bot-info");
         addClassName("tablet-switch");
         setWidthFull();
@@ -18,7 +18,7 @@ public class BotInfoLayout extends Div {
         parts.addClassNames(Styles.APP_WIDTH, Styles.FLEX_NOTPC_SWITCH_COLUMN_REVERSE);
 
         parts.add(new BotInfoVideoLayout());
-        parts.add(new BotInfoDetailsLayout());
+        parts.add(new BotInfoDetailsLayout(uiData));
 
         add(new HeaderDummy(), parts);
     }

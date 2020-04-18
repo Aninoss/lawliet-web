@@ -11,12 +11,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 public class FooterArea extends Footer {
 
     public FooterArea() {
-        setWidthFull();
         addClassName(Styles.FADE_IN);
+        setWidth("100vw");
+        setHeight("auto");
         getStyle().
                 set("background-color", "var(--lumo-shade)").
-                set("margin-top", "48px").
-                set("height", "auto");
+                set("margin-top", "48px");
 
         Div mainContent = new Div();
         mainContent.addClassName(Styles.APP_WIDTH);

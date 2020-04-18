@@ -2,12 +2,15 @@ package com.gmail.leonard.spring.Backend.FAQ;
 
 import com.gmail.leonard.spring.Backend.LanguageString;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
 public class FAQListContainer {
 
+    final static Logger LOGGER = LoggerFactory.getLogger(FAQListContainer.class);
     private static FAQListContainer ourInstance = new FAQListContainer();
     private ArrayList<FAQListSlot> entries = new ArrayList<>();
 
@@ -33,7 +36,7 @@ public class FAQListContainer {
 
     private void loadIfEmpty() {
         if (entries.size() == 0) {
-            System.out.println("Update faq list...");
+            LOGGER.info("Updating FAQ list");
             WebComClient.getInstance().updateFAQList().join();
         }
     }
