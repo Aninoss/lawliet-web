@@ -40,7 +40,7 @@ public class HeaderComponent extends Header {
         showMenu.getElement().setAttribute("onclick", "verticalBarSwitch()");
         showMenu.addClassName(Styles.VISIBLE_MOBILE);
         showMenu.setId("menu-toggle");
-        showMenu.setIcon(new Icon(VaadinIcon.MENU));
+        showMenu.setIcon(VaadinIcon.MENU.create());
         content.add(showMenu);
 
         //Logo

@@ -19,12 +19,13 @@ public class CommandCategoryLayout extends VerticalLayout {
 
     private static final int PX_PER_SLOT = 66, PX_ABSOLUTE = 4;
 
-    private CommandListCategory commandListCategory;
-    private HashMap<String, Details> commandFields = new HashMap<>();
+    private final CommandListCategory commandListCategory;
+    private final HashMap<String, Details> commandFields = new HashMap<>();
     private AccordionPanel accordionPanel;
-    private boolean showNsfw, build = false;
+    private final boolean showNsfw;
+    private boolean build = false;
     private String lastSearchTerm = "";
-    private Div loadingDiv;
+    private final Div loadingDiv;
 
     public CommandCategoryLayout(CommandListCategory commandListCategory, boolean showNsfw) {
         this.commandListCategory = commandListCategory;
@@ -56,7 +57,7 @@ public class CommandCategoryLayout extends VerticalLayout {
 
 
             HorizontalLayout titleArea = new HorizontalLayout();
-            H5 title = new H5(slot.getEmoji() + "⠀L." + slot.getTrigger());
+            H5 title = new H5("L." + slot.getTrigger());
             title.getStyle().set("margin-top", "0px");
             titleArea.setAlignItems(Alignment.CENTER);
             titleArea.setPadding(false);
@@ -66,6 +67,7 @@ public class CommandCategoryLayout extends VerticalLayout {
             if (slot.isNsfw()) titleArea.add(new CommandIcon(CommandIcon.Type.NSFW, true));
             if (slot.isRequiresUserPermissions()) titleArea.add(new CommandIcon(CommandIcon.Type.PERMISSIONS, true));
             if (slot.isCanBeTracked()) titleArea.add(new CommandIcon(CommandIcon.Type.TRACKER, true));
+            if (slot.isPatreonOnly()) titleArea.add(new CommandIcon(CommandIcon.Type.PATREON, true));
 
             titleContent.add(titleArea, new Text(slot.getLangDescShort().get(locale)));
 

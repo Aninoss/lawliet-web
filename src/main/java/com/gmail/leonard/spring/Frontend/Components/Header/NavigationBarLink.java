@@ -3,9 +3,13 @@ package com.gmail.leonard.spring.Frontend.Components.Header;
 import com.gmail.leonard.spring.Backend.Language.PageTitleGen;
 import com.gmail.leonard.spring.Frontend.Layouts.PageLayout;
 import com.gmail.leonard.spring.NoLiteAccess;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.router.RouterLink;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
 
 public class NavigationBarLink {
@@ -14,13 +18,8 @@ public class NavigationBarLink {
     private RouterLink routerLink;
     private boolean hiddenInLiteVersion = false;
 
-    public NavigationBarLink(String externalLink, String id, boolean hiddenInLiteVersion) {
-        this(externalLink, id);
-        this.hiddenInLiteVersion = hiddenInLiteVersion;
-    }
-
     public NavigationBarLink(String externalLink, String id) {
-        anchor = new Anchor(externalLink, PageTitleGen.getTitle(id));
+        anchor = new Anchor(externalLink, new Text(PageTitleGen.getTitle(id)));
         anchor.setTarget("_blank");
         anchor.setWidthFull();
     }

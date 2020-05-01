@@ -5,13 +5,13 @@ import com.gmail.leonard.spring.Backend.LanguageString;
 public class CommandListSlot {
 
     private String trigger, emoji;
-    private LanguageString langTitle = new LanguageString();
-    private LanguageString langUsage = new LanguageString();
-    private LanguageString langExamples = new LanguageString();
-    private LanguageString langDescShort = new LanguageString();
-    private LanguageString langDescLong = new LanguageString();
-    private LanguageString langUserPermissions = new LanguageString();
-    private boolean nsfw = false, requiresUserPermissions = false, canBeTracked = false;
+    private final LanguageString langTitle = new LanguageString();
+    private final LanguageString langUsage = new LanguageString();
+    private final LanguageString langExamples = new LanguageString();
+    private final LanguageString langDescShort = new LanguageString();
+    private final LanguageString langDescLong = new LanguageString();
+    private final LanguageString langUserPermissions = new LanguageString();
+    private boolean nsfw = false, requiresUserPermissions = false, canBeTracked = false, patreonOnly = false;
 
     public CommandListSlot() {}
 
@@ -74,6 +74,10 @@ public class CommandListSlot {
     public void setCanBeTracked(boolean canBeTracked) {
         this.canBeTracked = canBeTracked;
     }
+
+    public boolean isPatreonOnly() { return patreonOnly; }
+
+    public void setPatreonOnly(boolean patreonOnly) { this.patreonOnly = patreonOnly; }
 
     public LanguageString getLangUserPermissions() {
         return langUserPermissions;

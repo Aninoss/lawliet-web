@@ -8,11 +8,15 @@ import com.gmail.leonard.spring.Frontend.Views.FAQView;
 import com.gmail.leonard.spring.Frontend.Views.HomeView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.server.VaadinServletService;
+import com.vaadin.flow.server.VaadinSession;
 
 public class NavigationBar extends Tabs implements AfterNavigationObserver {
 
@@ -25,7 +29,8 @@ public class NavigationBar extends Tabs implements AfterNavigationObserver {
                 new NavigationBarLink(FAQView.class),
                 new NavigationBarLink(DashboardView.class),
                 new NavigationBarLink(ExternalLinks.BOT_INVITE_URL, "invite"),
-                new NavigationBarLink(ExternalLinks.SERVER_INVITE_URL, "server")
+                new NavigationBarLink(ExternalLinks.SERVER_INVITE_URL, "server"),
+                new NavigationBarLink(ExternalLinks.PATREON_PAGE, "patreon")
         };
 
         for(NavigationBarLink navigationBarLink: navigationBarLinks) {

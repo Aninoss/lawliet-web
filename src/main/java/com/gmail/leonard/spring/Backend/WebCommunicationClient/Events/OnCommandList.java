@@ -49,6 +49,7 @@ public class OnCommandList implements Emitter.Listener {
                 commandListSlot.setNsfw(commandJSON.getBoolean("nsfw"));
                 commandListSlot.setRequiresUserPermissions(commandJSON.getBoolean("requires_user_permissions"));
                 commandListSlot.setCanBeTracked(commandJSON.getBoolean("can_be_tracked"));
+                commandListSlot.setPatreonOnly(commandJSON.getBoolean("patron_only"));
 
                 commandListCategory.add(commandListSlot);
             }

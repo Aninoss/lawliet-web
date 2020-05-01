@@ -24,7 +24,8 @@ public class FooterArea extends Footer {
         String[][] links = {
                 {"footer.upvote", ExternalLinks.UPVOTE_URL},
                 {"footer.invite", ExternalLinks.BOT_INVITE_URL},
-                {"footer.server", ExternalLinks.SERVER_INVITE_URL}
+                {"footer.server", ExternalLinks.SERVER_INVITE_URL},
+                {"footer.patreon", ExternalLinks.PATREON_PAGE}
         };
 
         Div buttonLayout = new Div();

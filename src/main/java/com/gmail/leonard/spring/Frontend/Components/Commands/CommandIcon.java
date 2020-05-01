@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 
 public class CommandIcon extends Div {
 
-    public enum Type { PERMISSIONS, NSFW, TRACKER };
+    public enum Type { PERMISSIONS, NSFW, TRACKER, PATREON };
 
     public CommandIcon(@NotNull Type type) {
         this(type, false);
@@ -31,6 +31,10 @@ public class CommandIcon extends Div {
 
             case TRACKER:
                 fileStr = "icon_tracker.png";
+                break;
+
+            case PATREON:
+                fileStr = "icon_patreon.png";
                 break;
 
             default:
@@ -54,7 +58,8 @@ public class CommandIcon extends Div {
 
         getStyle()
                 .set("margin-top", "2px")
-                .set("margin-bottom", "2px");
+                .set("margin-bottom", "2px")
+                .set("margin-left", "8px");
     }
 
 }

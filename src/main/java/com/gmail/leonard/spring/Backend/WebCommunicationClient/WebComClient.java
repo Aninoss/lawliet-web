@@ -1,6 +1,7 @@
 package com.gmail.leonard.spring.Backend.WebCommunicationClient;
 
 import com.gmail.leonard.spring.Backend.CommandList.CommandListContainer;
+import com.gmail.leonard.spring.Backend.CustomThread;
 import com.gmail.leonard.spring.Backend.FAQ.FAQListContainer;
 import com.gmail.leonard.spring.Backend.Feedback.FeedbackBean;
 import com.gmail.leonard.spring.Backend.UserData.ServerListData;
@@ -16,6 +17,7 @@ import java.net.URISyntaxException;
 import java.nio.channels.NotYetConnectedException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
 public class WebComClient {
@@ -30,6 +32,7 @@ public class WebComClient {
     private static final String EVENT_TOPGG = "topgg";
     private static final String EVENT_DONATEBOT_IO = "donatebot.io";
     private static final String EVENT_FEEDBACK = "feedback";
+    private static final String EVENT_INVITE = "invite";
 
     final static Logger LOGGER = LoggerFactory.getLogger(WebComClient.class);
     private final HashMap<String, TransferCache> transferCaches = new HashMap<>();
@@ -45,7 +48,8 @@ public class WebComClient {
                 new TransferCache(EVENT_SERVERMEMBERS, "user_id"),
                 new TransferCache(EVENT_TOPGG),
                 new TransferCache(EVENT_DONATEBOT_IO),
-                new TransferCache(EVENT_FEEDBACK)
+                new TransferCache(EVENT_FEEDBACK),
+                new TransferCache(EVENT_INVITE)
         );
     }
 
@@ -109,6 +113,7 @@ public class WebComClient {
             socket.on(EVENT_TOPGG, new OnGenericResponseless(transferCaches.get(EVENT_TOPGG)));
             socket.on(EVENT_DONATEBOT_IO, new OnGenericResponseless(transferCaches.get(EVENT_DONATEBOT_IO)));
             socket.on(EVENT_FEEDBACK, new OnGenericResponseless(transferCaches.get(EVENT_FEEDBACK)));
+            socket.on(EVENT_INVITE, new OnGenericResponseless(transferCaches.get(EVENT_INVITE)));
 
             socket.connect();
             LOGGER.info("The WebCom client has been started!");
@@ -165,6 +170,18 @@ public class WebComClient {
         if (serverId != null)
             jsonObject.put("server_id", serverId);
         return send(EVENT_FEEDBACK, jsonObject, Void.class);
+    }
+
+    public void sendInvite(String type) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", type.toLowerCase());
+        new CustomThread(() -> {
+            try {
+                sendSecure(EVENT_INVITE, jsonObject, Void.class).get();
+            } catch (InterruptedException | ExecutionException e) {
+                LOGGER.error("Exception while sending invite data", e);
+            }
+        }, "transfer_invite_data").start();
     }
 
 }

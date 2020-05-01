@@ -2,20 +2,39 @@ package com.gmail.leonard.spring;
 
 import com.gmail.leonard.spring.Backend.SecretManager;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.vaadin.flow.server.RequestHandler;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinSession;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class CustomRequestHandler implements RequestHandler {
 
     final static Logger LOGGER = LoggerFactory.getLogger(CustomRequestHandler.class);
+
+    private final LoadingCache<String, Boolean> inviteIPAdresses = CacheBuilder.newBuilder()
+            .expireAfterWrite(1, TimeUnit.HOURS)
+            .build(
+                    new CacheLoader<String, Boolean>() {
+                        @Override
+                        public Boolean load(@NonNull String ip) throws Exception {
+                            return true;
+                        }
+                    }
+            );
 
     @Override
     public boolean handleRequest(VaadinSession session, VaadinRequest request, VaadinResponse response) throws IOException {
@@ -42,14 +61,27 @@ public class CustomRequestHandler implements RequestHandler {
         response.setHeader("Access-Control-Allow-Origin", "https://top.gg");
         response.setHeader("X-XSS-Protection", "1; mode=block");
 
-        if (request.getPathInfo().equalsIgnoreCase("/invite")) return handleInvite(response);
+        if (request.getPathInfo().equalsIgnoreCase("/invite")) return handleInvite(request, response, request.getParameterMap());
 
         return false;
     }
 
-    private boolean handleInvite(VaadinResponse response) {
+    private boolean handleInvite(VaadinRequest request, VaadinResponse response, Map<String, String[]> params) {
         response.setHeader("Location", ExternalLinks.BOT_INVITE_URL_EXT);
         response.setStatus(301);
+
+        if (params.size() > 0) {
+            String ip = request.getRemoteAddr();
+            if (!inviteIPAdresses.asMap().containsKey(ip)) {
+                String type = new ArrayList<>(params.keySet()).get(0);
+                if (type.length() > 0) WebComClient.getInstance().sendInvite(type);
+                try {
+                    inviteIPAdresses.get(ip);
+                } catch (ExecutionException e) {
+                    LOGGER.error("Unknown exception", e);
+                }
+            }
+        }
 
         return true;
     }

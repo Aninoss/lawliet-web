@@ -43,7 +43,9 @@ public class CommandList extends VerticalLayout {
         for(CommandIcon.Type type: CommandIcon.Type.values()) {
             if (type != CommandIcon.Type.NSFW || !uiData.isNSFWDisabled()) {
                 CommandIcon commandIcon = new CommandIcon(type);
-                commandIcon.getStyle().set("margin-right", "8px");
+                commandIcon.getStyle()
+                        .set("margin-left", "0")
+                        .set("margin-right", "8px");
 
                 Div equalSignLabel = new Div(new Text("="));
                 equalSignLabel.getStyle().set("margin-right", "8px");
@@ -54,6 +56,7 @@ public class CommandList extends VerticalLayout {
                 info.setSpacing(false);
                 info.setAlignItems(Alignment.CENTER);
                 info.getStyle().set("margin-top", "4px");
+                info.setWidthFull();
                 notesLayout.add(info);
             }
         }
