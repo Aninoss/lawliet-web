@@ -11,21 +11,13 @@
 
     transform: translateY(8px);
 
-    -webkit-box-shadow: 0 0 0 0 rgba(0,0,0,0);
-    -moz-box-shadow: 0 0 0 0 rgba(0,0,0,0);
-    box-shadow: 0 0 0 0 rgba(0,0,0,0);
-
-    transition-property: background-color, -webkit-box-shadow, -moz-box-shadow, box-shadow, transform;
+    transition-property: background-color, transform;
     transition-duration: 150ms;
 }
 
 .scroll-class#header-out {
     transform: translateY(0px);
-
     background-color: var(--lumo-shade);
-    -webkit-box-shadow: 0 2px 6px 0 rgba(0,0,0,0.3);
-    -moz-box-shadow: 0 2px 6px 0 rgba(0,0,0,0.3);
-    box-shadow: 0 2px 6px 0 rgba(0,0,0,0.3);
 }
 
 #header-content {

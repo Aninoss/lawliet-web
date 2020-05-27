@@ -49,6 +49,7 @@ public class FeedbackView extends PageLayout implements HasUrlParameter<Long> {
         VerticalLayout mainContent = new VerticalLayout();
 
         mainContent.addClassName(Styles.APP_WIDTH);
+        mainContent.getStyle().set("margin-top", "-16px");
         mainContent.setPadding(true);
 
         String[] options = getTranslation("feedback.options").split("\n");

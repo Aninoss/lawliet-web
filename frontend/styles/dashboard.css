@@ -37,7 +37,7 @@
 }
 
 #dashboard-info {
-    margin-top: 22px;
+    margin-top: 38px;
     margin-bottom: -18px;
 }
 
@@ -47,7 +47,7 @@
 @media (max-width: 1000px) {
 
     #dashboard-info {
-        margin-top: 20px;
+        margin-top: 38px;
         margin-bottom: -28px;
     }
 

@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @CssImport("./styles/styles.css")
+@CssImport("./styles/styles-reversed.css")
 @CssImport("./styles/bootstrap.css")
 @CssImport("./styles/main.css")
 @Theme(value = Lumo.class, variant = Lumo.DARK)
@@ -49,7 +50,8 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
         this.uiData = uiData;
 
         if(UI.getCurrent() != null)
-            UI.getCurrent().getElement().getStyle().set("width", "100%");
+            UI.getCurrent().getElement().getStyle().set("width", "100%")
+                    .set("background-color", "transparent");
 
         setMinHeight("100vh");
         setId("main-page");
