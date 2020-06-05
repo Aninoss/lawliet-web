@@ -18,10 +18,11 @@ public class TranslationProvider implements I18NProvider {
 
     public static final String BUNDLE_PREFIX = "translate";
 
-    public final Locale LOCALE_DE = new Locale("de");
     public final Locale LOCALE_EN = new Locale("en");
+    public final Locale LOCALE_DE = new Locale("de");
+    //public final Locale LOCALE_FR = new Locale("fr");
 
-    private List<Locale> locales = Collections
+    private final List<Locale> locales = Collections
             .unmodifiableList(Arrays.asList(LOCALE_EN, LOCALE_DE));
 
     private static final LoadingCache<Locale, ResourceBundle> bundleCache = CacheBuilder

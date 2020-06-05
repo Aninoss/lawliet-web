@@ -24,7 +24,7 @@ public class PageLayout extends Main implements HasDynamicTitle {
         this.route = this.getClass().getAnnotation(Route.class);
         this.uiData = uiData;
         this.sessionData = sessionData;
-        this.setWidth("100vw");
+        //this.setWidth("100vw");
     }
 
     public String getRoute() { return route.value(); }

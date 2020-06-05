@@ -16,6 +16,7 @@ public class BotProsLayout extends VerticalLayout {
         addClassName(Styles.APP_WIDTH);
 
         H2 title = new H2(getTranslation("bot.card.title"));
+        title.getStyle().set("margin-top", "2em");
         setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, title);
 
         add(title);
