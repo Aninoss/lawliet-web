@@ -11,8 +11,8 @@ import java.util.concurrent.ExecutionException;
 public class CommandListContainer {
 
     final static Logger LOGGER = LoggerFactory.getLogger(CommandListContainer.class);
-    private static CommandListContainer ourInstance = new CommandListContainer();
-    private CopyOnWriteArrayList<CommandListCategory> categories = new CopyOnWriteArrayList<>();
+    private static final CommandListContainer ourInstance = new CommandListContainer();
+    private final CopyOnWriteArrayList<CommandListCategory> categories = new CopyOnWriteArrayList<>();
 
     private CommandListContainer() {}
 

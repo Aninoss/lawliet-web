@@ -39,6 +39,7 @@ public class CommandList extends VerticalLayout {
         notesLayout.setPadding(false);
         notesLayout.setSpacing(false);
         notesLayout.setWidthFull();
+        notesLayout.getStyle().set("margin-top", "2em");
 
         for(CommandIcon.Type type: CommandIcon.Type.values()) {
             if (type != CommandIcon.Type.NSFW || !uiData.isNSFWDisabled()) {
