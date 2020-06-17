@@ -44,7 +44,7 @@ public class BotProsPanelsLayout extends VerticalLayout {
                     customButton = new Button(getTranslation("bot.card.1.button"), click -> UI.getCurrent().navigate(DashboardView.class));
                     customButton.setWidthFull();
                 }
-                wip = new WIP();
+                wip = new WIP(getTranslation("bot.card.2.wip"));
             }
 
             if (i == 9) {

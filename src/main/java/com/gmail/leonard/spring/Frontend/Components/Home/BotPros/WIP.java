@@ -4,8 +4,8 @@ import com.vaadin.flow.component.html.Label;
 
 public class WIP extends Label {
 
-    public WIP() {
-        super("WORK IN PROGRESS");
+    public WIP(String text) {
+        super(text);
         getStyle()
                 .set("color", "var(--lumo-error-color)")
                 .set("transform", "rotate(15deg)")

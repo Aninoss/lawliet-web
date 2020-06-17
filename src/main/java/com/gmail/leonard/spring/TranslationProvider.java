@@ -20,15 +20,14 @@ public class TranslationProvider implements I18NProvider {
 
     public final Locale LOCALE_EN = new Locale("en");
     public final Locale LOCALE_DE = new Locale("de");
-    //public final Locale LOCALE_FR = new Locale("fr");
+    public final Locale LOCALE_RU = new Locale("ru");
 
     private final List<Locale> locales = Collections
-            .unmodifiableList(Arrays.asList(LOCALE_EN, LOCALE_DE));
+            .unmodifiableList(Arrays.asList(LOCALE_EN, LOCALE_RU, LOCALE_DE));
 
     private static final LoadingCache<Locale, ResourceBundle> bundleCache = CacheBuilder
             .newBuilder().expireAfterWrite(1, TimeUnit.DAYS)
             .build(new CacheLoader<Locale, ResourceBundle>() {
-
                 @Override
                 public ResourceBundle load(final Locale key) throws Exception {
                     return initializeBundle(key);
@@ -100,8 +99,7 @@ public class TranslationProvider implements I18NProvider {
 
         ResourceBundle propertiesBundle = null;
         try {
-            propertiesBundle = ResourceBundle.getBundle(BUNDLE_PREFIX, locale,
-                    cl);
+            propertiesBundle = ResourceBundle.getBundle(BUNDLE_PREFIX, locale, cl, new UTF8Control());
         } catch (final MissingResourceException e) {
             LoggerFactory.getLogger(TranslationProvider.class.getName())
                     .warn("Missing resource", e);

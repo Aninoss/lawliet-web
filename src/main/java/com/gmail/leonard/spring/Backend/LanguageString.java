@@ -22,7 +22,8 @@ public class LanguageString {
     }
 
     public String get(Locale locale) {
-        return map.get(parseLocale(locale));
+        String text = map.get(parseLocale(locale));
+        return text != null ? text : map.get("en");
     }
 
     private String parseLocale(Locale locale) {
