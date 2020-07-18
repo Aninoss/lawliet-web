@@ -14,7 +14,6 @@ import com.gmail.leonard.spring.Frontend.Views.IEView;
 import com.gmail.leonard.spring.Frontend.Views.PageNotFoundView;
 import com.gmail.leonard.spring.LoginAccess;
 import com.gmail.leonard.spring.NoLiteAccess;
-import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
@@ -30,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.rmi.server.UID;
 import java.util.HashMap;
 
 @CssImport("./styles/styles.css")
@@ -95,30 +93,50 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
         if (PageLayout.class.isAssignableFrom(cTemp)) {
             Class<? extends PageLayout> c = (Class<? extends PageLayout>)cTemp;
 
-            if (uiData != null && uiData.isLite() && event.getNavigationTarget().isAnnotationPresent(NoLiteAccess.class)) {
-                event.rerouteToError(Exception.class);
-                return;
-            }
+            if (checkLiteModeAccess(event)) return;
+            setPageTarget(c);
+            if (checkBrowserIE(event)) return;
+            checkLoginStatusChanged(event);
+        }
+    }
 
-            target = PageLayout.getRouteStatic(c);
+    private boolean checkLoginStatusChanged(BeforeEnterEvent event) {
+        if (!sessionData.isLoggedIn() && event.getNavigationTarget().isAnnotationPresent(LoginAccess.class)) {
+            new Redirector().redirect(sessionData.getLoginUrl());
+            return true;
+        }
 
-            if (c != PageNotFoundView.class) sessionData.setCurrentTarget(c);
-            if (VaadinSession.getCurrent().getBrowser().isIE() && event.getNavigationTarget() != IEView.class) event.rerouteTo(IEView.class);
-
-            if (!sessionData.isLoggedIn() && event.getNavigationTarget().isAnnotationPresent(LoginAccess.class)) {
-                new Redirector().redirect(sessionData.getLoginUrl());
-                return;
-            }
-
-            if (sessionData != null) {
-                if ((sessionData.isLoggedIn() && !uiData.getUserId().isPresent()) ||
-                        (!sessionData.isLoggedIn() && uiData.getUserId().isPresent()) ||
-                        (sessionData.isLoggedIn() && !uiData.getUserId().get().equals(sessionData.getUserId().get()))
-                ) {
-                    UI.getCurrent().getPage().reload();
-                }
+        if (sessionData != null) {
+            if ((sessionData.isLoggedIn() && !uiData.getUserId().isPresent()) ||
+                    (!sessionData.isLoggedIn() && uiData.getUserId().isPresent()) ||
+                    (sessionData.isLoggedIn() && !uiData.getUserId().get().equals(sessionData.getUserId().get()))
+            ) {
+                UI.getCurrent().getPage().reload();
+                return true;
             }
         }
+        return false;
+    }
+
+    private boolean checkBrowserIE(BeforeEnterEvent event) {
+        if (VaadinSession.getCurrent().getBrowser().isIE() && event.getNavigationTarget() != IEView.class) {
+            event.rerouteTo(IEView.class);
+            return true;
+        }
+        return false;
+    }
+
+    private void setPageTarget(Class<? extends PageLayout> c) {
+        target = PageLayout.getRouteStatic(c);
+        if (c != PageNotFoundView.class) sessionData.setCurrentTarget(c);
+    }
+
+    private boolean checkLiteModeAccess(BeforeEnterEvent event) {
+        if (uiData != null && uiData.isLite() && event.getNavigationTarget().isAnnotationPresent(NoLiteAccess.class)) {
+            event.rerouteToError(Exception.class);
+            return true;
+        }
+        return false;
     }
 
     @Override

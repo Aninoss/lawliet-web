@@ -69,6 +69,9 @@ public class Console {
                                 }
 
                                 break;
+
+                            default:
+                                System.err.println("No result");
                         }
                     }
                 }

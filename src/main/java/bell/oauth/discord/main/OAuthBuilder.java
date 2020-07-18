@@ -41,6 +41,10 @@ public class OAuthBuilder {
 		this.redirect = url;	
 		return this;
 	}
+
+	public void setScopes(String scopes) {
+		this.scopes = scopes;
+	}
 	
 	public OAuthBuilder setScopes(String[] scopes) {
 		this.scopes = "";
@@ -204,10 +208,6 @@ public class OAuthBuilder {
 	
 	public String getScopes() {
 		return scopes;
-	}
-
-	public void setScopes(String scopes) {
-		this.scopes = scopes;
 	}
 
 	public String getAccess_token() {
