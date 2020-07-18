@@ -3,14 +3,7 @@ html {
     --scroll-type: scroll;
 }
 
-body {
-    overflow-x: hidden;
-    overflow-y: scroll;
-}
-
-body.light-mode {
-    overflow-y: auto;
-}
+body { overflow-x: hidden; }
 
 vaadin-button { cursor: pointer; }
 

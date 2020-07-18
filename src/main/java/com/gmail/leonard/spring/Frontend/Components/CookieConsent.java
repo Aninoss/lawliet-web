@@ -34,7 +34,7 @@ public class CookieConsent extends VerticalLayout {
                 .set("max-width", "400px")
                 .set("z-index", "6")
                 .set("transition", "transform 500ms")
-                .set("transform", "translateY(0px)")
+                .set("transform", "none")
                 .set("padding", "32px");
 
         Paragraph cookieText = new Paragraph(getTranslation("cookie.text"));

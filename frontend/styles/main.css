@@ -5,9 +5,9 @@
 #header-out {
     position: fixed;
     z-index: 6;
-    padding: 16px 16px;
+    padding: 16px;
     box-sizing: border-box;
-    width: 100%;
+    width: 100vw;
 
     transform: translateY(8px);
 
@@ -16,7 +16,7 @@
 }
 
 .scroll-class#header-out {
-    transform: translateY(0px);
+    transform: none;
     background-color: var(--lumo-shade);
 }
 
@@ -64,7 +64,7 @@
         padding: 8px 16px;
         height: 60px;
         background-color: var(--lumo-shade);
-        transform: translateY(0px);
+        transform: none;
     }
 
 }
@@ -79,7 +79,7 @@
         opacity: 1;
     }
 
-    .show#vertical-menu { transform: translateX(0px); }
+    .show#vertical-menu { transform: none; }
 
     .show#blackscreen {
         background: rgba(0, 0, 0, 0.5);

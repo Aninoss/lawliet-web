@@ -27,7 +27,7 @@ public class HeaderComponent extends Header {
         setId("header-out");
         if (uiData.isLite()) getStyle()
                 .set("background-color", "var(--lumo-shade)")
-                .set("transform", "translateY(0px)");
+                .set("transform", "none");
 
         HorizontalLayout content = new HorizontalLayout();
         content.setId("header-content");

@@ -61,10 +61,6 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
         setId("main-page");
         getStyle().set("flex-direction", "column-reverse");
 
-        /* hide scroll bars in iframe mode */
-        if (uiData.isLite())
-            UI.getCurrent().getElement().getClassList().add("light-mode");
-
         /* black background in mobile burger menu */
         Div blackscreen = new Div();
         blackscreen.setId("blackscreen");

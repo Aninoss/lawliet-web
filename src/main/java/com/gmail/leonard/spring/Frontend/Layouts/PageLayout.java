@@ -16,15 +16,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class PageLayout extends Main implements HasDynamicTitle {
 
-    private Route route;
-    private UIData uiData;
-    private SessionData sessionData;
+    private final Route route;
+    private final UIData uiData;
+    private final SessionData sessionData;
 
     public PageLayout(SessionData sessionData, UIData uiData) {
         this.route = this.getClass().getAnnotation(Route.class);
         this.uiData = uiData;
         this.sessionData = sessionData;
-        //this.setWidth("100vw");
     }
 
     public String getRoute() { return route.value(); }
