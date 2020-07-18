@@ -1,8 +1,16 @@
 html {
     --lumo-secondary: var(--lumo-shade-80pct);
+    --scroll-type: scroll;
 }
 
-body { overflow-x: hidden; }
+body {
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+body.light-mode {
+    overflow-y: auto;
+}
 
 vaadin-button { cursor: pointer; }
 

@@ -3,11 +3,15 @@
 .visible-small { display: block; }
 .visible-large { display: none; }
 
+widgetbot-crate { display: none; }
+
 /* Tablet */
 @media (min-width: 700px) {
 
     .visible-xsmall { display: none; }
     .visible-not-xsmall { display: block; }
+
+    widgetbot-crate { display: block; }
 
 }
 

@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -46,11 +45,11 @@ public class CustomRequestHandler implements RequestHandler {
 
         response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubdomains");
         response.setHeader("Content-Security-Policy",
-                "default-src data: 'self'; " +
+                "default-src data: 'self' https://widgetbot.io https://e.widgetbot.io; " +
                         "img-src 'self' https://cdn.discordapp.com/; " +
                         "media-src 'self'; " +
                         "object-src 'self'; " +
-                        "script-src 'unsafe-inline' 'unsafe-eval' 'self' ajax.cloudflare.com; " +
+                        "script-src 'unsafe-inline' 'unsafe-eval' 'self' ajax.cloudflare.com https://cdn.jsdelivr.net; " +
                         "style-src 'unsafe-inline' 'self'; " +
                         "frame-ancestors https://top.gg"
         );
@@ -97,7 +96,12 @@ public class CustomRequestHandler implements RequestHandler {
                     sb.append("\n").append(line);
                 }
 
-                if (sb.length() > 0) WebComClient.getInstance().sendTopGG(new JSONObject(sb.toString().substring(1))).get();
+                if (sb.length() > 0) {
+                    JSONObject jsonObject = new JSONObject(sb.toString().substring(1));
+                    LOGGER.info("UPVOTE | {}", jsonObject.getLong("user"));
+                    WebComClient.getInstance().sendTopGG(jsonObject).get();
+                }
+
                 return true;
             }
         } catch (IOException | ExecutionException e) {

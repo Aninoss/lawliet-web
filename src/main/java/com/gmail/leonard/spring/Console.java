@@ -12,7 +12,7 @@ import java.lang.management.ManagementFactory;
 
 public class Console {
 
-    private static Console instance = new Console();
+    private static final Console instance = new Console();
     private double maxMemory = 0;
     final static Logger LOGGER = LoggerFactory.getLogger(Console.class);
 

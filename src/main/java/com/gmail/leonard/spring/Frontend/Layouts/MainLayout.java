@@ -14,6 +14,7 @@ import com.gmail.leonard.spring.Frontend.Views.IEView;
 import com.gmail.leonard.spring.Frontend.Views.PageNotFoundView;
 import com.gmail.leonard.spring.LoginAccess;
 import com.gmail.leonard.spring.NoLiteAccess;
+import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
@@ -28,6 +29,9 @@ import com.vaadin.flow.theme.lumo.Lumo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.rmi.server.UID;
+import java.util.HashMap;
 
 @CssImport("./styles/styles.css")
 @CssImport("./styles/styles-reversed.css")
@@ -55,9 +59,13 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
 
         setMinHeight("100vh");
         setId("main-page");
-        getStyle()
-                .set("flex-direction", "column-reverse");
+        getStyle().set("flex-direction", "column-reverse");
 
+        /* hide scroll bars in iframe mode */
+        if (uiData.isLite())
+            UI.getCurrent().getElement().getClassList().add("light-mode");
+
+        /* black background in mobile burger menu */
         Div blackscreen = new Div();
         blackscreen.setId("blackscreen");
         blackscreen.addClassName(Styles.VISIBLE_MOBILE);
@@ -91,7 +99,7 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
         if (PageLayout.class.isAssignableFrom(cTemp)) {
             Class<? extends PageLayout> c = (Class<? extends PageLayout>)cTemp;
 
-            if (uiData.isLite() && event.getNavigationTarget().isAnnotationPresent(NoLiteAccess.class)) {
+            if (uiData != null && uiData.isLite() && event.getNavigationTarget().isAnnotationPresent(NoLiteAccess.class)) {
                 event.rerouteToError(Exception.class);
                 return;
             }
@@ -106,11 +114,13 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
                 return;
             }
 
-            if ((sessionData.isLoggedIn() && !uiData.getUserId().isPresent()) ||
-                    (!sessionData.isLoggedIn() && uiData.getUserId().isPresent()) ||
-                    (sessionData.isLoggedIn() && !uiData.getUserId().get().equals(sessionData.getUserId().get()))
-            ) {
-                UI.getCurrent().getPage().reload();
+            if (sessionData != null) {
+                if ((sessionData.isLoggedIn() && !uiData.getUserId().isPresent()) ||
+                        (!sessionData.isLoggedIn() && uiData.getUserId().isPresent()) ||
+                        (sessionData.isLoggedIn() && !uiData.getUserId().get().equals(sessionData.getUserId().get()))
+                ) {
+                    UI.getCurrent().getPage().reload();
+                }
             }
         }
     }
@@ -122,7 +132,18 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
         settings.addMetaTag("og:title", PageTitleGen.getPageTitle(target));
         settings.addMetaTag("og:description", getTranslation("bot.desc"));
         settings.addMetaTag("og:image", "http://lawlietbot.xyz/styles/img/bot_icon.png");
-        settings.addMetaTag("msapplication-config", "/browserconfig.xml");
+
+        //Favicons
+        settings.addLink("/apple-touch-icon.png", new HashMap<String, String>() {{
+            put("rel", "apple-touch-icon");
+            put("sizes", "180x180");
+        }});
+        settings.addLink("/safari-pinned-tab.svg", new HashMap<String, String>() {{
+            put("rel", "mask-icon");
+            put("color", "#000000");
+        }});
+        settings.addLink("manifest", "/site.webmanifest");
+        settings.addMetaTag("theme-color", "#ffffff");
     }
 
     @Override

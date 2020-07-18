@@ -7,15 +7,19 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.server.VaadinService;
 import javax.servlet.http.Cookie;
 
-public class CookieConsent extends HorizontalLayout {
+public class CookieConsent extends VerticalLayout {
 
     private static final String COOKIE_NAME = "cookie-consent", COOKIE_VALUE = "true";
 
     public CookieConsent() {
         setId("cookie-consent");
+        HorizontalLayout buttonLayout = new HorizontalLayout();
+        buttonLayout.setPadding(false);
+        buttonLayout.getStyle().set("margin-top", "0");
 
         if (cookieMessageClosed()) {
             setVisible(false);
@@ -26,25 +30,23 @@ public class CookieConsent extends HorizontalLayout {
                 .set("left", "0px")
                 .set("bottom", "0px")
                 .set("background", "black")
-                .set("width", "100%")
+                .set("width", "100vw")
+                .set("max-width", "400px")
                 .set("z-index", "6")
                 .set("transition", "transform 500ms")
-                .set("transform", "translateY(0px)");
-
-        setPadding(true);
-        setAlignItems(FlexComponent.Alignment.CENTER);
+                .set("transform", "translateY(0px)")
+                .set("padding", "32px");
 
         Paragraph cookieText = new Paragraph(getTranslation("cookie.text"));
         Anchor moreInfo = new Anchor("https://www.cookiesandyou.com/", new Paragraph(getTranslation("cookie.learnmore")));
         moreInfo.setTarget("_blank");
-        Div divEmpty = new Div();
 
         Button gotItButtom = new Button(getTranslation("cookie.button"));
         gotItButtom.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         gotItButtom.getElement().setAttribute("onclick", String.format("closeCookieConsent(\"%s\", \"%s\");", COOKIE_NAME, COOKIE_VALUE));
 
-        add(cookieText, moreInfo, divEmpty, gotItButtom);
-        setFlexGrow(1, divEmpty);
+        buttonLayout.add(gotItButtom, moreInfo);
+        add(cookieText, buttonLayout);
     }
 
     private boolean cookieMessageClosed() {

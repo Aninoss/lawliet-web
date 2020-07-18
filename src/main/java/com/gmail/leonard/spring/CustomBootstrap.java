@@ -20,9 +20,10 @@ public class CustomBootstrap implements BootstrapListener {
             response.getUI().navigate(IEView.class);
         } else {
             try {
-                response.getDocument().body().append(new FileString(
+                String pageString = new FileString(
                         Thread.currentThread().getContextClassLoader().getResourceAsStream("bootstrap.html")
-                ).toString());
+                ).toString();
+                response.getDocument().body().append(pageString);
 
                 response.getDocument().head().append("<script src=\"js/scripts.js\"></script>");
                 response.getDocument().body().attr("onscroll", "onScroll()");

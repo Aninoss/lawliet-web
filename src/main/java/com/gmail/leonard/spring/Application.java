@@ -17,7 +17,7 @@ public class Application extends SpringBootServletInitializer {
 
     final static Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
         LOGGER.info("###########################");
         Console.getInstance().start();
