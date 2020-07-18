@@ -14,6 +14,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class CommandCategoryLayout extends VerticalLayout {
 
@@ -116,39 +119,48 @@ public class CommandCategoryLayout extends VerticalLayout {
     public int search(String searchKey, Locale locale, boolean firstCategory, boolean changeAccordionPanel) {
         lastSearchTerm = searchKey;
 
-        int found = 0;
-        boolean exactHit = false;
+        AtomicInteger found = new AtomicInteger(0);
+        AtomicBoolean exactHit = new AtomicBoolean(false);
 
         if (accordionPanel != null) {
-            for (CommandListSlot slot : commandListCategory.getSlots()) {
-                if (!slot.isNsfw() || showNsfw) {
-                    Details commandField = commandFields.get(slot.getTrigger());
+            for (CommandListSlot slot : commandListCategory.getSlots())
+                updateSlot(slot, locale, searchKey, exactHit, found);
 
-                    if (slot.getTrigger().replace(" ", "").equalsIgnoreCase(searchKey)) exactHit = true;
-                    boolean visible = slot.getTrigger().toLowerCase().replace(" ", "").contains(searchKey) ||
-                            slot.getLangDescLong().get(locale).toLowerCase().replace(" ", "").contains(searchKey) ||
-                            slot.getLangExamples().get(locale).toLowerCase().replace(" ", "").contains(searchKey) ||
-                            slot.getLangDescShort().get(locale).toLowerCase().replace(" ", "").contains(searchKey) ||
-                            slot.getLangUsage().get(locale).toLowerCase().replace(" ", "").contains(searchKey) ||
-                            slot.getTrigger().toLowerCase().replace(" ", "").contains(searchKey);
+            if (!build)
+                setHeight((found.get() * PX_PER_SLOT + PX_ABSOLUTE) + "px");
 
-                    if (commandField != null) {
-                        commandField.setVisible(visible);
-                        commandField.setOpened(false);
-                    }
-                    if (visible) found++;
-                }
-            }
-
-            if (!build) setHeight((found * PX_PER_SLOT + PX_ABSOLUTE) + "px");
-
-            if (changeAccordionPanel) {
-                accordionPanel.setEnabled(found > 0);
-                accordionPanel.setOpened((firstCategory && found > 0) || exactHit);
-                accordionPanel.setSummaryText(getSummaryText(found));
-            }
+            if (changeAccordionPanel)
+                updateAccordionPanel(found, exactHit, firstCategory);
         }
-        return found;
+
+        return found.get();
+    }
+
+    private void updateAccordionPanel(AtomicInteger found, AtomicBoolean exactHit, boolean firstCategory) {
+        accordionPanel.setEnabled(found.get() > 0);
+        accordionPanel.setOpened((firstCategory && found.get() > 0) || exactHit.get());
+        accordionPanel.setSummaryText(getSummaryText(found.get()));
+    }
+
+    private void updateSlot(CommandListSlot slot, Locale locale, String searchKey, AtomicBoolean exactHit, AtomicInteger found) {
+        if (!slot.isNsfw() || showNsfw) {
+            Details commandField = commandFields.get(slot.getTrigger());
+
+            if (slot.getTrigger().replace(" ", "").equalsIgnoreCase(searchKey)) exactHit.set(true);
+            boolean visible = slot.getTrigger().toLowerCase().replace(" ", "").contains(searchKey) ||
+                    slot.getLangDescLong().get(locale).toLowerCase().replace(" ", "").contains(searchKey) ||
+                    slot.getLangExamples().get(locale).toLowerCase().replace(" ", "").contains(searchKey) ||
+                    slot.getLangDescShort().get(locale).toLowerCase().replace(" ", "").contains(searchKey) ||
+                    slot.getLangUsage().get(locale).toLowerCase().replace(" ", "").contains(searchKey) ||
+                    slot.getTrigger().toLowerCase().replace(" ", "").contains(searchKey);
+
+            if (commandField != null) {
+                commandField.setVisible(visible);
+                commandField.setOpened(false);
+            }
+
+            if (visible) found.incrementAndGet();
+        }
     }
 
     public void setAccordionPanel(AccordionPanel accordionPanel) {
