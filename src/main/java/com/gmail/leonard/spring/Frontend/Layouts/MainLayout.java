@@ -51,9 +51,9 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
         this.sessionData = sessionData;
         this.uiData = uiData;
 
-        if(UI.getCurrent() != null)
-            UI.getCurrent().getElement().getStyle().set("width", "100%")
-                    .set("background-color", "transparent");
+        //if(UI.getCurrent() != null)
+            //UI.getCurrent().getElement().getStyle().set("width", "100%")
+                    //.set("background-color", "transparent");
 
         setMinHeight("100vh");
         setId("main-page");

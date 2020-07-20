@@ -3,7 +3,10 @@ html {
     --scroll-type: scroll;
 }
 
-body { overflow-x: hidden; }
+body {
+    overflow-x: hidden;
+    background: var(--lumo-base-color);
+}
 
 vaadin-button { cursor: pointer; }
 
