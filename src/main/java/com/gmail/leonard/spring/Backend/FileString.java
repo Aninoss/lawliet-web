@@ -1,6 +1,9 @@
 package com.gmail.leonard.spring.Backend;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 public class FileString {
 
@@ -20,14 +23,14 @@ public class FileString {
     }
 
     public FileString(InputStream inputStream) throws IOException {
-        BufferedInputStream bip = new BufferedInputStream(inputStream);
+        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
         int chr;
-        while((chr = bip.read()) >= 0) {
+        while((chr = br.read()) >= 0) {
             content = content.concat(String.valueOf((char) chr));
         }
 
-        bip.close();
+        br.close();
         inputStream.close();
     }
 

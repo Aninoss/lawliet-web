@@ -26,17 +26,6 @@ public class CookieConsent extends VerticalLayout {
             return;
         }
 
-        getStyle().set("position", "fixed")
-                .set("left", "0px")
-                .set("bottom", "0px")
-                .set("background", "black")
-                .set("width", "100vw")
-                .set("max-width", "400px")
-                .set("z-index", "6")
-                .set("transition", "transform 500ms")
-                .set("transform", "none")
-                .set("padding", "32px");
-
         Paragraph cookieText = new Paragraph(getTranslation("cookie.text"));
         Anchor moreInfo = new Anchor("https://www.cookiesandyou.com/", new Paragraph(getTranslation("cookie.learnmore")));
         moreInfo.setTarget("_blank");

@@ -69,6 +69,19 @@ vaadin-button { cursor: pointer; }
     padding-bottom: 32px;
 }
 
+#cookie-consent {
+    position: fixed;
+    background: black;
+    z-index: 6;
+    transition: transform 500ms;
+    transform: none;
+    padding: 32px;
+    left: 16px;
+    bottom: 16px;
+    width: 100%;
+    max-width: 400px;
+}
+
 
 
 /* Keyframes */
@@ -131,5 +144,11 @@ vaadin-button { cursor: pointer; }
     .flex-xsmall-column { flex-direction: column; }
     .flex-xsmall-row-reverse { flex-direction: row-reverse; }
     .flex-xsmall-column-reverse { flex-direction: column-reverse; }
+
+    #cookie-consent {
+        left: 0;
+        bottom: 0;
+        max-width: 100%;
+    }
 
 }
