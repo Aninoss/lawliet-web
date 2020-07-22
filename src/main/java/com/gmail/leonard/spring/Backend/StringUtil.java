@@ -6,7 +6,9 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
-public class StringTools {
+public class StringUtil {
+
+    private StringUtil(){}
 
     public static String getRandomString() {
         int length = 10;
@@ -60,6 +62,26 @@ public class StringTools {
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+
+    public static String shortenString(String str, int limit) {
+        if (str.length() > limit) {
+            str = str.substring(0, limit - 4);
+
+            if (str.contains("\n")) {
+                int pos = str.lastIndexOf("\n");
+                str = str.substring(0, pos);
+            } else {
+                if (str.contains(" ")) {
+                    int pos = str.lastIndexOf(" ");
+                    str = str.substring(0, pos);
+                }
+            }
+            while (str.length() > 0 && (str.charAt(str.length() - 1) == '.' || str.charAt(str.length() - 1) == ' ' || str.charAt(str.length() - 1) == '\n')) str = str.substring(0, str.length() - 1);
+
+            str = str + " (…)";
+        }
+        return str;
     }
 
 }

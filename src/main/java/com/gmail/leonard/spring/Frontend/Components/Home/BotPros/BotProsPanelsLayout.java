@@ -22,45 +22,20 @@ import java.util.ArrayList;
 public class BotProsPanelsLayout extends VerticalLayout {
 
     public BotProsPanelsLayout(UIData uiData) {
-        Icon[] icons = {
-                VaadinIcon.TROPHY.create(),
-                VaadinIcon.STAR.create(),
-                VaadinIcon.BOAT.create(),
-                VaadinIcon.PIN.create(),
-                VaadinIcon.VOLUME.create(),
-                VaadinIcon.MOON_O.create(),
-                VaadinIcon.TAG.create(),
-                VaadinIcon.GROUP.create(),
-                VaadinIcon.GAMEPAD.create(),
-                VaadinIcon.LINK.create()
-        };
+        BotProPanelInfo[] botProPanelInfos = getBotProPanelInfos(uiData);
+
         ArrayList<Article> articles = new ArrayList<>();
-
-        for(int i = 0; i < icons.length; i++) {
-            Button customButton = null;
-            WIP wip = null;
-            if (i == 1) {
-                if (!uiData.isLite()) {
-                    customButton = new Button(getTranslation("bot.card.1.button"), click -> UI.getCurrent().navigate(DashboardView.class));
-                    customButton.setWidthFull();
-                }
-                wip = new WIP(getTranslation("bot.card.2.wip"));
-            }
-
-            if (i == 9) {
-                customButton = new Button(getTranslation("bot.card.9.button"), VaadinIcon.ARROW_RIGHT.create(), click -> UI.getCurrent().navigate(CommandsView.class));
-                customButton.setWidthFull();
-                customButton.setIconAfterText(true);
-            }
-
-            if ((i != 5 || !uiData.isNSFWDisabled()) && (i != 8 || uiData.isNSFWDisabled())) {
+        for(int i = 0; i < botProPanelInfos.length && articles.size() < 9; i++) {
+            BotProPanelInfo botProPanelInfo = botProPanelInfos[i];
+            if (botProPanelInfo.isVisible()) {
+                String id = botProPanelInfo.getId();
                 articles.add(new Article(new InfoCard(
-                        getTranslation("bot.card." + i + ".title"),
-                        getTranslation("bot.card." + i + ".subtitle"),
-                        getTranslation("bot.card." + i + ".desc"),
-                        icons[i],
-                        wip,
-                        customButton
+                        getTranslation("bot.card." + id + ".title"),
+                        getTranslation("bot.card." + id + ".subtitle"),
+                        getTranslation("bot.card." + id + ".desc"),
+                        botProPanelInfo.getIcon(),
+                        botProPanelInfo.getCharacterLimit(),
+                        botProPanelInfo.getComponents()
                 )));
             }
         }
@@ -80,5 +55,31 @@ public class BotProsPanelsLayout extends VerticalLayout {
         setPadding(false);
         add(layout);
 
+    }
+
+    private BotProPanelInfo[] getBotProPanelInfos(UIData uiData) {
+        WIP wip = new WIP(getTranslation("bot.card.wip"));
+        Button dashboardButton = null;
+        if (!uiData.isLite()) {
+            dashboardButton = new Button(getTranslation("bot.card.dashboard.button"), click -> UI.getCurrent().navigate(DashboardView.class));
+            dashboardButton.setWidthFull();
+        }
+        Button allFeaturesButton = new Button(getTranslation("bot.card.allfeatures.button"), VaadinIcon.ARROW_RIGHT.create(), click -> UI.getCurrent().navigate(CommandsView.class));
+        allFeaturesButton.setWidthFull();
+        allFeaturesButton.setIconAfterText(true);
+
+        return new BotProPanelInfo[]{
+                new BotProPanelInfo("fishery", true, VaadinIcon.TROPHY.create(), 200),
+                new BotProPanelInfo("gambling", true, VaadinIcon.COINS.create()),
+                new BotProPanelInfo("dashboard", false, VaadinIcon.STAR.create(), wip, dashboardButton),
+                new BotProPanelInfo("interactive", true, VaadinIcon.BOAT.create()),
+                new BotProPanelInfo("tracker", true, VaadinIcon.PIN.create()),
+                new BotProPanelInfo("autochannel", true, VaadinIcon.VOLUME.create()),
+                new BotProPanelInfo("nsfw", !uiData.isNSFWDisabled(), VaadinIcon.MOON_O.create()),
+                new BotProPanelInfo("reactionroles", true, VaadinIcon.TAG.create()),
+                new BotProPanelInfo("emotesinteractions", true, VaadinIcon.GROUP.create()),
+                new BotProPanelInfo("gimmicks", true, VaadinIcon.GAMEPAD.create()),
+                new BotProPanelInfo("allfeatures", true, VaadinIcon.LINK.create(), allFeaturesButton)
+        };
     }
 }

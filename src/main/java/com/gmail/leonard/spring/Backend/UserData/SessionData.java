@@ -4,7 +4,7 @@ import bell.oauth.discord.domain.User;
 import bell.oauth.discord.main.OAuthBuilder;
 import bell.oauth.discord.main.Response;
 import com.gmail.leonard.spring.Backend.SecretManager;
-import com.gmail.leonard.spring.Backend.StringTools;
+import com.gmail.leonard.spring.Backend.StringUtil;
 import com.gmail.leonard.spring.Frontend.Layouts.PageLayout;
 import com.gmail.leonard.spring.Frontend.Views.DiscordLogin;
 import com.gmail.leonard.spring.Frontend.Views.HomeView;
@@ -36,7 +36,7 @@ public class SessionData {
     public static HashMap<Long, ArrayList<SessionData>> userCache = new HashMap<>();
 
     public SessionData() {
-        id = StringTools.getRandomString();
+        id = StringUtil.getRandomString();
         setData();
     }
 
