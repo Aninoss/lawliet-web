@@ -125,7 +125,7 @@ public class FeedbackView extends PageLayout implements HasUrlParameter<Long> {
             }
         });
 
-        mainContent.add(rbCause, txReason, cbUsername, txUsername, new Hr(), cbServerDetails, btSubmit);
+        mainContent.add(rbCause, txReason, new Hr(), cbServerDetails, btSubmit);
         add(mainContent);
     }
 
