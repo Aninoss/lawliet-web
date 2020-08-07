@@ -12,6 +12,7 @@ import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -83,22 +84,34 @@ public class CommandCategoryLayout extends VerticalLayout {
 
             openedContent.add(new Text(slot.getLangDescLong().get(locale)));
 
-            String[] specContent = {slot.getLangUsage().get(locale), slot.getLangExamples().get(locale), slot.getLangUserPermissions().get(locale)};
+            String[] specContent = {
+                    slot.getLangUsage().get(locale),
+                    slot.getLangExamples().get(locale),
+                    slot.getLangUserPermissions().get(locale)
+            };
+            //String[] specWidths = { "50%", "50%", "100%" };
+            int n = (int) Arrays.stream(specContent).filter(e -> e != null && !e.isEmpty()).count();
 
-            VerticalLayout specs = new VerticalLayout();
-            specs.setPadding(false);
+            Div specs = new Div();
+            specs.setWidthFull();
 
             for (int i = 0; i < 3; i++) {
                 if (specContent[i] != null && !specContent[i].isEmpty()) {
                     VerticalLayout spec = new VerticalLayout();
                     spec.setPadding(false);
 
-                    spec.add(new H5(getTranslation("commands.specs" + i)));
+                    H5 specTitle = new H5(getTranslation("commands.specs" + i).toUpperCase());
+                    spec.add(specTitle);
 
                     HtmlText htmlText = new HtmlText(specContent[i]);
-                    htmlText.getStyle().set("margin-top", "0px");
+                    htmlText.getStyle().set("margin-top", "0px")
+                        .set("padding-right", "16px");
                     spec.add(htmlText);
 
+                    spec.setMinWidth("250px");
+                    spec.setWidth((100 / n) + "%");
+                    spec.getStyle().set("display", "inline-block")
+                        .set("vertical-align", "top");
                     specs.add(spec);
                 }
             }
