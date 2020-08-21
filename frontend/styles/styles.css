@@ -114,10 +114,10 @@ vaadin-button { cursor: pointer; }
 /* Tablet */
 @media (max-width: 1000px) {
 
-    .flex-small-row { flex-direction: row; }
-    .flex-small-column { flex-direction: column; }
-    .flex-small-row-reverse { flex-direction: row-reverse; }
-    .flex-small-column-reverse { flex-direction: column-reverse; }
+    .flex-small-row { flex-direction: row !important; }
+    .flex-small-column { flex-direction: column !important; }
+    .flex-small-row-reverse { flex-direction: row-reverse !important; }
+    .flex-small-column-reverse { flex-direction: column-reverse !important; }
 
     .size-small-fullwidth { max-width: 100%; }
 
@@ -143,10 +143,10 @@ vaadin-button { cursor: pointer; }
 /* Mobile */
 @media (max-width: 700px) {
 
-    .flex-xsmall-row { flex-direction: row; }
-    .flex-xsmall-column { flex-direction: column; }
-    .flex-xsmall-row-reverse { flex-direction: row-reverse; }
-    .flex-xsmall-column-reverse { flex-direction: column-reverse; }
+    .flex-xsmall-row { flex-direction: row !important; }
+    .flex-xsmall-column { flex-direction: column !important; }
+    .flex-xsmall-row-reverse { flex-direction: row-reverse !important; }
+    .flex-xsmall-column-reverse { flex-direction: column-reverse !important; }
 
     #cookie-consent {
         left: 0;

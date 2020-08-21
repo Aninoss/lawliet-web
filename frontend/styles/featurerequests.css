@@ -1,0 +1,22 @@
+#fr-flex {
+    flex-direction: column;
+}
+
+#not-logged-in-text {
+    color: var(--lumo-error-color);
+    margin-bottom: 8px;
+}
+
+
+/* Not Mobile */
+@media (min-width: 700px) {
+
+    #fr-flex {
+        flex-direction: row;
+    }
+
+    #not-logged-in-text {
+        margin-bottom: 0;
+    }
+
+}
