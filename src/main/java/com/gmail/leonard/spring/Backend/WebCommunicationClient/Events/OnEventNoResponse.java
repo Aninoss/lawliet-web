@@ -3,22 +3,21 @@ package com.gmail.leonard.spring.Backend.WebCommunicationClient.Events;
 import com.gmail.leonard.spring.Backend.CommandList.CommandListCategory;
 import com.gmail.leonard.spring.Backend.CommandList.CommandListContainer;
 import com.gmail.leonard.spring.Backend.CommandList.CommandListSlot;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.EventAbstract;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.TransferCache;
 import io.socket.emitter.Emitter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class OnGenericResponseless implements Emitter.Listener {
+public class OnEventNoResponse extends EventAbstract<Void> {
 
-    private TransferCache transferCache;
-
-    public OnGenericResponseless(TransferCache transferCache) {
-        this.transferCache = transferCache;
+    public OnEventNoResponse(TransferCache transferCache) {
+        super(transferCache);
     }
 
     @Override
-    public void call(Object... args) {
-        transferCache.complete(null, Void.class);
+    protected Void processData(JSONObject mainJSON) {
+        return null;
     }
 
 }

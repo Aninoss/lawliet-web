@@ -1,6 +1,5 @@
 package com.gmail.leonard.spring.Backend.WebCommunicationClient;
 
-import com.github.appreciated.css.grid.sizes.Int;
 import com.gmail.leonard.spring.Backend.CustomThread;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.json.JSONObject;
@@ -16,33 +15,27 @@ import java.util.concurrent.TimeoutException;
 public class TransferCache {
 
     final static Logger LOGGER = LoggerFactory.getLogger(TransferCache.class);
+    private final String KEY = "id";
 
-    private final String event;
-    private String key = null;
     private final HashMap<Integer, CompletableFuture<?>> futuresMap = new HashMap<>();
     private ArrayList<CompletableFuture<?>> futuresList = new ArrayList<>();
 
-    public TransferCache(String event) {
-        this.event = event;
-    }
-
-    public TransferCache(String event, String key) {
-        this(event);
-        this.key = key;
-    }
+    //public TransferCache(String event, String key) {
+        //this(event);
+        //this.key = key;
+    //}
 
     public <T> CompletableFuture<T> register(JSONObject data, Class<T> c) {
         CompletableFuture<T> future = new CompletableFuture<>();
-        if (hasKey()) {
-            int dataKey = data.get(key).hashCode();
-            futuresMap.put(dataKey, future);
-            startTimer(dataKey, future, c);
-        } else {
-            futuresList.add(future);
-            startTimer(null, future, c);
-        }
+        int dataKey = data.get(KEY).hashCode();
+        futuresMap.put(dataKey, future);
+        startTimer(dataKey, future, c);
 
         return future;
+    }
+
+    private String genKey(JSONObject data, Class c) {
+        return c.toString() + "_" + data.get(KEY);
     }
 
     private <T> void startTimer(Integer dataKey, CompletableFuture<T> future, Class<T> c) {
@@ -56,42 +49,19 @@ public class TransferCache {
                 }
 
                 future.completeExceptionally(new TimeoutException());
-                if (hasKey()) futuresMap.remove(dataKey);
-                else futuresList.remove(future);
+                futuresMap.remove(dataKey);
             } catch (InterruptedException e) {
                 LOGGER.error("Interrupted", e);
             }
         }, "CustomCompletableFuture Timeout", 1).start();
     }
 
-    public <T> void complete(@NonNull JSONObject data, T value, Class<T> c) {
-        if (hasKey()) {
-            int dataKey = data.get(key).hashCode();
-            Optional.ofNullable(futuresMap.get(dataKey)).ifPresent(future -> {
-                ((CompletableFuture<T>)future).complete(value);
-                futuresMap.remove(dataKey);
-            });
-        } else {
-            complete(value, c);
-        }
-    }
-
-    public <T> void complete(T value, Class<T> c) {
-        if (!hasKey()) {
-            futuresList.forEach(future -> ((CompletableFuture<T>)future).complete(value));
-            futuresList = new ArrayList<>();
-        } else {
-            if (c == JSONObject.class) complete((JSONObject)value, value, c);
-            else throw new RuntimeException("Wrong tranfer cache access");
-        }
-    }
-
-    public boolean hasKey() {
-        return key != null;
-    }
-
-    public String getEvent() {
-        return event;
+    public <T> void complete(@NonNull JSONObject data, T value) {
+        int dataKey = data.get(KEY).hashCode();
+        Optional.ofNullable(futuresMap.get(dataKey)).ifPresent(future -> {
+            ((CompletableFuture<T>)future).complete(value);
+            futuresMap.remove(dataKey);
+        });
     }
 
 }

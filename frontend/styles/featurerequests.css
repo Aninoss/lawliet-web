@@ -7,6 +7,10 @@
     margin-bottom: 8px;
 }
 
+#boost-text {
+    margin-bottom: 8px;
+}
+
 
 /* Not Mobile */
 @media (min-width: 700px) {
@@ -16,6 +20,10 @@
     }
 
     #not-logged-in-text {
+        margin-bottom: 0;
+    }
+
+    #boost-text {
         margin-bottom: 0;
     }
 

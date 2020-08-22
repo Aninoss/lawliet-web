@@ -31,7 +31,6 @@ public class SessionData {
     private long userId;
     private boolean loggedIn;
     private Class<? extends PageLayout> currentTarget = HomeView.class;
-    private final ServerListData serverListData = new ServerListData();
 
     public static HashMap<Long, ArrayList<SessionData>> userCache = new HashMap<>();
 
@@ -127,10 +126,6 @@ public class SessionData {
 
     public Class<? extends PageLayout> getCurrentTarget() {
         return currentTarget;
-    }
-
-    public ServerListData getServerListData() {
-        return serverListData;
     }
 
     public static ArrayList<SessionData> getSessionData(long userId) {

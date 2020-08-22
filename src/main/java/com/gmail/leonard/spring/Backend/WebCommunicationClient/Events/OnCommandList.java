@@ -3,30 +3,27 @@ package com.gmail.leonard.spring.Backend.WebCommunicationClient.Events;
 import com.gmail.leonard.spring.Backend.CommandList.CommandListCategory;
 import com.gmail.leonard.spring.Backend.CommandList.CommandListContainer;
 import com.gmail.leonard.spring.Backend.CommandList.CommandListSlot;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.EventAbstract;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.TransferCache;
-import io.socket.emitter.Emitter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OnCommandList implements Emitter.Listener {
-
-    final static Logger LOGGER = LoggerFactory.getLogger(OnCommandList.class);
-    private final TransferCache transferCache;
+public class OnCommandList extends EventAbstract<CommandListContainer> {
 
     public OnCommandList(TransferCache transferCache) {
-        this.transferCache = transferCache;
+        super(transferCache);
     }
 
     @Override
-    public void call(Object... args) {
+    protected CommandListContainer processData(JSONObject mainJSON) {
         CommandListContainer.getInstance().clear();
-        JSONArray mainJSON = new JSONArray((String) args[0]);
+        JSONArray arrayJSON = mainJSON.getJSONArray("categories");
 
         //Read every command category
-        for (int i = 0; i < mainJSON.length(); i++) {
-            JSONObject categoryJSON = mainJSON.getJSONObject(i);
+        for (int i = 0; i < arrayJSON.length(); i++) {
+            JSONObject categoryJSON = arrayJSON.getJSONObject(i);
 
             CommandListCategory commandListCategory = new CommandListCategory();
             commandListCategory.setId(categoryJSON.getString("id"));
@@ -57,7 +54,7 @@ public class OnCommandList implements Emitter.Listener {
             CommandListContainer.getInstance().add(commandListCategory);
         }
 
-        transferCache.complete(CommandListContainer.getInstance(), CommandListContainer.class);
-        LOGGER.info("Commands ready");
+        return CommandListContainer.getInstance();
     }
+
 }
