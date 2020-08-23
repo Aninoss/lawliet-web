@@ -7,13 +7,11 @@ import com.github.appreciated.css.grid.sizes.MinMax;
 import com.github.appreciated.css.grid.sizes.Repeat;
 import com.github.appreciated.layout.FlexibleGridLayout;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
-import com.gmail.leonard.spring.Frontend.Components.InfoCard;
 import com.gmail.leonard.spring.Frontend.Views.CommandsView;
 import com.gmail.leonard.spring.Frontend.Views.DashboardView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Article;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
@@ -29,7 +27,7 @@ public class BotProsPanelsLayout extends VerticalLayout {
             BotProPanelInfo botProPanelInfo = botProPanelInfos[i];
             if (botProPanelInfo.isVisible()) {
                 String id = botProPanelInfo.getId();
-                articles.add(new Article(new InfoCard(
+                articles.add(new Article(new BotProsInfoCard(
                         getTranslation("bot.card." + id + ".title"),
                         getTranslation("bot.card." + id + ".subtitle"),
                         getTranslation("bot.card." + id + ".desc"),

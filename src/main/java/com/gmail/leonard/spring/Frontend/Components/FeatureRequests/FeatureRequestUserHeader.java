@@ -30,9 +30,12 @@ public class FeatureRequestUserHeader extends Card {
     private final VerticalLayout mainLayout = new VerticalLayout();
     private final FlexLayout notLoggedInLayout = new FlexLayout();
     private final SessionData sessionData;
+    private final FRDynamicBean frDynamicBean;
 
     public FeatureRequestUserHeader(SessionData sessionData, FRDynamicBean frDynamicBean) {
         setWidthFull();
+        getStyle().set("margin-top", "32px");
+        this.frDynamicBean = frDynamicBean;
         this.sessionData = sessionData;
         mainLayout.setAlignItems(Alignment.CENTER);
         notLoggedInLayout.setId("fr-flex");
@@ -42,7 +45,7 @@ public class FeatureRequestUserHeader extends Card {
         notLoggedInLayout.setSizeFull();
 
         if (sessionData.isLoggedIn()) {
-            addRemainingBoostsText(0, frDynamicBean.getBoostsTotal());
+            addRemainingBoostsText();
             addBoostButtons();
         } else {
             addNotLoggedInText();
@@ -69,16 +72,21 @@ public class FeatureRequestUserHeader extends Card {
         notLoggedInLayout.add(layout);
     }
 
-    private void addRemainingBoostsText(int freeBosts, int totalBoosts) {
+    private void addRemainingBoostsText() {
         HorizontalLayout layout = new HorizontalLayout();
         layout.setPadding(false);
 
-        Div boostText = new Div(new Text(getTranslation("fr.freeboosts", freeBosts, totalBoosts)));
+        Div boostText = new Div(new Text(getBoostText()));
         boostText.setId("boost-text");
+        frDynamicBean.setBoostIncreaseListener(() -> boostText.setText(getBoostText()));
         notLoggedInLayout.add(boostText);
 
         layout.add(VaadinIcon.FIRE.create(), boostText);
         notLoggedInLayout.add(layout);
+    }
+
+    private String getBoostText() {
+        return getTranslation("fr.freeboosts", frDynamicBean.getBoostsRemaining(), frDynamicBean.getBoostsTotal());
     }
 
     private void addNotLoggedInText() {

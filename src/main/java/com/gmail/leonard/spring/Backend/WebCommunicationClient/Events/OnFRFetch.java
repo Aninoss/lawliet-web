@@ -15,7 +15,7 @@ public class OnFRFetch extends EventAbstract<FRDynamicBean> {
     protected FRDynamicBean processData(JSONObject mainJSON) {
         int boostsTotal = mainJSON.getInt("boosts_total");
 
-        return new FRDynamicBean(boostsTotal);
+        return new FRDynamicBean(5, boostsTotal);
     }
 
 }

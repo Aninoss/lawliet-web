@@ -1,4 +1,4 @@
-package com.gmail.leonard.spring.Frontend.Components;
+package com.gmail.leonard.spring.Frontend.Components.Home.BotPros;
 
 import com.github.appreciated.card.Card;
 import com.gmail.leonard.spring.Backend.StringUtil;
@@ -14,7 +14,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public class InfoCard extends Card {
+public class BotProsInfoCard extends Card {
 
     private boolean longVersion = false;
     private Button buttonMore = null;
@@ -22,7 +22,7 @@ public class InfoCard extends Card {
     private final String longText;
     private final String shortText;
 
-    public InfoCard(String title, String subtitle, String desc, Icon icon, int characterLimit, Component... components) {
+    public BotProsInfoCard(String title, String subtitle, String desc, Icon icon, int characterLimit, Component... components) {
         longText = desc;
         shortText = characterLimit > 0 ? StringUtil.shortenString(longText, characterLimit) : longText;
         setHeightFull();
@@ -44,7 +44,7 @@ public class InfoCard extends Card {
         subtitleLabel.getElement().getStyle()
                 .set("font-size", "80%")
                 .set("text-align", "center")
-                .set("opacity", "0.5")
+                .set("color", "var(--lumo-disabled-text-color)")
                 .set("margin-top", "2px");
 
         text = new Text(shortText);

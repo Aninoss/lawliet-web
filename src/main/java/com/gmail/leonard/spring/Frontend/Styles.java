@@ -8,6 +8,7 @@ public interface Styles {
     String ROUND = "round";
     String CENTER_TEXT = "center-text";
     String CENTER_FIXED_WIDTH = "center-fixed-width";
+    String CENTER_FIXED_FULL = "center-fixed-full";
     String FADE_IN = "fadein-class";
     String FADE_IN_FAST = "fadein-class-fast";
 
@@ -26,5 +27,4 @@ public interface Styles {
     String FLEX_MOBILE_SWITCH_COLUMN = "flex-xsmall-column";
     String FLEX_MOBILE_SWITCH_ROW_REVERSE = "flex-xsmall-row-reverse";
     String FLEX_MOBILE_SWITCH_COLUMN_REVERSE = "flex-xsmall-column-reverse";
-
 }

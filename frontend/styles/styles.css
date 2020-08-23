@@ -31,7 +31,7 @@ vaadin-button { cursor: pointer; }
 
 .center-fixed-full {
     left: 50vw;
-    top: 50vw;
+    top: 50vh;
     position: fixed;
     transform: translate(-50%, -50%);
 }
