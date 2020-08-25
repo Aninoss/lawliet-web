@@ -3,6 +3,7 @@ package com.gmail.leonard.spring.Frontend.Views;
 import com.gmail.leonard.spring.Backend.FeatureRequests.FRDynamicBean;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.Modules.FeatureRequests;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
 import com.gmail.leonard.spring.Frontend.Components.FeatureRequests.FeatureRequestEntries;
 import com.gmail.leonard.spring.Frontend.Components.FeatureRequests.FeatureRequestUserHeader;
@@ -27,11 +28,11 @@ public class FeatureRequestsView extends PageLayout {
 
     public FeatureRequestsView(@Autowired SessionData sessionData, @Autowired UIData uiData) throws ExecutionException, InterruptedException {
         super(sessionData, uiData);
-        frDynamicBean = WebComClient.getInstance().getFRFetch(sessionData).get();
+        frDynamicBean = FeatureRequests.fetchFeatureRequestMainData(sessionData).get();
 
         mainContent.addClassName(Styles.APP_WIDTH);
         mainContent.setPadding(true);
-        mainContent.add(new FeatureRequestEntries(frDynamicBean));
+        mainContent.add(new FeatureRequestEntries(getSessionData(), frDynamicBean));
 
         HtmlText htmlText = new HtmlText(getTranslation("fr.desc"));
         add(

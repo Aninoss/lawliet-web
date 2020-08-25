@@ -5,10 +5,9 @@ import java.util.HashMap;
 
 public class FRDynamicBean {
 
-    private int boostsRemaining;
-    private final int boostsTotal;
-    private final HashMap<String, ArrayList<FREntry>> entryCategoryMap = new HashMap<>();
-    private BoostIncreaseListener boostIncreaseListener = null;
+    private int boostsRemaining, boostsTotal;
+    private final HashMap<FRPanelType, ArrayList<FREntry>> entryCategoryMap = new HashMap<>();
+    private BoostIncreaseListener boostChangeListener = null;
 
     public FRDynamicBean(int boostsRemaining, int boostsTotal) {
         this.boostsRemaining = boostsRemaining;
@@ -23,24 +22,28 @@ public class FRDynamicBean {
         return boostsTotal;
     }
 
-    public ArrayList<FREntry> getEntryCategoryMap(String type) {
+    public ArrayList<FREntry> getEntryCategoryMap(FRPanelType type) {
         return entryCategoryMap.computeIfAbsent(type, k -> new ArrayList<>());
     }
 
-    public FREntry generateEntry(String type, String description, Integer boosts, boolean publicEntry) {
-        FREntry frEntry = new FREntry(this, description, boosts, publicEntry, this::onBoost);
+    public void addEntry(FRPanelType type, int id, String description, Integer boosts, boolean publicEntry) {
+        FREntry frEntry = new FREntry(this, id, description, boosts, publicEntry);
         getEntryCategoryMap(type).add(frEntry);
-        return frEntry;
     }
 
-    private void onBoost() {
-        boostsRemaining--;
-        if (boostIncreaseListener != null)
-            boostIncreaseListener.onBoostIncrease();
+    public void update(int boostsRemaining, int boostsTotal) {
+        this.boostsRemaining = boostsRemaining;
+        this.boostsTotal = boostsTotal;
+        setChanged();
     }
 
-    public void setBoostIncreaseListener(BoostIncreaseListener boostIncreaseListener) {
-        this.boostIncreaseListener = boostIncreaseListener;
+    private void setChanged() {
+        if (boostChangeListener != null)
+            boostChangeListener.onBoostChange(boostsRemaining, boostsTotal);
+    }
+
+    public void setBoostChangeListener(BoostIncreaseListener boostChangeListener) {
+        this.boostChangeListener = boostChangeListener;
     }
 
 }

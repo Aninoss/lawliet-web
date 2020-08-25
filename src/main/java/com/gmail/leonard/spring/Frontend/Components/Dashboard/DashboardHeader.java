@@ -3,6 +3,7 @@ package com.gmail.leonard.spring.Frontend.Components.Dashboard;
 import com.gmail.leonard.spring.Backend.StringUtil;
 import com.gmail.leonard.spring.Backend.UserData.DiscordServerData;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.Modules.Dashboard;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
 import com.gmail.leonard.spring.Frontend.Components.IconLabel;
 import com.gmail.leonard.spring.Frontend.Components.PageHeader;
@@ -16,7 +17,7 @@ import org.json.JSONObject;
 
 public class DashboardHeader extends PageHeader {
 
-    private DashboardTitle dashboardTitle;
+    private final DashboardTitle dashboardTitle;
 
     public DashboardHeader(SessionData sessionData, String dashboardName, DiscordServerData discordServerData) {
         super();
@@ -24,7 +25,7 @@ public class DashboardHeader extends PageHeader {
 
         dashboardTitle = new DashboardTitle(dashboardName, discordServerData.getName());
 
-        JSONObject data = WebComClient.getInstance().getServerMembersCount(sessionData, discordServerData.getId()).join();
+        JSONObject data = Dashboard.fetchServerMembersCount(sessionData, discordServerData.getId()).join();
         IconLabel iconLabel = new IconLabel(VaadinIcon.USER.create(), StringUtil.numToString(data.getLong("members_online")) + " / " + StringUtil.numToString(data.getLong("members_total")));
         iconLabel.getStyle().set("margin-top", "0");
         iconLabel.setWidthFull();

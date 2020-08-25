@@ -1,6 +1,8 @@
 package com.gmail.leonard.spring.Backend.FAQ;
 
 import com.gmail.leonard.spring.Backend.LanguageString;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.Events.OnFAQList;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.Modules.FAQList;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +39,7 @@ public class FAQListContainer {
     private void loadIfEmpty() {
         if (entries.size() == 0) {
             LOGGER.info("Updating FAQ list");
-            WebComClient.getInstance().updateFAQList().join();
+            FAQList.fetchFAQList().join();
         }
     }
 

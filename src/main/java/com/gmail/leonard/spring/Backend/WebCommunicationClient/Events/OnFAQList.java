@@ -4,8 +4,11 @@ import com.gmail.leonard.spring.Backend.FAQ.FAQListContainer;
 import com.gmail.leonard.spring.Backend.FAQ.FAQListSlot;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.EventAbstract;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.TransferCache;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.util.concurrent.CompletableFuture;
 
 public class OnFAQList extends EventAbstract<FAQListContainer> {
 

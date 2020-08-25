@@ -1,6 +1,7 @@
 package com.gmail.leonard.spring.Frontend.Views;
 
 import com.gmail.leonard.spring.Backend.UserData.UIData;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.Modules.Dashboard;
 import com.gmail.leonard.spring.Frontend.Components.HtmlText;
 import com.gmail.leonard.spring.LoginAccess;
 import com.gmail.leonard.spring.NoLiteAccess;
@@ -53,7 +54,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         if (!sessionData.isLoggedIn()) return;
         removeAll();
 
-        ServerListData serverListData = WebComClient.getInstance().getServerListData(sessionData).join();
+        ServerListData serverListData = Dashboard.fetchServerListData(sessionData).join();
         Optional<DiscordServerData> optionalServerListData;
 
         if (serverId == null || !(optionalServerListData = serverListData.find(serverId)).isPresent()) {

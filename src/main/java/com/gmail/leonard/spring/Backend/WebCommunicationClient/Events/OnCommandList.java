@@ -5,10 +5,13 @@ import com.gmail.leonard.spring.Backend.CommandList.CommandListContainer;
 import com.gmail.leonard.spring.Backend.CommandList.CommandListSlot;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.EventAbstract;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.TransferCache;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.CompletableFuture;
 
 public class OnCommandList extends EventAbstract<CommandListContainer> {
 

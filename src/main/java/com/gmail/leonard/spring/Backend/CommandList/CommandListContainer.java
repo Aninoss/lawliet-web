@@ -1,12 +1,12 @@
 package com.gmail.leonard.spring.Backend.CommandList;
 
-import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.Events.OnCommandList;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.Modules.CommandList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutionException;
 
 public class CommandListContainer {
 
@@ -61,7 +61,7 @@ public class CommandListContainer {
     private void loadIfEmpty() {
         if (categories.size() == 0) {
             LOGGER.info("Updating command list");
-            WebComClient.getInstance().updateCommandList().join();
+            CommandList.fetchCommandList().join();
         }
     }
 

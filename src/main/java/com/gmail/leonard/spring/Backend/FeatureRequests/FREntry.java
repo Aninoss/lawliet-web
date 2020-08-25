@@ -1,22 +1,35 @@
 package com.gmail.leonard.spring.Backend.FeatureRequests;
 
-import java.util.ArrayList;
+import com.gmail.leonard.spring.Backend.CommandList.CommandListContainer;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.Modules.FeatureRequests;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public class FREntry {
 
+    final static Logger LOGGER = LoggerFactory.getLogger(FREntry.class);
+
+    private final int id;
     private final String description;
     private Integer boosts;
-    private boolean publicEntry;
-    private BoostIncreaseListener listener;
+    private final boolean publicEntry;
     private final FRDynamicBean frDynamicBean;
 
-    FREntry(FRDynamicBean frDynamicBean, String description, Integer boosts, boolean publicEntry, BoostIncreaseListener listener) {
+    FREntry(FRDynamicBean frDynamicBean, int id, String description, Integer boosts, boolean publicEntry) {
+        this.id = id;
         this.frDynamicBean = frDynamicBean;
         this.description = description;
         this.boosts = boosts;
         this.publicEntry = publicEntry;
-        this.listener = listener;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getDescription() {
@@ -27,17 +40,32 @@ public class FREntry {
         return Optional.ofNullable(boosts);
     }
 
-    public boolean boost() {
+    public boolean boost(long userId) {
         if (boosts != null && frDynamicBean.getBoostsRemaining() > 0) {
-            boosts++;
-            listener.onBoostIncrease();
-            return true;
+            CompletableFuture<JSONObject> responseJsonFut = FeatureRequests.sendBoost(frDynamicBean, getId(), userId);
+            try {
+                if (checkBoost(responseJsonFut.get())) {
+                    boosts++;
+                    return true;
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                LOGGER.error("Error when submitting boost", e);
+            }
         }
+
         return false;
     }
 
     public boolean isPublic() {
         return publicEntry;
+    }
+
+    private boolean checkBoost(JSONObject responseJson) {
+        int boostsTotal = responseJson.getInt("boosts_total");
+        int boostsRemaining = responseJson.getInt("boosts_remaining");
+        frDynamicBean.update(boostsRemaining, boostsTotal);
+
+        return responseJson.getBoolean("success");
     }
 
 }

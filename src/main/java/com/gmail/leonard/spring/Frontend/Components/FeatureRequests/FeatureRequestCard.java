@@ -2,6 +2,7 @@ package com.gmail.leonard.spring.Frontend.Components.FeatureRequests;
 
 import com.github.appreciated.card.Card;
 import com.gmail.leonard.spring.Backend.FeatureRequests.FREntry;
+import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Frontend.Components.ConfirmationDialog;
 import com.gmail.leonard.spring.Frontend.Components.CustomNotification;
 import com.gmail.leonard.spring.Frontend.Styles;
@@ -19,13 +20,15 @@ import org.checkerframework.checker.units.qual.C;
 public class FeatureRequestCard extends Card {
 
     private final FREntry frEntry;
+    private final SessionData sessionData;
     private final VerticalLayout content = new VerticalLayout();
     private Div description;
     private Button boostButton = null;
     private ConfirmationDialog confirmationDialog = null;
 
-    public FeatureRequestCard(FREntry frEntry) {
+    public FeatureRequestCard(FREntry frEntry, SessionData sessionData) {
         this.frEntry = frEntry;
+        this.sessionData = sessionData;
         setHeightFull();
         content.setAlignItems(FlexComponent.Alignment.CENTER);
 
@@ -91,13 +94,16 @@ public class FeatureRequestCard extends Card {
     private void onBoostConfirm() {
         boostButton.setEnabled(true);
         boostButton.setDisableOnClick(true);
-        if (frEntry.boost()) {
+        if (sessionData.isLoggedIn() && frEntry.boost(sessionData.getUserId().get())) {
             boostButton.setText(String.valueOf(frEntry.getBoosts().get()));
-            boostButton.getStyle().set("color", "var(--lumo-error-color)");
-            //CustomNotification.showSuccess(getTranslation("fr.boost.success"));
+            turnRed();
         } else {
             CustomNotification.showError(getTranslation("fr.boost.noboosts"));
         }
+    }
+
+    private void turnRed() {
+        boostButton.getStyle().set("color", "var(--lumo-error-color)");
     }
 
 }

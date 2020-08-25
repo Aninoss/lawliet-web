@@ -1,6 +1,7 @@
 package com.gmail.leonard.spring;
 
 import com.gmail.leonard.spring.Backend.SecretManager;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.Modules.OneWayTransfers;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -73,7 +74,7 @@ public class CustomRequestHandler implements RequestHandler {
             String ip = request.getRemoteAddr();
             if (!inviteIPAdresses.asMap().containsKey(ip)) {
                 String type = new ArrayList<>(params.keySet()).get(0);
-                if (type.length() > 0) WebComClient.getInstance().sendInvite(type);
+                if (type.length() > 0) OneWayTransfers.sendInvite(type);
                 try {
                     inviteIPAdresses.get(ip);
                 } catch (ExecutionException e) {
@@ -103,7 +104,7 @@ public class CustomRequestHandler implements RequestHandler {
                 if (sb.length() > 0) {
                     JSONObject jsonObject = new JSONObject(sb.substring(1));
                     LOGGER.info("UPVOTE | {}", jsonObject.getLong("user"));
-                    WebComClient.getInstance().sendTopGG(jsonObject).get();
+                    OneWayTransfers.sendTopGG(jsonObject).get();
                 }
 
                 return true;
@@ -128,7 +129,8 @@ public class CustomRequestHandler implements RequestHandler {
                     sb.append("\n").append(line);
                 }
 
-                if (sb.length() > 0) WebComClient.getInstance().sendDonatebotIO(new JSONObject(sb.toString().substring(1))).get();
+                if (sb.length() > 0)
+                    OneWayTransfers.sendDonatebotIO(new JSONObject(sb.toString().substring(1))).get();
                 return true;
             }
         } catch (IOException | ExecutionException e) {

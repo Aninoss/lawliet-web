@@ -8,6 +8,8 @@ import com.github.appreciated.css.grid.sizes.Repeat;
 import com.github.appreciated.layout.FlexibleGridLayout;
 import com.gmail.leonard.spring.Backend.FeatureRequests.FRDynamicBean;
 import com.gmail.leonard.spring.Backend.FeatureRequests.FREntry;
+import com.gmail.leonard.spring.Backend.FeatureRequests.FRPanelType;
+import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Frontend.Styles;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Article;
@@ -17,18 +19,14 @@ import java.util.ArrayList;
 
 public class FeatureRequestPanel extends Div {
 
+    private final SessionData sessionData;
     private final FRDynamicBean frDynamicBean;
     private final ArrayList<FREntry> entries;
 
-    public FeatureRequestPanel(FRDynamicBean frDynamicBean, String type) {
+    public FeatureRequestPanel(SessionData sessionData, FRDynamicBean frDynamicBean, FRPanelType type) {
+        this.sessionData = sessionData;
         this.frDynamicBean = frDynamicBean;
         this.entries = frDynamicBean.getEntryCategoryMap(type);
-
-        //TODO Test Entries
-        frDynamicBean.generateEntry(type, "looool", 5, true);
-        frDynamicBean.generateEntry(type, "Ja man echt geil so", 4, true);
-        frDynamicBean.generateEntry(type, "Boah echt keine Ahnung", null, true);
-        frDynamicBean.generateEntry(type, "Ja looooool", null, false);
 
         if (entries.isEmpty()) {
             addEmptyText();
@@ -40,7 +38,7 @@ public class FeatureRequestPanel extends Div {
     private void addEntries() {
         ArrayList<Article> articles = new ArrayList<>();
         for (FREntry entry : entries) {
-            articles.add(new Article(new FeatureRequestCard(entry)));
+            articles.add(new Article(new FeatureRequestCard(entry, sessionData)));
         }
 
         FlexibleGridLayout layout = new FlexibleGridLayout()

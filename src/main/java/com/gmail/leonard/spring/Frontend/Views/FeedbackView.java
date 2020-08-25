@@ -3,6 +3,7 @@ package com.gmail.leonard.spring.Frontend.Views;
 import com.gmail.leonard.spring.Backend.Feedback.FeedbackBean;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
+import com.gmail.leonard.spring.Backend.WebCommunicationClient.Modules.OneWayTransfers;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
 import com.gmail.leonard.spring.Frontend.Components.CustomNotification;
 import com.gmail.leonard.spring.Frontend.Components.HtmlText;
@@ -132,7 +133,7 @@ public class FeedbackView extends PageLayout implements HasUrlParameter<Long> {
     private void onSubmitPress(VerticalLayout mainContent, FeedbackBean feedbackBean) {
         mainContent.setEnabled(false);
         try {
-            WebComClient.getInstance().sendFeedback(feedbackBean, feedbackBean.getServerDetails(feedbackBean) ? serverId : null).get();
+            OneWayTransfers.sendFeedback(feedbackBean, feedbackBean.getServerDetails(feedbackBean) ? serverId : null).get();
             CustomNotification.showSuccess(getTranslation("feedback.confirm"));
             mainContent.getUI().get().navigate(HomeView.class);
         } catch (ExecutionException e) {
