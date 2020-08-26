@@ -2,7 +2,9 @@ package com.gmail.leonard.spring.Frontend.Components.FeatureRequests;
 
 import com.github.appreciated.card.Card;
 import com.gmail.leonard.spring.Backend.FeatureRequests.FREntry;
+import com.gmail.leonard.spring.Backend.FeatureRequests.FRPanelType;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
+import com.gmail.leonard.spring.Backend.UserData.UIData;
 import com.gmail.leonard.spring.Frontend.Components.ConfirmationDialog;
 import com.gmail.leonard.spring.Frontend.Components.CustomNotification;
 import com.gmail.leonard.spring.Frontend.Styles;
@@ -11,32 +13,39 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import org.checkerframework.checker.units.qual.C;
 
+import java.rmi.server.UID;
+
 public class FeatureRequestCard extends Card {
 
     private final FREntry frEntry;
     private final SessionData sessionData;
+    private final UIData uiData;
     private final VerticalLayout content = new VerticalLayout();
     private Div description;
     private Button boostButton = null;
     private ConfirmationDialog confirmationDialog = null;
 
-    public FeatureRequestCard(FREntry frEntry, SessionData sessionData) {
+    public FeatureRequestCard(FRPanelType type, FREntry frEntry, SessionData sessionData, UIData uiData) {
         this.frEntry = frEntry;
         this.sessionData = sessionData;
+        this.uiData = uiData;
         setHeightFull();
         content.setAlignItems(FlexComponent.Alignment.CENTER);
 
+        addTitle();
         addDescription();
         if (frEntry.isPublic()) {
             frEntry.getBoosts().ifPresent(this::addBoostButton);
         } else {
-            addNoPublicText();
+            addNoPublicText(type == FRPanelType.PENDING);
         }
 
         content.setHeightFull();
@@ -45,19 +54,28 @@ public class FeatureRequestCard extends Card {
         add(content);
 
         if (frEntry.isPublic() && frEntry.getBoosts().isPresent()) {
-            this.confirmationDialog = new ConfirmationDialog(getTranslation("fr.boost.confirm"), this::onBoostConfirm, this::onBoostCancel);
+            this.confirmationDialog = new ConfirmationDialog(getTranslation("fr.boost.confirm", frEntry.getTitle()), this::onBoostConfirm, this::onBoostCancel);
             add(confirmationDialog);
+        }
+    }
+
+    private void addTitle() {
+        if (frEntry.getTitle().length() > 0) {
+            H3 title = new H3((frEntry.getTitle()));
+            title.setWidthFull();
+            content.add(title);
         }
     }
 
     private void addDescription() {
         description = new Div(new Text(frEntry.getDescription()));
+        description.setWidthFull();
         content.add(description);
     }
 
-    private void addNoPublicText() {
+    private void addNoPublicText(boolean pending) {
         addSeperator();
-        Div notPublicText = new Div(new Text(getTranslation("fr.notpublic")));
+        Div notPublicText = new Div(new Text(getTranslation(pending ? "fr.notpublic.pending" : "fr.notpublic")));
         notPublicText.setWidthFull();
         notPublicText.addClassName(Styles.CENTER_TEXT);
         notPublicText.getStyle().set("color", "var(--lumo-disabled-text-color)");
@@ -68,7 +86,8 @@ public class FeatureRequestCard extends Card {
         addSeperator();
         boostButton = new Button(String.valueOf(boosts), VaadinIcon.FIRE.create(), (e) -> onBoostClick());
         boostButton.setWidthFull();
-        boostButton.setDisableOnClick(true);
+        if (uiData.isLite()) boostButton.setEnabled(false);
+        else boostButton.setDisableOnClick(true);
         content.add(boostButton);
     }
 
@@ -81,7 +100,7 @@ public class FeatureRequestCard extends Card {
     }
 
     private void onBoostClick() {
-        if (confirmationDialog != null) {
+        if (confirmationDialog != null && !uiData.isLite()) {
             confirmationDialog.open();
         }
     }
@@ -94,11 +113,16 @@ public class FeatureRequestCard extends Card {
     private void onBoostConfirm() {
         boostButton.setEnabled(true);
         boostButton.setDisableOnClick(true);
-        if (sessionData.isLoggedIn() && frEntry.boost(sessionData.getUserId().get())) {
-            boostButton.setText(String.valueOf(frEntry.getBoosts().get()));
-            turnRed();
+        if (sessionData.isLoggedIn()) {
+            if (frEntry.boost(sessionData.getUserId().get())) {
+                boostButton.setText(String.valueOf(frEntry.getBoosts().get()));
+                CustomNotification.showSuccess(getTranslation("fr.boost.success", frEntry.getTitle()));
+                //turnRed();
+            } else {
+                CustomNotification.showError(getTranslation("fr.boost.noboosts"));
+            }
         } else {
-            CustomNotification.showError(getTranslation("fr.boost.noboosts"));
+            CustomNotification.showError(getTranslation("fr.boost.notloggedin"));
         }
     }
 

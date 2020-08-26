@@ -11,6 +11,7 @@ public interface Styles {
     String CENTER_FIXED_FULL = "center-fixed-full";
     String FADE_IN = "fadein-class";
     String FADE_IN_FAST = "fadein-class-fast";
+    String DROP_SHADOW = "drop-shadow";
 
     /* Responsive Design */
     String VISIBLE_MOBILE = "visible-xsmall";

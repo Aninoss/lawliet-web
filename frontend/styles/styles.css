@@ -63,6 +63,12 @@ vaadin-button { cursor: pointer; }
     animation: fadein 0.5s;
 }
 
+.drop-shadow {
+    -webkit-box-shadow: 2px 2px 5px 0 rgba(0,0,0,0.2);
+    -moz-box-shadow: 2px 2px 5px 0 rgba(0,0,0,0.2);
+    box-shadow: 2px 2px 5px 0 rgba(0,0,0,0.2);
+}
+
 #header-dummy { height: 80px; }
 
 #page-header {

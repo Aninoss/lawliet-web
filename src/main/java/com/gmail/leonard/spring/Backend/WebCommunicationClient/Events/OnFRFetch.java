@@ -28,6 +28,7 @@ public class OnFRFetch extends EventAbstract<FRDynamicBean> {
                 frDynamicBean.addEntry(
                         type,
                         jsonEntry.getInt("id"),
+                        jsonEntry.getString("title"),
                         jsonEntry.getString("description"),
                         i == 0 ? jsonEntry.getInt("boosts") : null,
                         jsonEntry.getBoolean("public")

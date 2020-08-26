@@ -15,12 +15,9 @@ import io.socket.client.Socket;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.net.URISyntaxException;
 import java.nio.channels.NotYetConnectedException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
 public class WebComClient {
 
     private static final WebComClient instance = new WebComClient();
@@ -34,6 +31,8 @@ public class WebComClient {
     public static final String EVENT_SERVERMEMBERS = "server_members";
     public static final String EVENT_FR_FETCH = "fr_fetch";
     public static final String EVENT_FR_BOOST = "fr_boost";
+    public static final String EVENT_FR_CAN_POST = "fr_can_post";
+    public static final String EVENT_FR_POST = "fr_post";
     public static final String EVENT_TOPGG = "topgg";
     public static final String EVENT_DONATEBOT_IO = "donatebot.io";
     public static final String EVENT_FEEDBACK = "feedback";
@@ -63,6 +62,8 @@ public class WebComClient {
             socket.on(EVENT_SERVERMEMBERS, new OnEventJSONResponse(transferCache));
             socket.on(EVENT_FR_FETCH, new OnFRFetch(transferCache));
             socket.on(EVENT_FR_BOOST, new OnEventJSONResponse(transferCache));
+            socket.on(EVENT_FR_CAN_POST, new OnFRCanPost(transferCache));
+            socket.on(EVENT_FR_POST, new OnEventNoResponse(transferCache));
 
             socket.on(EVENT_TOPGG, new OnEventNoResponse(transferCache));
             socket.on(EVENT_DONATEBOT_IO, new OnEventNoResponse(transferCache));

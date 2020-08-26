@@ -26,8 +26,8 @@ public class FRDynamicBean {
         return entryCategoryMap.computeIfAbsent(type, k -> new ArrayList<>());
     }
 
-    public void addEntry(FRPanelType type, int id, String description, Integer boosts, boolean publicEntry) {
-        FREntry frEntry = new FREntry(this, id, description, boosts, publicEntry);
+    public void addEntry(FRPanelType type, int id, String title, String description, Integer boosts, boolean publicEntry) {
+        FREntry frEntry = new FREntry(this, id, title, description, boosts, publicEntry);
         getEntryCategoryMap(type).add(frEntry);
     }
 

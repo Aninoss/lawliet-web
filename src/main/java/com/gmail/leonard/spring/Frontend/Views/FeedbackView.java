@@ -80,32 +80,6 @@ public class FeedbackView extends PageLayout implements HasUrlParameter<Long> {
                 .bind(feedbackBean::getReason, feedbackBean::setReason);
 
 
-        /* Contact */
-        Checkbox cbUsername = new Checkbox(getTranslation("feedback.username"));
-        cbUsername.setWidthFull();
-
-        binder.forField(cbUsername)
-                .bind(feedbackBean::getContact, feedbackBean::setContact);
-
-
-        /* Username */
-        TextField txUsername = new TextField();
-        txUsername.setPlaceholder(getTranslation("feedback.username.pre"));
-        if (sessionData.isLoggedIn())
-            txUsername.setValue(sessionData.getUserName().get() + "#" + sessionData.getDiscriminator().get());
-        txUsername.setWidth("300px");
-        txUsername.getStyle().set("margin-top", "0");
-        txUsername.setEnabled(false);
-
-        binder.forField(txUsername)
-                .withValidator(
-                        username -> !cbUsername.getValue() || username.matches(".+#\\d{4}"),
-                        getTranslation("feedback.username.invalid")
-                )
-                .bind(feedbackBean::getUsernameDiscriminated, feedbackBean::setUsernameDiscriminated);
-        cbUsername.addValueChangeListener(event -> txUsername.setEnabled(event.getValue()));
-
-
         /* Send Server Details */
         Checkbox cbServerDetails = new Checkbox(getTranslation("feedback.serverDetails"), true);
         cbServerDetails.setWidthFull();
@@ -137,11 +111,11 @@ public class FeedbackView extends PageLayout implements HasUrlParameter<Long> {
             CustomNotification.showSuccess(getTranslation("feedback.confirm"));
             mainContent.getUI().get().navigate(HomeView.class);
         } catch (ExecutionException e) {
-            CustomNotification.showError(getTranslation("feedback.error"));
+            CustomNotification.showError(getTranslation("err.exception.des"));
             LOGGER.error("Error while submitting feedback form", e);
             mainContent.setEnabled(true);
         } catch (InterruptedException e) {
-            CustomNotification.showError(getTranslation("feedback.error"));
+            CustomNotification.showError(getTranslation("err.exception.des"));
             LOGGER.error("Interrupted");
             mainContent.setEnabled(true);
         }

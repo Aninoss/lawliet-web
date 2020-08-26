@@ -10,23 +10,25 @@ import com.gmail.leonard.spring.Backend.FeatureRequests.FRDynamicBean;
 import com.gmail.leonard.spring.Backend.FeatureRequests.FREntry;
 import com.gmail.leonard.spring.Backend.FeatureRequests.FRPanelType;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
+import com.gmail.leonard.spring.Backend.UserData.UIData;
 import com.gmail.leonard.spring.Frontend.Styles;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Article;
 import com.vaadin.flow.component.html.Div;
-
 import java.util.ArrayList;
 
 public class FeatureRequestPanel extends Div {
 
     private final SessionData sessionData;
-    private final FRDynamicBean frDynamicBean;
+    private final UIData uiData;
     private final ArrayList<FREntry> entries;
+    private final FRPanelType type;
 
-    public FeatureRequestPanel(SessionData sessionData, FRDynamicBean frDynamicBean, FRPanelType type) {
+    public FeatureRequestPanel(SessionData sessionData, UIData uiData, FRDynamicBean frDynamicBean, ArrayList<FREntry> entries, FRPanelType type) {
         this.sessionData = sessionData;
-        this.frDynamicBean = frDynamicBean;
-        this.entries = frDynamicBean.getEntryCategoryMap(type);
+        this.uiData = uiData;
+        this.entries = entries;
+        this.type = type;
 
         if (entries.isEmpty()) {
             addEmptyText();
@@ -38,7 +40,7 @@ public class FeatureRequestPanel extends Div {
     private void addEntries() {
         ArrayList<Article> articles = new ArrayList<>();
         for (FREntry entry : entries) {
-            articles.add(new Article(new FeatureRequestCard(entry, sessionData)));
+            articles.add(new Article(new FeatureRequestCard(type, entry, sessionData, uiData)));
         }
 
         FlexibleGridLayout layout = new FlexibleGridLayout()

@@ -26,8 +26,6 @@ public class OneWayTransfers {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("cause", feedbackBean.getCause(feedbackBean));
         jsonObject.put("reason", feedbackBean.getReason(feedbackBean));
-        if (feedbackBean.getContact(feedbackBean))
-            jsonObject.put("username_discriminated", feedbackBean.getUsernameDiscriminated(feedbackBean));
         if (serverId != null)
             jsonObject.put("server_id", serverId);
         return WebComClient.getInstance().send(WebComClient.EVENT_FEEDBACK, jsonObject, Void.class);

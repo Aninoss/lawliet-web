@@ -3,7 +3,7 @@
 }
 
 #not-logged-in-text {
-    color: var(--lumo-error-color);
+    color: var(--lumo-error-text-color);
     margin-bottom: 8px;
 }
 

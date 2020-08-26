@@ -15,14 +15,15 @@ public class FREntry {
     final static Logger LOGGER = LoggerFactory.getLogger(FREntry.class);
 
     private final int id;
-    private final String description;
+    private final String title, description;
     private Integer boosts;
     private final boolean publicEntry;
     private final FRDynamicBean frDynamicBean;
 
-    FREntry(FRDynamicBean frDynamicBean, int id, String description, Integer boosts, boolean publicEntry) {
+    FREntry(FRDynamicBean frDynamicBean, int id, String title, String description, Integer boosts, boolean publicEntry) {
         this.id = id;
         this.frDynamicBean = frDynamicBean;
+        this.title = title;
         this.description = description;
         this.boosts = boosts;
         this.publicEntry = publicEntry;
@@ -30,6 +31,10 @@ public class FREntry {
 
     public int getId() {
         return id;
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     public String getDescription() {

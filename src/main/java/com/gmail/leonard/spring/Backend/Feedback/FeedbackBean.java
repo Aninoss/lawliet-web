@@ -2,8 +2,8 @@ package com.gmail.leonard.spring.Backend.Feedback;
 
 public class FeedbackBean {
 
-    private String cause, reason, usernameDiscriminated;
-    private boolean contact, serverDetails;
+    private String cause, reason;
+    private boolean serverDetails;
 
     public String getReason(FeedbackBean feedbackBean) {
         return feedbackBean.reason;
@@ -19,22 +19,6 @@ public class FeedbackBean {
 
     public void setCause(FeedbackBean feedbackBean, String s) {
         feedbackBean.cause = s;
-    }
-
-    public Boolean getContact(FeedbackBean feedbackBean) {
-        return feedbackBean.contact;
-    }
-
-    public void setContact(FeedbackBean feedbackBean, Boolean aBoolean) {
-        feedbackBean.contact = aBoolean;
-    }
-
-    public String getUsernameDiscriminated(FeedbackBean feedbackBean) {
-        return feedbackBean.usernameDiscriminated;
-    }
-
-    public void setUsernameDiscriminated(FeedbackBean feedbackBean, String s) {
-        feedbackBean.usernameDiscriminated = s;
     }
 
     public Boolean getServerDetails(FeedbackBean feedbackBean) {

@@ -6,9 +6,11 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
+import java.util.Arrays;
+
 public class PageHeader extends Div {
 
-    private VerticalLayout mainLayout = new VerticalLayout();
+    private final VerticalLayout mainLayout = new VerticalLayout();
 
     public PageHeader(Component... components) {
         this(null, components);
@@ -30,7 +32,9 @@ public class PageHeader extends Div {
             mainLayout.add(h1);
         }
 
-        mainLayout.add(components);
+        Arrays.stream(components).forEach(component -> {
+            if (component != null) mainLayout.add(component);
+        });
         add(mainLayout);
     }
 
