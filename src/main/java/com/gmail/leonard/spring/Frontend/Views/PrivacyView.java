@@ -33,7 +33,7 @@ public class PrivacyView extends PageLayout {
         div.add(new Html(pageString));
 
         mainContent.add(div);
-        add(new PageHeader(getTitleText()), mainContent);
+        add(new PageHeader(getTitleText(), null, null), mainContent);
     }
 
 }

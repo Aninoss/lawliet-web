@@ -10,7 +10,7 @@ public class FeatureRequests {
 
     public static CompletableFuture<FRDynamicBean> fetchFeatureRequestMainData(SessionData sessionData) {
         JSONObject jsonObject = new JSONObject();
-        if (sessionData.isLoggedIn()) jsonObject.put("user_id", sessionData.getUserId().get());
+        if (sessionData.isLoggedIn()) jsonObject.put("user_id", sessionData.getDiscordUser().get().getId());
         return WebComClient.getInstance().send(WebComClient.EVENT_FR_FETCH, jsonObject, FRDynamicBean.class);
     }
 

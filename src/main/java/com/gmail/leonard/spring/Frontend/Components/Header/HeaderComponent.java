@@ -1,5 +1,6 @@
 package com.gmail.leonard.spring.Frontend.Components.Header;
 
+import com.gmail.leonard.spring.Backend.UserData.DiscordUser;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
 import com.gmail.leonard.spring.Frontend.Components.DiscordIcon;
@@ -71,7 +72,9 @@ public class HeaderComponent extends Header {
         //Login Elements
         if (!uiData.isLite()) {
             if (sessionData.isLoggedIn()) {
-                Image userIcon = new Image(sessionData.getUserAvatar().get(), "");
+                DiscordUser discordUser = sessionData.getDiscordUser().get();
+
+                Image userIcon = new Image(discordUser.getUserAvatar(), "");
                 userIcon.setHeight("48px");
                 userIcon.addClassName(Styles.ROUND);
                 content.add(userIcon);
@@ -82,7 +85,7 @@ public class HeaderComponent extends Header {
                 accountName.setSizeUndefined();
                 accountName.addClassName(Styles.VISIBLE_NOTMOBILE);
 
-                Div username = new Div(new Text(sessionData.getUserName().get()));
+                Div username = new Div(new Text(discordUser.getUsername()));
                 username.getStyle()
                         .set("margin-left", "-4px")
                         .set("color", "white");

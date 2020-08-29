@@ -5,6 +5,8 @@
 
 widgetbot-crate { display: none; }
 
+#page-icon { display: none; }
+
 /* Tablet */
 @media (min-width: 700px) {
 
@@ -12,6 +14,15 @@ widgetbot-crate { display: none; }
     .visible-not-xsmall { display: block; }
 
     widgetbot-crate { display: block; }
+    #page-icon {
+        display: block;
+        max-width: 100px;
+        max-height: 100px;
+        min-width: 100px;
+        min-height: 100px;
+        margin-right: 0.5em;
+        margin-top: 3em;
+    }
 
 }
 
@@ -21,5 +32,13 @@ widgetbot-crate { display: none; }
 
     .visible-small { display: none; }
     .visible-large { display: block; }
+
+    #page-icon {
+        max-width: 125px;
+        max-height: 125px;
+        min-width: 125px;
+        min-height: 125px;
+        margin-right: 1em;
+    }
 
 }

@@ -3,6 +3,7 @@ package com.gmail.leonard.spring.Frontend.Components.FeatureRequests;
 import com.github.appreciated.card.Card;
 import com.gmail.leonard.spring.Backend.FeatureRequests.FREntry;
 import com.gmail.leonard.spring.Backend.FeatureRequests.FRPanelType;
+import com.gmail.leonard.spring.Backend.UserData.DiscordUser;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
 import com.gmail.leonard.spring.Frontend.Components.ConfirmationDialog;
@@ -10,18 +11,12 @@ import com.gmail.leonard.spring.Frontend.Components.CustomNotification;
 import com.gmail.leonard.spring.Frontend.Styles;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import org.checkerframework.checker.units.qual.C;
-
-import java.rmi.server.UID;
 
 public class FeatureRequestCard extends Card {
 
@@ -114,7 +109,7 @@ public class FeatureRequestCard extends Card {
         boostButton.setEnabled(true);
         boostButton.setDisableOnClick(true);
         if (sessionData.isLoggedIn()) {
-            if (frEntry.boost(sessionData.getUserId().get())) {
+            if (frEntry.boost(sessionData.getDiscordUser().map(DiscordUser::getId).orElse(0L))) {
                 boostButton.setText(String.valueOf(frEntry.getBoosts().get()));
                 CustomNotification.showSuccess(getTranslation("fr.boost.success", frEntry.getTitle()));
                 //turnRed();

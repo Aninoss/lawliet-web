@@ -24,8 +24,8 @@ public class ErrorLayout extends PageLayout {
         mainContent.addClassName(Styles.APP_WIDTH);
         mainContent.setPadding(true);
 
-        add(new PageHeader(getTranslation("err." + typeString + ".title")));
-        mainContent.add(new Paragraph(getTranslation("err." + typeString + ".des")));
+        add(new PageHeader(getTranslation("err." + typeString + ".title"), getTranslation("err." + typeString + ".des"), "error"));
+        //mainContent.add(new Paragraph(getTranslation("err." + typeString + ".des")));
 
         Button button = new Button(getTranslation("err.button.home"), new Icon(VaadinIcon.ARROW_LEFT));
         button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);

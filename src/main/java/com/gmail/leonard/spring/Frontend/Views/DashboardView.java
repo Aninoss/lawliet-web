@@ -44,7 +44,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
             div.setWidthFull();
             mainLayout.add(div);
 
-            add(new PageHeader(getTitleText()), mainLayout);
+            add(new PageHeader(getTitleText(), null, null), mainLayout);
         }
     }
 
@@ -83,7 +83,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
             mainLayout.add(iconLabel);
 
             HtmlText htmlText = new HtmlText(getTranslation("dashboard.desc"));
-            add(new PageHeader(getTitleText(), htmlText), mainLayout);
+            add(new PageHeader(getTitleText(), null, null, htmlText), mainLayout);
             return;
         }
 

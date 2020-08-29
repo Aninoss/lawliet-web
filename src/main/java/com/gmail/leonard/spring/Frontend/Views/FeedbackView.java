@@ -41,8 +41,7 @@ public class FeedbackView extends PageLayout implements HasUrlParameter<Long> {
     public FeedbackView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         super(sessionData, uiData);
 
-        HtmlText htmlText = new HtmlText(getTranslation("feedback.desc"));
-        add(new PageHeader(getTitleText(), htmlText));
+        add(new PageHeader(getTitleText(), getTranslation("feedback.desc"), getRoute()));
 
         FeedbackBean feedbackBean = new FeedbackBean();
         Binder<FeedbackBean> binder = new Binder<>(FeedbackBean.class);

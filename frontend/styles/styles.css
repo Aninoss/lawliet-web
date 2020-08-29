@@ -78,6 +78,22 @@ vaadin-button { cursor: pointer; }
     padding-bottom: 32px;
 }
 
+#page-title {
+    position: relative;
+    margin-bottom: 8px;
+    width: 100%;
+}
+
+#page-title-shadow {
+    position: absolute;
+    width: 100%;
+    font-size: 200%;
+    opacity: 0.02;
+    top: -25px;
+    left: -15px;
+    white-space: nowrap;
+}
+
 #cookie-consent {
     position: fixed;
     background: black;

@@ -1,6 +1,5 @@
 package com.gmail.leonard.spring.Backend.UserData;
 
-import bell.oauth.discord.domain.User;
 import bell.oauth.discord.main.OAuthBuilder;
 import bell.oauth.discord.main.Response;
 import com.gmail.leonard.spring.Backend.SecretManager;
@@ -27,9 +26,7 @@ public class SessionData {
 
     private OAuthBuilder builder;
     private final String id;
-    private String username, avatarId, discriminator;
-    private long userId;
-    private boolean loggedIn;
+    private DiscordUser discordUser = null;
     private Class<? extends PageLayout> currentTarget = HomeView.class;
 
     public static HashMap<Long, ArrayList<SessionData>> userCache = new HashMap<>();
@@ -40,12 +37,6 @@ public class SessionData {
     }
 
     private void setData() {
-        userId = 0;
-        username = null;
-        avatarId = null;
-        discriminator = null;
-        loggedIn = false;
-
         try {
             builder = new OAuthBuilder(SecretManager.getString("bot.clientid"), SecretManager.getString("bot.clientsecret"))
                     .setScopes(new String[]{"identify"})
@@ -70,14 +61,9 @@ public class SessionData {
         if (state.equals(id)) {
             Response response = builder.exchange(code);
             if (response != Response.ERROR) {
-                User user = builder.getUser();
-                userId = Long.parseLong(user.getId());
-                username = user.getUsername();
-                avatarId = user.getAvatar();
-                discriminator = user.getDiscriminator();
-                loggedIn = true;
-                userCache.computeIfAbsent(userId, id -> new ArrayList<>()).add(this);
-                uiData.login(userId);
+                discordUser = new DiscordUser(builder.getUser());
+                userCache.computeIfAbsent(discordUser.getId(), id -> new ArrayList<>()).add(this);
+                uiData.login(discordUser.getId());
                 return true;
             }
         }
@@ -86,38 +72,19 @@ public class SessionData {
 
     public void logout(UIData uiData) {
         if (isLoggedIn()) {
-            userCache.computeIfAbsent(userId, id -> new ArrayList<>()).remove(this);
+            userCache.computeIfAbsent(discordUser.getId(), id -> new ArrayList<>()).remove(this);
+            uiData.logout();
+            setData();
+            discordUser = null;
         }
-        uiData.logout();
-        setData();
     }
 
-    public Optional<Long> getUserId() {
-        if (loggedIn) {
-            return Optional.of(userId);
-        } return Optional.empty();
-    }
-
-    public Optional<String> getUserName() {
-        if (loggedIn) {
-            return Optional.of(username);
-        } return Optional.empty();
-    }
-
-    public Optional<String> getDiscriminator() {
-        if (loggedIn) {
-            return Optional.of(discriminator);
-        } return Optional.empty();
-    }
-
-    public Optional<String> getUserAvatar() {
-        if (loggedIn) {
-            return Optional.of("https://cdn.discordapp.com/avatars/" + userId + "/" + avatarId + ".png");
-        } return Optional.empty();
+    public Optional<DiscordUser> getDiscordUser() {
+        return Optional.ofNullable(discordUser);
     }
 
     public boolean isLoggedIn() {
-        return loggedIn;
+        return discordUser != null;
     }
 
     public void setCurrentTarget(Class<? extends PageLayout> c) {

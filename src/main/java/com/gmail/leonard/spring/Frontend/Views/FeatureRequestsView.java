@@ -36,7 +36,7 @@ public class FeatureRequestsView extends PageLayout {
 
         HtmlText htmlText = new HtmlText(getTranslation("fr.desc"));
         add(
-                new PageHeader(getTitleText(), htmlText, uiData.isLite() ? null : new FeatureRequestUserHeader(getSessionData(), frDynamicBean)),
+                new PageHeader(getTitleText(), getTranslation("fr.desc"), getRoute(), uiData.isLite() ? null : new FeatureRequestUserHeader(getSessionData(), frDynamicBean)),
                 mainContent
         );
     }

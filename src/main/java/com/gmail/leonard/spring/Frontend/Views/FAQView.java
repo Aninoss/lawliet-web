@@ -41,8 +41,7 @@ public class FAQView extends PageLayout {
             }
         }
 
-        HtmlText htmlText = new HtmlText(getTranslation("faq.desc"));
-        add(new PageHeader(getTitleText(), htmlText), mainContent);
+        add(new PageHeader(getTitleText(), getTranslation("faq.desc"), getRoute()), mainContent);
     }
 
 }

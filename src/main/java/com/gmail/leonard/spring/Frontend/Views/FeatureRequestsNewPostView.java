@@ -29,8 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Route(value = "new", layout = MainLayout.class)
 @RoutePrefix("featurerequests")
@@ -47,8 +45,7 @@ public class FeatureRequestsNewPostView extends PageLayout {
     public FeatureRequestsNewPostView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         super(sessionData, uiData);
 
-        HtmlText htmlText = new HtmlText(getTranslation("fr.new.desc"));
-        add(new PageHeader(getTitleText(), htmlText));
+        add(new PageHeader(getTitleText(), getTranslation("fr.new.desc"), FeatureRequestsView.getRouteStatic(FeatureRequestsView.class)));
 
         mainContent.addClassName(Styles.APP_WIDTH);
         mainContent.getStyle().set("margin-top", "-16px");
@@ -90,7 +87,7 @@ public class FeatureRequestsNewPostView extends PageLayout {
 
     private void onSubmit() {
         if (getSessionData().isLoggedIn()) {
-            long userId = getSessionData().getUserId().get();
+            long userId = getSessionData().getDiscordUser().get().getId();
             if (FeatureRequests.canPost(userId).join()) {
                 try {
                     FeatureRequests.postNewFeatureRequest(userId, newBean.getTitle(newBean), newBean.getDescription(newBean)).get();

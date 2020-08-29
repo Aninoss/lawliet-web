@@ -4,22 +4,18 @@ import com.gmail.leonard.spring.Backend.CommandList.CommandListContainer;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
 import com.gmail.leonard.spring.Frontend.Components.IconLabel;
 import com.gmail.leonard.spring.Frontend.Components.PageHeader;
-import com.gmail.leonard.spring.Frontend.Styles;
 import com.gmail.leonard.spring.Frontend.Views.CommandsView;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
 public class CommandSearchArea extends PageHeader {
 
-    public CommandSearchArea(CommandsView parent, UIData uiData) {
-        super(parent.getTitleText());
+    public CommandSearchArea(CommandsView parent, UIData uiData, String route) {
+        super(parent.getTitleText(), null, route);
 
         HorizontalLayout searchArea = new HorizontalLayout();
         searchArea.setPadding(false);
@@ -47,10 +43,10 @@ public class CommandSearchArea extends PageHeader {
             searchResults.setText(getTranslation("commands.searchresults", found != 1, found));
         });
 
-        getMainLayout().add(searchField, searchResults);
+        getInnerLayout().add(searchField, searchResults);
 
         if (uiData.isNSFWDisabled()) {
-            getMainLayout().add(new IconLabel(VaadinIcon.WARNING.create(), getTranslation("commands.hide")));
+            getInnerLayout().add(new IconLabel(VaadinIcon.WARNING.create(), getTranslation("commands.hide")));
         }
     }
 }

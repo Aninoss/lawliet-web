@@ -17,11 +17,11 @@ import java.util.ArrayList;
 @CssImport("./styles/commands.css")
 public class CommandsView extends PageLayout {
 
-    private ArrayList<CommandCategoryLayout> categories = new ArrayList<>();
+    private final ArrayList<CommandCategoryLayout> categories = new ArrayList<>();
 
     public CommandsView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         super(sessionData, uiData);
-        add(new CommandSearchArea(this, uiData), new CommandList(this, uiData));
+        add(new CommandSearchArea(this, uiData, getRoute()), new CommandList(this, uiData));
     }
 
     public ArrayList<CommandCategoryLayout> getCategories() {

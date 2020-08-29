@@ -1,5 +1,6 @@
 package com.gmail.leonard.spring.Frontend.Components.Header;
 
+import com.gmail.leonard.spring.Backend.UserData.DiscordUser;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
 import com.gmail.leonard.spring.Frontend.Components.DiscordIcon;
@@ -31,7 +32,9 @@ public class VerticalMenuBarComponent extends VerticalLayout {
 
         if (!uiData.isLite()) {
             if (sessionData.isLoggedIn()) {
-                Div status = new Div(new Text(getTranslation("login.status", sessionData.getUserName().get())));
+                DiscordUser discordUser = sessionData.getDiscordUser().get();
+
+                Div status = new Div(new Text(getTranslation("login.status", discordUser.getUsername())));
                 status.setWidthFull();
                 status.addClassName(Styles.CENTER_TEXT);
                 status.getStyle().set("margin-bottom", "-4px");

@@ -4,7 +4,6 @@ import com.gmail.leonard.spring.Backend.StringUtil;
 import com.gmail.leonard.spring.Backend.UserData.DiscordServerData;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.Modules.Dashboard;
-import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
 import com.gmail.leonard.spring.Frontend.Components.IconLabel;
 import com.gmail.leonard.spring.Frontend.Components.PageHeader;
 import com.gmail.leonard.spring.Frontend.Styles;
@@ -20,7 +19,7 @@ public class DashboardHeader extends PageHeader {
     private final DashboardTitle dashboardTitle;
 
     public DashboardHeader(SessionData sessionData, String dashboardName, DiscordServerData discordServerData) {
-        super();
+        super(null, null, null);
         removeOnlyPC();
 
         dashboardTitle = new DashboardTitle(dashboardName, discordServerData.getName());
@@ -47,7 +46,7 @@ public class DashboardHeader extends PageHeader {
         }
 
         mainLayout.add(serverDataLayout);
-        getMainLayout().add(mainLayout);
+        getOuterLayout().add(mainLayout);
     }
 
     public void addServerClickListener(DashboardServerClickListener listener) { dashboardTitle.addServerClickListener(listener); }

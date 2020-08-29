@@ -82,7 +82,7 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
 
         UI.getCurrent().getPage().executeJs("onLoad()");
         if (sessionData.isLoggedIn()) {
-            uiData.login(sessionData.getUserId().get());
+            uiData.login(sessionData.getDiscordUser().get().getId());
         }
     }
 
@@ -100,22 +100,20 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
         }
     }
 
-    private boolean checkLoginStatusChanged(BeforeEnterEvent event) {
+    private void checkLoginStatusChanged(BeforeEnterEvent event) {
         if (!sessionData.isLoggedIn() && event.getNavigationTarget().isAnnotationPresent(LoginAccess.class)) {
             new Redirector().redirect(sessionData.getLoginUrl());
-            return true;
+            return;
         }
 
         if (sessionData != null) {
             if ((sessionData.isLoggedIn() && !uiData.getUserId().isPresent()) ||
                     (!sessionData.isLoggedIn() && uiData.getUserId().isPresent()) ||
-                    (sessionData.isLoggedIn() && !uiData.getUserId().get().equals(sessionData.getUserId().get()))
+                    (sessionData.isLoggedIn() && !uiData.getUserId().get().equals(sessionData.getDiscordUser().get().getId()))
             ) {
                 UI.getCurrent().getPage().reload();
-                return true;
             }
         }
-        return false;
     }
 
     private boolean checkBrowserIE(BeforeEnterEvent event) {

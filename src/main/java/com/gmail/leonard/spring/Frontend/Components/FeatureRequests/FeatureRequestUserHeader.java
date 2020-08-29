@@ -2,6 +2,7 @@ package com.gmail.leonard.spring.Frontend.Components.FeatureRequests;
 
 import com.github.appreciated.card.Card;
 import com.gmail.leonard.spring.Backend.FeatureRequests.FRDynamicBean;
+import com.gmail.leonard.spring.Backend.UserData.DiscordUser;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.Modules.FeatureRequests;
 import com.gmail.leonard.spring.ExternalLinks;
@@ -78,7 +79,7 @@ public class FeatureRequestUserHeader extends Card {
 
     private void onPostButtonClick() {
         try {
-            if (FeatureRequests.canPost(sessionData.getUserId().get()).get()) {
+            if (FeatureRequests.canPost(sessionData.getDiscordUser().map(DiscordUser::getId).orElse(0L)).get()) {
                 UI.getCurrent().navigate(FeatureRequestsNewPostView.class);
             } else {
                 CustomNotification.showError(getTranslation("fr.post.block"));
