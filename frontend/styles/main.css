@@ -7,7 +7,7 @@
     z-index: 6;
     padding: 16px;
     box-sizing: border-box;
-    width: 100vw;
+    width: 100%;
 
     transform: translateY(8px);
 

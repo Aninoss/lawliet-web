@@ -2,7 +2,9 @@ package com.gmail.leonard.spring.Frontend.Components.Commands;
 
 import com.gmail.leonard.spring.Backend.CommandList.CommandListCategory;
 import com.gmail.leonard.spring.Backend.CommandList.CommandListSlot;
+import com.gmail.leonard.spring.Frontend.Components.Card;
 import com.gmail.leonard.spring.Frontend.Components.HtmlText;
+import com.gmail.leonard.spring.Frontend.Components.LoadingIndicator;
 import com.gmail.leonard.spring.Frontend.Styles;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.accordion.AccordionPanel;
@@ -11,6 +13,7 @@ import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import org.checkerframework.checker.units.qual.C;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,7 +32,7 @@ public class CommandCategoryLayout extends VerticalLayout {
     private final boolean showNsfw;
     private boolean build = false;
     private String lastSearchTerm = "";
-    private final Div loadingDiv;
+    private final LoadingIndicator loadingIndicator = new LoadingIndicator();
 
     public CommandCategoryLayout(CommandListCategory commandListCategory, boolean showNsfw) {
         this.commandListCategory = commandListCategory;
@@ -40,17 +43,14 @@ public class CommandCategoryLayout extends VerticalLayout {
         setPadding(false);
         setSpacing(false);
 
-        loadingDiv = new Div(new Div(), new Div(), new Div(), new Div());
-        loadingDiv.addClassName("lds-ring2");
-
-        add(loadingDiv);
+        add(loadingIndicator);
     }
 
     public void build() {
         if (build) return;
         build = true;
 
-        remove(loadingDiv);
+        remove(loadingIndicator);
         setHeight("auto");
 
         Locale locale = getLocale();
@@ -76,31 +76,27 @@ public class CommandCategoryLayout extends VerticalLayout {
             titleContent.add(titleArea, new Text(slot.getLangDescShort().get(locale)));
 
             VerticalLayout openedContent = new VerticalLayout();
-            openedContent.setPadding(false);
-
-            Hr seperator = new Hr();
-            seperator.getStyle().set("margin-top", "16px");
-            openedContent.add(seperator);
-
-            openedContent.add(new Text(slot.getLangDescLong().get(locale)));
+            Div commandDescLong = new Div(new Text(slot.getLangDescLong().get(locale)));
+            openedContent.add(commandDescLong);
 
             String[] specContent = {
                     slot.getLangUsage().get(locale),
                     slot.getLangExamples().get(locale),
                     slot.getLangUserPermissions().get(locale)
             };
-            //String[] specWidths = { "50%", "50%", "100%" };
             int n = (int) Arrays.stream(specContent).filter(e -> e != null && !e.isEmpty()).count();
 
             Div specs = new Div();
             specs.setWidthFull();
 
+            boolean moreInfo = false;
             for (int i = 0; i < 3; i++) {
                 if (specContent[i] != null && !specContent[i].isEmpty()) {
+                    moreInfo = true;
                     VerticalLayout spec = new VerticalLayout();
                     spec.setPadding(false);
 
-                    H5 specTitle = new H5(getTranslation("commands.specs" + i).toUpperCase());
+                    H5 specTitle = new H5(getTranslation("commands.specs" + i));
                     spec.add(specTitle);
 
                     HtmlText htmlText = new HtmlText(specContent[i]);
@@ -115,10 +111,12 @@ public class CommandCategoryLayout extends VerticalLayout {
                     specs.add(spec);
                 }
             }
-            openedContent.add(specs);
 
+            if (moreInfo)
+                openedContent.add(new Hr(), specs);
 
-            Details component = new Details(titleContent, openedContent);
+            Card commandContent = new Card(openedContent);
+            Details component = new Details(titleContent, commandContent);
             component.addThemeVariants(DetailsVariant.REVERSE, DetailsVariant.FILLED);
             component.getElement().getStyle().set("width", "100%");
             component.getElement().setAttribute("class", Styles.FADE_IN_FAST);

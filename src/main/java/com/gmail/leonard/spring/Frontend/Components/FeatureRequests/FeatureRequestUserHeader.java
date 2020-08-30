@@ -1,11 +1,11 @@
 package com.gmail.leonard.spring.Frontend.Components.FeatureRequests;
 
-import com.github.appreciated.card.Card;
 import com.gmail.leonard.spring.Backend.FeatureRequests.FRDynamicBean;
 import com.gmail.leonard.spring.Backend.UserData.DiscordUser;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.Modules.FeatureRequests;
 import com.gmail.leonard.spring.ExternalLinks;
+import com.gmail.leonard.spring.Frontend.Components.Card;
 import com.gmail.leonard.spring.Frontend.Components.CustomNotification;
 import com.gmail.leonard.spring.Frontend.Styles;
 import com.gmail.leonard.spring.Frontend.Views.FeatureRequestsNewPostView;
@@ -17,6 +17,7 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -42,10 +43,10 @@ public class FeatureRequestUserHeader extends Card {
         getStyle().set("margin-top", "32px");
 
         VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.setAlignItems(Alignment.CENTER);
+        mainLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         notLoggedInLayout.setId("fr-flex");
-        notLoggedInLayout.setAlignItems(Alignment.CENTER);
-        notLoggedInLayout.setJustifyContentMode(JustifyContentMode.BETWEEN);
+        notLoggedInLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        notLoggedInLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         notLoggedInLayout.addClassName(Styles.FLEX_MOBILE_SWITCH_COLUMN);
         notLoggedInLayout.setSizeFull();
 

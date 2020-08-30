@@ -1,11 +1,11 @@
 package com.gmail.leonard.spring.Frontend.Components.FeatureRequests;
 
-import com.github.appreciated.card.Card;
 import com.gmail.leonard.spring.Backend.FeatureRequests.FREntry;
 import com.gmail.leonard.spring.Backend.FeatureRequests.FRPanelType;
 import com.gmail.leonard.spring.Backend.UserData.DiscordUser;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
+import com.gmail.leonard.spring.Frontend.Components.Card;
 import com.gmail.leonard.spring.Frontend.Components.ConfirmationDialog;
 import com.gmail.leonard.spring.Frontend.Components.CustomNotification;
 import com.gmail.leonard.spring.Frontend.Styles;

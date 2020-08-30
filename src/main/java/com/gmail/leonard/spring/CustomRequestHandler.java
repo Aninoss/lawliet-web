@@ -46,7 +46,7 @@ public class CustomRequestHandler implements RequestHandler {
 
         response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubdomains");
         response.setHeader("Content-Security-Policy",
-                "default-src data: 'self' https://widgetbot.io https://e.widgetbot.io; " +
+                "default-src data: 'self' https://widgetbot.io https://e.widgetbot.io ws://localhost:35729/; " +
                         "img-src 'self' https://cdn.discordapp.com/; " +
                         "media-src 'self'; " +
                         "object-src 'self'; " +

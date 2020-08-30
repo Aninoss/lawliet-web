@@ -12,7 +12,7 @@ public class FooterArea extends Footer {
 
     public FooterArea() {
         addClassName(Styles.FADE_IN);
-        setWidth("100vw");
+        setWidthFull();
         setHeight("auto");
         getStyle().
                 set("background-color", "var(--lumo-shade)").

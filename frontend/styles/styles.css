@@ -1,19 +1,26 @@
 html {
-    --lumo-secondary: var(--lumo-shade-80pct);
+    --lumo-secondary: var(--lumo-shade-10pct);
     --scroll-type: scroll;
 }
 
 body {
     overflow-x: hidden;
     background: var(--lumo-base-color);
+    overflow-y: scroll;
 }
 
 vaadin-button { cursor: pointer; }
 
+content-card {
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
 .pointer { cursor: pointer; }
 
 .app-width {
-    width: 100vw;
+    width: 100%;
     max-width: 1000px;
     margin-left: auto;
     margin-right: auto;
@@ -157,6 +164,8 @@ vaadin-button { cursor: pointer; }
         background: rgba(0,0,0,0);
         padding-bottom: 0;
     }
+
+    #page-title { margin-top: 0.75em; }
 
 }
 

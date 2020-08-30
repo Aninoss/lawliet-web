@@ -4,7 +4,6 @@ import com.gmail.leonard.spring.Backend.FeatureRequests.FRDynamicBean;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
 import com.gmail.leonard.spring.Backend.WebCommunicationClient.Modules.FeatureRequests;
-import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
 import com.gmail.leonard.spring.Frontend.Components.FeatureRequests.FeatureRequestEntries;
 import com.gmail.leonard.spring.Frontend.Components.FeatureRequests.FeatureRequestUserHeader;
 import com.gmail.leonard.spring.Frontend.Components.HtmlText;
@@ -12,7 +11,6 @@ import com.gmail.leonard.spring.Frontend.Components.PageHeader;
 import com.gmail.leonard.spring.Frontend.Layouts.MainLayout;
 import com.gmail.leonard.spring.Frontend.Layouts.PageLayout;
 import com.gmail.leonard.spring.Frontend.Styles;
-import com.gmail.leonard.spring.LoginAccess;
 import com.gmail.leonard.spring.NoLiteAccess;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -23,6 +21,7 @@ import java.util.concurrent.ExecutionException;
 
 @Route(value = "featurerequests", layout = MainLayout.class)
 @CssImport("./styles/featurerequests.css")
+@NoLiteAccess
 public class FeatureRequestsView extends PageLayout {
 
     public FeatureRequestsView(@Autowired SessionData sessionData, @Autowired UIData uiData) throws ExecutionException, InterruptedException {

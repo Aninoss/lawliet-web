@@ -1,20 +1,11 @@
 package com.gmail.leonard.spring.Frontend.Components.Dashboard;
 
-import com.github.appreciated.card.Card;
-import com.gmail.leonard.spring.Frontend.ComponentChanger;
+import com.gmail.leonard.spring.Frontend.Components.Card;
 import com.gmail.leonard.spring.Frontend.Styles;
-import com.gmail.leonard.spring.Frontend.Views.HomeView;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.server.VaadinServletService;
-import com.vaadin.flow.server.VaadinSession;
-
-import java.util.Objects;
-import java.util.stream.Stream;
 
 public class DashboardServerCard extends Card {
 
@@ -22,7 +13,7 @@ public class DashboardServerCard extends Card {
         setHeightFull();
 
         VerticalLayout content = new VerticalLayout();
-        content.setAlignItems(Alignment.CENTER);
+        content.setAlignItems(FlexComponent.Alignment.CENTER);
 
         Image image = new Image(iconURL, "");
         image.setWidth("70%");

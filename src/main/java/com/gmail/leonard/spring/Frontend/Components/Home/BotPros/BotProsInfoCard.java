@@ -1,7 +1,7 @@
 package com.gmail.leonard.spring.Frontend.Components.Home.BotPros;
 
-import com.github.appreciated.card.Card;
 import com.gmail.leonard.spring.Backend.StringUtil;
+import com.gmail.leonard.spring.Frontend.Components.Card;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;

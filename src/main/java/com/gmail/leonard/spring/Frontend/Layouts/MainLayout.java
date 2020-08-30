@@ -19,6 +19,7 @@ import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.page.BodySize;
+import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.InitialPageSettings;
 import com.vaadin.flow.server.PageConfigurator;
@@ -37,6 +38,7 @@ import java.util.HashMap;
 @CssImport("./styles/main.css")
 @Theme(value = Lumo.class, variant = Lumo.DARK)
 @BodySize(width = "100%", height = "100%")
+@Push
 public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterObserver, PageConfigurator, HasErrorParameter<Exception>, BeforeLeaveObserver {
 
     final static Logger LOGGER = LoggerFactory.getLogger(MainLayout.class);
@@ -50,10 +52,6 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
 
         this.sessionData = sessionData;
         this.uiData = uiData;
-
-        //if(UI.getCurrent() != null)
-            //UI.getCurrent().getElement().getStyle().set("width", "100%")
-                    //.set("background-color", "transparent");
 
         setMinHeight("100vh");
         setId("main-page");
