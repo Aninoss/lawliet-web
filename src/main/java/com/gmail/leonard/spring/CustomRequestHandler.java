@@ -87,11 +87,8 @@ public class CustomRequestHandler implements RequestHandler {
     }
 
     private boolean handleTopGG(VaadinRequest request, String auth) {
-        LOGGER.info("TOPGG 0");
         try {
-            LOGGER.info("TOPGG 1");
             if (auth.equals(SecretManager.getString("discordbots.auth"))) {
-                LOGGER.info("TOPGG 2");
                 StringBuilder sb = new StringBuilder();
                 BufferedReader br = request.getReader();
 
@@ -99,7 +96,6 @@ public class CustomRequestHandler implements RequestHandler {
                 while((line = br.readLine()) != null) {
                     sb.append("\n").append(line);
                 }
-                LOGGER.info("TOPGG 3");
 
                 if (sb.length() > 0) {
                     JSONObject jsonObject = new JSONObject(sb.substring(1));
