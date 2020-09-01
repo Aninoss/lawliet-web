@@ -53,7 +53,7 @@ public class FeatureRequestEntries extends Div {
         panelsPushThread = new PanelsPushThread(this, UI.getCurrent());
         panelsPushThread.start();
 
-        loadingIndicator.getStyle().set("margin-top", "48px");
+        loadingIndicator.getStyle().set("margin-top", "64px");
         add(loadingIndicator);
     }
 

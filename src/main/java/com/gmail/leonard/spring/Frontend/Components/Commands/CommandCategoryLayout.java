@@ -24,8 +24,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class CommandCategoryLayout extends VerticalLayout {
 
-    private static final int PX_PER_SLOT = 66, PX_ABSOLUTE = 4;
-
     private final CommandListCategory commandListCategory;
     private final HashMap<String, Details> commandFields = new HashMap<>();
     private AccordionPanel accordionPanel;
@@ -39,19 +37,17 @@ public class CommandCategoryLayout extends VerticalLayout {
         this.showNsfw = showNsfw;
 
         setWidthFull();
-        setHeight((commandListCategory.size(showNsfw) * PX_PER_SLOT) + "px");
         setPadding(false);
         setSpacing(false);
 
+        loadingIndicator.getStyle().set("margin", "48px 0");
         add(loadingIndicator);
     }
 
     public void build() {
         if (build) return;
         build = true;
-
         remove(loadingIndicator);
-        setHeight("auto");
 
         Locale locale = getLocale();
 
@@ -136,9 +132,6 @@ public class CommandCategoryLayout extends VerticalLayout {
         if (accordionPanel != null) {
             for (CommandListSlot slot : commandListCategory.getSlots())
                 updateSlot(slot, locale, searchKey, exactHit, found);
-
-            if (!build)
-                setHeight((found.get() * PX_PER_SLOT + PX_ABSOLUTE) + "px");
 
             if (changeAccordionPanel)
                 updateAccordionPanel(found, exactHit, firstCategory);

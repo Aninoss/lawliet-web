@@ -44,8 +44,7 @@ public class ConfirmationDialog extends Div {
                 .set("z-index", "7")
                 .set("left", "0")
                 .set("top", "0");
-        setWidth("100vw");
-        setHeight("100vh");
+        setSizeFull();
 
         addClickListener(e -> close());
     }

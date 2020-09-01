@@ -54,6 +54,7 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
         this.uiData = uiData;
 
         setMinHeight("100vh");
+        setWidthFull();
         setId("main-page");
         getStyle().set("flex-direction", "column-reverse");
 

@@ -1,5 +1,6 @@
 #main-page {
     box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 #header-out {
@@ -53,10 +54,6 @@
 
 /* Tablet */
 @media (max-width: 1000px) {
-
-    #main-page {
-        box-sizing: border-box;
-    }
 
     #horizontal-tabs { height: 60px; }
 
