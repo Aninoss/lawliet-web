@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutionException;
 
 public class FAQListContainer {
 
-    final static Logger LOGGER = LoggerFactory.getLogger(FAQListContainer.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(FAQListContainer.class);
     private static FAQListContainer ourInstance = new FAQListContainer();
     private ArrayList<FAQListSlot> entries = new ArrayList<>();
 

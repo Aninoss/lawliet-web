@@ -28,7 +28,7 @@ import java.util.concurrent.ExecutionException;
 
 public class FeatureRequestUserHeader extends Card {
 
-    final static Logger LOGGER = LoggerFactory.getLogger(FeatureRequestUserHeader.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(FeatureRequestUserHeader.class);
 
     private final FlexLayout notLoggedInLayout = new FlexLayout();
     private final SessionData sessionData;

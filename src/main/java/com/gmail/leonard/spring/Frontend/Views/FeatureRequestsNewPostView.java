@@ -36,7 +36,7 @@ import java.util.concurrent.ExecutionException;
 @LoginAccess
 public class FeatureRequestsNewPostView extends PageLayout {
 
-    final static Logger LOGGER = LoggerFactory.getLogger(FeatureRequestsNewPostView.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(FeatureRequestsNewPostView.class);
 
     private final VerticalLayout mainContent = new VerticalLayout();
     private final FRNewBean newBean = new FRNewBean();

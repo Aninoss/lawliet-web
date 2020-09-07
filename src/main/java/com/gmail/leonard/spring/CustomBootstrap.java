@@ -15,7 +15,7 @@ import java.rmi.server.UID;
 
 public class CustomBootstrap implements BootstrapListener {
 
-    final static Logger LOGGER = LoggerFactory.getLogger(CustomBootstrap.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(CustomBootstrap.class);
 
     @Override
     public void modifyBootstrapPage(BootstrapPageResponse response) {

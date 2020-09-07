@@ -38,7 +38,7 @@ public class WebComClient {
     public static final String EVENT_FEEDBACK = "feedback";
     public static final String EVENT_INVITE = "invite";
 
-    final static Logger LOGGER = LoggerFactory.getLogger(WebComClient.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(WebComClient.class);
     private final TransferCache transferCache = new TransferCache();
 
     private boolean started = false;

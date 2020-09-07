@@ -34,7 +34,7 @@ import java.util.concurrent.ExecutionException;
 @NoLiteAccess
 public class FeedbackView extends PageLayout implements HasUrlParameter<Long> {
 
-    final static Logger LOGGER = LoggerFactory.getLogger(FeedbackView.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(FeedbackView.class);
 
     private long serverId = 0;
 

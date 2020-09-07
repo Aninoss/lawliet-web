@@ -22,7 +22,7 @@ import java.util.ArrayList;
 
 public class FeatureRequestEntries extends Div {
 
-    final static Logger LOGGER = LoggerFactory.getLogger(FeatureRequestEntries.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(FeatureRequestEntries.class);
 
     private final SessionData sessionData;
     private final UIData uiData;

@@ -41,7 +41,7 @@ import java.util.HashMap;
 @Push
 public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterObserver, PageConfigurator, HasErrorParameter<Exception>, BeforeLeaveObserver {
 
-    final static Logger LOGGER = LoggerFactory.getLogger(MainLayout.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(MainLayout.class);
 
     private SessionData sessionData;
     private UIData uiData;

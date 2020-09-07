@@ -22,7 +22,7 @@ import java.util.Optional;
 @VaadinSessionScope
 public class SessionData {
 
-    final static Logger LOGGER = LoggerFactory.getLogger(SessionData.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(SessionData.class);
 
     private OAuthBuilder builder;
     private final String id;

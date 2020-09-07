@@ -15,7 +15,7 @@ import java.io.FileNotFoundException;
 @SpringBootApplication
 public class Application extends SpringBootServletInitializer {
 
-    final static Logger LOGGER = LoggerFactory.getLogger(Application.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);

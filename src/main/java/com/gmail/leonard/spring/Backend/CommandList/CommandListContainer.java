@@ -10,7 +10,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CommandListContainer {
 
-    final static Logger LOGGER = LoggerFactory.getLogger(CommandListContainer.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(CommandListContainer.class);
     private static final CommandListContainer ourInstance = new CommandListContainer();
     private final CopyOnWriteArrayList<CommandListCategory> categories = new CopyOnWriteArrayList<>();
 

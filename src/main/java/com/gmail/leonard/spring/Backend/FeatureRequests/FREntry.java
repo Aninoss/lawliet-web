@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutionException;
 
 public class FREntry {
 
-    final static Logger LOGGER = LoggerFactory.getLogger(FREntry.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(FREntry.class);
 
     private final int id;
     private final String title, description;

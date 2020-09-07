@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutionException;
 
 public class OneWayTransfers {
 
-    final static Logger LOGGER = LoggerFactory.getLogger(OneWayTransfers.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(OneWayTransfers.class);
 
     public static CompletableFuture<Void> sendTopGG(JSONObject jsonObject) {
         return WebComClient.getInstance().sendSecure(WebComClient.EVENT_TOPGG, jsonObject, Void.class);

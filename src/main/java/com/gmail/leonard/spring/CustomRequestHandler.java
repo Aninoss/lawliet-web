@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 public class CustomRequestHandler implements RequestHandler {
 
-    final static Logger LOGGER = LoggerFactory.getLogger(CustomRequestHandler.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(CustomRequestHandler.class);
 
     private final LoadingCache<String, Boolean> inviteIPAdresses = CacheBuilder.newBuilder()
             .expireAfterWrite(1, TimeUnit.HOURS)

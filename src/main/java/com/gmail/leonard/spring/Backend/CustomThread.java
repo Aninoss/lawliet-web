@@ -7,7 +7,7 @@ import java.time.Instant;
 
 public class CustomThread extends Thread {
 
-    final static Logger LOGGER = LoggerFactory.getLogger(CustomThread.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(CustomThread.class);
 
     private final Instant creationTime = Instant.now();
 

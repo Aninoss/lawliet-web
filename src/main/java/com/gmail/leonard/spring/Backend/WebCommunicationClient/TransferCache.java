@@ -14,7 +14,7 @@ import java.util.concurrent.TimeoutException;
 
 public class TransferCache {
 
-    final static Logger LOGGER = LoggerFactory.getLogger(TransferCache.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(TransferCache.class);
     private final String KEY = "id";
 
     private final HashMap<Integer, CompletableFuture<?>> futuresMap = new HashMap<>();
