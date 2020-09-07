@@ -27,7 +27,8 @@ public class NavigationBar extends Tabs implements AfterNavigationObserver {
                 new NavigationBarLink(FeatureRequestsView.class),
                 new NavigationBarLink(ExternalLinks.BOT_INVITE_URL, "invite"),
                 new NavigationBarLink(ExternalLinks.SERVER_INVITE_URL, "server"),
-                new NavigationBarLink(ExternalLinks.PATREON_PAGE, "patreon")
+                new NavigationBarLink(ExternalLinks.PATREON_PAGE, "patreon"),
+                new NavigationBarLink(ExternalLinks.DISCORD_SERVERS_ME, "discordservers.me", true).standOut()
         };
 
         for(NavigationBarLink navigationBarLink: navigationBarLinks) {

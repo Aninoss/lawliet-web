@@ -19,11 +19,15 @@ public class UIData {
 
     private boolean lite = false, noNSFW = false;
     private Optional<Long> userId = Optional.empty();
+    private final boolean fromDiscordServersMe;
 
     public UIData() {
         Map<String, String[]> parametersMap = VaadinService.getCurrentRequest().getParameterMap();
         if (parameterMapIsTrue(parametersMap, "lite")) lite = true;
         if (parameterMapIsTrue(parametersMap, "nonsfw")) noNSFW = true;
+
+        String referer = VaadinService.getCurrentRequest().getHeader("Referer");
+        fromDiscordServersMe = referer != null && referer.startsWith("https://discordservers.me");
     }
 
     public boolean parameterMapIsTrue(Map<String, String[]> parametersMap, String key) {
@@ -50,6 +54,10 @@ public class UIData {
 
     public Optional<Long> getUserId() {
         return userId;
+    }
+
+    public boolean isFromDiscordServersMe() {
+        return fromDiscordServersMe;
     }
 
 }
