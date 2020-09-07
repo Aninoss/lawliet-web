@@ -72,7 +72,7 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
         UI.getCurrent().getElement().appendChild(verticalMenuBarComponent.getElement());
         UI.getCurrent().getElement().appendChild(new CookieConsent().getElement());
 
-        add(new FooterArea());
+        add(new FooterArea(uiData));
 
         Div divStretch = new Div();
         divStretch.setWidthFull();

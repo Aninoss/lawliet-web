@@ -1,5 +1,6 @@
 package com.gmail.leonard.spring.Frontend.Components;
 
+import com.gmail.leonard.spring.Backend.UserData.UIData;
 import com.gmail.leonard.spring.ExternalLinks;
 import com.gmail.leonard.spring.Frontend.Layouts.PageLayout;
 import com.gmail.leonard.spring.Frontend.Styles;
@@ -10,7 +11,7 @@ import com.vaadin.flow.router.RouterLink;
 
 public class FooterArea extends Footer {
 
-    public FooterArea() {
+    public FooterArea(UIData uiData) {
         addClassName(Styles.FADE_IN);
         setWidthFull();
         setHeight("auto");
@@ -23,7 +24,7 @@ public class FooterArea extends Footer {
 
         Object[][] links = {
                 {"footer.upvote", ExternalLinks.UPVOTE_URL},
-                {"footer.invite", ExternalLinks.BOT_INVITE_URL},
+                {"footer.invite", uiData.getBotInviteUrl()},
                 {"footer.server", ExternalLinks.SERVER_INVITE_URL},
                 {"footer.patreon", ExternalLinks.PATREON_PAGE},
                 {"footer.privacy", PrivacyView.class}

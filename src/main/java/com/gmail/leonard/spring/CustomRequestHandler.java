@@ -61,7 +61,8 @@ public class CustomRequestHandler implements RequestHandler {
         response.setHeader("Access-Control-Allow-Origin", "https://top.gg");
         response.setHeader("X-XSS-Protection", "1; mode=block");
 
-        if (request.getPathInfo().equalsIgnoreCase("/invite")) return handleInvite(request, response, request.getParameterMap());
+        if (request.getPathInfo().equalsIgnoreCase("/invite"))
+            return handleInvite(request, response, request.getParameterMap());
 
         return false;
     }
@@ -71,16 +72,8 @@ public class CustomRequestHandler implements RequestHandler {
         response.setStatus(301);
 
         if (params.size() > 0) {
-            String ip = request.getRemoteAddr();
-            if (!inviteIPAdresses.asMap().containsKey(ip)) {
-                String type = new ArrayList<>(params.keySet()).get(0);
-                if (type.length() > 0) OneWayTransfers.sendInvite(type);
-                try {
-                    inviteIPAdresses.get(ip);
-                } catch (ExecutionException e) {
-                    LOGGER.error("Unknown exception", e);
-                }
-            }
+            String type = new ArrayList<>(params.keySet()).get(0);
+            if (type.length() > 0) OneWayTransfers.sendInvite(type);
         }
 
         return true;

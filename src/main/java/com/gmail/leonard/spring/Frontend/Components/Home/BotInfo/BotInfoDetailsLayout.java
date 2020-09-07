@@ -48,7 +48,7 @@ public class BotInfoDetailsLayout extends VerticalLayout {
         inviteButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         inviteButton.setIconAfterText(true);
 
-        Anchor a = new Anchor(ExternalLinks.BOT_INVITE_URL, inviteButton);
+        Anchor a = new Anchor(uiData.getBotInviteUrl(), inviteButton);
         a.setTarget("_blank");
         a.setMaxWidth("var(--bot-info-width)");
         a.setWidth("100%");
