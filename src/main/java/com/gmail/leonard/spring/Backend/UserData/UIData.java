@@ -28,7 +28,7 @@ public class UIData {
         noNSFW = parameterMapIsTrue(parametersMap, "nonsfw");
 
         String referer = VaadinService.getCurrentRequest().getHeader("Referer");
-        fromDiscordServersMe = !(referer != null && referer.startsWith("https://discordservers.me"));
+        fromDiscordServersMe = referer != null && referer.startsWith("https://discordservers.me");
     }
 
     public boolean parameterMapIsTrue(Map<String, String[]> parametersMap, String key) {
