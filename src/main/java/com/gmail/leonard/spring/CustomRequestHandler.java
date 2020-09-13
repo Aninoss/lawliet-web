@@ -41,6 +41,7 @@ public class CustomRequestHandler implements RequestHandler {
         String auth = request.getHeader("Authorization");
         if (auth != null) {
             if (request.getPathInfo().equals("/topgg") && handleTopGG(request, auth)) return true;
+            if (request.getPathInfo().equals("/topgg_aninoss") && handleTopGGAninoss(request, auth)) return true;
             if (request.getPathInfo().equals("/donatebotio") && handleDonatebotIO(request, auth)) return true;
         }
 
@@ -94,6 +95,34 @@ public class CustomRequestHandler implements RequestHandler {
                     JSONObject jsonObject = new JSONObject(sb.substring(1));
                     LOGGER.info("UPVOTE | {}", jsonObject.getLong("user"));
                     OneWayTransfers.sendTopGG(jsonObject).get();
+                }
+
+                return true;
+            }
+        } catch (IOException | ExecutionException e) {
+            LOGGER.error("Error while handling upvote", e);
+        } catch (InterruptedException e) {
+            LOGGER.error("Interrupted", e);
+        }
+
+        return false;
+    }
+
+    private boolean handleTopGGAninoss(VaadinRequest request, String auth) {
+        try {
+            if (auth.equals(SecretManager.getString("topgg.aninoss.auth"))) {
+                StringBuilder sb = new StringBuilder();
+                BufferedReader br = request.getReader();
+
+                String line;
+                while((line = br.readLine()) != null) {
+                    sb.append("\n").append(line);
+                }
+
+                if (sb.length() > 0) {
+                    JSONObject jsonObject = new JSONObject(sb.substring(1));
+                    LOGGER.info("UPVOTE ANINOSS | {}", jsonObject.getLong("user"));
+                    OneWayTransfers.sendTopGGAninoss(jsonObject).get();
                 }
 
                 return true;

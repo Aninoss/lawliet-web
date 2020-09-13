@@ -18,6 +18,10 @@ public class OneWayTransfers {
         return WebComClient.getInstance().sendSecure(WebComClient.EVENT_TOPGG, jsonObject, Void.class);
     }
 
+    public static CompletableFuture<Void> sendTopGGAninoss(JSONObject jsonObject) {
+        return WebComClient.getInstance().sendSecure(WebComClient.EVENT_TOPGG_ANINOSS, jsonObject, Void.class);
+    }
+
     public static CompletableFuture<Void> sendDonatebotIO(JSONObject jsonObject) {
         return WebComClient.getInstance().sendSecure(WebComClient.EVENT_DONATEBOT_IO, jsonObject, Void.class);
     }

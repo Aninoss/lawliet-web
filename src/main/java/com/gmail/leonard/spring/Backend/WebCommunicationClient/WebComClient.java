@@ -34,6 +34,7 @@ public class WebComClient {
     public static final String EVENT_FR_CAN_POST = "fr_can_post";
     public static final String EVENT_FR_POST = "fr_post";
     public static final String EVENT_TOPGG = "topgg";
+    public static final String EVENT_TOPGG_ANINOSS = "topgg_aninoss";
     public static final String EVENT_DONATEBOT_IO = "donatebot.io";
     public static final String EVENT_FEEDBACK = "feedback";
     public static final String EVENT_INVITE = "invite";
@@ -66,6 +67,7 @@ public class WebComClient {
             socket.on(EVENT_FR_POST, new OnEventNoResponse(transferCache));
 
             socket.on(EVENT_TOPGG, new OnEventNoResponse(transferCache));
+            socket.on(EVENT_TOPGG_ANINOSS, new OnEventNoResponse(transferCache));
             socket.on(EVENT_DONATEBOT_IO, new OnEventNoResponse(transferCache));
             socket.on(EVENT_FEEDBACK, new OnEventNoResponse(transferCache));
             socket.on(EVENT_INVITE, new OnEventNoResponse(transferCache));
