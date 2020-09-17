@@ -4,6 +4,7 @@ import com.gmail.leonard.spring.Backend.UserData.DiscordUser;
 import com.gmail.leonard.spring.Backend.UserData.SessionData;
 import com.gmail.leonard.spring.Backend.UserData.UIData;
 import com.gmail.leonard.spring.Frontend.Components.DiscordIcon;
+import com.gmail.leonard.spring.Frontend.Components.LawlietBotLogo;
 import com.gmail.leonard.spring.Frontend.Styles;
 import com.gmail.leonard.spring.Frontend.Views.DiscordLogout;
 import com.gmail.leonard.spring.Frontend.Views.HomeView;
@@ -45,17 +46,9 @@ public class HeaderComponent extends Header {
         content.add(showMenu);
 
         //Logo
-        String logoString = VaadinServletService.getCurrent()
-                .resolveResource("/styles/img/logo.png",
-                        VaadinSession.getCurrent().getBrowser());
-
-        Image logoImage = new Image(logoString, "");
-        logoImage.setHeight("48px");
-
-        Button logo = new Button(logoImage);
+        Button logo = new Button(new LawlietBotLogo());
         logo.setMinWidth("200px");
-        logo.getStyle().set("margin-left", "8px")
-                .set("margin-top", "6px");
+        logo.getStyle().set("margin-left", "8px");
         logo.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         logo.addClickListener(click -> UI.getCurrent().navigate(HomeView.class));
         content.add(logo);

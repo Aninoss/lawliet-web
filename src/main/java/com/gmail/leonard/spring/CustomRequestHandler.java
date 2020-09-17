@@ -47,12 +47,12 @@ public class CustomRequestHandler implements RequestHandler {
 
         response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubdomains");
         response.setHeader("Content-Security-Policy",
-                "default-src data: 'self' https://widgetbot.io https://e.widgetbot.io ws://localhost:35729/; " +
+                "default-src data: 'self' https://widgetbot.io https://e.widgetbot.io ws://localhost:35729/ https://fonts.gstatic.com/; " +
                         "img-src 'self' https://cdn.discordapp.com/; " +
                         "media-src 'self'; " +
                         "object-src 'self'; " +
                         "script-src 'unsafe-inline' 'unsafe-eval' 'self' ajax.cloudflare.com https://cdn.jsdelivr.net; " +
-                        "style-src 'unsafe-inline' 'self'; " +
+                        "style-src https://fonts.googleapis.com/ https://fonts.gstatic.com/ 'unsafe-inline' 'self'; " +
                         "frame-ancestors https://top.gg"
         );
         response.setHeader("X-Frame-Options", "allow-from https://top.gg/");
