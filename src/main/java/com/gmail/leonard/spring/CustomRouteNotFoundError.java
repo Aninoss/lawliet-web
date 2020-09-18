@@ -1,6 +1,6 @@
 package com.gmail.leonard.spring;
 
-import com.gmail.leonard.spring.Frontend.Views.PageNotFoundView;
+import com.gmail.leonard.spring.frontend.views.PageNotFoundView;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.ErrorParameter;
 import com.vaadin.flow.router.NotFoundException;

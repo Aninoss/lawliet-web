@@ -1,6 +1,6 @@
 package com.gmail.leonard.spring;
 
-import com.gmail.leonard.spring.Backend.CustomThread;
+import com.gmail.leonard.spring.backend.CustomThread;
 import com.sun.management.OperatingSystemMXBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

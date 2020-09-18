@@ -1,8 +1,7 @@
 package com.gmail.leonard.spring;
 
-import com.gmail.leonard.spring.Backend.SecretManager;
-import com.gmail.leonard.spring.Backend.WebCommunicationClient.Modules.OneWayTransfers;
-import com.gmail.leonard.spring.Backend.WebCommunicationClient.WebComClient;
+import com.gmail.leonard.spring.backend.SecretManager;
+import com.gmail.leonard.spring.backend.webcomclient.modules.OneWayTransfers;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
