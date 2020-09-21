@@ -51,10 +51,6 @@ public class UIData {
         return userId;
     }
 
-    public boolean isFromDiscordServersMe() {
-        return fromDiscordServersMe;
-    }
-
     public String getBotInviteUrl() {
         return fromDiscordServersMe ? "/invite?WEBSITE_DISCORD_SERVERS_ME" : "/invite?WEBSITE";
     }
