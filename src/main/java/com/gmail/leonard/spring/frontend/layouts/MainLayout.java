@@ -58,7 +58,8 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
         setMinHeight("100vh");
         setWidthFull();
         setId("main-page");
-        getStyle().set("flex-direction", "column-reverse");
+        getStyle().set("flex-direction", "column-reverse")
+                .set("overflow-y", "hidden");
 
         /* black background in mobile burger menu */
         Div blackscreen = new Div();
