@@ -52,7 +52,10 @@ public class UIData {
     }
 
     public String getBotInviteUrl() {
-        return fromDiscordServersMe ? "/invite?WEBSITE_DISCORD_SERVERS_ME" : "/invite?WEBSITE";
+        if (fromDiscordServersMe) return "/invite?WEBSITE_DISCORD_SERVERS_ME";
+        if (isLite()) return "/invite?WEBSITE_TOPGG";
+
+        return "/invite?WEBSITE";
     }
 
 }
