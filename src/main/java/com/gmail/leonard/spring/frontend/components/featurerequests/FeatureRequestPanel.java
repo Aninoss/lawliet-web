@@ -12,38 +12,43 @@ import com.gmail.leonard.spring.backend.featurerequests.FRPanelType;
 import com.gmail.leonard.spring.backend.userdata.SessionData;
 import com.gmail.leonard.spring.backend.userdata.UIData;
 import com.gmail.leonard.spring.frontend.Styles;
+import com.gmail.leonard.spring.frontend.components.featurerequests.sort.FeatureRequestSort;
+import com.gmail.leonard.spring.frontend.components.featurerequests.sort.FeatureRequestSortByBoosts;
+import com.gmail.leonard.spring.frontend.components.featurerequests.sort.FeatureRequestSortByNewest;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Article;
 import com.vaadin.flow.component.html.Div;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class FeatureRequestPanel extends Div {
 
+    private static final int ENTRIES_PER_PAGE = 18;
+
     private final SessionData sessionData;
     private final UIData uiData;
-    private final ArrayList<FREntry> entries;
-    private final FRPanelType type;
+    private final FRDynamicBean frDynamicBean;
+    private FlexibleGridLayout gridLayout = null;
 
-    public FeatureRequestPanel(SessionData sessionData, UIData uiData, FRDynamicBean frDynamicBean, ArrayList<FREntry> entries, FRPanelType type) {
+    public FeatureRequestPanel(SessionData sessionData, UIData uiData, FRDynamicBean frDynamicBean) {
         this.sessionData = sessionData;
         this.uiData = uiData;
-        this.entries = entries;
-        this.type = type;
-
-        if (entries.isEmpty()) {
-            addEmptyText();
-        } else {
-            addEntries();
-        }
+        this.frDynamicBean = frDynamicBean;
+        setWidthFull();
     }
 
-    private void addEntries() {
+    public void updateEntries(int page, FeatureRequestSort comparator) {
+        ArrayList<FREntry> entryList = new ArrayList<>(frDynamicBean.getEntryList());
+        entryList.sort(comparator);
+
         ArrayList<Article> articles = new ArrayList<>();
-        for (FREntry entry : entries) {
-            articles.add(new Article(new FeatureRequestCard(type, entry, sessionData, uiData)));
+        for (int i = ENTRIES_PER_PAGE * page; i < Math.min(entryList.size(), ENTRIES_PER_PAGE * (page + 1)); i++) {
+            FREntry entry = entryList.get(i);
+            articles.add(new Article(new FeatureRequestCard(entry, sessionData, uiData)));
         }
 
-        FlexibleGridLayout layout = new FlexibleGridLayout()
+        if (gridLayout != null) remove(gridLayout);
+        gridLayout = new FlexibleGridLayout()
                 .withColumns(Repeat.RepeatMode.AUTO_FILL, new MinMax(new Length("270px"), new Flex(1)))
                 .withItems(articles.toArray(new Article[0]))
                 .withPadding(false)
@@ -51,15 +56,12 @@ public class FeatureRequestPanel extends Div {
                 .withAutoFlow(GridLayoutComponent.AutoFlow.ROW_DENSE)
                 .withOverflow(GridLayoutComponent.Overflow.AUTO);
 
-        layout.setSizeFull();
-        add(layout);
+        gridLayout.setSizeFull();
+        add(gridLayout);
     }
 
-    private void addEmptyText() {
-        Div emptyText = new Div(new Text(getTranslation("fr.empty")));
-        emptyText.setWidthFull();
-        emptyText.addClassName(Styles.CENTER_TEXT);
-        add(emptyText);
+    public int getPageSize() {
+        return (frDynamicBean.getEntryList().size() - 1) / ENTRIES_PER_PAGE + 1;
     }
 
 }

@@ -57,3 +57,7 @@ function onScroll() {
         document.getElementById("header-out").classList.remove("scroll-class");
     }
 }
+
+function scrollToTop() {
+    window.scrollTo(0, 250);
+}

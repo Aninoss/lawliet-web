@@ -5,6 +5,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -14,18 +15,23 @@ public class FREntry {
     private final static Logger LOGGER = LoggerFactory.getLogger(FREntry.class);
 
     private final int id;
-    private final String title, description;
+    private final String title;
+    private final String description;
     private Integer boosts;
     private final boolean publicEntry;
+    private final FRPanelType type;
     private final FRDynamicBean frDynamicBean;
+    private final LocalDate date;
 
-    FREntry(FRDynamicBean frDynamicBean, int id, String title, String description, Integer boosts, boolean publicEntry) {
+    FREntry(FRDynamicBean frDynamicBean, int id, String title, String description, Integer boosts, boolean publicEntry, FRPanelType type, LocalDate date) {
         this.id = id;
         this.frDynamicBean = frDynamicBean;
         this.title = title;
         this.description = description;
         this.boosts = boosts;
         this.publicEntry = publicEntry;
+        this.type = type;
+        this.date = date;
     }
 
     public int getId() {
@@ -42,6 +48,14 @@ public class FREntry {
 
     public Optional<Integer> getBoosts() {
         return Optional.ofNullable(boosts);
+    }
+
+    public FRPanelType getType() {
+        return type;
+    }
+
+    public LocalDate getDate() {
+        return date;
     }
 
     public boolean boost(long userId) {

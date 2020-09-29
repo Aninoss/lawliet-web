@@ -4,13 +4,11 @@ import com.gmail.leonard.spring.backend.featurerequests.FRDynamicBean;
 import com.gmail.leonard.spring.backend.userdata.SessionData;
 import com.gmail.leonard.spring.backend.userdata.UIData;
 import com.gmail.leonard.spring.backend.webcomclient.modules.FeatureRequests;
-import com.gmail.leonard.spring.frontend.components.featurerequests.FeatureRequestEntries;
+import com.gmail.leonard.spring.frontend.components.featurerequests.FeatureRequestMain;
 import com.gmail.leonard.spring.frontend.components.featurerequests.FeatureRequestUserHeader;
-import com.gmail.leonard.spring.frontend.components.HtmlText;
 import com.gmail.leonard.spring.frontend.components.PageHeader;
 import com.gmail.leonard.spring.frontend.layouts.MainLayout;
 import com.gmail.leonard.spring.frontend.layouts.PageLayout;
-import com.gmail.leonard.spring.frontend.Styles;
 import com.gmail.leonard.spring.NoLiteAccess;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -30,13 +28,12 @@ public class FeatureRequestsView extends PageLayout {
         FRDynamicBean frDynamicBean = FeatureRequests.fetchFeatureRequestMainData(sessionData).get();
 
         VerticalLayout mainContent = new VerticalLayout();
-        mainContent.addClassName(Styles.APP_WIDTH);
+        mainContent.setWidthFull();
         mainContent.setPadding(true);
-        mainContent.add(new FeatureRequestEntries(getSessionData(), getUiData(), frDynamicBean));
+        mainContent.add(new FeatureRequestMain(getSessionData(), getUiData(), frDynamicBean));
 
-        HtmlText htmlText = new HtmlText(getTranslation("fr.desc"));
         add(
-                new PageHeader(getTitleText(), getTranslation("fr.desc"), getRoute(), uiData.isLite() ? null : new FeatureRequestUserHeader(getSessionData(), frDynamicBean)),
+                new PageHeader(getTitleText(), getTranslation("fr.desc"), null, uiData.isLite() ? null : new FeatureRequestUserHeader(getSessionData(), frDynamicBean)),
                 mainContent
         );
     }

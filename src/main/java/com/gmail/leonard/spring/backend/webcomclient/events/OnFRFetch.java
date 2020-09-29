@@ -7,6 +7,8 @@ import com.gmail.leonard.spring.backend.webcomclient.TransferCache;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.time.LocalDate;
+
 public class OnFRFetch extends EventAbstract<FRDynamicBean> {
 
     public OnFRFetch(TransferCache transferCache) {
@@ -20,20 +22,19 @@ public class OnFRFetch extends EventAbstract<FRDynamicBean> {
 
         FRDynamicBean frDynamicBean = new FRDynamicBean(boostsRemaining, boostsTotal);
 
-        for(int i = 0; i < FRPanelType.values().length; i++) {
-            FRPanelType type = FRPanelType.values()[i];
-            JSONArray jsonEntriesArray = mainJSON.getJSONArray(type.name());
-            for(int j = 0; j < jsonEntriesArray.length(); j++) {
-                JSONObject jsonEntry = jsonEntriesArray.getJSONObject(j);
-                frDynamicBean.addEntry(
-                        type,
-                        jsonEntry.getInt("id"),
-                        jsonEntry.getString("title"),
-                        jsonEntry.getString("description"),
-                        i == 0 ? jsonEntry.getInt("boosts") : null,
-                        jsonEntry.getBoolean("public")
-                );
-            }
+        JSONArray jsonEntriesArray = mainJSON.getJSONArray("data");
+        for(int j = 0; j < jsonEntriesArray.length(); j++) {
+            JSONObject jsonEntry = jsonEntriesArray.getJSONObject(j);
+            FRPanelType type = FRPanelType.valueOf(jsonEntry.getString("type"));
+            frDynamicBean.addEntry(
+                    jsonEntry.getInt("id"),
+                    jsonEntry.getString("title"),
+                    jsonEntry.getString("description"),
+                    type == FRPanelType.PENDING ? jsonEntry.getInt("boosts") : null,
+                    jsonEntry.getBoolean("public"),
+                    type,
+                    LocalDate.ofEpochDay(jsonEntry.getLong("date"))
+            );
         }
 
         return frDynamicBean;

@@ -45,7 +45,7 @@ public class FeatureRequestsNewPostView extends PageLayout {
         super(sessionData, uiData);
         getStyle().set("margin-bottom", "48px");
 
-        add(new PageHeader(getTitleText(), getTranslation("fr.new.desc"), FeatureRequestsView.getRouteStatic(FeatureRequestsView.class)));
+        add(new PageHeader(getTitleText(), getTranslation("fr.new.desc"), null));
 
         mainContent.addClassName(Styles.APP_WIDTH);
         mainContent.getStyle().set("margin-top", "-16px");

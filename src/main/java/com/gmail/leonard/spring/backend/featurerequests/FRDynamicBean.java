@@ -1,12 +1,12 @@
 package com.gmail.leonard.spring.backend.featurerequests;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class FRDynamicBean {
 
     private int boostsRemaining, boostsTotal;
-    private final HashMap<FRPanelType, ArrayList<FREntry>> entryCategoryMap = new HashMap<>();
+    private final ArrayList<FREntry> entryList = new ArrayList<>();
     private BoostIncreaseListener boostChangeListener = null;
 
     public FRDynamicBean(int boostsRemaining, int boostsTotal) {
@@ -22,13 +22,13 @@ public class FRDynamicBean {
         return boostsTotal;
     }
 
-    public ArrayList<FREntry> getEntryCategoryMap(FRPanelType type) {
-        return entryCategoryMap.computeIfAbsent(type, k -> new ArrayList<>());
+    public ArrayList<FREntry> getEntryList() {
+        return entryList;
     }
 
-    public void addEntry(FRPanelType type, int id, String title, String description, Integer boosts, boolean publicEntry) {
-        FREntry frEntry = new FREntry(this, id, title, description, boosts, publicEntry);
-        getEntryCategoryMap(type).add(frEntry);
+    public void addEntry(int id, String title, String description, Integer boosts, boolean publicEntry, FRPanelType type, LocalDate date) {
+        FREntry frEntry = new FREntry(this, id, title, description, boosts, publicEntry, type, date);
+        entryList.add(frEntry);
     }
 
     public void update(int boostsRemaining, int boostsTotal) {

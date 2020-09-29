@@ -1,5 +1,6 @@
 package com.gmail.leonard.spring.frontend.components.featurerequests;
 
+import com.gmail.leonard.spring.backend.StringUtil;
 import com.gmail.leonard.spring.backend.featurerequests.FREntry;
 import com.gmail.leonard.spring.backend.featurerequests.FRPanelType;
 import com.gmail.leonard.spring.backend.userdata.DiscordUser;
@@ -19,6 +20,10 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+
 public class FeatureRequestCard extends Card {
 
     private final FREntry frEntry;
@@ -29,7 +34,7 @@ public class FeatureRequestCard extends Card {
     private Button boostButton = null;
     private ConfirmationDialog confirmationDialog = null;
 
-    public FeatureRequestCard(FRPanelType type, FREntry frEntry, SessionData sessionData, UIData uiData) {
+    public FeatureRequestCard(FREntry frEntry, SessionData sessionData, UIData uiData) {
         this.frEntry = frEntry;
         this.sessionData = sessionData;
         this.uiData = uiData;
@@ -38,24 +43,23 @@ public class FeatureRequestCard extends Card {
 
         addTitle();
         addDescription();
-        if (frEntry.isPublic()) {
-            frEntry.getBoosts().ifPresent(this::addBoostButton);
+        addDateString();
+        if (frEntry.getBoosts().isPresent()) {
+            addBoostButton(frEntry.getBoosts().get());
+
+            Label warningLabel = new Label(getTranslation("fr.boost.confirm.notpush"));
+            warningLabel.getStyle().set("color", "black")
+                    .set("margin-bottom", "32px");
+            this.confirmationDialog = new ConfirmationDialog(getTranslation("fr.boost.confirm", frEntry.getTitle()), this::onBoostConfirm, this::onBoostCancel, warningLabel);
+            add(confirmationDialog);
         } else {
-            addNoPublicText(type == FRPanelType.PENDING);
+            addNoPublicText(frEntry.getType() == FRPanelType.PENDING);
         }
 
         content.setHeightFull();
         content.setFlexGrow(1, description);
 
         add(content);
-
-        if (frEntry.isPublic() && frEntry.getBoosts().isPresent()) {
-            Label warningLabel = new Label(getTranslation("fr.boost.confirm.notpush"));
-            warningLabel.getStyle().set("color", "var(--lumo-error-text-color)")
-                    .set("margin-bottom", "32px");
-            this.confirmationDialog = new ConfirmationDialog(getTranslation("fr.boost.confirm", frEntry.getTitle()), this::onBoostConfirm, this::onBoostCancel, warningLabel);
-            add(confirmationDialog);
-        }
     }
 
     private void addTitle() {
@@ -66,6 +70,29 @@ public class FeatureRequestCard extends Card {
         }
     }
 
+    private void addDateString() {
+        String formattedDate;
+        int daysBetween = (int)ChronoUnit.DAYS.between(frEntry.getDate(), LocalDate.now());
+        switch (daysBetween) {
+            case 0:
+                formattedDate = getTranslation("fr.card.today");
+                break;
+
+            case 1:
+                formattedDate = getTranslation("fr.card.yesterday");
+                break;
+
+            default:
+                formattedDate = getTranslation("fr.card.ago", StringUtil.numToString(getLocale(), daysBetween));
+        }
+
+        Div dateString = new Div(new Text(formattedDate));
+        dateString.setWidthFull();
+        dateString.getStyle().set("font-size", "80%")
+                .set("color", "var(--lumo-disabled-text-color)");
+        content.add(dateString);
+    }
+
     private void addDescription() {
         description = new Div(new Text(frEntry.getDescription()));
         description.setWidthFull();
@@ -74,10 +101,16 @@ public class FeatureRequestCard extends Card {
 
     private void addNoPublicText(boolean pending) {
         addSeperator();
-        Div notPublicText = new Div(new Text(getTranslation(pending ? "fr.notpublic.pending" : "fr.notpublic")));
+        Div notPublicText;
+        if (pending) {
+            notPublicText = new Div(new Text(getTranslation("fr.notpublic.pending")));
+            notPublicText.getStyle().set("color", "var(--lumo-disabled-text-color)");
+        } else {
+            notPublicText = new Div(new Text(getTranslation("fr.notpublic.rejected")));
+            notPublicText.getStyle().set("color", "var(--lumo-error-color)");
+        }
         notPublicText.setWidthFull();
         notPublicText.addClassName(Styles.CENTER_TEXT);
-        notPublicText.getStyle().set("color", "var(--lumo-disabled-text-color)");
         content.add(notPublicText);
     }
 
