@@ -23,7 +23,7 @@ import java.util.Comparator;
 
 public class FeatureRequestPanel extends Div {
 
-    private static final int ENTRIES_PER_PAGE = 18;
+    private static final int ENTRIES_PER_PAGE = 12;
 
     private final SessionData sessionData;
     private final UIData uiData;

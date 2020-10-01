@@ -21,6 +21,7 @@ public class FeatureRequestChangeSort extends HorizontalLayout {
     };
 
     private Label pageIndicator;
+    private Label pageIndicatorMobile;
 
     public FeatureRequestChangeSort(OnSortChange listener, OnPagePrevious onPagePrevious, OnPageNext onPageNext) {
         setPadding(false);
@@ -42,7 +43,10 @@ public class FeatureRequestChangeSort extends HorizontalLayout {
         buttonNext.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
         pageIndicator = new Label("");
-        add(buttonPrevious, pageIndicator, buttonNext);
+        pageIndicator.addClassNames(Styles.VISIBLE_NOTMOBILE);
+        pageIndicatorMobile = new Label("");
+        pageIndicatorMobile.addClassNames(Styles.VISIBLE_MOBILE);
+        add(buttonPrevious, pageIndicator, pageIndicatorMobile, buttonNext);
     }
 
     private void addDropdownMenu(OnSortChange listener) {
@@ -70,6 +74,7 @@ public class FeatureRequestChangeSort extends HorizontalLayout {
 
     public void onPageChanged(int page, int pageSize) {
         pageIndicator.setText(getTranslation("page", StringUtil.numToString(getLocale(), page + 1), StringUtil.numToString(getLocale(), pageSize)));
+        pageIndicatorMobile.setText(StringUtil.numToString(getLocale(), page + 1));
     }
 
     public interface OnSortChange {
