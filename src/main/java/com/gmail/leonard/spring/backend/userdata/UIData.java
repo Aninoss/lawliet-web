@@ -13,7 +13,6 @@ public class UIData {
 
     private final boolean lite;
     private final boolean noNSFW;
-    private final boolean fromDiscordServersMe;
     private Optional<Long> userId = Optional.empty();
 
     public UIData() {
@@ -22,7 +21,6 @@ public class UIData {
         noNSFW = parameterMapIsTrue(parametersMap, "nonsfw");
 
         String referer = VaadinService.getCurrentRequest().getHeader("Referer");
-        fromDiscordServersMe = referer != null && referer.startsWith("https://discordservers.me");
     }
 
     public boolean parameterMapIsTrue(Map<String, String[]> parametersMap, String key) {
@@ -52,9 +50,7 @@ public class UIData {
     }
 
     public String getBotInviteUrl() {
-        if (fromDiscordServersMe) return "/invite?WEBSITE_DISCORD_SERVERS_ME";
         if (isLite()) return "/invite?WEBSITE_TOPGG";
-
         return "/invite?WEBSITE";
     }
 
