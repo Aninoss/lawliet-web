@@ -1,9 +1,8 @@
 package com.gmail.leonard.spring.frontend.components.home.botstats;
 
-import com.gmail.leonard.spring.Application;
 import com.gmail.leonard.spring.backend.StringUtil;
+import com.gmail.leonard.spring.backend.serverstats.ServerStatsBean;
 import com.gmail.leonard.spring.backend.serverstats.ServerStatsContainer;
-import com.gmail.leonard.spring.backend.serverstats.ServerStatsSlot;
 import com.gmail.leonard.spring.frontend.Styles;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -23,9 +22,9 @@ public class BotStatsLayout extends VerticalLayout {
         getStyle().set("background", "var(--lumo-secondary)");
 
         try {
-            ServerStatsSlot[] slots = ServerStatsContainer.getInstance().getSlots();
-            addTitle(slots[slots.length - 1].getServerCount() / 1000 * 1000);
-            mainLayout.add(new BotStatsChart(slots));
+            ServerStatsBean bean = ServerStatsContainer.getInstance().getBean();
+            addTitle(roundDownStat(bean.getServers()), roundDownStat(bean.getUsers()));
+            mainLayout.add(new BotStatsChart(bean.getSlots()));
         } catch (Throwable e) {
             LOGGER.error("Error in fetching bot server stats", e);
         }
@@ -33,8 +32,12 @@ public class BotStatsLayout extends VerticalLayout {
         add(mainLayout);
     }
 
-    private void addTitle(int serverCount) {
-        H2 title = new H2(getTranslation("bot.stat.title", StringUtil.numToString(getLocale(), serverCount)));
+    private int roundDownStat(int value) {
+        return value / 1000 * 1000;
+    }
+
+    private void addTitle(int serverCount, int userCount) {
+        H2 title = new H2(getTranslation("bot.stat.title", StringUtil.numToString(getLocale(), serverCount), StringUtil.numToString(getLocale(), userCount)));
         title.getStyle().set("margin-top", "2em");
         title.setWidthFull();
         title.addClassName(Styles.CENTER_TEXT);

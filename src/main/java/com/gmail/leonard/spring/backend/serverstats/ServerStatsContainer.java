@@ -21,26 +21,31 @@ public class ServerStatsContainer {
     public static ServerStatsContainer getInstance() { return ourInstance; }
     private ServerStatsContainer() {}
 
-    private final LoadingCache<Integer, ServerStatsSlot[]> cache = CacheBuilder
+    private final LoadingCache<Integer, ServerStatsBean> cache = CacheBuilder
             .newBuilder()
             .expireAfterWrite(1, TimeUnit.DAYS)
-            .build(new CacheLoader<Integer, ServerStatsSlot[]>() {
+            .build(new CacheLoader<Integer, ServerStatsBean>() {
                 @Override
-                public ServerStatsSlot[] load(@Nonnull final Integer n) throws Exception {
+                public ServerStatsBean load(@Nonnull final Integer n) throws Exception {
                     LOGGER.info("Updating server stats");
-                    JSONArray statsJson = ServerStats.fetchServerStats().get().getJSONArray("data");
+                    JSONObject statsJson = ServerStats.fetchServerStats().get();
+                    JSONArray statsDataJson = statsJson.getJSONArray("data");
 
-                    ServerStatsSlot[] slots = new ServerStatsSlot[statsJson.length()];
-                    for(int i = 0; i < statsJson.length(); i++) {
-                        JSONObject statsSlotJson = statsJson.getJSONObject(i);
+                    ServerStatsSlot[] slots = new ServerStatsSlot[statsDataJson.length()];
+                    for(int i = 0; i < statsDataJson.length(); i++) {
+                        JSONObject statsSlotJson = statsDataJson.getJSONObject(i);
                         slots[i] = new ServerStatsSlot(statsSlotJson.getInt("month"), statsSlotJson.getInt("year"), statsSlotJson.getInt("value"));
                     }
 
-                    return slots;
+                    return new ServerStatsBean(
+                            statsJson.getInt("servers"),
+                            statsJson.getInt("users"),
+                            slots
+                    );
                 }
             });
 
-    public ServerStatsSlot[] getSlots() throws ExecutionException {
+    public ServerStatsBean getBean() throws ExecutionException {
         return cache.get(0);
     }
 
