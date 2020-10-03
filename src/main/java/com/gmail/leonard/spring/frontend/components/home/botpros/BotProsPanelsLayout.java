@@ -71,7 +71,7 @@ public class BotProsPanelsLayout extends VerticalLayout {
                 new BotProPanelInfo("gambling", true, VaadinIcon.COINS.create()),
                 new BotProPanelInfo("dashboard", false, VaadinIcon.STAR.create(), wip, dashboardButton),
                 new BotProPanelInfo("interactive", true, VaadinIcon.BOAT.create()),
-                new BotProPanelInfo("tracker", true, VaadinIcon.PIN.create()),
+                new BotProPanelInfo("tracker", true, VaadinIcon.BELL.create()),
                 new BotProPanelInfo("autochannel", true, VaadinIcon.VOLUME.create()),
                 new BotProPanelInfo("nsfw", !uiData.isNSFWDisabled(), VaadinIcon.MOON_O.create()),
                 new BotProPanelInfo("reactionroles", true, VaadinIcon.TAG.create()),
