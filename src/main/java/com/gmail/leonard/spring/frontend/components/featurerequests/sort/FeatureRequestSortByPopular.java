@@ -12,7 +12,7 @@ public class FeatureRequestSortByPopular extends FeatureRequestSort {
     }
 
     private double getScore(FREntry entry) {
-        return Math.pow(entry.getBoosts().orElse(-1) + 0.25, 1.5) / (double)(ChronoUnit.DAYS.between(entry.getDate(), LocalDate.now()) + 1);
+        return Math.pow(entry.getBoosts().map(i -> (double)i).orElse(-0.25) + 0.25, 1.5) / (double)(ChronoUnit.DAYS.between(entry.getDate(), LocalDate.now()) + 1);
     }
 
 }
