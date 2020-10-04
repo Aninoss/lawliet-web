@@ -26,12 +26,13 @@ public class OnFRFetch extends EventAbstract<FRDynamicBean> {
         for(int j = 0; j < jsonEntriesArray.length(); j++) {
             JSONObject jsonEntry = jsonEntriesArray.getJSONObject(j);
             FRPanelType type = FRPanelType.valueOf(jsonEntry.getString("type"));
+            boolean pub = jsonEntry.getBoolean("public");
             frDynamicBean.addEntry(
                     jsonEntry.getInt("id"),
                     jsonEntry.getString("title"),
                     jsonEntry.getString("description"),
-                    type == FRPanelType.PENDING ? jsonEntry.getInt("boosts") : null,
-                    jsonEntry.getBoolean("public"),
+                    type == FRPanelType.PENDING && pub ? jsonEntry.getInt("boosts") : null,
+                    pub,
                     type,
                     LocalDate.ofEpochDay(jsonEntry.getLong("date"))
             );
