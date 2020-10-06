@@ -62,7 +62,7 @@ public class PageHeader extends Div {
     }
 
     private void addTitle(@Nonnull String title) {
-        String htmlString = String.format("<h1 id=\"page-title\">%s<span id=\"page-title-shadow\" class=\"unselectable\">%s</span></h1>", title, title.toUpperCase());
+        String htmlString = String.format("<h1 id=\"page-title\">%s<span id=\"page-title-shadow\" class=\"unselectable\">%s</span></h1>", title, title);
         Html html = new Html(htmlString);
         innerLayout.add(html);
     }

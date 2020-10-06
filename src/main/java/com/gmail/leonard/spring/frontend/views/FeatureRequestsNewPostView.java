@@ -15,6 +15,7 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -53,6 +54,7 @@ public class FeatureRequestsNewPostView extends PageLayout {
 
         addTitle();
         addDescription();
+        addNotifyCheckbox();
         addHr();
         addButtons();
 
@@ -90,7 +92,7 @@ public class FeatureRequestsNewPostView extends PageLayout {
             long userId = getSessionData().getDiscordUser().get().getId();
             if (FeatureRequests.canPost(userId).join()) {
                 try {
-                    FeatureRequests.postNewFeatureRequest(userId, newBean.getTitle(newBean), newBean.getDescription(newBean)).get();
+                    FeatureRequests.postNewFeatureRequest(userId, newBean.getTitle(newBean), newBean.getDescription(newBean), newBean.getNotify(newBean)).get();
                     CustomNotification.showSuccess(getTranslation("fr.new.success"));
                     exit();
                 } catch (InterruptedException | ExecutionException e) {
@@ -111,6 +113,16 @@ public class FeatureRequestsNewPostView extends PageLayout {
 
     private void addHr() {
         mainContent.add(new Hr());
+    }
+
+    private void addNotifyCheckbox() {
+        Checkbox checkbox = new Checkbox(getTranslation("fr.new.notify"));
+        checkbox.setValue(true);
+
+        binder.forField(checkbox)
+                .bind(newBean::getNotify, newBean::setNotify);
+
+        mainContent.add(checkbox);
     }
 
     private void addDescription() {

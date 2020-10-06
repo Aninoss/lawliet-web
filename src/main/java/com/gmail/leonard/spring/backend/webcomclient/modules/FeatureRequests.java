@@ -27,11 +27,12 @@ public class FeatureRequests {
         return WebComClient.getInstance().send(WebComClient.EVENT_FR_CAN_POST, jsonObject, Boolean.class);
     }
 
-    public static CompletableFuture<Void> postNewFeatureRequest(long userId, String title, String description) {
+    public static CompletableFuture<Void> postNewFeatureRequest(long userId, String title, String description, boolean notify) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("user_id", userId);
         jsonObject.put("title", title);
         jsonObject.put("description", description);
+        jsonObject.put("notify", notify);
         return WebComClient.getInstance().send(WebComClient.EVENT_FR_POST, jsonObject, Void.class);
     }
 

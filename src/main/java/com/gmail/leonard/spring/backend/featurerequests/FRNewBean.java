@@ -2,7 +2,9 @@ package com.gmail.leonard.spring.backend.featurerequests;
 
 public class FRNewBean {
 
-    private String title, description;
+    private String title;
+    private String description;
+    private boolean notify = true;
 
     public String getTitle(FRNewBean frNewBean) {
         return frNewBean.title;
@@ -18,6 +20,14 @@ public class FRNewBean {
 
     public void setDescription(FRNewBean frNewBean, String s) {
         frNewBean.description = s;
+    }
+
+    public void setNotify(FRNewBean frNewBean, boolean b) {
+        frNewBean.notify = b;
+    }
+
+    public boolean getNotify(FRNewBean frNewBean) {
+        return frNewBean.notify;
     }
 
 }
