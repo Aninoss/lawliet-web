@@ -40,25 +40,10 @@ public class BotInfoVideoLayout extends Div {
         add(discordBarIcon);
 
         //Gradient foreground large
-        String fadeStr = VaadinServletService.getCurrent()
-                .resolveResource("/styles/img/video_fade.png",
-                        VaadinSession.getCurrent().getBrowser());
-
-        Image fade = new Image(fadeStr, "");
+        Div fade = new Div();
         ComponentChanger.setNotInteractive(fade);
         fade.addClassName("videofade");
-        fade.addClassName(Styles.VISIBLE_PC);
+        fade.addClassName(Styles.VISIBLE_NOTMOBILE);
         add(fade);
-
-        //Gradient foreground small
-        String fadeStr2 = VaadinServletService.getCurrent()
-                .resolveResource("/styles/img/video_fade2.png",
-                        VaadinSession.getCurrent().getBrowser());
-
-        Image fade2 = new Image(fadeStr2, "");
-        ComponentChanger.setNotInteractive(fade2);
-        fade2.addClassName("videofade");
-        fade2.addClassName(Styles.VISIBLE_TABLET);
-        add(fade2);
     }
 }

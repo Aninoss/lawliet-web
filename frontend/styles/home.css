@@ -48,6 +48,7 @@ html {
     width: 100%;
     height: 80%;
     z-index: 1;
+    background: linear-gradient(0deg, rgba(0,0,0,0) 0%, #1f2c3e 100%);
 }
 
 
@@ -81,6 +82,7 @@ html {
     .videofade {
         margin-top: -240px;
         height: 150%;
+        background: linear-gradient(0deg, rgba(0,0,0,0) 0%, #1f2c3e 80%);
     }
 
 }
