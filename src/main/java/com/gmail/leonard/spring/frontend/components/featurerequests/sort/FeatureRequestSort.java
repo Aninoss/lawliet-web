@@ -13,6 +13,8 @@ public abstract class FeatureRequestSort implements Comparator<FREntry> {
         return compareDetailed(o1, o2);
     }
 
+    public abstract String getId();
+
     protected abstract int compareDetailed(FREntry o1, FREntry o2);
 
 }

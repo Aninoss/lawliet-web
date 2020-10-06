@@ -13,4 +13,9 @@ public class FeatureRequestSortByNewest extends FeatureRequestSort {
         return 0;
     }
 
+    @Override
+    public String getId() {
+        return "newest";
+    }
+
 }

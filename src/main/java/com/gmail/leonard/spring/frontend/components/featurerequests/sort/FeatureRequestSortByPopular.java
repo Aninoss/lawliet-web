@@ -15,4 +15,9 @@ public class FeatureRequestSortByPopular extends FeatureRequestSort {
         return Math.pow(entry.getBoosts().map(i -> (double)i).orElse(-0.25) + 0.25, 1.5) / (double)(ChronoUnit.DAYS.between(entry.getDate(), LocalDate.now()) + 1);
     }
 
+    @Override
+    public String getId() {
+        return "popular";
+    }
+
 }

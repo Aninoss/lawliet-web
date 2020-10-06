@@ -10,4 +10,9 @@ public class FeatureRequestSortByBoosts extends FeatureRequestSort {
         return Integer.compare(o2.getBoosts().orElse(0), o1.getBoosts().orElse(0));
     }
 
+    @Override
+    public String getId() {
+        return "boosts";
+    }
+
 }

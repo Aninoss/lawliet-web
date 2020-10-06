@@ -9,4 +9,9 @@ public class FeatureRequestSortByTitle extends FeatureRequestSort {
         return o1.getTitle().compareToIgnoreCase(o2.getTitle());
     }
 
+    @Override
+    public String getId() {
+        return "title";
+    }
+
 }

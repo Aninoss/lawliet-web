@@ -13,17 +13,10 @@ import com.vaadin.flow.component.select.Select;
 
 public class FeatureRequestChangeSort extends HorizontalLayout {
 
-    private final FeatureRequestSort[] comparators = new FeatureRequestSort[] {
-            new FeatureRequestSortByPopular(),
-            new FeatureRequestSortByBoosts(),
-            new FeatureRequestSortByNewest(),
-            new FeatureRequestSortByTitle()
-    };
-
     private Label pageIndicator;
     private Label pageIndicatorMobile;
 
-    public FeatureRequestChangeSort(OnSortChange listener, OnPagePrevious onPagePrevious, OnPageNext onPageNext) {
+    public FeatureRequestChangeSort(OnSortChange listener, OnPagePrevious onPagePrevious, OnPageNext onPageNext, FeatureRequestSort[] comparators, FeatureRequestSort sortDefault) {
         setPadding(false);
         setAlignItems(Alignment.CENTER);
         setWidthFull();
@@ -31,7 +24,7 @@ public class FeatureRequestChangeSort extends HorizontalLayout {
         addPageIndicator(onPagePrevious, onPageNext);
         Div emptyDiv = new Div();
         add(emptyDiv);
-        addDropdownMenu(listener);
+        addDropdownMenu(listener, comparators, sortDefault);
         setFlexGrow(1, emptyDiv);
     }
 
@@ -49,7 +42,7 @@ public class FeatureRequestChangeSort extends HorizontalLayout {
         add(buttonPrevious, pageIndicator, pageIndicatorMobile, buttonNext);
     }
 
-    private void addDropdownMenu(OnSortChange listener) {
+    private void addDropdownMenu(OnSortChange listener, FeatureRequestSort[] comparators, FeatureRequestSort sortDefault) {
         Label label = new Label(getTranslation("fr.sort.label"));
         label.addClassName(Styles.VISIBLE_NOTMOBILE);
         add(label);
@@ -57,9 +50,18 @@ public class FeatureRequestChangeSort extends HorizontalLayout {
 
         Select<String> labelSelect = new Select<>();
         labelSelect.setItems(options);
-        labelSelect.setValue(options[0]);
+        labelSelect.setValue(options[getSortIndex(comparators, sortDefault)]);
         labelSelect.addValueChangeListener(selected -> listener.onSortChange(comparators[getIndexOfValue(options, selected.getValue())]));
         add(labelSelect);
+    }
+
+    private int getSortIndex(FeatureRequestSort[] comparators, FeatureRequestSort sortDefault) {
+        for (int i = 0; i < comparators.length; i++) {
+            if (comparators[i].getId().equals(sortDefault.getId()))
+                return i;
+        }
+
+        return 0;
     }
 
     private int getIndexOfValue(String[] values, String value) {
