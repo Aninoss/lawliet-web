@@ -50,7 +50,7 @@ public class ConfirmationDialog extends Div {
     }
 
     private void setDialogStyles() {
-        dialogLayout.setMaxWidth("500px");
+        dialogLayout.setMaxWidth("min(500px, calc(100% - 32px))");
         dialogLayout.setWidthFull();
         dialogLayout.setMinHeight("200px");
         dialogLayout.getStyle().set("position", "fixed")
