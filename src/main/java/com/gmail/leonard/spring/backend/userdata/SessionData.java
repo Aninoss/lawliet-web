@@ -54,7 +54,7 @@ public class SessionData {
     }
 
     public String getLoginUrl() {
-        return builder.getAuthorizationUrl(id);
+        return builder.getAuthorizationUrl(id) + "&prompt=none";
     }
 
     public boolean login(String code, String state, UIData uiData) {

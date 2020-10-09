@@ -25,6 +25,7 @@ public class CustomBootstrap implements BootstrapListener {
                 response.getDocument().body().append(pageString);
 
                 response.getDocument().head().append("<script src=\"js/scripts.js\"></script>");
+                response.getDocument().head().append("<script data-ad-client=\"ca-pub-6615556433120664\" async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js\"></script>");
                 response.getDocument().body().attr("onscroll", "onScroll()");
             } catch (IOException e) {
                 LOGGER.error("Error while sending bootstrap page", e);
