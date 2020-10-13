@@ -75,8 +75,8 @@ public class FeatureRequestChangeSort extends HorizontalLayout {
     }
 
     public void onPageChanged(int page, int pageSize) {
-        pageIndicator.setText(getTranslation("page", StringUtil.numToString(getLocale(), page + 1), StringUtil.numToString(getLocale(), pageSize)));
-        pageIndicatorMobile.setText(StringUtil.numToString(getLocale(), page + 1));
+        pageIndicator.setText(getTranslation("page", StringUtil.numToString(page + 1), StringUtil.numToString(pageSize)));
+        pageIndicatorMobile.setText(StringUtil.numToString(page + 1));
     }
 
     public interface OnSortChange {

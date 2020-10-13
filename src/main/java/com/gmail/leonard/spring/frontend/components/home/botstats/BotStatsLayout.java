@@ -37,7 +37,7 @@ public class BotStatsLayout extends VerticalLayout {
     }
 
     private void addTitle(int serverCount, int userCount) {
-        H2 title = new H2(getTranslation("bot.stat.title", StringUtil.numToString(getLocale(), serverCount), StringUtil.numToString(getLocale(), userCount)));
+        H2 title = new H2(getTranslation("bot.stat.title", StringUtil.numToString(serverCount), StringUtil.numToString(userCount)));
         title.getStyle().set("margin-top", "2em");
         title.setWidthFull();
         title.addClassName(Styles.CENTER_TEXT);

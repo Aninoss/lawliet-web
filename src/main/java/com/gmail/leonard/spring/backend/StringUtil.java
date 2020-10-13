@@ -16,27 +16,9 @@ public class StringUtil {
         return RandomStringUtils.random(length, useLetters, useNumbers);
     }
 
-    public static String numToString(Locale locale, long n) {
-        DecimalFormat formatter = new DecimalFormat("#,###", DecimalFormatSymbols.getInstance(Locale.US));
-        String str = formatter.format(n);
-        switch (locale.getLanguage().toLowerCase()) {
-            case "ru":
-            case "de":
-                str = str.replace(",",".");
-                break;
-
-            default:
-        }
-
-        return str;
-    }
-
-    public static String numToString(Locale locale, int n) {
-        return numToString(locale, (long) n);
-    }
-
     public static String numToString(long n) {
-        return numToString(Locale.US, n);
+        DecimalFormat formatter = new DecimalFormat("#,###", DecimalFormatSymbols.getInstance(Locale.US));
+        return formatter.format(n).replace(",", " ");
     }
 
     public static String numToString(int n) {

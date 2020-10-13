@@ -83,7 +83,7 @@ public class FeatureRequestCard extends Card {
                 break;
 
             default:
-                formattedDate = getTranslation("fr.card.ago", StringUtil.numToString(getLocale(), daysBetween));
+                formattedDate = getTranslation("fr.card.ago", StringUtil.numToString(daysBetween));
         }
 
         Div dateString = new Div(new Text(formattedDate));
