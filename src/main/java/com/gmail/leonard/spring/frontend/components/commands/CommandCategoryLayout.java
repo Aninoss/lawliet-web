@@ -93,12 +93,11 @@ public class CommandCategoryLayout extends VerticalLayout {
                     H5 specTitle = new H5(getTranslation("commands.specs" + i));
                     spec.add(specTitle);
 
-                    HtmlText htmlText = new HtmlText(specContent[i]);
-                    htmlText.getStyle().set("margin-top", "0px")
-                        .set("padding-right", "16px");
-                    spec.add(htmlText);
+                    UnorderedList ul = new UnorderedList();
+                    Arrays.stream(specContent[i].split("\n")).forEach(entry -> ul.add(new ListItem(entry)));
+                    spec.add(ul);
 
-                    spec.setMinWidth("250px");
+                    spec.setMinWidth("300px");
                     spec.setWidth((100 / n) + "%");
                     spec.getStyle().set("display", "inline-block")
                         .set("vertical-align", "top");

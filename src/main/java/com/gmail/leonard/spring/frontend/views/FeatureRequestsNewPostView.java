@@ -17,6 +17,8 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.html.ListItem;
+import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -28,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
 @Route(value = "new", layout = MainLayout.class)
@@ -46,7 +49,10 @@ public class FeatureRequestsNewPostView extends PageLayout {
         super(sessionData, uiData);
         getStyle().set("margin-bottom", "48px");
 
-        add(new PageHeader(getTitleText(), getTranslation("fr.new.desc"), null));
+        UnorderedList ul = new UnorderedList();
+        Arrays.stream(getTranslation("fr.new.desc").split("\n"))
+                .forEach(value -> ul.add(new ListItem(value )));
+        add(new PageHeader(getTitleText(), null, null, ul));
 
         mainContent.addClassName(Styles.APP_WIDTH);
         mainContent.getStyle().set("margin-top", "-16px");
