@@ -8,10 +8,8 @@ public class ServerStatsBean {
 
     public ServerStatsBean(int servers, int users, ServerStatsSlot[] slots) {
         this.slots = slots;
-        //this.servers = servers; todo
-        //this.users = users;
-        this.servers = 46734;
-        this.users = 2042683;
+        this.servers = servers;
+        this.users = users;
     }
 
     public ServerStatsSlot[] getSlots() {
