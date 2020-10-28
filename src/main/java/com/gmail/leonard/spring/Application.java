@@ -16,10 +16,12 @@ public class Application extends SpringBootServletInitializer {
     private final static Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
     public static void main(String[] args) {
+        if (args.length == 0) args = new String[]{ "15744" };
+
         SpringApplication.run(Application.class, args);
         LOGGER.info("###########################");
         Console.getInstance().start();
-        WebComClient.getInstance().start(15744);
+        WebComClient.getInstance().start(Integer.parseInt(args[0]));
     }
 
 }

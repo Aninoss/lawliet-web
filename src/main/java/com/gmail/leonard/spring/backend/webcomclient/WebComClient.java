@@ -2,20 +2,18 @@ package com.gmail.leonard.spring.backend.webcomclient;
 
 import com.gmail.leonard.spring.backend.StringUtil;
 import com.gmail.leonard.spring.backend.webcomclient.events.*;
-import io.socket.client.IO;
-import io.socket.client.Socket;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.channels.NotYetConnectedException;
 import java.util.concurrent.CompletableFuture;
+
 public class WebComClient {
 
     private static final WebComClient instance = new WebComClient();
     public static WebComClient getInstance() { return instance; }
-
-    private static final String CONNECTED = "connected";
 
     public static final String EVENT_COMMANDLIST = "command_list";
     public static final String EVENT_FAQLIST = "faq_list";
@@ -36,50 +34,48 @@ public class WebComClient {
     private final TransferCache transferCache = new TransferCache();
 
     private boolean started = false;
-    private Socket socket;
+    private CustomWebSocketClient client;
 
     public void start(int port) {
         if (started) return;
         started = true;
 
-        IO.Options options = new IO.Options();
-        options.reconnection = true;
         try {
-            socket = IO.socket("http://127.0.0.1:" + port + "/");
-
+            client = new CustomWebSocketClient(new URI("ws://localhost:" + port));
+            
             //Events
-            socket.on(CONNECTED, new OnConnected());
+            client.addConnectedHandler(new OnConnected());
 
-            socket.on(EVENT_COMMANDLIST, new OnCommandList(transferCache));
-            socket.on(EVENT_FAQLIST, new OnFAQList(transferCache));
-            socket.on(EVENT_SERVERLIST, new OnServerList(transferCache));
-            socket.on(EVENT_SERVERMEMBERS, new OnEventJSONResponse(transferCache));
-            socket.on(EVENT_FR_FETCH, new OnFRFetch(transferCache));
-            socket.on(EVENT_FR_BOOST, new OnEventJSONResponse(transferCache));
-            socket.on(EVENT_FR_CAN_POST, new OnFRCanPost(transferCache));
-            socket.on(EVENT_FR_POST, new OnEventNoResponse(transferCache));
-            socket.on(EVENT_SERVERSTATS, new OnEventJSONResponse(transferCache));
+            client.addEventHandler(EVENT_COMMANDLIST, new OnCommandList(transferCache));
+            client.addEventHandler(EVENT_FAQLIST, new OnFAQList(transferCache));
+            client.addEventHandler(EVENT_SERVERLIST, new OnServerList(transferCache));
+            client.addEventHandler(EVENT_SERVERMEMBERS, new OnEventJSONResponse(transferCache));
+            client.addEventHandler(EVENT_FR_FETCH, new OnFRFetch(transferCache));
+            client.addEventHandler(EVENT_FR_BOOST, new OnEventJSONResponse(transferCache));
+            client.addEventHandler(EVENT_FR_CAN_POST, new OnFRCanPost(transferCache));
+            client.addEventHandler(EVENT_FR_POST, new OnEventNoResponse(transferCache));
+            client.addEventHandler(EVENT_SERVERSTATS, new OnEventJSONResponse(transferCache));
 
-            socket.on(EVENT_TOPGG, new OnEventNoResponse(transferCache));
-            socket.on(EVENT_TOPGG_ANINOSS, new OnEventNoResponse(transferCache));
-            socket.on(EVENT_DONATEBOT_IO, new OnEventNoResponse(transferCache));
-            socket.on(EVENT_FEEDBACK, new OnEventNoResponse(transferCache));
-            socket.on(EVENT_INVITE, new OnEventNoResponse(transferCache));
+            client.addEventHandler(EVENT_TOPGG, new OnEventNoResponse(transferCache));
+            client.addEventHandler(EVENT_TOPGG_ANINOSS, new OnEventNoResponse(transferCache));
+            client.addEventHandler(EVENT_DONATEBOT_IO, new OnEventNoResponse(transferCache));
+            client.addEventHandler(EVENT_FEEDBACK, new OnEventNoResponse(transferCache));
+            client.addEventHandler(EVENT_INVITE, new OnEventNoResponse(transferCache));
 
-            socket.connect();
+            client.connect();
             LOGGER.info("The WebCom client has been started!");
         } catch (URISyntaxException e) {
             LOGGER.error("Could not initialize web com client", e);
         }
     }
 
-    public <T> CompletableFuture<T> sendSecure(String event, Class<T> c) {
-        return sendSecure(event, new JSONObject(), c);
+    public <T> void sendSecure(String event, Class<T> c) {
+        sendSecure(event, new JSONObject(), c);
     }
 
-    public <T> CompletableFuture<T> sendSecure(String event, JSONObject jsonObject, Class<T> c) {
+    public <T> void sendSecure(String event, JSONObject jsonObject, Class<T> c) {
         blockWhileDisconnected();
-        return send(event, jsonObject, c);
+        send(event, jsonObject, c);
     }
 
     public <T> CompletableFuture<T> send(String event, Class<T> c) {
@@ -90,8 +86,8 @@ public class WebComClient {
         jsonObject.put("id", StringUtil.getRandomString());
         CompletableFuture<T> completableFuture = transferCache.register(jsonObject, c);
 
-        if (socket.connected()) {
-            socket.emit(event, jsonObject.toString());
+        if (client.isConnected()) {
+            client.send(event, jsonObject);
         } else {
             completableFuture.completeExceptionally(new NotYetConnectedException());
         }
@@ -99,10 +95,14 @@ public class WebComClient {
         return completableFuture;
     }
 
+    public boolean isConnected() {
+        return client.isConnected();
+    }
+
     private synchronized void blockWhileDisconnected() {
-        if (!socket.connected()) {
+        if (!client.isConnected()) {
             try {
-                while (!socket.connected()) {
+                while (!client.isConnected()) {
                     Thread.sleep(100);
                 }
             } catch (InterruptedException e) {

@@ -1,0 +1,90 @@
+package com.gmail.leonard.spring.backend.webcomclient;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+
+import com.gmail.leonard.spring.backend.CustomThread;
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.drafts.Draft;
+import org.java_websocket.handshake.ServerHandshake;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class CustomWebSocketClient extends WebSocketClient {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(CustomWebSocketClient.class);
+
+    private final HashMap<String, Consumer<JSONObject>> eventHandlers = new HashMap<>();
+    private final ArrayList<Runnable> connectedHanlders = new ArrayList<>();
+
+    public CustomWebSocketClient(URI serverURI) {
+        super(serverURI);
+    }
+
+    public CustomWebSocketClient(URI serverUri, Map<String, String> httpHeaders) {
+        super(serverUri, httpHeaders);
+    }
+
+    @Override
+    public void onOpen(ServerHandshake handshakedata) {
+        LOGGER.info("Web socket connected");
+        connectedHanlders.forEach(Runnable::run);
+    }
+
+    public void addConnectedHandler(Runnable runnable) {
+        connectedHanlders.add(runnable);
+    }
+
+    public void removeConnectedHandler(Runnable runnable) {
+        connectedHanlders.remove(runnable);
+    }
+
+    public void addEventHandler(String event, Consumer<JSONObject> eventConsumer) {
+        eventHandlers.put(event, eventConsumer);
+    }
+
+    public void removeEventHandler(String event) {
+        eventHandlers.remove(event);
+    }
+
+    public void removeEventHandler(String event, Consumer<JSONObject> eventConsumer) {
+        eventHandlers.remove(event, eventConsumer);
+    }
+
+    @Override
+    public void onMessage(String message) {
+        String event = message.split("::")[0];
+        String content = message.substring(event.length() + 2);
+        Consumer<JSONObject> eventConsumer = eventHandlers.get(event);
+        if (eventConsumer != null)
+            eventConsumer.accept(new JSONObject(content));
+    }
+
+    public void send(String event, JSONObject content) {
+        super.send(event + "::" + content.toString());
+    }
+
+    @Override
+    public void onClose(int code, String reason, boolean remote) {
+        LOGGER.info("Web socket disconnected");
+        new CustomThread(this::reconnect, "websocket_reconnect").start();
+    }
+
+    @Override
+    public void onError(Exception ex) {
+        LOGGER.error("Web socket error", ex);
+    }
+
+    public boolean isConnected() {
+        if (getSocket() == null)
+            return false;
+        return getSocket().isConnected();
+    }
+
+}

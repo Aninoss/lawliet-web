@@ -93,15 +93,13 @@ public class CustomRequestHandler implements RequestHandler {
                 if (sb.length() > 0) {
                     JSONObject jsonObject = new JSONObject(sb.substring(1));
                     LOGGER.info("UPVOTE | {}", jsonObject.getLong("user"));
-                    OneWayTransfers.sendTopGG(jsonObject).get();
+                    OneWayTransfers.sendTopGG(jsonObject);
                 }
 
                 return true;
             }
-        } catch (IOException | ExecutionException e) {
+        } catch (IOException e) {
             LOGGER.error("Error while handling upvote", e);
-        } catch (InterruptedException e) {
-            LOGGER.error("Interrupted", e);
         }
 
         return false;
@@ -121,15 +119,13 @@ public class CustomRequestHandler implements RequestHandler {
                 if (sb.length() > 0) {
                     JSONObject jsonObject = new JSONObject(sb.substring(1));
                     LOGGER.info("UPVOTE ANINOSS | {}", jsonObject.getLong("user"));
-                    OneWayTransfers.sendTopGGAninoss(jsonObject).get();
+                    OneWayTransfers.sendTopGGAninoss(jsonObject);
                 }
 
                 return true;
             }
-        } catch (IOException | ExecutionException e) {
+        } catch (IOException e) {
             LOGGER.error("Error while handling upvote", e);
-        } catch (InterruptedException e) {
-            LOGGER.error("Interrupted", e);
         }
 
         return false;
@@ -147,13 +143,11 @@ public class CustomRequestHandler implements RequestHandler {
                 }
 
                 if (sb.length() > 0)
-                    OneWayTransfers.sendDonatebotIO(new JSONObject(sb.toString().substring(1))).get();
+                    OneWayTransfers.sendDonatebotIO(new JSONObject(sb.substring(1)));
                 return true;
             }
-        } catch (IOException | ExecutionException e) {
+        } catch (IOException e) {
             LOGGER.error("Error while handling donation", e);
-        } catch (InterruptedException e) {
-            LOGGER.error("Interrupted");
         }
 
         return false;

@@ -12,18 +12,16 @@ import java.util.concurrent.ExecutionException;
 
 public class OneWayTransfers {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(OneWayTransfers.class);
-
-    public static CompletableFuture<Void> sendTopGG(JSONObject jsonObject) {
-        return WebComClient.getInstance().sendSecure(WebComClient.EVENT_TOPGG, jsonObject, Void.class);
+    public static void sendTopGG(JSONObject jsonObject) {
+        WebComClient.getInstance().sendSecure(WebComClient.EVENT_TOPGG, jsonObject, Void.class);
     }
 
-    public static CompletableFuture<Void> sendTopGGAninoss(JSONObject jsonObject) {
-        return WebComClient.getInstance().sendSecure(WebComClient.EVENT_TOPGG_ANINOSS, jsonObject, Void.class);
+    public static void sendTopGGAninoss(JSONObject jsonObject) {
+        WebComClient.getInstance().sendSecure(WebComClient.EVENT_TOPGG_ANINOSS, jsonObject, Void.class);
     }
 
-    public static CompletableFuture<Void> sendDonatebotIO(JSONObject jsonObject) {
-        return WebComClient.getInstance().sendSecure(WebComClient.EVENT_DONATEBOT_IO, jsonObject, Void.class);
+    public static void sendDonatebotIO(JSONObject jsonObject) {
+        WebComClient.getInstance().sendSecure(WebComClient.EVENT_DONATEBOT_IO, jsonObject, Void.class);
     }
 
     public static CompletableFuture<Void> sendFeedback(FeedbackBean feedbackBean, Long serverId) {
@@ -39,11 +37,7 @@ public class OneWayTransfers {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("type", type.toLowerCase());
         new CustomThread(() -> {
-            try {
-                WebComClient.getInstance().sendSecure(WebComClient.EVENT_INVITE, jsonObject, Void.class).get();
-            } catch (InterruptedException | ExecutionException e) {
-                LOGGER.error("Exception while sending invite data", e);
-            }
+            WebComClient.getInstance().sendSecure(WebComClient.EVENT_INVITE, jsonObject, Void.class);
         }, "transfer_invite_data").start();
     }
 

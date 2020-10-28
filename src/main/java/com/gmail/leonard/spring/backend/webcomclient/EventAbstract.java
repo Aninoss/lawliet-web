@@ -1,19 +1,18 @@
 package com.gmail.leonard.spring.backend.webcomclient;
 
-import io.socket.emitter.Emitter;
 import org.json.JSONObject;
+import java.util.function.Consumer;
 
-public abstract class EventAbstract<T> implements Emitter.Listener {
+public abstract class EventAbstract<T> implements Consumer<JSONObject> {
 
     private final TransferCache transferCache;
     
     public EventAbstract(TransferCache transferCache) {
         this.transferCache = transferCache;
     }
-    
+
     @Override
-    public void call(Object... args) {
-        JSONObject mainJSON = new JSONObject((String) args[0]);
+    public void accept(JSONObject mainJSON) {
         T data = processData(mainJSON);
         transferCache.complete(mainJSON, data);
     }
