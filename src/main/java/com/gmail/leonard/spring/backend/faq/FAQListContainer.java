@@ -17,7 +17,7 @@ public class FAQListContainer {
     public static FAQListContainer getInstance() { return ourInstance; }
 
 
-    public FAQListSlot get(int n) {
+    public synchronized FAQListSlot get(int n) {
         loadIfEmpty();
         return entries.get(n);
     }

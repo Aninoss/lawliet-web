@@ -30,7 +30,8 @@ public class OneWayTransfers {
         jsonObject.put("reason", feedbackBean.getReason(feedbackBean));
         if (serverId != null)
             jsonObject.put("server_id", serverId);
-        return WebComClient.getInstance().send(WebComClient.EVENT_FEEDBACK, jsonObject, Void.class);
+        //return WebComClient.getInstance().send(WebComClient.EVENT_FEEDBACK, jsonObject, Void.class);
+        return CompletableFuture.completedFuture(null);
     }
 
     public static void sendInvite(String type) {

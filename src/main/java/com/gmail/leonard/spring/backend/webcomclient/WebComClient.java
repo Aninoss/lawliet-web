@@ -17,8 +17,6 @@ public class WebComClient {
 
     public static final String EVENT_COMMANDLIST = "command_list";
     public static final String EVENT_FAQLIST = "faq_list";
-    public static final String EVENT_SERVERLIST = "server_list";
-    public static final String EVENT_SERVERMEMBERS = "server_members";
     public static final String EVENT_FR_FETCH = "fr_fetch";
     public static final String EVENT_FR_BOOST = "fr_boost";
     public static final String EVENT_FR_CAN_POST = "fr_can_post";
@@ -26,7 +24,6 @@ public class WebComClient {
     public static final String EVENT_TOPGG = "topgg";
     public static final String EVENT_TOPGG_ANINOSS = "topgg_aninoss";
     public static final String EVENT_DONATEBOT_IO = "donatebot.io";
-    public static final String EVENT_FEEDBACK = "feedback";
     public static final String EVENT_INVITE = "invite";
     public static final String EVENT_SERVERSTATS = "serverstats";
 
@@ -48,8 +45,6 @@ public class WebComClient {
 
             client.addEventHandler(EVENT_COMMANDLIST, new OnCommandList(transferCache));
             client.addEventHandler(EVENT_FAQLIST, new OnFAQList(transferCache));
-            client.addEventHandler(EVENT_SERVERLIST, new OnServerList(transferCache));
-            client.addEventHandler(EVENT_SERVERMEMBERS, new OnEventJSONResponse(transferCache));
             client.addEventHandler(EVENT_FR_FETCH, new OnFRFetch(transferCache));
             client.addEventHandler(EVENT_FR_BOOST, new OnEventJSONResponse(transferCache));
             client.addEventHandler(EVENT_FR_CAN_POST, new OnFRCanPost(transferCache));
@@ -59,7 +54,6 @@ public class WebComClient {
             client.addEventHandler(EVENT_TOPGG, new OnEventNoResponse(transferCache));
             client.addEventHandler(EVENT_TOPGG_ANINOSS, new OnEventNoResponse(transferCache));
             client.addEventHandler(EVENT_DONATEBOT_IO, new OnEventNoResponse(transferCache));
-            client.addEventHandler(EVENT_FEEDBACK, new OnEventNoResponse(transferCache));
             client.addEventHandler(EVENT_INVITE, new OnEventNoResponse(transferCache));
 
             client.connect();

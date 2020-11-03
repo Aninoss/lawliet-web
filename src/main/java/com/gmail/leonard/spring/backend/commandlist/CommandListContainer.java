@@ -57,7 +57,7 @@ public class CommandListContainer {
 
     public void clear() { categories.clear(); }
 
-    private void loadIfEmpty() {
+    private synchronized void loadIfEmpty() {
         if (categories.size() == 0) {
             LOGGER.info("Updating command list");
             CommandList.fetchCommandList().join();

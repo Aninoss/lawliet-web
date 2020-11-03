@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 
 public class CommandIcon extends Div {
 
-    public enum Type { PERMISSIONS, NSFW, TRACKER, PATREON };
+    public enum Type { TRACKER, NSFW, PATREON };
 
     public CommandIcon(@NotNull Type type) {
         this(type, false);
@@ -25,9 +25,9 @@ public class CommandIcon extends Div {
                 fileStr = "icon_nsfw.png";
                 break;
 
-            case PERMISSIONS:
+            /*case PERMISSIONS:
                 fileStr = "icon_locked.png";
-                break;
+                break;*/
 
             case TRACKER:
                 fileStr = "icon_tracker.png";

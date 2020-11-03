@@ -14,7 +14,7 @@ public class Dashboard {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("user_id", sessionData.getDiscordUser().get().getId());
 
-            return WebComClient.getInstance().send(WebComClient.EVENT_SERVERLIST, jsonObject, ServerListData.class);
+            //return WebComClient.getInstance().send(WebComClient.EVENT_SERVERLIST, jsonObject, ServerListData.class);
         }
 
         return CompletableFuture.completedFuture(null);
@@ -26,7 +26,7 @@ public class Dashboard {
             jsonObject.put("user_id", sessionData.getDiscordUser().get().getId());
             jsonObject.put("server_id", serverId);
 
-            return WebComClient.getInstance().send(WebComClient.EVENT_SERVERMEMBERS, jsonObject, JSONObject.class);
+            //return WebComClient.getInstance().send(WebComClient.EVENT_SERVERMEMBERS, jsonObject, JSONObject.class);
         }
 
         return CompletableFuture.completedFuture(null);

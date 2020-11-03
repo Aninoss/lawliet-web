@@ -22,6 +22,7 @@ public class CustomWebSocketClient extends WebSocketClient {
 
     private final HashMap<String, Consumer<JSONObject>> eventHandlers = new HashMap<>();
     private final ArrayList<Runnable> connectedHanlders = new ArrayList<>();
+    private boolean connected = false;
 
     public CustomWebSocketClient(URI serverURI) {
         super(serverURI);
@@ -33,6 +34,7 @@ public class CustomWebSocketClient extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake handshakedata) {
+        connected = true;
         LOGGER.info("Web socket connected");
         connectedHanlders.forEach(Runnable::run);
     }
@@ -67,18 +69,28 @@ public class CustomWebSocketClient extends WebSocketClient {
     }
 
     public void send(String event, JSONObject content) {
-        super.send(event + "::" + content.toString());
+        if (eventHandlers.containsKey(event))
+            super.send(event + "::" + content.toString());
     }
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        LOGGER.info("Web socket disconnected");
-        new CustomThread(this::reconnect, "websocket_reconnect").start();
+        if (connected) LOGGER.info("Web socket disconnected");
+        connected = false;
+        new CustomThread(() -> {
+            try {
+                Thread.sleep(2000);
+                reconnect();
+            } catch (InterruptedException e) {
+                //Ignore
+            }
+        }, "websocket_reconnect").start();
     }
 
     @Override
     public void onError(Exception ex) {
-        LOGGER.error("Web socket error", ex);
+        if (!ex.toString().contains("Connection refused"))
+            LOGGER.error("Web socket error", ex);
     }
 
     public boolean isConnected() {
