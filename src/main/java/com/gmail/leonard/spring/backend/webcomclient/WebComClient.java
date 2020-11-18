@@ -43,7 +43,7 @@ public class WebComClient {
             //Events
             client.addConnectedHandler(new OnConnected());
 
-            client.addEventHandler(EVENT_COMMANDLIST, new OnCommandList(transferCache));
+            client.addEventHandler(EVENT_COMMANDLIST, new OnEventJSONResponse(transferCache));
             client.addEventHandler(EVENT_FAQLIST, new OnFAQList(transferCache));
             client.addEventHandler(EVENT_FR_FETCH, new OnFRFetch(transferCache));
             client.addEventHandler(EVENT_FR_BOOST, new OnEventJSONResponse(transferCache));
