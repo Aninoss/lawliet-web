@@ -5,6 +5,7 @@ import com.gmail.leonard.spring.backend.webcomclient.events.*;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.channels.NotYetConnectedException;
@@ -13,7 +14,10 @@ import java.util.concurrent.CompletableFuture;
 public class WebComClient {
 
     private static final WebComClient instance = new WebComClient();
-    public static WebComClient getInstance() { return instance; }
+
+    public static WebComClient getInstance() {
+        return instance;
+    }
 
     public static final String EVENT_COMMANDLIST = "command_list";
     public static final String EVENT_FAQLIST = "faq_list";
@@ -39,7 +43,7 @@ public class WebComClient {
 
         try {
             client = new CustomWebSocketClient(new URI("ws://localhost:" + port));
-            
+
             //Events
             client.addConnectedHandler(new OnConnected());
 
@@ -68,8 +72,30 @@ public class WebComClient {
     }
 
     public <T> void sendSecure(String event, JSONObject jsonObject, Class<T> c) {
-        blockWhileDisconnected();
-        send(event, jsonObject, c);
+        if (client.isConnected()) {
+            send(event, jsonObject, c)
+                    .exceptionally(e -> {
+                        waitAndSendSecure(event, jsonObject, c);
+                        return null;
+                    });
+        } else {
+            client.addConnectedTempHandler(() -> {
+                send(event, jsonObject, c)
+                        .exceptionally(e -> {
+                            waitAndSendSecure(event, jsonObject, c);
+                            return null;
+                        });
+            });
+        }
+    }
+
+    private <T> void waitAndSendSecure(String event, JSONObject jsonObject, Class<T> c) {
+        try {
+            Thread.sleep(5000);
+            sendSecure(event, jsonObject, c);
+        } catch (InterruptedException interruptedException) {
+            //Ignore
+        }
     }
 
     public <T> CompletableFuture<T> send(String event, Class<T> c) {
@@ -80,10 +106,14 @@ public class WebComClient {
         jsonObject.put("id", StringUtil.getRandomString());
         CompletableFuture<T> completableFuture = transferCache.register(jsonObject, c);
 
-        if (client.isConnected()) {
-            client.send(event, jsonObject);
-        } else {
-            completableFuture.completeExceptionally(new NotYetConnectedException());
+        try {
+            if (client.isConnected()) {
+                client.send(event, jsonObject);
+            } else {
+                completableFuture.completeExceptionally(new NotYetConnectedException());
+            }
+        } catch (Throwable e) {
+            completableFuture.completeExceptionally(e);
         }
 
         return completableFuture;
@@ -91,18 +121,6 @@ public class WebComClient {
 
     public boolean isConnected() {
         return client.isConnected();
-    }
-
-    private synchronized void blockWhileDisconnected() {
-        if (!client.isConnected()) {
-            try {
-                while (!client.isConnected()) {
-                    Thread.sleep(100);
-                }
-            } catch (InterruptedException e) {
-                LOGGER.error("Interrupted", e);
-            }
-        }
     }
 
 }

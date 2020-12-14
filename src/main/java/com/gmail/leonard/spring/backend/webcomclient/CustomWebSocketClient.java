@@ -4,13 +4,10 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import com.gmail.leonard.spring.backend.CustomThread;
 import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.drafts.Draft;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -21,7 +18,8 @@ public class CustomWebSocketClient extends WebSocketClient {
     private final static Logger LOGGER = LoggerFactory.getLogger(CustomWebSocketClient.class);
 
     private final HashMap<String, Consumer<JSONObject>> eventHandlers = new HashMap<>();
-    private final ArrayList<Runnable> connectedHanlders = new ArrayList<>();
+    private final ArrayList<Runnable> connectedTempHandlers = new ArrayList<>();
+    private final ArrayList<Runnable> connectedHandlers = new ArrayList<>();
     private boolean connected = false;
 
     public CustomWebSocketClient(URI serverURI) {
@@ -36,15 +34,23 @@ public class CustomWebSocketClient extends WebSocketClient {
     public void onOpen(ServerHandshake handshakedata) {
         connected = true;
         LOGGER.info("Web socket connected");
-        connectedHanlders.forEach(Runnable::run);
+        connectedHandlers.forEach(Runnable::run);
+        for(Runnable runnable : new ArrayList<>(connectedTempHandlers)) {
+            connectedTempHandlers.remove(runnable);
+            runnable.run();
+        }
     }
 
     public void addConnectedHandler(Runnable runnable) {
-        connectedHanlders.add(runnable);
+        connectedHandlers.add(runnable);
+    }
+
+    public void addConnectedTempHandler(Runnable runnable) {
+        connectedTempHandlers.add(runnable);
     }
 
     public void removeConnectedHandler(Runnable runnable) {
-        connectedHanlders.remove(runnable);
+        connectedHandlers.remove(runnable);
     }
 
     public void addEventHandler(String event, Consumer<JSONObject> eventConsumer) {
