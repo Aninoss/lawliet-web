@@ -39,7 +39,6 @@ public class ServerStatsContainer {
 
                     return new ServerStatsBean(
                             statsJson.getInt("servers"),
-                            statsJson.getInt("users"),
                             slots
                     );
                 }

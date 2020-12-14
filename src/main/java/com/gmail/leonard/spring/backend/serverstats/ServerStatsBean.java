@@ -4,12 +4,10 @@ public class ServerStatsBean {
 
     private final ServerStatsSlot[] slots;
     private final int servers;
-    private final int users;
 
-    public ServerStatsBean(int servers, int users, ServerStatsSlot[] slots) {
+    public ServerStatsBean(int servers, ServerStatsSlot[] slots) {
         this.slots = slots;
         this.servers = servers;
-        this.users = users;
     }
 
     public ServerStatsSlot[] getSlots() {
@@ -18,10 +16,6 @@ public class ServerStatsBean {
 
     public int getServers() {
         return servers;
-    }
-
-    public int getUsers() {
-        return users;
     }
 
 }

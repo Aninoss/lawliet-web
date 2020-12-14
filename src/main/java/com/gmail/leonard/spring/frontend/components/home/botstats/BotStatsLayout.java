@@ -23,7 +23,7 @@ public class BotStatsLayout extends VerticalLayout {
 
         try {
             ServerStatsBean bean = ServerStatsContainer.getInstance().getBean();
-            addTitle(roundDownStat(bean.getServers()), roundDownStat(bean.getUsers()));
+            addTitle(roundDownStat(bean.getServers()));
             mainLayout.add(new BotStatsChart(bean.getSlots()));
         } catch (Throwable e) {
             LOGGER.error("Error in fetching bot server stats", e);
@@ -36,8 +36,8 @@ public class BotStatsLayout extends VerticalLayout {
         return value / 1000 * 1000;
     }
 
-    private void addTitle(int serverCount, int userCount) {
-        H2 title = new H2(getTranslation("bot.stat.title", StringUtil.numToString(serverCount), StringUtil.numToString(userCount)));
+    private void addTitle(int serverCount) {
+        H2 title = new H2(getTranslation("bot.stat.title", StringUtil.numToString(serverCount)));
         title.getStyle().set("margin-top", "2em");
         title.setWidthFull();
         title.addClassName(Styles.CENTER_TEXT);
