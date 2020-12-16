@@ -73,18 +73,10 @@ public class WebComClient {
 
     public <T> void sendSecure(String event, JSONObject jsonObject, Class<T> c) {
         if (client.isConnected()) {
-            send(event, jsonObject, c)
-                    .exceptionally(e -> {
-                        waitAndSendSecure(event, jsonObject, c);
-                        return null;
-                    });
+            send(event, jsonObject, c);
         } else {
             client.addConnectedTempHandler(() -> {
-                send(event, jsonObject, c)
-                        .exceptionally(e -> {
-                            waitAndSendSecure(event, jsonObject, c);
-                            return null;
-                        });
+                send(event, jsonObject, c);
             });
         }
     }

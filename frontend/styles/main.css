@@ -7,17 +7,16 @@
     position: fixed;
     z-index: 6;
     padding: 16px;
+    padding-top: 24px;
     box-sizing: border-box;
     width: 100%;
-
-    transform: translateY(8px);
-
+    transform: none;
     transition-property: background-color, transform;
     transition-duration: 150ms;
 }
 
 .scroll-class#header-out {
-    transform: none;
+    transform: translateY(-8px);
     background-color: var(--lumo-shade);
 }
 
