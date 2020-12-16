@@ -57,10 +57,8 @@
     #horizontal-tabs { height: 60px; }
 
     #header-out {
-        padding: 8px 16px;
-        height: 60px;
         background-color: var(--lumo-shade);
-        transform: none;
+        transform: translateY(-8px);
     }
 
 }
@@ -85,6 +83,12 @@
     #bot-info-details-icon {
         width: 100px;
         height: 100px;
+    }
+
+    #header-out {
+        padding: 8px 16px;
+        height: 60px;
+        transform: none !important;
     }
 
 }

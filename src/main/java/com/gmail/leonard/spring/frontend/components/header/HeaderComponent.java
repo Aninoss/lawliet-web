@@ -24,9 +24,8 @@ public class HeaderComponent extends Header {
 
     public HeaderComponent(SessionData sessionData, UIData uiData)  {
         setId("header-out");
-        if (uiData.isLite()) getStyle()
-                .set("background-color", "var(--lumo-shade)")
-                .set("transform", "none");
+        if (uiData.isLite())
+            getStyle().set("background-color", "var(--lumo-shade)");
 
         HorizontalLayout content = new HorizontalLayout();
         content.setId("header-content");
