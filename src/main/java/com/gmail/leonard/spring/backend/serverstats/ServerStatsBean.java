@@ -1,11 +1,13 @@
 package com.gmail.leonard.spring.backend.serverstats;
 
+import java.util.Optional;
+
 public class ServerStatsBean {
 
     private final ServerStatsSlot[] slots;
-    private final int servers;
+    private final Long servers;
 
-    public ServerStatsBean(int servers, ServerStatsSlot[] slots) {
+    public ServerStatsBean(Long servers, ServerStatsSlot[] slots) {
         this.slots = slots;
         this.servers = servers;
     }
@@ -14,8 +16,8 @@ public class ServerStatsBean {
         return slots;
     }
 
-    public int getServers() {
-        return servers;
+    public Optional<Long> getServers() {
+        return Optional.ofNullable(servers);
     }
 
 }

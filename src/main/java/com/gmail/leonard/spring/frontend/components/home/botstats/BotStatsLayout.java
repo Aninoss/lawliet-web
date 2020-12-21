@@ -9,6 +9,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+
 public class BotStatsLayout extends VerticalLayout {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(BotStatsLayout.class);
@@ -23,7 +25,11 @@ public class BotStatsLayout extends VerticalLayout {
 
         try {
             ServerStatsBean bean = ServerStatsContainer.getInstance().getBean();
-            addTitle(roundDownStat(bean.getServers()));
+            Optional<Long> serverSizeOpt = bean.getServers();
+
+            if (serverSizeOpt.isPresent()) addTitle(roundDownStat(serverSizeOpt.get()));
+            else getStyle().set("padding-top", "3em");
+
             mainLayout.add(new BotStatsChart(bean.getSlots()));
         } catch (Throwable e) {
             LOGGER.error("Error in fetching bot server stats", e);
@@ -32,11 +38,11 @@ public class BotStatsLayout extends VerticalLayout {
         add(mainLayout);
     }
 
-    private int roundDownStat(int value) {
+    private long roundDownStat(long value) {
         return value / 1000 * 1000;
     }
 
-    private void addTitle(int serverCount) {
+    private void addTitle(long serverCount) {
         H2 title = new H2(getTranslation("bot.stat.title", StringUtil.numToString(serverCount)));
         title.getStyle().set("margin-top", "2em");
         title.setWidthFull();
