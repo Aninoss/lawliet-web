@@ -26,8 +26,8 @@ public class FRDynamicBean {
         return entryList;
     }
 
-    public void addEntry(int id, String title, String description, Integer boosts, boolean publicEntry, FRPanelType type, LocalDate date) {
-        FREntry frEntry = new FREntry(this, id, title, description, boosts, publicEntry, type, date);
+    public void addEntry(int id, String title, String description, Integer boosts, Integer recentBoosts, boolean publicEntry, FRPanelType type, LocalDate date) {
+        FREntry frEntry = new FREntry(this, id, title, description, boosts, recentBoosts, publicEntry, type, date);
         entryList.add(frEntry);
     }
 

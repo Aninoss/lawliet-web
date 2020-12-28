@@ -8,6 +8,7 @@ import com.gmail.leonard.spring.frontend.components.featurerequests.sort.Feature
 import com.gmail.leonard.spring.frontend.components.featurerequests.sort.FeatureRequestSortByPopular;
 import com.gmail.leonard.spring.frontend.views.FeatureRequestsView;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
 
@@ -39,7 +40,7 @@ public class FeatureRequestMain extends VerticalLayout {
         page = checkPageBounds();
         featureRequestPanel.updateEntries(page, sort);
         featureRequestChangeSort.onPageChanged(page, featureRequestPanel.getPageSize());
-        add(featureRequestPanel);
+        add(new Hr(), featureRequestPanel);
 
         featureRequestPages = new FeatureRequestPages(this::onPageChange);
         featureRequestPages.setPage(page, featureRequestPanel.getPageSize());

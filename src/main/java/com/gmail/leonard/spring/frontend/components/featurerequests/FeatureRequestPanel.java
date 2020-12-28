@@ -57,6 +57,7 @@ public class FeatureRequestPanel extends Div {
                 .withOverflow(GridLayoutComponent.Overflow.AUTO);
 
         gridLayout.setSizeFull();
+        gridLayout.getStyle().set("overflow", "visible");
         add(gridLayout);
     }
 

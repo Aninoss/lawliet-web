@@ -1,17 +1,24 @@
 package com.gmail.leonard.spring.backend;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
 public class SecretManager {
-    public static String getString(String key) throws IOException {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(SecretManager.class);
+
+    public static String getString(String key) {
         ResourceBundle texts = PropertyResourceBundle.getBundle("secrets");
-        if (!texts.containsKey(key)) {
-            throw new IOException("Key " + key + " not found!");
+        if (texts.containsKey(key)) {
+            return texts.getString(key);
         } else {
-            String text = texts.getString(key);
-            return text;
+            LOGGER.error("Key " + key + " for security file not found in thread " + Thread.currentThread().getName());
+            return "???";
         }
     }
+
 }

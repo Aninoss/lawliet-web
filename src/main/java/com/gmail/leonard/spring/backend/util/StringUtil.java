@@ -1,4 +1,4 @@
-package com.gmail.leonard.spring.backend;
+package com.gmail.leonard.spring.backend.util;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import java.text.DecimalFormat;

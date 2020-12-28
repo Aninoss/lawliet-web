@@ -1,17 +1,17 @@
 package com.gmail.leonard.spring.frontend.components.featurerequests;
 
-import com.gmail.leonard.spring.backend.StringUtil;
+import com.gmail.leonard.spring.backend.util.StringUtil;
 import com.gmail.leonard.spring.backend.featurerequests.FREntry;
 import com.gmail.leonard.spring.backend.featurerequests.FRPanelType;
 import com.gmail.leonard.spring.backend.userdata.DiscordUser;
 import com.gmail.leonard.spring.backend.userdata.SessionData;
 import com.gmail.leonard.spring.backend.userdata.UIData;
-import com.gmail.leonard.spring.frontend.components.Card;
 import com.gmail.leonard.spring.frontend.components.ConfirmationDialog;
 import com.gmail.leonard.spring.frontend.components.CustomNotification;
 import com.gmail.leonard.spring.frontend.Styles;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
@@ -21,16 +21,17 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
-public class FeatureRequestCard extends Card {
+public class FeatureRequestCard extends Div {
 
     private final FREntry frEntry;
     private final SessionData sessionData;
     private final UIData uiData;
     private final VerticalLayout content = new VerticalLayout();
+    private final VerticalLayout action = new VerticalLayout();
     private Div description;
+    private Div popular;
     private Button boostButton = null;
     private ConfirmationDialog confirmationDialog = null;
 
@@ -39,12 +40,19 @@ public class FeatureRequestCard extends Card {
         this.sessionData = sessionData;
         this.uiData = uiData;
         setHeightFull();
+        getStyle().set("display", "flex")
+                .set("flex-direction", "column")
+                .set("border-radius", "8px")
+                .set("box-shadow", "4px 4px 15px 0px rgba(0, 0, 0, 0.035)");
+
         content.setAlignItems(FlexComponent.Alignment.CENTER);
+        action.setAlignItems(FlexComponent.Alignment.CENTER);
 
         addTitle();
         addDescription();
-        addDateString();
         if (frEntry.getBoosts().isPresent()) {
+            addFooter();
+            addSeperator(action);
             addBoostButton(frEntry.getBoosts().get());
 
             Label warningLabel = new Label(getTranslation("fr.boost.confirm.notpush"));
@@ -56,10 +64,19 @@ public class FeatureRequestCard extends Card {
             addNoPublicText(frEntry.getType() == FRPanelType.PENDING);
         }
 
-        content.setHeightFull();
+        content.getStyle()
+                .set("flex-grow", "1")
+                .set("background", "var(--lumo-tint-5pct)")
+                .set("border-top-left-radius", "8px")
+                .set("border-top-right-radius", "8px");
         content.setFlexGrow(1, description);
 
-        add(content);
+        action.getStyle()
+                .set("background", "var(--lumo-secondary)")
+                .set("border-bottom-left-radius", "8px")
+                .set("border-bottom-right-radius", "8px");
+
+        add(content, action);
     }
 
     private void addTitle() {
@@ -70,27 +87,46 @@ public class FeatureRequestCard extends Card {
         }
     }
 
-    private void addDateString() {
-        String formattedDate;
+    private void addFooter() {
+        Div footerDiv = new Div();
+        footerDiv.setWidthFull();
+        footerDiv.getStyle().set("display", "flex")
+                .set("flex-direction", "row")
+                .set("justify-content", "space-between");
+
+        Div ageString = new Div(new Text(getAgeText()));
+        ageString.getStyle().set("font-size", "80%");
+        footerDiv.add(ageString);
+
+        popular = new Div(new Text(getPopularString()));
+        popular.getStyle().set("font-size", "80%");
+        footerDiv.add(popular);
+
+        action.add(footerDiv);
+    }
+
+    private String getAgeText() {
+        StringBuilder footer = new StringBuilder();
         int daysBetween = (int)ChronoUnit.DAYS.between(frEntry.getDate(), LocalDate.now());
         switch (daysBetween) {
             case 0:
-                formattedDate = getTranslation("fr.card.today");
+                footer.append(getTranslation("fr.card.today"));
                 break;
 
             case 1:
-                formattedDate = getTranslation("fr.card.yesterday");
+                footer.append(getTranslation("fr.card.yesterday"));
                 break;
 
             default:
-                formattedDate = getTranslation("fr.card.ago", StringUtil.numToString(daysBetween));
+                footer.append(getTranslation("fr.card.ago", StringUtil.numToString(daysBetween)));
         }
 
-        Div dateString = new Div(new Text(formattedDate));
-        dateString.setWidthFull();
-        dateString.getStyle().set("font-size", "80%")
-                .set("color", "var(--lumo-disabled-text-color)");
-        content.add(dateString);
+        return footer.toString();
+    }
+
+    public String getPopularString() {
+        int recentBoosts = frEntry.getRecentBoosts().orElse(0);
+        return recentBoosts > 0 ? getTranslation("fr.card.recent", recentBoosts) : "";
     }
 
     private void addDescription() {
@@ -100,7 +136,6 @@ public class FeatureRequestCard extends Card {
     }
 
     private void addNoPublicText(boolean pending) {
-        addSeperator();
         Div notPublicText;
         if (pending) {
             notPublicText = new Div(new Text(getTranslation("fr.notpublic.pending")));
@@ -111,24 +146,23 @@ public class FeatureRequestCard extends Card {
         }
         notPublicText.setWidthFull();
         notPublicText.addClassName(Styles.CENTER_TEXT);
-        content.add(notPublicText);
+        action.add(notPublicText);
     }
 
     private void addBoostButton(int boosts) {
-        addSeperator();
         boostButton = new Button(String.valueOf(boosts), VaadinIcon.FIRE.create(), (e) -> onBoostClick());
         boostButton.setWidthFull();
         if (uiData.isLite()) boostButton.setEnabled(false);
         else boostButton.setDisableOnClick(true);
-        content.add(boostButton);
+        action.add(boostButton);
     }
 
-    private void addSeperator() {
+    private void addSeperator(VerticalLayout div) {
         Hr seperator = new Hr();
         seperator.getStyle()
                 .set("margin-top", "12px")
                 .set("margin-bottom", "-4px");
-        content.add(seperator);
+        div.add(seperator);
     }
 
     private void onBoostClick() {
@@ -148,18 +182,14 @@ public class FeatureRequestCard extends Card {
         if (sessionData.isLoggedIn()) {
             if (frEntry.boost(sessionData.getDiscordUser().map(DiscordUser::getId).orElse(0L))) {
                 boostButton.setText(String.valueOf(frEntry.getBoosts().get()));
+                popular.setText(getPopularString());
                 CustomNotification.showSuccess(getTranslation("fr.boost.success", frEntry.getTitle()));
-                //turnRed();
             } else {
                 CustomNotification.showError(getTranslation("fr.boost.noboosts"));
             }
         } else {
             CustomNotification.showError(getTranslation("fr.boost.notloggedin"));
         }
-    }
-
-    private void turnRed() {
-        boostButton.getStyle().set("color", "var(--lumo-error-color)");
     }
 
 }

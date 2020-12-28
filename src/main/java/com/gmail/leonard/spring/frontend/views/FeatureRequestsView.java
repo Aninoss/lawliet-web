@@ -3,7 +3,6 @@ package com.gmail.leonard.spring.frontend.views;
 import com.gmail.leonard.spring.backend.featurerequests.FRDynamicBean;
 import com.gmail.leonard.spring.backend.userdata.SessionData;
 import com.gmail.leonard.spring.backend.userdata.UIData;
-import com.gmail.leonard.spring.backend.webcomclient.modules.FeatureRequests;
 import com.gmail.leonard.spring.frontend.components.featurerequests.FeatureRequestMain;
 import com.gmail.leonard.spring.frontend.components.featurerequests.FeatureRequestUserHeader;
 import com.gmail.leonard.spring.frontend.components.PageHeader;
@@ -11,12 +10,11 @@ import com.gmail.leonard.spring.frontend.components.featurerequests.sort.*;
 import com.gmail.leonard.spring.frontend.layouts.MainLayout;
 import com.gmail.leonard.spring.frontend.layouts.PageLayout;
 import com.gmail.leonard.spring.NoLiteAccess;
+import com.gmail.leonard.spring.syncserver.SendEvent;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -43,7 +41,7 @@ public class FeatureRequestsView extends PageLayout implements HasUrlParameter<S
         super(sessionData, uiData);
         getStyle().set("margin-bottom", "48px");
 
-        frDynamicBean = FeatureRequests.fetchFeatureRequestMainData(getSessionData()).get();
+        frDynamicBean = SendEvent.sendRequestFeatureRequestMainData(sessionData).get();
         mainContent.setWidthFull();
         mainContent.setPadding(true);
 

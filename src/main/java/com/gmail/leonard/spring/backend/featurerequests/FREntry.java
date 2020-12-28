@@ -1,10 +1,9 @@
 package com.gmail.leonard.spring.backend.featurerequests;
 
-import com.gmail.leonard.spring.backend.webcomclient.modules.FeatureRequests;
+import com.gmail.leonard.spring.syncserver.SendEvent;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -18,17 +17,19 @@ public class FREntry {
     private final String title;
     private final String description;
     private Integer boosts;
+    private Integer recentBoosts;
     private final boolean publicEntry;
     private final FRPanelType type;
     private final FRDynamicBean frDynamicBean;
     private final LocalDate date;
 
-    FREntry(FRDynamicBean frDynamicBean, int id, String title, String description, Integer boosts, boolean publicEntry, FRPanelType type, LocalDate date) {
+    FREntry(FRDynamicBean frDynamicBean, int id, String title, String description, Integer boosts, Integer recentBoosts, boolean publicEntry, FRPanelType type, LocalDate date) {
         this.id = id;
         this.frDynamicBean = frDynamicBean;
         this.title = title;
         this.description = description;
         this.boosts = boosts;
+        this.recentBoosts = recentBoosts;
         this.publicEntry = publicEntry;
         this.type = type;
         this.date = date;
@@ -50,6 +51,10 @@ public class FREntry {
         return Optional.ofNullable(boosts);
     }
 
+    public Optional<Integer> getRecentBoosts() {
+        return Optional.ofNullable(recentBoosts);
+    }
+
     public FRPanelType getType() {
         return type;
     }
@@ -59,11 +64,12 @@ public class FREntry {
     }
 
     public boolean boost(long userId) {
-        if (boosts != null && frDynamicBean.getBoostsRemaining() > 0) {
-            CompletableFuture<JSONObject> responseJsonFut = FeatureRequests.sendBoost(frDynamicBean, getId(), userId);
+        if (boosts != null && recentBoosts != null && frDynamicBean.getBoostsRemaining() > 0) {
+            CompletableFuture<JSONObject> responseJsonFut = SendEvent.sendBoost(getId(), userId);
             try {
                 if (checkBoost(responseJsonFut.get())) {
                     boosts++;
+                    recentBoosts++;
                     return true;
                 }
             } catch (InterruptedException | ExecutionException e) {

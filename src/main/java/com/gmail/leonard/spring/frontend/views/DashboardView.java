@@ -1,7 +1,6 @@
 package com.gmail.leonard.spring.frontend.views;
 
 import com.gmail.leonard.spring.backend.userdata.UIData;
-import com.gmail.leonard.spring.backend.webcomclient.modules.Dashboard;
 import com.gmail.leonard.spring.frontend.components.HtmlText;
 import com.gmail.leonard.spring.LoginAccess;
 import com.gmail.leonard.spring.NoLiteAccess;
@@ -26,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
-@Route(value = "dashboard", layout = MainLayout.class)
+//@Route(value = "dashboard", layout = MainLayout.class)
 @CssImport("./styles/dashboard.css")
 @NoLiteAccess
 @LoginAccess
@@ -53,7 +52,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         if (!sessionData.isLoggedIn()) return;
         removeAll();
 
-        ServerListData serverListData = Dashboard.fetchServerListData(sessionData).join();
+        ServerListData serverListData = null;/*Dashboard.fetchServerListData(sessionData).join();*/
         Optional<DiscordServerData> optionalServerListData;
 
         if (serverId == null || !(optionalServerListData = serverListData.find(serverId)).isPresent()) {

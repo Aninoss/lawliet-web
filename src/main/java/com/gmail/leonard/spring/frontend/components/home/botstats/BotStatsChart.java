@@ -1,13 +1,10 @@
 package com.gmail.leonard.spring.frontend.components.home.botstats;
 
-import com.gmail.leonard.spring.backend.StringUtil;
 import com.gmail.leonard.spring.backend.serverstats.ServerStatsSlot;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.*;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
-
-import java.util.Arrays;
 
 @CssImport(value = "./styles/charts.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
 public class BotStatsChart extends Div {

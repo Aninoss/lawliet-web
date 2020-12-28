@@ -3,7 +3,6 @@ package com.gmail.leonard.spring.frontend.views;
 import com.gmail.leonard.spring.backend.featurerequests.FRNewBean;
 import com.gmail.leonard.spring.backend.userdata.SessionData;
 import com.gmail.leonard.spring.backend.userdata.UIData;
-import com.gmail.leonard.spring.backend.webcomclient.modules.FeatureRequests;
 import com.gmail.leonard.spring.frontend.components.CustomNotification;
 import com.gmail.leonard.spring.frontend.components.PageHeader;
 import com.gmail.leonard.spring.frontend.layouts.MainLayout;
@@ -11,6 +10,7 @@ import com.gmail.leonard.spring.frontend.layouts.PageLayout;
 import com.gmail.leonard.spring.frontend.Styles;
 import com.gmail.leonard.spring.LoginAccess;
 import com.gmail.leonard.spring.NoLiteAccess;
+import com.gmail.leonard.spring.syncserver.SendEvent;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -96,9 +96,9 @@ public class FeatureRequestsNewPostView extends PageLayout {
     private void onSubmit() {
         if (getSessionData().isLoggedIn()) {
             long userId = getSessionData().getDiscordUser().get().getId();
-            if (FeatureRequests.canPost(userId).join()) {
+            if (SendEvent.sendRequestCanPost(userId).join()) {
                 try {
-                    FeatureRequests.postNewFeatureRequest(userId, newBean.getTitle(newBean), newBean.getDescription(newBean), newBean.getNotify(newBean)).get();
+                    SendEvent.sendNewFeatureRequest(userId, newBean.getTitle(newBean), newBean.getDescription(newBean), newBean.getNotify(newBean)).get();
                     CustomNotification.showSuccess(getTranslation("fr.new.success"));
                     exit();
                 } catch (InterruptedException | ExecutionException e) {

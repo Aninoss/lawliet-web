@@ -1,7 +1,7 @@
 package com.gmail.leonard.spring;
 
 import com.gmail.leonard.spring.backend.SecretManager;
-import com.gmail.leonard.spring.backend.webcomclient.modules.OneWayTransfers;
+import com.gmail.leonard.spring.syncserver.SendEvent;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -17,7 +17,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public class CustomRequestHandler implements RequestHandler {
@@ -36,12 +35,12 @@ public class CustomRequestHandler implements RequestHandler {
             );
 
     @Override
-    public boolean handleRequest(VaadinSession session, VaadinRequest request, VaadinResponse response) throws IOException {
+    public boolean handleRequest(VaadinSession session, VaadinRequest request, VaadinResponse response) {
         String auth = request.getHeader("Authorization");
         if (auth != null) {
+            if (request.getPathInfo().equals("/print") && handlePrint(request, auth)) return true;
             if (request.getPathInfo().equals("/topgg") && handleTopGG(request, auth)) return true;
             if (request.getPathInfo().equals("/topgg_aninoss") && handleTopGGAninoss(request, auth)) return true;
-            if (request.getPathInfo().equals("/donatebotio") && handleDonatebotIO(request, auth)) return true;
         }
 
         response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubdomains");
@@ -62,21 +61,47 @@ public class CustomRequestHandler implements RequestHandler {
         response.setHeader("X-XSS-Protection", "1; mode=block");
 
         if (request.getPathInfo().equalsIgnoreCase("/invite"))
-            return handleInvite(request, response, request.getParameterMap());
+            return handleInvite(response, request.getParameterMap());
 
         return false;
     }
 
-    private boolean handleInvite(VaadinRequest request, VaadinResponse response, Map<String, String[]> params) {
+    private boolean handleInvite(VaadinResponse response, Map<String, String[]> params) {
         response.setHeader("Location", ExternalLinks.BOT_INVITE_URL_EXT);
         response.setStatus(301);
 
         if (params.size() > 0) {
             String type = new ArrayList<>(params.keySet()).get(0);
-            if (type.length() > 0) OneWayTransfers.sendInvite(type);
+            if (type.length() > 0) {
+                //TODO SEND INVITE (type)
+            }
         }
 
         return true;
+    }
+
+    private boolean handlePrint(VaadinRequest request, String auth) {
+        try {
+            if (auth.equals(SecretManager.getString("print.auth"))) {
+                StringBuilder sb = new StringBuilder();
+                BufferedReader br = request.getReader();
+
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line).append("\n");
+                }
+
+                if (sb.length() > 0) {
+                    LOGGER.info("Content:\n" + sb.toString());
+                }
+
+                return true;
+            }
+        } catch (IOException e) {
+            LOGGER.error("Error while handling upvote", e);
+        }
+
+        return false;
     }
 
     private boolean handleTopGG(VaadinRequest request, String auth) {
@@ -93,7 +118,7 @@ public class CustomRequestHandler implements RequestHandler {
                 if (sb.length() > 0) {
                     JSONObject jsonObject = new JSONObject(sb.substring(1));
                     LOGGER.info("UPVOTE | {}", jsonObject.getLong("user"));
-                    OneWayTransfers.sendTopGG(jsonObject);
+                    SendEvent.sendTopGG(jsonObject);
                 }
 
                 return true;
@@ -119,35 +144,13 @@ public class CustomRequestHandler implements RequestHandler {
                 if (sb.length() > 0) {
                     JSONObject jsonObject = new JSONObject(sb.substring(1));
                     LOGGER.info("UPVOTE ANINOSS | {}", jsonObject.getLong("user"));
-                    OneWayTransfers.sendTopGGAninoss(jsonObject);
+                    SendEvent.sendTopGGAnicord(jsonObject);
                 }
 
                 return true;
             }
         } catch (IOException e) {
             LOGGER.error("Error while handling upvote", e);
-        }
-
-        return false;
-    }
-
-    private boolean handleDonatebotIO(VaadinRequest request, String auth) {
-        try {
-            if (auth.equals(SecretManager.getString("donation.auth"))) {
-                StringBuilder sb = new StringBuilder();
-                BufferedReader br = request.getReader();
-
-                String line;
-                while((line = br.readLine()) != null) {
-                    sb.append("\n").append(line);
-                }
-
-                if (sb.length() > 0)
-                    OneWayTransfers.sendDonatebotIO(new JSONObject(sb.substring(1)));
-                return true;
-            }
-        } catch (IOException e) {
-            LOGGER.error("Error while handling donation", e);
         }
 
         return false;

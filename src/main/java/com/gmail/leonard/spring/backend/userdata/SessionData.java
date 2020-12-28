@@ -3,7 +3,7 @@ package com.gmail.leonard.spring.backend.userdata;
 import bell.oauth.discord.main.OAuthBuilder;
 import bell.oauth.discord.main.Response;
 import com.gmail.leonard.spring.backend.SecretManager;
-import com.gmail.leonard.spring.backend.StringUtil;
+import com.gmail.leonard.spring.backend.util.StringUtil;
 import com.gmail.leonard.spring.frontend.layouts.PageLayout;
 import com.gmail.leonard.spring.frontend.views.DiscordLogin;
 import com.gmail.leonard.spring.frontend.views.HomeView;
@@ -37,13 +37,9 @@ public class SessionData {
     }
 
     private void setData() {
-        try {
-            builder = new OAuthBuilder(SecretManager.getString("bot.clientid"), SecretManager.getString("bot.clientsecret"))
-                    .setScopes(new String[]{"identify"})
-                    .setRedirectURI(getCurrentDomain() + PageLayout.getRouteStatic(DiscordLogin.class));
-        } catch (IOException e) {
-            LOGGER.error("Error while trying to log in user", e);
-        }
+        builder = new OAuthBuilder(SecretManager.getString("bot.clientid"), SecretManager.getString("bot.clientsecret"))
+                .setScopes(new String[]{"identify"})
+                .setRedirectURI(getCurrentDomain() + PageLayout.getRouteStatic(DiscordLogin.class));
     }
 
     private String getCurrentDomain() {

@@ -1,6 +1,6 @@
 package com.gmail.leonard.spring.frontend.components.home.botstats;
 
-import com.gmail.leonard.spring.backend.StringUtil;
+import com.gmail.leonard.spring.backend.util.StringUtil;
 import com.gmail.leonard.spring.backend.serverstats.ServerStatsBean;
 import com.gmail.leonard.spring.backend.serverstats.ServerStatsContainer;
 import com.gmail.leonard.spring.frontend.Styles;

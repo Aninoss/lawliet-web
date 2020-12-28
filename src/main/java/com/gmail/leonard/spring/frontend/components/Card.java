@@ -7,7 +7,7 @@ public class Card extends Div {
 
     public Card(Component... components) {
         super(components);
-        getStyle().set("border-radius", "5px")
+        getStyle().set("border-radius", "6px")
                 .set("background", "var(--lumo-tint-5pct)");
     }
 
