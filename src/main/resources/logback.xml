@@ -1,59 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <timestamp key="bySecond" datePattern="yyyy-MM-dd HH_mm_ss"/>
-
     <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%-5level] %msg%n</pattern>
         </encoder>
     </appender>
 
-    <appender name="FileDebug" class="ch.qos.logback.core.FileAppender">
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>DEBUG</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
-        </filter>
-
-
-        <file>error_log/${bySecond}/debug.log</file>
-        <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%-5level] [%thread] %logger{5} --- %msg%n</pattern>
-        </encoder>
-    </appender>
-
-    <appender name="FileInfo" class="ch.qos.logback.core.FileAppender">
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>INFO</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
-        </filter>
-
-        <file>error_log/${bySecond}/info.log</file>
-        <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%-5level] [%thread] %logger{5} --- %msg%n</pattern>
-        </encoder>
-    </appender>
-
-    <appender name="FileError" class="ch.qos.logback.core.FileAppender">
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>ERROR</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
-        </filter>
-
-        <file>error_log/${bySecond}/error.log</file>
-        <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%-5level] [%thread] %logger{5} --- %msg%n</pattern>
-        </encoder>
-    </appender>
-
     <root level="INFO">
         <appender-ref ref="Console" />
-        <appender-ref ref="FileDebug" />
-        <appender-ref ref="FileInfo" />
-        <appender-ref ref="FileError" />
     </root>
 
 </configuration>

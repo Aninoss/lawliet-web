@@ -1,122 +1,116 @@
 package com.gmail.leonard.spring;
 
 import com.gmail.leonard.spring.backend.CustomThread;
-import com.sun.management.OperatingSystemMXBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.management.ManagementFactory;
+import java.util.HashMap;
 
 public class Console {
 
-    private static final Console instance = new Console();
-    private double maxMemory = 0;
     private final static Logger LOGGER = LoggerFactory.getLogger(Console.class);
 
-    private Console() {}
+    private static final Console instance = new Console();
 
     public static Console getInstance() {
         return instance;
     }
 
+    private Console() {
+        registerTasks();
+    }
+
+    private boolean started = false;
+    private final HashMap<String, ConsoleTask> tasks = new HashMap<>();
+
     public void start() {
-        new CustomThread(this::manageConsole, "Console", 1).start();
-        new CustomThread(this::trackMemory, "Console MemoryTracker", 1).start();
+        if (started) return;
+        started = true;
+
+        new CustomThread(this::manageConsole, "console", 1).start();
+    }
+
+    private void registerTasks() {
+        tasks.put("help", this::onHelp);
+
+        tasks.put("quit", this::onQuit);
+        tasks.put("threads", this::onThreads);
+        tasks.put("threads_stop", this::onThreadStop);
+    }
+
+    private void onThreadStop(String[] args) {
+        int stopped = 0;
+
+        for (Thread t : Thread.getAllStackTraces().keySet()) {
+            if (args.length < 2 || t.getName().matches(args[1])) {
+                t.interrupt();
+                stopped++;
+            }
+        }
+
+        LOGGER.info("{} thread/s interrupted", stopped);
+    }
+
+    private void onThreads(String[] args) {
+        StringBuilder sb = new StringBuilder();
+
+        for (Thread t : Thread.getAllStackTraces().keySet()) {
+            if (args.length < 2 || t.getName().matches(args[1])) {
+                sb.append(t.getName()).append(", ");
+            }
+        }
+
+        String str = sb.toString();
+        if (str.length() >= 2) str = str.substring(0, str.length() - 2);
+
+        LOGGER.info("\n--- THREADS ({}) ---\n{}\n", Thread.getAllStackTraces().size(), str);
+    }
+
+    private void onQuit(String[] args) {
+        LOGGER.info("EXIT - User commanded exit");
+        System.exit(0);
+    }
+
+    private void onHelp(String[] args) {
+        tasks.keySet().stream()
+                .filter(key -> !key.equals("help"))
+                .sorted()
+                .forEach(key -> System.out.println("- " + key));
     }
 
     private void manageConsole() {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        while(true) {
+        while (true) {
             try {
                 if (br.ready()) {
-                    String s = br.readLine();
-                    String command = s;
-                    String arg = "";
-                    if (s != null) {
-                        if (command.contains(" ")) {
-                            command = command.split(" ")[0];
-                            arg = s.substring(command.length() + 1);
-                        }
-                        switch (command) {
-                            case "quit":
-                                System.exit(0);
-                                break;
-
-                            case "stats":
-                                System.out.println(getStats());
-                                break;
-
-                            case "threads":
-                                try {
-                                    StringBuilder sb = new StringBuilder();
-
-                                    for (Thread t : Thread.getAllStackTraces().keySet()) {
-                                        if (arg.isEmpty() || t.getName().matches(arg)) {
-                                            sb.append(t.getName()).append(", ");
-                                        }
-                                    }
-
-                                    String str = sb.toString();
-                                    if (str.length() >= 2) str = str.substring(0, str.length() - 2);
-
-                                    System.out.println("\n--- THREADS (" + Thread.getAllStackTraces().size() + ") ---");
-                                    System.out.println(str + "\n");
-                                } catch (Throwable e) {
-                                    LOGGER.error("Could not list threads", e);
-                                }
-
-                                break;
-
-                            default:
-                                System.err.println("No result");
-                        }
+                    String[] args = br.readLine().split(" ");
+                    ConsoleTask task = tasks.get(args[0]);
+                    if (task != null) {
+                        new CustomThread(() -> {
+                            try {
+                                task.process(args);
+                            } catch (Throwable throwable) {
+                                LOGGER.error("Console task {} endet with exception", args[0], throwable);
+                            }
+                        }, "console_task_" + args[0], 1).start();
+                    } else {
+                        System.err.printf("No result for \"%s\"\n", args[0]);
                     }
                 }
-            } catch (IOException e) {
-                LOGGER.error("Error in console");
+                Thread.sleep(100);
+            } catch (IOException | InterruptedException e) {
+                LOGGER.error("Unexpected console exception", e);
             }
         }
     }
 
-    private void trackMemory() {
-        try {
-            while (true) {
-                double memoryTotal = Runtime.getRuntime().totalMemory() / (1024.0 * 1024.0);
-                double memoryUsed = memoryTotal - (Runtime.getRuntime().freeMemory() / (1024.0 * 1024.0));
-                maxMemory = Math.max(maxMemory, memoryUsed);
-                Thread.sleep(500);
-            }
-        } catch (InterruptedException e) {
-            LOGGER.error("Interrupted", e);
-        }
-    }
 
-    private String getStats() {
-        StringBuilder sb = new StringBuilder("\n--- STATS ---\n");
+    public interface ConsoleTask {
 
-       //Memory
-        double memoryTotal = Runtime.getRuntime().totalMemory() / (1024.0 * 1024.0);
-        double memoryUsed = memoryTotal - (Runtime.getRuntime().freeMemory() / (1024.0 * 1024.0));
-        sb.append("Memory: ").append(String.format("%1$.2f", memoryUsed) + " / " + String.format("%1$.2f", memoryTotal) + " MB").append("\n");
+        void process(String[] args) throws Throwable;
 
-        //Max Memory
-        maxMemory = Math.max(maxMemory, memoryUsed);
-        sb.append("Max Memory: ").append(String.format("%1$.2f", maxMemory) + " / " + String.format("%1$.2f", memoryTotal) + " MB").append("\n");
-
-        //Threads
-        sb.append("Threads: ").append(Thread.getAllStackTraces().keySet().size()).append("\n");
-
-        //CPU Usage
-        OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
-        double cpuJvm = osBean.getProcessCpuLoad();
-        double cpuTotal = osBean.getSystemCpuLoad();
-
-        sb.append("CPU JVM: ").append(Math.floor(cpuJvm * 1000) / 10 + "%").append("\n");
-        sb.append("CPU Total: ").append(Math.floor(cpuTotal * 1000) / 10 + "%").append("\n");
-
-        return sb.toString();
     }
 
 }

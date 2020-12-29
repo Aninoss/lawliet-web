@@ -1,13 +1,9 @@
 package com.gmail.leonard.spring.syncserver;
 
-import com.gmail.leonard.spring.backend.commandlist.CommandListContainer;
-import com.gmail.leonard.spring.backend.faq.FAQListContainer;
-import org.apache.http.ExceptionLogger;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.Objects;
 import java.util.Set;
 
@@ -27,11 +23,6 @@ public class SyncManager {
     private SyncManager() {
         try {
             client = new CustomWebSocketClient("localhost", 9998, "web");
-            client.addConnectedHandler(() -> {
-                CommandListContainer.getInstance().clear();
-                FAQListContainer.getInstance().clear();
-                return false;
-            });
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }

@@ -100,6 +100,12 @@ public class SendEvent {
         return SyncManager.getInstance().getClient().send("FR_POST", jsonObject);
     }
 
+    public static CompletableFuture<JSONObject> sendInvite(String type) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", type);
+        return SyncManager.getInstance().getClient().send("INVITE", jsonObject);
+    }
+
     private static <T> CompletableFuture<T> process(String event, JSONObject dataJson, Function<JSONObject, T> function) {
         CompletableFuture<T> future = new CompletableFuture<>();
 

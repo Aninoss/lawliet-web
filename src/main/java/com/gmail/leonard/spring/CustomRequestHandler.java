@@ -73,7 +73,7 @@ public class CustomRequestHandler implements RequestHandler {
         if (params.size() > 0) {
             String type = new ArrayList<>(params.keySet()).get(0);
             if (type.length() > 0) {
-                //TODO SEND INVITE (type)
+                SendEvent.sendInvite(type);
             }
         }
 
