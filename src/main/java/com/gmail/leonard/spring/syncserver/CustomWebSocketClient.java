@@ -1,7 +1,8 @@
 package com.gmail.leonard.spring.syncserver;
 
-import com.gmail.leonard.spring.backend.CustomThread;
+import com.gmail.leonard.spring.backend.GlobalThreadPool;
 import com.gmail.leonard.spring.backend.MainScheduler;
+import com.gmail.leonard.spring.backend.SecretManager;
 import com.gmail.leonard.spring.backend.util.ExceptionUtil;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -16,6 +17,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -32,11 +35,13 @@ public class CustomWebSocketClient extends WebSocketClient {
     public CustomWebSocketClient(String host, int port, String socketId, HashMap<String, String> httpHeaders) throws URISyntaxException {
         super(new URI(String.format("ws://%s:%d", host, port)), httpHeaders);
         addHeader("socket_id", socketId);
+        addHeader("auth", SecretManager.getString("syncserver.auth"));
     }
 
     public CustomWebSocketClient(String host, int port, String socketId) throws URISyntaxException {
         super(new URI(String.format("ws://%s:%d", host, port)));
         addHeader("socket_id", socketId);
+        addHeader("auth", SecretManager.getString("syncserver.auth"));
     }
 
     @Override
@@ -80,21 +85,27 @@ public class CustomWebSocketClient extends WebSocketClient {
         } else {
             Function<JSONObject, JSONObject> eventFunction = eventHandlers.get(event);
             if (eventFunction != null) {
-                Thread t = new CustomThread(() -> {
+                AtomicBoolean completed = new AtomicBoolean(false);
+                AtomicReference<Thread> t = new AtomicReference<>();
+
+                GlobalThreadPool.getExecutorService().submit(() -> {
+                    t.set(Thread.currentThread());
+
                     JSONObject responseJson = eventFunction.apply(contentJson);
-                    if (responseJson == null) responseJson = new JSONObject();
+                    if (responseJson == null)
+                        responseJson = new JSONObject();
+
                     responseJson.put("request_id", requestId);
                     send(event + "::" + responseJson.toString());
-                }, "websocket_" + event);
+                    completed.set(true);
+                });
 
-                MainScheduler.getInstance().schedule(2, ChronoUnit.SECONDS, "websocket_" + event + "_observer", () -> {
-                    if (t.isAlive()) {
-                        Exception e = ExceptionUtil.generateForStack(t);
-                        LOGGER.error("websocket_" + event + " took too long to respond!", e);
-                        t.interrupt();
+                MainScheduler.getInstance().schedule(5, ChronoUnit.SECONDS, "websocket_" + event + "_observer", () -> {
+                    if (!completed.get()) {
+                        Exception e = ExceptionUtil.generateForStack(t.get());
+                        LOGGER.error("websocket_" + event + " took too long to process!", e);
                     }
                 });
-                t.start();
             }
         }
     }
@@ -144,14 +155,14 @@ public class CustomWebSocketClient extends WebSocketClient {
     public void onClose(int code, String reason, boolean remote) {
         if (connected) LOGGER.info("Web socket disconnected");
         connected = false;
-        new CustomThread(() -> {
+        GlobalThreadPool.getExecutorService().submit(() -> {
             try {
                 Thread.sleep(2000);
                 reconnect();
             } catch (InterruptedException e) {
                 //Ignore
             }
-        }, "websocket_reconnect").start();
+        });
     }
 
     @Override

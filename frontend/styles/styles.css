@@ -187,13 +187,8 @@ content-card {
         transform: translate(-50%, -50%);
     }
 
-    #header-dummy { height: 60px; }
-
     .only-pc#page-header {
         margin-top: -16px;
-        margin-bottom: 0;
-        background: rgba(0,0,0,0);
-        padding-bottom: 0;
     }
 
     #page-title { margin-top: 0.75em; }
@@ -209,6 +204,8 @@ content-card {
     .flex-xsmall-column { flex-direction: column !important; }
     .flex-xsmall-row-reverse { flex-direction: row-reverse !important; }
     .flex-xsmall-column-reverse { flex-direction: column-reverse !important; }
+
+    #header-dummy { height: 60px; }
 
     #cookie-consent {
         left: 0;

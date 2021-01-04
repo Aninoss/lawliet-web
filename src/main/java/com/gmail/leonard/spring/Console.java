@@ -1,6 +1,7 @@
 package com.gmail.leonard.spring;
 
 import com.gmail.leonard.spring.backend.CustomThread;
+import com.gmail.leonard.spring.backend.GlobalThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
@@ -88,13 +89,13 @@ public class Console {
                     String[] args = br.readLine().split(" ");
                     ConsoleTask task = tasks.get(args[0]);
                     if (task != null) {
-                        new CustomThread(() -> {
+                        GlobalThreadPool.getExecutorService().submit(() -> {
                             try {
                                 task.process(args);
                             } catch (Throwable throwable) {
-                                LOGGER.error("Console task {} endet with exception", args[0], throwable);
+                                LOGGER.error("Console task {} ended with exception", args[0], throwable);
                             }
-                        }, "console_task_" + args[0], 1).start();
+                        });
                     } else {
                         System.err.printf("No result for \"%s\"\n", args[0]);
                     }
