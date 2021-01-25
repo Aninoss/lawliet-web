@@ -1,4 +1,4 @@
-[![CodeFactor](https://www.codefactor.io/repository/github/aninoss/lawlietweb/badge)](https://www.codefactor.io/repository/github/aninoss/lawlietweb)
+[![CodeFactor](https://www.codefactor.io/repository/github/aninoss/lawliet-web/badge)](https://www.codefactor.io/repository/github/aninoss/lawliet-web)
 # Lawliet Web
 The source code of the Lawliet Web Server  
 https://lawlietbot.xyz/
