@@ -22,7 +22,11 @@ public class SyncManager {
 
     private SyncManager() {
         try {
-            client = new CustomWebSocketClient("localhost", 9998, "web");
+            client = new CustomWebSocketClient(
+                    System.getenv("SYNC_HOST"),
+                    Integer.parseInt(System.getenv("SYNC_PORT")),
+                    "web"
+            );
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }

@@ -1,6 +1,5 @@
 package com.gmail.leonard.spring;
 
-import com.gmail.leonard.spring.backend.SecretManager;
 import com.gmail.leonard.spring.syncserver.SendEvent;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -82,7 +81,7 @@ public class CustomRequestHandler implements RequestHandler {
 
     private boolean handlePrint(VaadinRequest request, String auth) {
         try {
-            if (auth.equals(SecretManager.getString("print.auth"))) {
+            if (auth.equals(System.getenv("PRINT_AUTH"))) {
                 StringBuilder sb = new StringBuilder();
                 BufferedReader br = request.getReader();
 
@@ -106,7 +105,7 @@ public class CustomRequestHandler implements RequestHandler {
 
     private boolean handleTopGG(VaadinRequest request, String auth) {
         try {
-            if (auth.equals(SecretManager.getString("discordbots.auth"))) {
+            if (auth.equals(System.getenv("TOPGG_AUTH"))) {
                 StringBuilder sb = new StringBuilder();
                 BufferedReader br = request.getReader();
 
@@ -132,7 +131,7 @@ public class CustomRequestHandler implements RequestHandler {
 
     private boolean handleTopGGAninoss(VaadinRequest request, String auth) {
         try {
-            if (auth.equals(SecretManager.getString("topgg.aninoss.auth"))) {
+            if (auth.equals(System.getenv("TOPGG_ANINOSS_AUTH"))) {
                 StringBuilder sb = new StringBuilder();
                 BufferedReader br = request.getReader();
 

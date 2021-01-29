@@ -2,16 +2,12 @@
 *.log
 *.ctxt
 .mtj.tmp/
-*.jar
 *.war
 *.zip
 *.tar.gz
 *.rar
 hs_err_pid*
 
-secrets.properties
-application.properties
-application-prod.properties
 workspace.xml
 usage.statistics.xml
 tasks.xml
@@ -24,6 +20,6 @@ modules.xml
 *.p12
 *.iml
 *.sql
-/node/
-/node_modules/
-/target/
+/node_modules
+/target/*
+!/target/lawliet-web-2.0-SNAPSHOT.jar

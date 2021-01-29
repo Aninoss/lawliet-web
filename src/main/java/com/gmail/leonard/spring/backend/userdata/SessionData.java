@@ -2,7 +2,6 @@ package com.gmail.leonard.spring.backend.userdata;
 
 import bell.oauth.discord.main.OAuthBuilder;
 import bell.oauth.discord.main.Response;
-import com.gmail.leonard.spring.backend.SecretManager;
 import com.gmail.leonard.spring.backend.util.StringUtil;
 import com.gmail.leonard.spring.frontend.layouts.PageLayout;
 import com.gmail.leonard.spring.frontend.views.DiscordLogin;
@@ -37,7 +36,7 @@ public class SessionData {
     }
 
     private void setData() {
-        builder = new OAuthBuilder(SecretManager.getString("bot.clientid"), SecretManager.getString("bot.clientsecret"))
+        builder = new OAuthBuilder(System.getenv("BOT_CLIENT_ID"), System.getenv("BOT_CLIENT_SECRET"))
                 .setScopes(new String[]{"identify"})
                 .setRedirectURI(getCurrentDomain() + PageLayout.getRouteStatic(DiscordLogin.class));
     }

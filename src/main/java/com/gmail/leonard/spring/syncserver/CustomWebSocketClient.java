@@ -2,7 +2,7 @@ package com.gmail.leonard.spring.syncserver;
 
 import com.gmail.leonard.spring.backend.GlobalThreadPool;
 import com.gmail.leonard.spring.backend.MainScheduler;
-import com.gmail.leonard.spring.backend.SecretManager;
+
 import com.gmail.leonard.spring.backend.util.ExceptionUtil;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -35,13 +35,13 @@ public class CustomWebSocketClient extends WebSocketClient {
     public CustomWebSocketClient(String host, int port, String socketId, HashMap<String, String> httpHeaders) throws URISyntaxException {
         super(new URI(String.format("ws://%s:%d", host, port)), httpHeaders);
         addHeader("socket_id", socketId);
-        addHeader("auth", SecretManager.getString("syncserver.auth"));
+        addHeader("auth", System.getenv("SYNC_AUTH"));
     }
 
     public CustomWebSocketClient(String host, int port, String socketId) throws URISyntaxException {
         super(new URI(String.format("ws://%s:%d", host, port)));
         addHeader("socket_id", socketId);
-        addHeader("auth", SecretManager.getString("syncserver.auth"));
+        addHeader("auth", System.getenv("SYNC_AUTH"));
     }
 
     @Override
