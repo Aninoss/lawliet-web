@@ -9,7 +9,7 @@
         </filter>
 
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%-5level] %msg%n</pattern>
+            <pattern>%d [%-5level] %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -22,7 +22,7 @@
 
         <target>System.err</target>
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%-5level] %msg%n</pattern>
+            <pattern>%d [%-5level] %msg%n</pattern>
         </encoder>
     </appender>
 
