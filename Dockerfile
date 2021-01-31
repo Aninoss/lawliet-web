@@ -10,4 +10,4 @@ USER app
 
 EXPOSE 8443
 
-CMD [ "java", "-XX:+UseContainerSupport", "-XX:InitialRAMPercentage=75.0", "-XX:MaxRAMPercentage=75.0", "-Djava.awt.headless=true", "-jar", "lawliet-web-2.0-SNAPSHOT.jar" ]
+CMD [ "java", "-Xms800m", "-Xmx800m", "-Djava.awt.headless=true", "-jar", "lawliet-web-2.0-SNAPSHOT.jar" ]
