@@ -6,9 +6,8 @@ plugins {
     id 'com.palantir.docker' version '0.22.1'
 }
 
-group = 'com.gmail.leonard'
-version = '2.0-SNAPSHOT'
-sourceCompatibility = '1.8'
+group = 'xyz.lawlietbot'
+version = 'latest'
 
 repositories {
     mavenLocal()
