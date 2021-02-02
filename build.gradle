@@ -1,0 +1,77 @@
+plugins {
+    id 'org.springframework.boot' version '2.2.4.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'java'
+    id 'com.vaadin' version '0.14.3.7'
+    id 'com.palantir.docker' version '0.22.1'
+}
+
+group = 'com.gmail.leonard'
+version = '2.0-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+    mavenLocal()
+    maven {
+        url = uri('https://repo.maven.apache.org/maven2/')
+    }
+
+    maven {
+        url = uri('https://maven.vaadin.com/vaadin-addons')
+    }
+}
+
+ext {
+    set('vaadinVersion', "14.4.5")
+}
+
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+}
+
+dependencies {
+    implementation('com.vaadin:vaadin-spring-boot-starter') {
+//         Webjars are only needed when running in Vaadin 13 compatibility mode
+        ["com.vaadin.webjar", "org.webjars.bowergithub.insites",
+         "org.webjars.bowergithub.polymer", "org.webjars.bowergithub.polymerelements",
+         "org.webjars.bowergithub.vaadin", "org.webjars.bowergithub.webcomponents"]
+                .forEach { group -> exclude(group: group) }
+    }
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+
+    implementation 'ch.qos.logback:logback-classic:1.2.3'
+    implementation 'org.apache.logging.log4j:log4j-to-slf4j:2.13.1'
+    implementation 'org.json:json:20180813'
+    implementation 'com.google.guava:guava:28.1-jre'
+    implementation 'org.java-websocket:Java-WebSocket:1.5.1'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
+    implementation 'com.github.appreciated:vaadin-css-grid:2.0.0.beta2'
+    implementation 'org.reflections:reflections:0.9.11'
+    implementation 'com.vaadin:vaadin-charts-flow:7.1.3'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "com.vaadin:vaadin-bom:${vaadinVersion}"
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+vaadin {
+    pnpmEnable = true
+}
+
+docker {
+    name "registry.lawlietbot.xyz/lawliet-web:latest"
+    files 'build/libs'
+    tag 'DockerHub', "registry.lawlietbot.xyz/lawliet-web:latest"
+}

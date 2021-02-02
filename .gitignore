@@ -15,11 +15,13 @@ modules.xml
 .target
 .DS_Store
 .idea/libraries
+.idea/modules
 .build
 .config
+gradle
+.gradle
 *.p12
 *.iml
 *.sql
+build
 /node_modules
-/target/*
-!/target/lawliet-web-2.0-SNAPSHOT.jar

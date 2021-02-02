@@ -7,8 +7,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
-import java.sql.SQLException;
-
 /**
  * The entry point of the Spring Boot application.
  */
@@ -17,7 +15,7 @@ public class Application extends SpringBootServletInitializer {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
         LOGGER.info("###########################");
         Console.getInstance().start();
