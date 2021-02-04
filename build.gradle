@@ -70,7 +70,7 @@ vaadin {
 }
 
 docker {
-    name "registry.lawlietbot.xyz/lawliet-web:latest"
+    name 'registry.lawlietbot.xyz/lawliet-web:latest'
     files 'build/libs'
     tag 'DockerHub', "registry.lawlietbot.xyz/lawliet-web:latest"
 }

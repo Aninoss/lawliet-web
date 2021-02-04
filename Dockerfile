@@ -10,4 +10,4 @@ USER app
 
 EXPOSE 8443
 
-CMD [ "java", "-Xms800m", "-Xmx800m", "-Djava.awt.headless=true", "-jar", "app.jar" ]
+CMD [ "java", "-jar", "app.jar" ]
