@@ -2,14 +2,12 @@ package xyz.lawlietbot.spring.syncserver;
 
 import xyz.lawlietbot.spring.backend.GlobalThreadPool;
 import xyz.lawlietbot.spring.backend.MainScheduler;
-
 import xyz.lawlietbot.spring.backend.util.ExceptionUtil;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -135,13 +133,14 @@ public class CustomWebSocketClient extends WebSocketClient {
 
         content.put("request_id", id);
         content.put("is_response", false);
+        outCache.put(id, future);
         try {
             send(event + "::" + content.toString());
         } catch (Throwable e) {
             future.completeExceptionally(e);
+            outCache.remove(id);
             return future;
         }
-        outCache.put(id, future);
 
         MainScheduler.getInstance().schedule(5, ChronoUnit.SECONDS, "websocket_" + event, () -> {
             if (outCache.containsKey(id)) {

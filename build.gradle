@@ -11,13 +11,8 @@ version = 'latest'
 
 repositories {
     mavenLocal()
-    maven {
-        url = uri('https://repo.maven.apache.org/maven2/')
-    }
-
-    maven {
-        url = uri('https://maven.vaadin.com/vaadin-addons')
-    }
+    maven { url = uri('https://repo.maven.apache.org/maven2/') }
+    maven { url = uri('https://maven.vaadin.com/vaadin-addons') }
 }
 
 ext {
@@ -51,7 +46,6 @@ dependencies {
     implementation 'org.java-websocket:Java-WebSocket:1.5.1'
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
     implementation 'com.github.appreciated:vaadin-css-grid:2.0.0.beta2'
-    implementation 'org.reflections:reflections:0.9.11'
     implementation 'com.vaadin:vaadin-charts-flow:7.1.3'
 }
 
