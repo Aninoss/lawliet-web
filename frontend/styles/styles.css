@@ -83,6 +83,9 @@ content-card {
     margin-bottom: 32px;
     background: var(--lumo-secondary);
     padding-bottom: 32px;
+    border-color: var(--lumo-contrast-10pct);
+    border-bottom-style: solid;
+    border-width: 2px;
 }
 
 #page-title {

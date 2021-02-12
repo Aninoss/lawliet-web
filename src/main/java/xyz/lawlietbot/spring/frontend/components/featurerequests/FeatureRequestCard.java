@@ -41,8 +41,7 @@ public class FeatureRequestCard extends Div {
         setHeightFull();
         getStyle().set("display", "flex")
                 .set("flex-direction", "column")
-                .set("border-radius", "8px")
-                .set("box-shadow", "4px 4px 15px 0px rgba(0, 0, 0, 0.035)");
+                .set("border-radius", "8px");
 
         content.setAlignItems(FlexComponent.Alignment.CENTER);
         action.setAlignItems(FlexComponent.Alignment.CENTER);
