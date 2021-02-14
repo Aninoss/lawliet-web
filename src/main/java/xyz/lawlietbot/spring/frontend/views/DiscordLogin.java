@@ -23,7 +23,6 @@ public class DiscordLogin extends PageLayout implements HasUrlParameter<String> 
 
     @Override
     public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
-        getStyle().set("margin-bottom", "48px");
         SessionData sessionData = getSessionData();
         UIData uiData = getUiData();
 

@@ -19,7 +19,6 @@ public class DiscordLogout extends PageLayout implements BeforeEnterObserver {
 
     @Override
     public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
-        getStyle().set("margin-bottom", "48px");
         SessionData sessionData = getSessionData();
         UIData uiData = getUiData();
 
