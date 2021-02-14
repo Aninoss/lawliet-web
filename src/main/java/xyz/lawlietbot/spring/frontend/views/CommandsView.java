@@ -22,7 +22,10 @@ public class CommandsView extends PageLayout {
     public CommandsView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         super(sessionData, uiData);
         getStyle().set("margin-bottom", "48px");
-        add(new CommandSearchArea(this, uiData, getRoute()), new CommandList(this, uiData));
+        add(
+                new CommandSearchArea(this, uiData, getRoute()),
+                new CommandList(this, uiData)
+        );
     }
 
     public ArrayList<CommandCategoryLayout> getCategories() {

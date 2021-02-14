@@ -20,6 +20,11 @@
     background-color: var(--lumo-shade);
 }
 
+.lite#header-out {
+    transform: translateY(-8px);
+    background-color: var(--lumo-shade);
+}
+
 #header-content {
     width: 100%;
     max-width: 1280px;
@@ -78,11 +83,6 @@
     .show#blackscreen {
         background: rgba(0, 0, 0, 0.5);
         pointer-events: auto;
-    }
-
-    #bot-info-details-icon {
-        width: 100px;
-        height: 100px;
     }
 
     #header-out {

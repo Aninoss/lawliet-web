@@ -15,7 +15,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 public class CommandSearchArea extends PageHeader {
 
     public CommandSearchArea(CommandsView parent, UIData uiData, String route) {
-        super(parent.getTitleText(), null, route);
+        super(uiData, parent.getTitleText(), null, route);
 
         HorizontalLayout searchArea = new HorizontalLayout();
         searchArea.setPadding(false);

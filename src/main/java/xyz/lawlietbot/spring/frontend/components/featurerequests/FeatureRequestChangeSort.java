@@ -20,6 +20,7 @@ public class FeatureRequestChangeSort extends HorizontalLayout {
         setPadding(false);
         setAlignItems(Alignment.CENTER);
         setWidthFull();
+        getStyle().set("margin-top", "12px");
 
         addPageIndicator(onPagePrevious, onPageNext);
         Div emptyDiv = new Div();

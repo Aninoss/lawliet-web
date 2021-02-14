@@ -41,7 +41,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
             div.setWidthFull();
             mainLayout.add(div);
 
-            add(new PageHeader(getTitleText(), null, null), mainLayout);
+            add(new PageHeader(getUiData(), getTitleText(), null, null), mainLayout);
         }
     }
 
@@ -80,7 +80,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
             mainLayout.add(iconLabel);
 
             HtmlText htmlText = new HtmlText(getTranslation("dashboard.desc"));
-            add(new PageHeader(getTitleText(), null, null, htmlText), mainLayout);
+            add(new PageHeader(getUiData(), getTitleText(), null, null, htmlText), mainLayout);
             return;
         }
 
@@ -92,7 +92,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         notAvailable.getStyle().set("color", "var(--lumo-error-text-color)");
         mainLayout.add(notAvailable);
 
-        DashboardHeader dashboardHeader = new DashboardHeader(sessionData, getTitleText(), discordServerData);
+        DashboardHeader dashboardHeader = new DashboardHeader(getUiData(), getTitleText(), discordServerData);
         dashboardHeader.addServerClickListener(this::setServer);
 
         add(dashboardHeader, mainLayout);

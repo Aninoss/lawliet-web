@@ -44,10 +44,10 @@ public class FeatureRequestsView extends PageLayout implements HasUrlParameter<S
 
         frDynamicBean = SendEvent.sendRequestFeatureRequestMainData(sessionData).get();
         mainContent.setWidthFull();
-        mainContent.setPadding(true);
+        mainContent.setPadding(false);
 
         add(
-                new PageHeader(getTitleText(), getTranslation("fr.desc"), null, uiData.isLite() ? null : new FeatureRequestUserHeader(getSessionData(), frDynamicBean)),
+                new PageHeader(getUiData(), getTitleText(), getTranslation("fr.desc"), null, uiData.isLite() ? null : new FeatureRequestUserHeader(getSessionData(), frDynamicBean)),
                 mainContent
         );
     }

@@ -19,7 +19,7 @@ public class BotInfoLayout extends Div {
         parts.add(new BotInfoVideoLayout());
         parts.add(new BotInfoDetailsLayout(uiData));
 
-        add(new HeaderDummy(), parts);
+        add(new HeaderDummy(uiData), parts);
     }
 
 }

@@ -35,7 +35,7 @@ public class PrivacyView extends PageLayout {
         div.add(new Html(pageString));
 
         mainContent.add(div);
-        add(new PageHeader(getTitleText(), null, null), mainContent);
+        add(new PageHeader(getUiData(), getTitleText(), null, null), mainContent);
     }
 
 }

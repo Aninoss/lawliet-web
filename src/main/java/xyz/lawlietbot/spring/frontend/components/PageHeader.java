@@ -1,5 +1,6 @@
 package xyz.lawlietbot.spring.frontend.components;
 
+import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.frontend.Styles;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Html;
@@ -19,10 +20,9 @@ public class PageHeader extends Div {
     private final HorizontalLayout titleDiv = new HorizontalLayout();
     private final VerticalLayout innerLayout = new VerticalLayout();
 
-    public PageHeader(String title, String description, String route, Component... components) {
+    public PageHeader(UIData uiData, String title, String description, String route, Component... components) {
         setWidthFull();
         setId("page-header");
-        addClassName("only-pc");
 
         outerLayout.addClassName(Styles.APP_WIDTH);
         outerLayout.setPadding(true);
@@ -30,7 +30,7 @@ public class PageHeader extends Div {
         titleDiv.setPadding(false);
         titleDiv.setWidthFull();
 
-        outerLayout.add(new HeaderDummy());
+        outerLayout.add(new HeaderDummy(uiData));
         if (route != null) addPageIcon(route);
         if (title != null) addTitle(title);
         if (description != null) addDescription(description);
@@ -57,7 +57,6 @@ public class PageHeader extends Div {
     private void addDescription(@Nonnull String description) {
         HtmlText htmlText = new HtmlText(description);
         htmlText.setWidthFull();
-        htmlText.getStyle().set("margin-bottom", "8px");
         innerLayout.add(htmlText);
     }
 
@@ -73,10 +72,6 @@ public class PageHeader extends Div {
 
     public VerticalLayout getInnerLayout() {
         return innerLayout;
-    }
-
-    protected void removeOnlyPC() {
-        removeClassName("only-pc");
     }
 
 }

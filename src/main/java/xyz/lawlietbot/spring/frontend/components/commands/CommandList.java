@@ -16,6 +16,7 @@ public class CommandList extends VerticalLayout {
 
     public CommandList(CommandsView parent, UIData uiData) {
         addClassName(Styles.APP_WIDTH);
+        getStyle().set("margin-top", "-14px");
 
         Accordion accordion = new Accordion();
         accordion.setWidthFull();

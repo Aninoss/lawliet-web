@@ -29,7 +29,10 @@ public class FAQView extends PageLayout {
         mainContent.setPadding(true);
 
         addEntries();
-        add(new PageHeader(getTitleText(), getTranslation("faq.desc"), getRoute()), mainContent);
+        add(
+                new PageHeader(getUiData(), getTitleText(), getTranslation("faq.desc"), getRoute()),
+                mainContent
+        );
     }
 
     private void addEntries() {

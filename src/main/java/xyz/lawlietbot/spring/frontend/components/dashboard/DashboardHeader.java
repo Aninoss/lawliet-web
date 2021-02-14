@@ -1,5 +1,6 @@
 package xyz.lawlietbot.spring.frontend.components.dashboard;
 
+import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.backend.util.StringUtil;
 import xyz.lawlietbot.spring.backend.userdata.DiscordServerData;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
@@ -17,9 +18,8 @@ public class DashboardHeader extends PageHeader {
 
     private final DashboardTitle dashboardTitle;
 
-    public DashboardHeader(SessionData sessionData, String dashboardName, DiscordServerData discordServerData) {
-        super(null, null, null);
-        removeOnlyPC();
+    public DashboardHeader(UIData uiData, String dashboardName, DiscordServerData discordServerData) {
+        super(uiData, null, null, null);
 
         dashboardTitle = new DashboardTitle(dashboardName, discordServerData.getName());
 

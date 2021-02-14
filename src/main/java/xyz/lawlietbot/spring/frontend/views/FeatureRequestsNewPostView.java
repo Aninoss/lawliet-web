@@ -50,12 +50,15 @@ public class FeatureRequestsNewPostView extends PageLayout {
         getStyle().set("margin-bottom", "48px");
 
         UnorderedList ul = new UnorderedList();
+        ul.getStyle().set("margin-bottom", "-6px");
         Arrays.stream(getTranslation("fr.new.desc").split("\n"))
                 .forEach(value -> ul.add(new ListItem(value )));
-        add(new PageHeader(getTitleText(), null, null, ul));
+        add(new PageHeader(getUiData(), getTitleText(), null, null, ul));
 
         mainContent.addClassName(Styles.APP_WIDTH);
-        mainContent.getStyle().set("margin-top", "-16px");
+        mainContent.getStyle()
+                .set("margin-top", "-20px")
+                .set("margin-bottom", "-4px");
         mainContent.setPadding(true);
 
         addTitle();

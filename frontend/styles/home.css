@@ -25,8 +25,7 @@ html {
 #bot-info-details-icon {
     width: var(--bot-info-width);
     height: var(--bot-info-width);
-    z-index: 1;
-    border-radius: 2%;
+    border-radius: 3%;
 }
 
 #bot-info-video {
@@ -58,11 +57,8 @@ html {
 
     .tablet-switch#bot-info { background: #14212a; }
 
-    #header-out { background-color: var(--lumo-shade); }
-
     #bot-info-details {
         max-width: 100%;
-        margin-top: 8px;
     }
 
     .bot-info-details-width { max-width: 100%; }
@@ -96,7 +92,10 @@ html {
 
     .tablet-switch#bot-info { background: var(--lumo-secondary); }
 
-    #bot-info-details { margin-top: 0; }
+    #bot-info-details {
+        margin-top: 16px;
+        margin-bottom: 28px;
+    }
 
     #bot-info-details-icon {
         width: 100px;

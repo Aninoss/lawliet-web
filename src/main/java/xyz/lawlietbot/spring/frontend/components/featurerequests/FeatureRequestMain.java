@@ -24,18 +24,23 @@ public class FeatureRequestMain extends VerticalLayout {
         this.sort = sort;
 
         setWidthFull();
-        setPadding(false);
+        setPadding(true);
         addClassName(Styles.APP_WIDTH);
-        getStyle().set("margin-top", "16px");
+        getStyle().set("margin-top", "16px")
+                .set("margin-bottom", "-16px");
 
         featureRequestChangeSort = new FeatureRequestChangeSort(this::onSortChange, this::onPageChangePrevious, this::onPageChangeNext, comparators, sort);
         add(featureRequestChangeSort);
+
+        Hr hr = new Hr();
+        hr.getStyle().set("margin-bottom", "0");
+        add(hr);
 
         featureRequestPanel = new FeatureRequestPanel(sessionData, uiData, frDynamicBean);
         page = checkPageBounds();
         featureRequestPanel.updateEntries(page, sort);
         featureRequestChangeSort.onPageChanged(page, featureRequestPanel.getPageSize());
-        add(new Hr(), featureRequestPanel);
+        add(featureRequestPanel);
 
         featureRequestPages = new FeatureRequestPages(this::onPageChange);
         featureRequestPages.setPage(page, featureRequestPanel.getPageSize());

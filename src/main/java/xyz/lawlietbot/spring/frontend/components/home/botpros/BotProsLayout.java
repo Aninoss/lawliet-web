@@ -12,7 +12,7 @@ public class BotProsLayout extends VerticalLayout {
     public BotProsLayout(UIData uiData) {
         setPadding(true);
         addClassName(Styles.APP_WIDTH);
-        getStyle().set("margin-bottom", "48px");
+        getStyle().set("margin-bottom", "42px");
 
         H2 title = new H2(getTranslation("bot.card.title"));
         title.getStyle().set("margin-top", "2em");
