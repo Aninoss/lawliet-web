@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class LanguageString {
 
-    Map<String, String> map = Collections.synchronizedMap(new HashMap<>());
+    Map<String, String> map = new HashMap<>();
 
     public void set(Locale locale, String string) {
         map.put(parseLocale(locale), string);

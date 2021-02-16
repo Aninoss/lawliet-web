@@ -21,14 +21,10 @@ import java.util.Optional;
 @VaadinSessionScope
 public class SessionData {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(SessionData.class);
-
     private OAuthBuilder builder;
     private final String id;
     private DiscordUser discordUser = null;
     private Class<? extends PageLayout> currentTarget = HomeView.class;
-
-    public static HashMap<Long, ArrayList<SessionData>> userCache = new HashMap<>();
 
     public SessionData() {
         id = StringUtil.getRandomString();
@@ -57,7 +53,6 @@ public class SessionData {
             Response response = builder.exchange(code);
             if (response != Response.ERROR) {
                 discordUser = new DiscordUser(builder.getUser());
-                userCache.computeIfAbsent(discordUser.getId(), id -> new ArrayList<>()).add(this);
                 uiData.login(discordUser.getId());
                 return true;
             }
@@ -67,7 +62,6 @@ public class SessionData {
 
     public void logout(UIData uiData) {
         if (isLoggedIn()) {
-            userCache.computeIfAbsent(discordUser.getId(), id -> new ArrayList<>()).remove(this);
             uiData.logout();
             setData();
             discordUser = null;
@@ -88,10 +82,6 @@ public class SessionData {
 
     public Class<? extends PageLayout> getCurrentTarget() {
         return currentTarget;
-    }
-
-    public static ArrayList<SessionData> getSessionData(long userId) {
-        return userCache.computeIfAbsent(userId, id -> new ArrayList<>());
     }
 
 }

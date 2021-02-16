@@ -12,7 +12,7 @@ public class ServerListData {
     }
 
     public void put(DiscordServerData server) {
-         if (!find(server.getId()).isPresent()) {
+         if (find(server.getId()).isEmpty()) {
              servers.add(server);
          }
     }

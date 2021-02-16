@@ -1,15 +1,14 @@
 package xyz.lawlietbot.spring.backend.commandlist;
 
 import xyz.lawlietbot.spring.backend.LanguageString;
-
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CommandListCategory {
 
     private String id;
-    private CopyOnWriteArrayList<CommandListSlot> slots = new CopyOnWriteArrayList<>();
-    private LanguageString langName = new LanguageString();
+    private final ArrayList<CommandListSlot> slots = new ArrayList<>();
+    private final LanguageString langName = new LanguageString();
 
     public void add(CommandListSlot commandListSlot) {
         if (find(commandListSlot.getTrigger()) == null)

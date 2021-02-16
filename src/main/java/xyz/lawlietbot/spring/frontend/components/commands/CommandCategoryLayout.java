@@ -12,7 +12,6 @@ import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;

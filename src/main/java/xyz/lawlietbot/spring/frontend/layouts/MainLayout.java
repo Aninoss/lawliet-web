@@ -30,8 +30,7 @@ import com.vaadin.flow.theme.lumo.Lumo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.HashMap;
+import java.util.Map;
 
 @CssImport("./styles/styles.css")
 @CssImport("./styles/styles-reversed.css")
@@ -118,14 +117,14 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
         settings.addMetaTag("og:image", "http://lawlietbot.xyz/styles/img/bot_icon.png");
 
         //Favicons
-        settings.addLink("/apple-touch-icon.png", new HashMap<String, String>() {{
-            put("rel", "apple-touch-icon");
-            put("sizes", "180x180");
-        }});
-        settings.addLink("/safari-pinned-tab.svg", new HashMap<String, String>() {{
-            put("rel", "mask-icon");
-            put("color", "#000000");
-        }});
+        settings.addLink("/apple-touch-icon.png", Map.of(
+                "rel",  "apple-touch-icon",
+                "sizes", "180x180"
+        ));
+        settings.addLink("/safari-pinned-tab.svg", Map.of(
+            "rel", "mask-icon",
+            "color", "#000000"
+        ));
         settings.addLink("manifest", "/site.webmanifest");
         settings.addMetaTag("theme-color", "#ffffff");
     }
