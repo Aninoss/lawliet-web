@@ -6,8 +6,9 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.server.VaadinServletService;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.shared.ui.LoadMode;
 
-@StyleSheet("https://fonts.googleapis.com/css2?family=Oswald&display=swap")
+@StyleSheet(value = "https://fonts.googleapis.com/css2?family=Oswald&display=swap", loadMode = LoadMode.LAZY)
 public class LawlietBotLogo extends HorizontalLayout {
 
     public LawlietBotLogo() {
@@ -23,7 +24,7 @@ public class LawlietBotLogo extends HorizontalLayout {
 
     private void addLogoImage() {
         String logoString = VaadinServletService.getCurrent()
-                .resolveResource("/styles/img/bot_icon.png",
+                .resolveResource("/styles/img/bot_icon.webp",
                         VaadinSession.getCurrent().getBrowser());
 
         Image logoImage = new Image(logoString, "");

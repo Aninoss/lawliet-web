@@ -38,7 +38,6 @@ import java.util.Map;
 @CssImport("./styles/main.css")
 @Theme(value = Lumo.class, variant = Lumo.DARK)
 @BodySize(width = "100%", height = "100%")
-@Push
 public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterObserver, PageConfigurator, HasErrorParameter<Exception>, BeforeLeaveObserver {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(MainLayout.class);
@@ -114,7 +113,7 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
         settings.addMetaTag("og:site_name", getTranslation("bot.name"));
         settings.addMetaTag("og:title", PageTitleGen.getPageTitle(target));
         settings.addMetaTag("og:description", getTranslation("bot.desc"));
-        settings.addMetaTag("og:image", "http://lawlietbot.xyz/styles/img/bot_icon.png");
+        settings.addMetaTag("og:image", "http://lawlietbot.xyz/styles/img/bot_icon.webp");
 
         //Favicons
         settings.addLink("/apple-touch-icon.png", Map.of(

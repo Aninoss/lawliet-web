@@ -20,7 +20,7 @@ public class BotInfoDetailsLayout extends VerticalLayout {
 
         //Bot Icon
         String iconStr = VaadinServletService.getCurrent()
-                .resolveResource("/styles/img/bot_icon.png",
+                .resolveResource("/styles/img/bot_icon.webp",
                         VaadinSession.getCurrent().getBrowser());
 
         Image icon = new Image(iconStr, "");
