@@ -1,19 +1,22 @@
 package xyz.lawlietbot.spring.syncserver;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import xyz.lawlietbot.spring.backend.featurerequests.FRDynamicBean;
 import xyz.lawlietbot.spring.backend.featurerequests.FRPanelType;
+import xyz.lawlietbot.spring.backend.premium.UserPremium;
 import xyz.lawlietbot.spring.backend.serverstats.ServerStatsBean;
 import xyz.lawlietbot.spring.backend.serverstats.ServerStatsSlot;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import java.time.LocalDate;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
 public class SendEvent {
 
-    private SendEvent() {}
+    private SendEvent() {
+    }
 
     public static CompletableFuture<JSONObject> sendRequestCommandList() {
         return SyncManager.getInstance().getClient().send("COMMAND_LIST", new JSONObject());
@@ -58,7 +61,7 @@ public class SendEvent {
             FRDynamicBean frDynamicBean = new FRDynamicBean(boostsRemaining, boostsTotal);
 
             JSONArray jsonEntriesArray = responseJson.getJSONArray("data");
-            for(int j = 0; j < jsonEntriesArray.length(); j++) {
+            for (int j = 0; j < jsonEntriesArray.length(); j++) {
                 JSONObject jsonEntry = jsonEntriesArray.getJSONObject(j);
                 FRPanelType type = FRPanelType.valueOf(jsonEntry.getString("type"));
                 boolean pub = jsonEntry.getBoolean("public");
@@ -106,6 +109,46 @@ public class SendEvent {
         return SyncManager.getInstance().getClient().send("INVITE", jsonObject);
     }
 
+    public static CompletableFuture<UserPremium> sendRequestUserPremium(long userId) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("user_id", userId);
+        return process("PREMIUM", jsonObject, jsonResponse -> {
+            ArrayList<Long> slots = new ArrayList<>();
+            JSONArray jsonSlots = jsonResponse.getJSONArray("slots");
+            for (int i = 0; i < jsonSlots.length(); i++) {
+                slots.add(jsonSlots.getLong(i));
+            }
+
+            ArrayList<UserPremium.Guild> guilds = new ArrayList<>();
+            JSONArray jsonGuilds = jsonResponse.getJSONArray("guilds");
+            for (int i = 0; i < jsonGuilds.length(); i++) {
+                JSONObject jsonGuild = jsonGuilds.getJSONObject(i);
+                guilds.add(
+                        new UserPremium.Guild(
+                                jsonGuild.getLong("guild_id"),
+                                jsonGuild.getString("name"),
+                                jsonGuild.getString("icon_url")
+                        )
+                );
+            }
+
+            return new UserPremium(userId, guilds, slots);
+        });
+    }
+
+    public static CompletableFuture<Boolean> sendModifyPremium(long userId, int slot, long guildId) {
+        JSONObject json = new JSONObject();
+        json.put("user_id", userId);
+        json.put("slot", slot);
+        json.put("guild_id", guildId);
+
+        return process(
+                "PREMIUM_MODIFY",
+                json,
+                r -> r.getBoolean("success")
+        );
+    }
+
     private static <T> CompletableFuture<T> process(String event, JSONObject dataJson, Function<JSONObject, T> function) {
         CompletableFuture<T> future = new CompletableFuture<>();
 
@@ -115,8 +158,12 @@ public class SendEvent {
                     return null;
                 })
                 .thenAccept(jsonResponse -> {
-                    T t = function.apply(jsonResponse);
-                    future.complete(t);
+                    try {
+                        T t = function.apply(jsonResponse);
+                        future.complete(t);
+                    } catch (Throwable e) {
+                        future.completeExceptionally(e);
+                    }
                 });
 
         return future;

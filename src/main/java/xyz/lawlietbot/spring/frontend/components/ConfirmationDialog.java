@@ -13,7 +13,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 public class ConfirmationDialog extends Div {
 
-    private final ConfirmationDialogConfirmListener confirmListener;
+    private ConfirmationDialogConfirmListener confirmListener = null;
     private ConfirmationDialogCancelListener cancelListener = null;
     private final VerticalLayout dialogLayout = new VerticalLayout();
     private Label textParagraph;
@@ -26,7 +26,11 @@ public class ConfirmationDialog extends Div {
     }
 
     public ConfirmationDialog(String text, ConfirmationDialogConfirmListener confirmListener, Component... components) {
+        this(text);
         this.confirmListener = confirmListener;
+    }
+
+    public ConfirmationDialog(String text, Component... components) {
         setBackgroundStyles();
         setDialogStyles();
         getStyle().set("transition", "opacity 0.2s");
@@ -123,6 +127,17 @@ public class ConfirmationDialog extends Div {
         }
     }
 
+    public void setConfirmListener(ConfirmationDialogConfirmListener confirmListener) {
+        this.confirmListener = confirmListener;
+    }
+
+    public void setCancelListener(ConfirmationDialogCancelListener cancelListener) {
+        this.cancelListener = cancelListener;
+    }
+
+    public boolean isOpened() {
+        return opened;
+    }
 
     public interface ConfirmationDialogConfirmListener {
         void onConfirm();
