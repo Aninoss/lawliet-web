@@ -72,8 +72,9 @@ public class FeatureRequestsView extends PageLayout implements HasUrlParameter<S
     private FeatureRequestSort extractSort(Map<String, List<String>> parametersMap, HashMap<String, FeatureRequestSort> featureRequestsMap) {
         if (parametersMap.containsKey("sortby") && parametersMap.get("sortby").size() > 0) {
             String sortby = parametersMap.get("sortby").get(0);
-            if (featureRequestsMap.containsKey(sortby))
+            if (featureRequestsMap.containsKey(sortby)) {
                 return featureRequestsMap.get(sortby);
+            }
         }
 
         return featureRequestsMap.get("popular");

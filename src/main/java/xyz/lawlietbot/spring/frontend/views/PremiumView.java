@@ -5,10 +5,7 @@ import java.util.HashMap;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -17,6 +14,7 @@ import com.vaadin.flow.router.Route;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import xyz.lawlietbot.spring.ExternalLinks;
 import xyz.lawlietbot.spring.LoginAccess;
 import xyz.lawlietbot.spring.NoLiteAccess;
 import xyz.lawlietbot.spring.backend.premium.UserPremium;
@@ -66,12 +64,12 @@ public class PremiumView extends PageLayout {
     }
 
     private void addSlots() {
-        H2 title = new H2("Unlock Servers");
+        H2 title = new H2(getTranslation("premium.title"));
         title.getStyle().set("margin-top", "8px");
         mainContent.add(title);
 
         if (userPremium.getSlots().size() > 0) {
-            Paragraph p = new Paragraph("Which server do you want to unlock?");
+            Paragraph p = new Paragraph(getTranslation("premium.subtitle"));
             p.getStyle().set("margin-bottom", "26px")
                     .set("margin-top", "0");
             mainContent.add(p);
@@ -84,6 +82,22 @@ public class PremiumView extends PageLayout {
         } else {
             Paragraph p = new Paragraph(getTranslation("premium.noactive"));
             mainContent.add(p);
+
+            HorizontalLayout buttonLayout = new HorizontalLayout();
+            buttonLayout.setPadding(false);
+
+            Button patreonButton = new Button(getTranslation("premium.patreon"));
+            patreonButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            Anchor patreonAnchor = new Anchor(ExternalLinks.PATREON_PAGE, patreonButton);
+            patreonAnchor.setTarget("_blank");
+
+            Button connectButton = new Button(getTranslation("premium.connect"));
+            connectButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+            Anchor connectAnchor = new Anchor("https://www.patreon.com/settings/apps", connectButton);
+            connectAnchor.setTarget("_blank");
+
+            buttonLayout.add(patreonAnchor, connectAnchor);
+            mainContent.add(buttonLayout);
         }
     }
 
