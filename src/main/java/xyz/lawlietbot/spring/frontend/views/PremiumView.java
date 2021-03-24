@@ -81,6 +81,8 @@ public class PremiumView extends PageLayout {
             }
         } else {
             Paragraph p = new Paragraph(getTranslation("premium.noactive"));
+            p.getStyle().set("margin-bottom", "26px")
+                    .set("margin-top", "0");
             mainContent.add(p);
 
             HorizontalLayout buttonLayout = new HorizontalLayout();
@@ -204,6 +206,9 @@ public class PremiumView extends PageLayout {
             long userId = userPremium.getUserId();
             boolean success = SendEvent.sendModifyPremium(userId, slot, guildId).get();
             if (success) {
+                if (guildId != 0) {
+                    CustomNotification.showSuccess(getTranslation("premium.success", userPremium.getGuildById(guildId).getName()));
+                }
                 return true;
             } else {
                 CustomNotification.showError(getTranslation("premium.cooldown"));
