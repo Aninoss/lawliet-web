@@ -77,6 +77,9 @@ public class PremiumView extends PageLayout {
             for (int i = 0; i < userPremium.getSlots().size(); i++) {
                 long guildId = userPremium.getSlots().get(i);
                 UserPremium.Guild guild = userPremium.getGuildById(guildId);
+                if (guild == null && guildId != 0) {
+                    guild = new UserPremium.Guild(guildId, String.format("%X", guildId), "");
+                }
                 addCard(guild, i);
             }
         } else {
@@ -191,7 +194,10 @@ public class PremiumView extends PageLayout {
     private void onRemove(int i) {
         if (modify(i, 0)) {
             long guildId = userPremium.getSlots().get(i);
-            availableGuilds.add(userPremium.getGuildById(guildId));
+            UserPremium.Guild guild = userPremium.getGuildById(guildId);
+            if (guild != null) {
+                availableGuilds.add(guild);
+            }
             userPremium.setSlot(i, 0);
 
             Card card = cards.get(i);
