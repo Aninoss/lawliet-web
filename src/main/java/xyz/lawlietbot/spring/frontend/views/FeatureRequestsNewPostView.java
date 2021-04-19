@@ -63,7 +63,7 @@ public class FeatureRequestsNewPostView extends PageLayout {
 
         addTitle();
         addDescription();
-        addNotifyCheckbox();
+        //addNotifyCheckbox();
         addHr();
         addButtons();
 

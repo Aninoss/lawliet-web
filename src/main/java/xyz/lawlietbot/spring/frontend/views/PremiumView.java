@@ -2,6 +2,9 @@ package xyz.lawlietbot.spring.frontend.views;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -43,7 +46,7 @@ public class PremiumView extends PageLayout {
     private ArrayList<UserPremium.Guild> availableGuilds;
     private UserPremium userPremium;
 
-    public PremiumView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
+    public PremiumView(@Autowired SessionData sessionData, @Autowired UIData uiData) throws InterruptedException, ExecutionException, TimeoutException {
         super(sessionData, uiData);
         getStyle().set("margin-bottom", "48px");
 
@@ -52,7 +55,7 @@ public class PremiumView extends PageLayout {
         mainContent.add(dialog);
 
         if (sessionData.isLoggedIn()) {
-            this.userPremium = SendEvent.sendRequestUserPremium(sessionData.getDiscordUser().get().getId()).join();
+            this.userPremium = SendEvent.sendRequestUserPremium(sessionData.getDiscordUser().get().getId()).get(5, TimeUnit.SECONDS);
             this.availableGuilds = new ArrayList<>(this.userPremium.getMutualGuilds());
             addSlots();
         }
