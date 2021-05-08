@@ -21,10 +21,11 @@ public class TranslationProvider implements I18NProvider {
 
     public final Locale LOCALE_EN = new Locale("en");
     public final Locale LOCALE_DE = new Locale("de");
+    public final Locale LOCALE_ES = new Locale("es");
     public final Locale LOCALE_RU = new Locale("ru");
 
     private final List<Locale> locales = Collections
-            .unmodifiableList(Arrays.asList(LOCALE_EN, LOCALE_RU, LOCALE_DE));
+            .unmodifiableList(Arrays.asList(LOCALE_EN, LOCALE_RU, LOCALE_ES, LOCALE_DE));
 
     private static final LoadingCache<Locale, ResourceBundle> bundleCache = CacheBuilder
             .newBuilder().expireAfterWrite(1, TimeUnit.DAYS)
