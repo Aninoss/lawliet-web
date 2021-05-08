@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
 public class TranslationProvider implements I18NProvider {
@@ -59,32 +61,14 @@ public class TranslationProvider implements I18NProvider {
             return "!" + locale.getLanguage() + ": " + key;
         }
 
+        String[] placeholders = extractGroups(RegexPatterns.TEXT_PLACEHOLDER_PATTERN, value);
+        value = processReferences(value, placeholders, locale);
         if (params.length > 0) {
-
-            boolean secondOption = false;
-            boolean hasChoice = false;
-
             if (params[0] instanceof Boolean) {
-                hasChoice = true;
-                secondOption = (boolean) params[0];
-                Object[] newParams = new Object[params.length - 1];
-                System.arraycopy(params, 1, newParams, 0, params.length - 1);
-                params = newParams;
+                value = processMultiOptions(value, (boolean)params[0] ? 1 : 0);
+                System.arraycopy(params, 1, params, 0, params.length - 1);
             }
-
             value = MessageFormat.format(value, params);
-
-            if (hasChoice) {
-                String[] parts = value.split("%\\[");
-                for (int i = 1; i < parts.length; i++) {
-                    String subText = parts[i];
-                    if (subText.contains("]%")) {
-                        subText = subText.split("]%")[0];
-                        String[] options = subText.split("\\|");
-                        value = value.replace("%[" + subText + "]%", options[secondOption ? 1 : 0]);
-                    }
-                }
-            }
         }
         return value;
     }
@@ -106,4 +90,38 @@ public class TranslationProvider implements I18NProvider {
 
         return propertiesBundle;
     }
+
+    private String[] extractGroups(Pattern pattern, String text) {
+        ArrayList<String> placeholderList = new ArrayList<>();
+        Matcher m = pattern.matcher(text);
+        while(m.find()) {
+            placeholderList.add(m.group("inner"));
+        }
+        return placeholderList.toArray(new String[0]);
+    }
+
+    private String processMultiOptions(String text, int option) {
+        String[] groups = extractGroups(RegexPatterns.TEXT_MULTIOPTION_PATTERN, text);
+
+        for (String group : groups) {
+            if (group.contains("|")) {
+                text = text.replace("[" + group + "]", group.split("\\|")[option]);
+            }
+        }
+
+        return text.replace("\\[", "[").replace("\\]", "]");
+    }
+
+    private String processReferences(String text, String[] placeholders, Locale locale) {
+        for (String placeholder : placeholders) {
+            if (placeholder.startsWith("this.")) {
+                String key = placeholder.substring(5);
+                String newValue = getTranslation(key, locale);
+                text = text.replace("{" + placeholder + "}", newValue);
+            }
+        }
+
+        return text;
+    }
+
 }
