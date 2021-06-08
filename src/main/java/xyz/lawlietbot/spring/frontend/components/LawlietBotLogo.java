@@ -24,7 +24,7 @@ public class LawlietBotLogo extends HorizontalLayout {
 
     private void addLogoImage() {
         String logoString = VaadinServletService.getCurrent()
-                .resolveResource("/styles/img/bot_icon.webp",
+                .resolveResource("/styles/img/bot_icon_small.webp",
                         VaadinSession.getCurrent().getBrowser());
 
         Image logoImage = new Image(logoString, "");

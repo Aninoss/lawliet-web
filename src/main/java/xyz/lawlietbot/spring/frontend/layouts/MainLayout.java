@@ -120,10 +120,6 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
                 "rel",  "apple-touch-icon",
                 "sizes", "180x180"
         ));
-        settings.addLink("/safari-pinned-tab.svg", Map.of(
-            "rel", "mask-icon",
-            "color", "#000000"
-        ));
         settings.addLink("manifest", "/site.webmanifest");
         settings.addMetaTag("theme-color", "#ffffff");
     }
