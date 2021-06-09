@@ -1,11 +1,9 @@
 package xyz.lawlietbot.spring.frontend.components.home.botpros;
 
-import xyz.lawlietbot.spring.backend.userdata.UIData;
-import xyz.lawlietbot.spring.frontend.Styles;
-import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import xyz.lawlietbot.spring.backend.userdata.UIData;
+import xyz.lawlietbot.spring.frontend.Styles;
 
 public class BotProsLayout extends VerticalLayout {
 
@@ -21,9 +19,6 @@ public class BotProsLayout extends VerticalLayout {
 
         add(title);
         add(new BotProsPanelsLayout(uiData));
-
-        Div andMore = new Div(new Text(getTranslation("bot.note")));
-        andMore.setWidthFull();
-        add(andMore);
     }
+
 }

@@ -2,7 +2,7 @@
     font-family: var(--lumo-font-family);
 }
 .highcharts-background {
-    fill: var(--lumo-base-color);
+    fill: #1f2c3e;
 }
 .highcharts-title {
     fill: var(--lumo-header-text-color);

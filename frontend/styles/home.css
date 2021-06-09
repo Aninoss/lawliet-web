@@ -50,6 +50,22 @@ html {
     background: linear-gradient(0deg, rgba(0,0,0,0) 0%, #1f2c3e 100%);
 }
 
+#prop-list {
+    width: 100%;
+    margin-top: 3em;
+    margin-bottom: 2em;
+}
+
+.prop-check {
+    color: var(--lumo-success-color);
+    margin-right: 12px;
+}
+
+#prop-button {
+    margin-top: 2em;
+    width: 300px;
+}
+
 
 
 /* Tablet */
@@ -100,6 +116,10 @@ html {
     #bot-info-details-icon {
         width: 100px;
         height: 100px;
+    }
+
+    #prop-button {
+        width: 100%;
     }
 
 }

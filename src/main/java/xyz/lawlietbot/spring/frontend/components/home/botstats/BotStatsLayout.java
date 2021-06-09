@@ -21,7 +21,7 @@ public class BotStatsLayout extends VerticalLayout {
         getStyle().set("padding-bottom", "48px");
         setPadding(false);
         mainLayout.addClassName(Styles.APP_WIDTH);
-        getStyle().set("background", "var(--lumo-secondary)");
+        getStyle().set("background", "var(--lumo-shade)");
 
         try {
             ServerStatsBean bean = ServerStatsContainer.getInstance().getBean();

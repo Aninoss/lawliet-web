@@ -13,7 +13,7 @@ public class BotStatsChart extends Div {
         final Chart chart = new Chart(ChartType.AREASPLINE);
         setWidthFull();
         getStyle().set("border-radius", "5px")
-            .set("background", "var(--lumo-base-color)")
+            .set("background", "#1f2c3e")
             .set("padding-top", "16px");
 
         final Configuration configuration = chart.getConfiguration();
