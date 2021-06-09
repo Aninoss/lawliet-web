@@ -44,6 +44,7 @@ public class BotInfoDetailsLayout extends VerticalLayout {
         //Button
         Button inviteButton = new Button(getTranslation("bot.invite"), VaadinIcon.ARROW_RIGHT.create());
         inviteButton.setWidthFull();
+        inviteButton.setHeight("48px");
         inviteButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         inviteButton.setIconAfterText(true);
 
