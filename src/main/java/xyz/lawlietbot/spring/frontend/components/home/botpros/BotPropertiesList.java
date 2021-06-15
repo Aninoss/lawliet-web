@@ -8,6 +8,7 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.frontend.Styles;
@@ -32,12 +33,13 @@ public class BotPropertiesList extends VerticalLayout {
     }
 
     private Component generateProperty(String text) {
-        Span span = new Span();
+        FlexLayout content = new FlexLayout();
+        content.setFlexDirection(FlexLayout.FlexDirection.ROW);
         Icon icon = VaadinIcon.CHECK.create();
         icon.addClassName("prop-check");
 
-        span.add(icon, new Text(text));
-        return span;
+        content.add(icon, new Text(text));
+        return content;
     }
 
     private Component generateInviteButton(UIData uiData) {
