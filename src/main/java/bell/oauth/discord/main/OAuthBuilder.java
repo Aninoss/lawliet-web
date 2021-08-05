@@ -160,7 +160,7 @@ public class OAuthBuilder {
 				JSONObject obj = (JSONObject) guild;
 
 				g.setIcon(obj.isNull("icon") ? null : obj.getString("icon"));
-				g.setId(obj.getString("id"));
+				g.setId(Long.parseLong(obj.getString("id")));
 				g.setName(obj.getString("name"));
 				g.setOwner(obj.getBoolean("owner"));
 				g.setPermissions(obj.getInt("permissions"));

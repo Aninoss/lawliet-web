@@ -51,13 +51,13 @@ public class CustomRequestHandler implements RequestHandler {
                         "object-src 'self'; " +
                         "script-src 'unsafe-inline' 'unsafe-eval' 'self' ajax.cloudflare.com https://cdn.jsdelivr.net; " +
                         "style-src https://fonts.googleapis.com/ https://fonts.gstatic.com/ 'unsafe-inline' 'self'; " +
-                        "frame-ancestors https://top.gg"
+                        "frame-ancestors https://top.gg https://discords.com"
         );
-        response.setHeader("X-Frame-Options", "allow-from https://top.gg/");
+        response.setHeader("X-Frame-Options", "allow-from https://top.gg/ https://discords.com/");
         response.setHeader("X-Content-Type-Options", "nosniff");
         response.setHeader("Referrer-Policy", "same-origin");
         response.setHeader("Feature-Policy", "microphone 'none'; geolocation 'none'");
-        response.setHeader("Access-Control-Allow-Origin", "https://top.gg");
+        response.setHeader("Access-Control-Allow-Origin", "https://top.gg https://discords.com");
         response.setHeader("X-XSS-Protection", "1; mode=block");
 
         if (request.getPathInfo().equalsIgnoreCase("/invite"))

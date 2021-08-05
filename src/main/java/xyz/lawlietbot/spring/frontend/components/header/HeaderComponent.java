@@ -93,7 +93,7 @@ public class HeaderComponent extends Header {
                 login.getStyle().set("color", "white")
                         .set("margin-right", "-6px");
                 login.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-                Anchor loginAnchor = new Anchor(sessionData.getLoginUrl(), login);
+                Anchor loginAnchor = new Anchor(sessionData.getLoginUrl(false), login);
                 loginAnchor.addClassName(Styles.VISIBLE_NOTMOBILE);
                 content.add(loginAnchor);
             }

@@ -131,7 +131,7 @@ public class FeatureRequestUserHeader extends Card {
     private void addLogInButton() {
         Button login = new Button(getTranslation("login"));
         login.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        Anchor loginAnchor = new Anchor(sessionData.getLoginUrl(), login);
+        Anchor loginAnchor = new Anchor(sessionData.getLoginUrl(false), login);
         notLoggedInLayout.add(loginAnchor);
     }
 

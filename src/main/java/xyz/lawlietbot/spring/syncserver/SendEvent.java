@@ -119,20 +119,7 @@ public class SendEvent {
                 slots.add(jsonSlots.getLong(i));
             }
 
-            ArrayList<UserPremium.Guild> guilds = new ArrayList<>();
-            JSONArray jsonGuilds = jsonResponse.getJSONArray("guilds");
-            for (int i = 0; i < jsonGuilds.length(); i++) {
-                JSONObject jsonGuild = jsonGuilds.getJSONObject(i);
-                guilds.add(
-                        new UserPremium.Guild(
-                                jsonGuild.getLong("guild_id"),
-                                jsonGuild.getString("name"),
-                                jsonGuild.getString("icon_url")
-                        )
-                );
-            }
-
-            return new UserPremium(userId, guilds, slots);
+            return new UserPremium(userId, slots);
         });
     }
 

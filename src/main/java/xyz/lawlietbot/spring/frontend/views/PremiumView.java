@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import bell.oauth.discord.domain.Guild;
+import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -21,6 +23,7 @@ import xyz.lawlietbot.spring.ExternalLinks;
 import xyz.lawlietbot.spring.LoginAccess;
 import xyz.lawlietbot.spring.NoLiteAccess;
 import xyz.lawlietbot.spring.backend.premium.UserPremium;
+import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.frontend.Styles;
@@ -34,16 +37,16 @@ import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 @Route(value = "premium", layout = MainLayout.class)
 @NoLiteAccess
-@LoginAccess
+@LoginAccess(withGuilds = true)
 public class PremiumView extends PageLayout {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PremiumView.class);
 
     private final VerticalLayout mainContent = new VerticalLayout();
     private final ArrayList<Card> cards = new ArrayList<>();
-    private final HashMap<Integer, ComboBox<UserPremium.Guild>> comboBoxMap = new HashMap<>();
+    private final HashMap<Integer, ComboBox<Guild>> comboBoxMap = new HashMap<>();
     private final ConfirmationDialog dialog = new ConfirmationDialog(getTranslation("premium.confirm"));
-    private ArrayList<UserPremium.Guild> availableGuilds;
+    private ArrayList<Guild> availableGuilds;
     private UserPremium userPremium;
 
     public PremiumView(@Autowired SessionData sessionData, @Autowired UIData uiData) throws InterruptedException, ExecutionException, TimeoutException {
@@ -54,9 +57,9 @@ public class PremiumView extends PageLayout {
         mainContent.setPadding(true);
         mainContent.add(dialog);
 
-        if (sessionData.isLoggedIn()) {
+        if (sessionData.isLoggedIn() && sessionData.getDiscordUser().get().hasGuilds()) {
             this.userPremium = SendEvent.sendRequestUserPremium(sessionData.getDiscordUser().get().getId()).get(5, TimeUnit.SECONDS);
-            this.availableGuilds = new ArrayList<>(this.userPremium.getMutualGuilds());
+            this.availableGuilds = new ArrayList<>(sessionData.getDiscordUser().get().getGuilds());
             addSlots();
         }
 
@@ -79,9 +82,11 @@ public class PremiumView extends PageLayout {
 
             for (int i = 0; i < userPremium.getSlots().size(); i++) {
                 long guildId = userPremium.getSlots().get(i);
-                UserPremium.Guild guild = userPremium.getGuildById(guildId);
+                Guild guild = getSessionData().getDiscordUser().map(u -> u.getGuildById(guildId)).orElse(null);
                 if (guild == null && guildId != 0) {
-                    guild = new UserPremium.Guild(guildId, String.format("%X", guildId), "");
+                    guild = new Guild();
+                    guild.setId(guildId);
+                    guild.setName(String.format("%X", guildId));
                 }
                 addCard(guild, i);
             }
@@ -109,7 +114,7 @@ public class PremiumView extends PageLayout {
         }
     }
 
-    private void addCard(UserPremium.Guild guild, int i) {
+    private void addCard(Guild guild, int i) {
         Card card = new Card();
         card.setWidthFull();
         card.setHeight("72px");
@@ -120,7 +125,7 @@ public class PremiumView extends PageLayout {
         mainContent.add(card);
     }
 
-    private HorizontalLayout getCardContent(UserPremium.Guild guild, int i, boolean init) {
+    private HorizontalLayout getCardContent(Guild guild, int i, boolean init) {
         HorizontalLayout horizontalLayout = new HorizontalLayout();
         horizontalLayout.setSizeFull();
         horizontalLayout.setPadding(true);
@@ -131,7 +136,8 @@ public class PremiumView extends PageLayout {
             horizontalLayout.add(label);
             horizontalLayout.setFlexGrow(1, label);
 
-            ComboBox<UserPremium.Guild> guildComboBox = new ComboBox<>();
+            ComboBox<Guild> guildComboBox = new ComboBox<>();
+            guildComboBox.setItemLabelGenerator((ItemLabelGenerator<Guild>) Guild::getName);
             guildComboBox.setPlaceholder(getTranslation("premium.server"));
             guildComboBox.setItems(availableGuilds);
             horizontalLayout.add(guildComboBox);
@@ -148,8 +154,8 @@ public class PremiumView extends PageLayout {
         } else {
             comboBoxMap.remove(i);
             availableGuilds.remove(guild);
-            if (guild.getIconUrl().length() > 0) {
-                Image guildIcon = new Image(guild.getIconUrl(), "Server Icon");
+            if (guild.getIcon() != null) {
+                Image guildIcon = new Image(guild.getIcon(), "Server Icon");
                 guildIcon.setHeightFull();
                 guildIcon.addClassName(Styles.ROUND);
                 horizontalLayout.add(guildIcon);
@@ -178,12 +184,13 @@ public class PremiumView extends PageLayout {
         });
     }
 
-    private void onAdd(UserPremium.Guild guild, int i) {
+    private void onAdd(Guild guild, int i) {
         if (!dialog.isOpened()) {
             dialog.setConfirmListener(() -> {
-                if (modify(i, guild.getId())) {
+                long guildId = guild.getId();
+                if (modify(i, guildId)) {
                     availableGuilds.remove(guild);
-                    userPremium.setSlot(i, guild.getId());
+                    userPremium.setSlot(i, guildId);
                     Card card = cards.get(i);
                     card.removeAll();
                     card.add(getCardContent(guild, i, false));
@@ -197,10 +204,8 @@ public class PremiumView extends PageLayout {
     private void onRemove(int i) {
         if (modify(i, 0)) {
             long guildId = userPremium.getSlots().get(i);
-            UserPremium.Guild guild = userPremium.getGuildById(guildId);
-            if (guild != null) {
-                availableGuilds.add(guild);
-            }
+            getSessionData().getDiscordUser().map(u -> u.getGuildById(guildId))
+                    .ifPresent(guild -> availableGuilds.add(guild));
             userPremium.setSlot(i, 0);
 
             Card card = cards.get(i);
@@ -216,7 +221,7 @@ public class PremiumView extends PageLayout {
             boolean success = SendEvent.sendModifyPremium(userId, slot, guildId).get();
             if (success) {
                 if (guildId != 0) {
-                    CustomNotification.showSuccess(getTranslation("premium.success", userPremium.getGuildById(guildId).getName()));
+                    CustomNotification.showSuccess(getTranslation("premium.success", getSessionData().getDiscordUser().get().getGuildById(guildId).getName()));
                 }
                 return true;
             } else {

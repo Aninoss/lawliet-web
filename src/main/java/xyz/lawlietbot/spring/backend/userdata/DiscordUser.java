@@ -1,13 +1,20 @@
 package xyz.lawlietbot.spring.backend.userdata;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+import bell.oauth.discord.domain.Guild;
 import bell.oauth.discord.domain.User;
 
 public class DiscordUser {
 
     private final User discordUser;
+    private final List<Guild> guilds;
 
-    public DiscordUser(User discordUser) {
+    public DiscordUser(User discordUser, List<Guild> guilds) {
         this.discordUser = discordUser;
+        this.guilds = guilds;
     }
 
     public long getId() {
@@ -24,6 +31,29 @@ public class DiscordUser {
 
     public String getUserAvatar() {
         return "https://cdn.discordapp.com/avatars/" + discordUser.getId() + "/" + discordUser.getAvatar() + ".png";
+    }
+
+    public boolean hasGuilds() {
+        return guilds != null;
+    }
+
+    public List<Guild> getGuilds() {
+        if (guilds == null) {
+            return Collections.emptyList();
+        }
+        return guilds.stream()
+                .sorted(Comparator.comparing(Guild::getName))
+                .collect(Collectors.toList());
+    }
+
+    public Guild getGuildById(long guildId) {
+        if (guilds == null) {
+            return null;
+        }
+        return guilds.stream()
+                .filter(g -> g.getId() == guildId)
+                .findFirst()
+                .orElse(null);
     }
 
 }

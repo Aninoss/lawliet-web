@@ -1,21 +1,20 @@
 package xyz.lawlietbot.spring.backend.userdata;
 
+import java.util.List;
+import java.util.Optional;
+import javax.servlet.http.HttpServletRequest;
+import bell.oauth.discord.domain.Guild;
 import bell.oauth.discord.main.OAuthBuilder;
 import bell.oauth.discord.main.Response;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinServletRequest;
+import com.vaadin.flow.spring.annotation.VaadinSessionScope;
+import org.springframework.stereotype.Component;
 import xyz.lawlietbot.spring.backend.util.StringUtil;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
 import xyz.lawlietbot.spring.frontend.views.DiscordLogin;
 import xyz.lawlietbot.spring.frontend.views.HomeView;
-import com.vaadin.flow.server.*;
-import com.vaadin.flow.spring.annotation.VaadinSessionScope;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Optional;
 
 @Component
 @VaadinSessionScope
@@ -33,7 +32,6 @@ public class SessionData {
 
     private void setData() {
         builder = new OAuthBuilder(System.getenv("BOT_CLIENT_ID"), System.getenv("BOT_CLIENT_SECRET"))
-                .setScopes(new String[]{"identify"})
                 .setRedirectURI(getCurrentDomain() + PageLayout.getRouteStatic(DiscordLogin.class));
     }
 
@@ -44,7 +42,8 @@ public class SessionData {
         return requestUrl.substring(0, requestUrl.indexOf('/')).replace("|", "//") + "/";
     }
 
-    public String getLoginUrl() {
+    public String getLoginUrl(boolean withGuilds) {
+        builder = builder.setScopes(withGuilds ? new String[]{"identify", "guilds"} : new String[]{"identify"});
         return builder.getAuthorizationUrl(id) + "&prompt=none";
     }
 
@@ -52,7 +51,8 @@ public class SessionData {
         if (state.equals(id)) {
             Response response = builder.exchange(code);
             if (response != Response.ERROR) {
-                discordUser = new DiscordUser(builder.getUser());
+                List<Guild> guilds = builder.getScopes().contains("guilds") ? builder.getGuilds() : null;
+                discordUser = new DiscordUser(builder.getUser(), guilds);
                 uiData.login(discordUser.getId());
                 return true;
             }

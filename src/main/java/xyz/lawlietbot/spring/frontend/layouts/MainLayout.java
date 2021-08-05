@@ -140,18 +140,24 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
             return;
         }
 
-        if (!sessionData.isLoggedIn() && target.isAnnotationPresent(LoginAccess.class)) {
+        LoginAccess loginAccess = target.getAnnotation(LoginAccess.class);
+        if ((!sessionData.isLoggedIn() && loginAccess != null) ||
+                (sessionData.isLoggedIn() && !sessionData.getDiscordUser().get().hasGuilds() && loginAccess != null && loginAccess.withGuilds())
+        ) {
             if (PageLayout.class.isAssignableFrom(target))
                 sessionData.setCurrentTarget((Class<? extends PageLayout>)target);
 
-            new Redirector().redirect(sessionData.getLoginUrl());
+            new Redirector().redirect(sessionData.getLoginUrl(loginAccess.withGuilds()));
             event.postpone();
         }
     }
 
     private void checkLoginStatusChanged(BeforeEnterEvent event) {
-        if (!sessionData.isLoggedIn() && event.getNavigationTarget().isAnnotationPresent(LoginAccess.class)) {
-            new Redirector().redirect(sessionData.getLoginUrl());
+        LoginAccess loginAccess = event.getNavigationTarget().getAnnotation(LoginAccess.class);
+        if ((!sessionData.isLoggedIn() && loginAccess != null) ||
+                (sessionData.isLoggedIn() && !sessionData.getDiscordUser().get().hasGuilds() && loginAccess != null && loginAccess.withGuilds())
+        ) {
+            new Redirector().redirect(sessionData.getLoginUrl(loginAccess.withGuilds()));
             return;
         }
 

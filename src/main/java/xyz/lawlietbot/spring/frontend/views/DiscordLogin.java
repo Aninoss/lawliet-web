@@ -33,17 +33,19 @@ public class DiscordLogin extends PageLayout implements HasUrlParameter<String> 
         Map<String, List<String>> parametersMap =
                 queryParameters.getParameters();
 
+        boolean ok = false;
         if (parametersMap != null && parametersMap.containsKey("code") && parametersMap.containsKey("state")) {
             String code = parametersMap.get("code").get(0);
             String state = parametersMap.get("state").get(0);
 
-            if (!sessionData.login(code, state, uiData)) {
+            if (sessionData.login(code, state, uiData)) {
+                ok = true;
+            } else {
                 CustomNotification.showError(getTranslation("login.error"));
             }
         }
 
-        Class<? extends Component> resumeClass = sessionData.isLoggedIn() ? (Class<? extends Component>) sessionData.getCurrentTarget() : HomeView.class;
-
+        Class<? extends Component> resumeClass = ok ? sessionData.getCurrentTarget() : HomeView.class;
         UI.getCurrent().navigate(resumeClass);
         event.rerouteTo(resumeClass);
     }
