@@ -21,9 +21,10 @@ public class BotProsPanelsLayout extends VerticalLayout {
 
     public BotProsPanelsLayout(UIData uiData) {
         BotProPanelInfo[] botProPanelInfos = getBotProPanelInfos(uiData);
+        int entries = (botProPanelInfos.length / 3) * 3;
 
         ArrayList<Article> articles = new ArrayList<>();
-        for(int i = 0; i < botProPanelInfos.length && articles.size() < 15; i++) {
+        for(int i = 0; i < botProPanelInfos.length && articles.size() < entries; i++) {
             BotProPanelInfo botProPanelInfo = botProPanelInfos[i];
             if (botProPanelInfo.isVisible()) {
                 String id = botProPanelInfo.getId();
@@ -69,6 +70,7 @@ public class BotProsPanelsLayout extends VerticalLayout {
                 new BotProPanelInfo("alerts", true, VaadinIcon.BELL.create()),
                 new BotProPanelInfo("nsfw", !uiData.isNSFWDisabled(), VaadinIcon.MOON_O.create()),
                 new BotProPanelInfo("mod", true, VaadinIcon.SHIELD.create()),
+                new BotProPanelInfo("invitetracking", true, VaadinIcon.ENVELOPE.create()),
                 new BotProPanelInfo("giveaways", true, VaadinIcon.GIFT.create()),
                 new BotProPanelInfo("reactionroles", true, VaadinIcon.TAG.create()),
                 new BotProPanelInfo("autoroles", true, VaadinIcon.AUTOMATION.create()),
