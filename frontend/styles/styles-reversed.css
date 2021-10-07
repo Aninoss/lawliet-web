@@ -1,17 +1,10 @@
-.visible-xsmall { display: block; }
-.visible-not-xsmall { display: none; }
-.visible-small { display: block; }
-.visible-large { display: none; }
-
 widgetbot-crate { display: none; }
-
 #page-icon { display: none; }
 
 /* Tablet */
 @media (min-width: 700px) {
 
     .visible-xsmall { display: none; }
-    .visible-not-xsmall { display: block; }
 
     widgetbot-crate { display: block; }
     #page-icon {
@@ -31,7 +24,6 @@ widgetbot-crate { display: none; }
 @media (min-width: 1000px) {
 
     .visible-small { display: none; }
-    .visible-large { display: block; }
 
     #page-icon {
         max-width: 125px;

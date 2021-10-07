@@ -63,9 +63,11 @@ public class FeatureRequestsView extends PageLayout implements HasUrlParameter<S
 
         int page = extractPage(parametersMap);
         FeatureRequestSort sort = extractSort(parametersMap, getFeatureRequestsMap());
+        String search = extractSearch(parametersMap);
 
         if (featureRequestMain != null) mainContent.remove(featureRequestMain);
-        featureRequestMain = new FeatureRequestMain(getSessionData(), getUiData(), frDynamicBean, comparators, page, sort);
+        featureRequestMain = new FeatureRequestMain(getSessionData(), getUiData(), frDynamicBean, comparators, page,
+                sort, search);
         mainContent.add(featureRequestMain);
     }
 
@@ -96,6 +98,14 @@ public class FeatureRequestsView extends PageLayout implements HasUrlParameter<S
         }
 
         return 0;
+    }
+
+    private String extractSearch(Map<String, List<String>> parametersMap) {
+        if (parametersMap.containsKey("search") && parametersMap.get("search").size() > 0) {
+            return parametersMap.get("search").get(0);
+        }
+
+        return "";
     }
 
 }
