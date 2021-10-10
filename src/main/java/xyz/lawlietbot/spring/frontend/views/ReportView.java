@@ -67,7 +67,7 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
     }
 
     private Span generateQuestion() {
-        String[] textParts = getTranslation("report.text").split("\\|");
+        String[] textParts = getTranslation("report.text", "<url>").split("<url>");
         Span span = new Span();
         Anchor a = new Anchor(url, url);
         a.setTarget("_blank");
