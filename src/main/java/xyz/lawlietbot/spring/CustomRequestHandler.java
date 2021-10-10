@@ -1,6 +1,10 @@
 package xyz.lawlietbot.spring;
 
-import xyz.lawlietbot.spring.syncserver.SendEvent;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -12,12 +16,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 public class CustomRequestHandler implements RequestHandler {
 
@@ -60,8 +59,9 @@ public class CustomRequestHandler implements RequestHandler {
         response.setHeader("Access-Control-Allow-Origin", "https://top.gg https://discords.com");
         response.setHeader("X-XSS-Protection", "1; mode=block");
 
-        if (request.getPathInfo().equalsIgnoreCase("/invite"))
+        if (request.getPathInfo().equalsIgnoreCase("/invite")) {
             return handleInvite(response, request.getParameterMap());
+        }
 
         return false;
     }

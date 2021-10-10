@@ -136,6 +136,17 @@ public class SendEvent {
         );
     }
 
+    public static CompletableFuture<Void> sendReport(String url) {
+        JSONObject json = new JSONObject();
+        json.put("url", url);
+
+        return process(
+                "REPORT",
+                json,
+                r -> null
+        );
+    }
+
     private static <T> CompletableFuture<T> process(String event, JSONObject dataJson, Function<JSONObject, T> function) {
         CompletableFuture<T> future = new CompletableFuture<>();
 
