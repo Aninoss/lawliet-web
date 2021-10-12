@@ -2,6 +2,7 @@ package xyz.lawlietbot.spring.frontend.views;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -59,7 +60,8 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
                 .getQueryParameters();
         Map<String, List<String>> parameters = queryParameters.getParameters();
         if (parameters.containsKey("content") && parameters.get("content").size() > 0) {
-            url = URLDecoder.decode(parameters.get("content").get(0), StandardCharsets.UTF_8);
+            String encodedImageUrl = URLDecoder.decode(parameters.get("content").get(0), StandardCharsets.UTF_8);
+            url = new String(Base64.getDecoder().decode(encodedImageUrl.getBytes()));
             mainContent.add(generateQuestion(), generateButtonLayout());
         } else {
             event.rerouteTo(PageNotFoundView.class);
