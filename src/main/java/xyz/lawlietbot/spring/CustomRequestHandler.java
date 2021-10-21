@@ -45,8 +45,8 @@ public class CustomRequestHandler implements RequestHandler {
         response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubdomains");
         response.setHeader("Content-Security-Policy",
                 "default-src data: 'self' https://widgetbot.io https://e.widgetbot.io ws://localhost:35729/ https://fonts.gstatic.com/; " +
-                        "img-src 'self' https://cdn.discordapp.com/; " +
-                        "media-src 'self'; " +
+                        "img-src 'self' https://*.lawlietbot.xyz/ https://cdn.discordapp.com/ https://*.donmai.us/ https://*.rule34.xxx/ https://realbooru.com/ https://*.e621.net/ https://safebooru.org/;" +
+                        "media-src 'self' https://*.lawlietbot.xyz/ https://*.donmai.us/ https://*.rule34.xxx/ https://realbooru.com/ https://*.e621.net/ https://safebooru.org/; " +
                         "object-src 'self'; " +
                         "script-src 'unsafe-inline' 'unsafe-eval' 'self' ajax.cloudflare.com https://cdn.jsdelivr.net; " +
                         "style-src https://fonts.googleapis.com/ https://fonts.gstatic.com/ 'unsafe-inline' 'self'; " +
@@ -92,7 +92,7 @@ public class CustomRequestHandler implements RequestHandler {
                 }
 
                 if (sb.length() > 0) {
-                    LOGGER.info("Content:\n" + sb.toString());
+                    LOGGER.info("Content:\n" + sb);
                 }
 
                 return true;

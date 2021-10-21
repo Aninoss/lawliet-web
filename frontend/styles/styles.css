@@ -43,6 +43,12 @@ content-card {
     transform: translate(-50%, -50%);
 }
 
+.center-width {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .unselectable {
     -moz-user-select: none;
     -webkit-user-select: none;
