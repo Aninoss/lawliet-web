@@ -9,10 +9,7 @@ import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.RouterLink;
-import xyz.lawlietbot.spring.frontend.views.CommandsView;
-import xyz.lawlietbot.spring.frontend.views.FAQView;
-import xyz.lawlietbot.spring.frontend.views.FeatureRequestsView;
-import xyz.lawlietbot.spring.frontend.views.HomeView;
+import xyz.lawlietbot.spring.frontend.views.*;
 
 public class NavigationBar extends Tabs implements AfterNavigationObserver {
 
@@ -24,9 +21,9 @@ public class NavigationBar extends Tabs implements AfterNavigationObserver {
                 new NavigationBarLink(CommandsView.class),
                 new NavigationBarLink(FAQView.class),
                 new NavigationBarLink(FeatureRequestsView.class),
+                new NavigationBarLink(PremiumView.class).standOut(),
                 new NavigationBarLink(uiData.getBotInviteUrl(), "invite"),
                 new NavigationBarLink(ExternalLinks.SERVER_INVITE_URL, "server"),
-                new NavigationBarLink(ExternalLinks.PATREON_PAGE, "patreon").standOut()
         };
 
         for(NavigationBarLink navigationBarLink: navigationBarLinks) {

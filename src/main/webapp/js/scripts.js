@@ -61,3 +61,25 @@ function onScroll() {
 function scrollToTop() {
     window.scrollTo(0, 250);
 }
+
+function showPayPalButtons(planId, quantity, elementId, customId) {
+    paypal.Buttons({
+        style: {
+            shape: 'rect',
+            color: 'gold',
+            layout: 'vertical',
+            label: 'subscribe'
+        },
+        createSubscription: function(data, actions) {
+            return actions.subscription.create({
+                /* Creates the subscription */
+                plan_id: planId,
+                quantity: quantity, // The quantity of the product for a subscription
+                custom_id: customId
+            });
+        },
+        onApprove: function(data, actions) {
+            alert(data.subscriptionID); // You can add optional success message for the subscriber here
+        }
+    }).render(elementId); // Renders the PayPal button
+}

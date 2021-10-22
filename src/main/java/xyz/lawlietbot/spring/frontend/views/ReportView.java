@@ -11,7 +11,6 @@ import java.util.concurrent.TimeoutException;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
@@ -19,6 +18,7 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.*;
 import org.slf4j.Logger;
@@ -42,7 +42,7 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
     private final static Logger LOGGER = LoggerFactory.getLogger(ReportView.class);
 
     private final VerticalLayout mainContent = new VerticalLayout();
-    private ComboBox<String> urlComboBox;
+    private Select<String> urlSelect;
     private Div previewDiv;
     private Anchor link;
     private TextField reason;
@@ -89,12 +89,12 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
     }
 
     private Component generateUrlComboBox() {
-        urlComboBox = new ComboBox<>();
-        urlComboBox.setItemLabelGenerator((ItemLabelGenerator<String>) url -> getTranslation("report.combobox", indexOfUrl(url) + 1));
-        urlComboBox.setItems(urls);
-        urlComboBox.setValue(urls[0]);
-        urlComboBox.addValueChangeListener(e -> updateUrlSelection(e.getValue()));
-        return urlComboBox;
+        urlSelect = new Select<>();
+        urlSelect.setItemLabelGenerator((ItemLabelGenerator<String>) url -> getTranslation("report.combobox", indexOfUrl(url) + 1));
+        urlSelect.setItems(urls);
+        urlSelect.setValue(urls[0]);
+        urlSelect.addValueChangeListener(e -> updateUrlSelection(e.getValue()));
+        return urlSelect;
     }
 
     private Component generateContentLink() {
@@ -136,7 +136,7 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
             if (reason.getValue().replaceAll("\\s", "").length() > 0) {
                 reason.setInvalid(false);
                 try {
-                    SendEvent.sendReport(urlComboBox.getValue(), reason.getValue()).get(5, TimeUnit.SECONDS);
+                    SendEvent.sendReport(urlSelect.getValue(), reason.getValue()).get(5, TimeUnit.SECONDS);
                     CustomNotification.showSuccess(getTranslation("report.success"));
                     UI.getCurrent().navigate(HomeView.class);
                 } catch (InterruptedException | ExecutionException | TimeoutException ex) {

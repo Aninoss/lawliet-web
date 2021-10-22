@@ -129,6 +129,10 @@ content-card {
     max-width: 400px;
 }
 
+.component-frame {
+    z-index: 0 !important;
+}
+
 .lds-ring2 {
     display: inline-block;
     position: relative;
