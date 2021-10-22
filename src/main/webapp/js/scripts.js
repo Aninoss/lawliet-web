@@ -75,7 +75,8 @@ function showPayPalButtons(planId, quantity, elementId, customId) {
                 /* Creates the subscription */
                 plan_id: planId,
                 quantity: quantity, // The quantity of the product for a subscription
-                custom_id: customId
+                custom_id: customId,
+                application_context: { shipping_preference: "NO_SHIPPING" }
             });
         },
         onApprove: function(data, actions) {

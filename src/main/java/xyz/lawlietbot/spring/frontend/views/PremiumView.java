@@ -245,7 +245,12 @@ public class PremiumView extends PageLayout {
                 outerDiv.add(generatePreBuyLayout(outerDiv, duration, tier, paypalDiv));
             });
             outerDiv.addComponentAsFirst(text);
-            UI.getCurrent().getPage().executeJs("showPayPalButtons($0, $1, $2, $3)", "P-2ND832908M568673AMFZMTQA", value, "#" + paypalDiv.getId().orElse(""), String.valueOf(getSessionData().getDiscordUser().get().getId()));
+            UI.getCurrent().getPage().executeJs("showPayPalButtons($0, $1, $2, $3)",
+                    "P-2ND832908M568673AMFZMTQA",
+                    value,
+                    "#" + paypalDiv.getId().orElse(""),
+                    String.valueOf(getSessionData().getDiscordUser().get().getId())
+            );
         });
 
         quantityLayout.add(quantity, price);
