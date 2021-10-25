@@ -1,26 +1,11 @@
 package xyz.lawlietbot.spring.frontend.layouts;
 
-import xyz.lawlietbot.spring.SetDivStretchBackground;
-import xyz.lawlietbot.spring.backend.language.PageTitleGen;
-import xyz.lawlietbot.spring.backend.Redirector;
-import xyz.lawlietbot.spring.backend.userdata.SessionData;
-import xyz.lawlietbot.spring.backend.userdata.UIData;
-import xyz.lawlietbot.spring.frontend.components.CookieConsent;
-import xyz.lawlietbot.spring.frontend.components.FooterArea;
-import xyz.lawlietbot.spring.frontend.components.header.HeaderComponent;
-import xyz.lawlietbot.spring.frontend.components.header.VerticalMenuBarComponent;
-import xyz.lawlietbot.spring.frontend.Styles;
-import xyz.lawlietbot.spring.frontend.views.ExceptionView;
-import xyz.lawlietbot.spring.frontend.views.IEView;
-import xyz.lawlietbot.spring.frontend.views.PageNotFoundView;
-import xyz.lawlietbot.spring.LoginAccess;
-import xyz.lawlietbot.spring.NoLiteAccess;
+import java.util.Map;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.page.BodySize;
-import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.InitialPageSettings;
 import com.vaadin.flow.server.PageConfigurator;
@@ -30,7 +15,21 @@ import com.vaadin.flow.theme.lumo.Lumo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import java.util.Map;
+import xyz.lawlietbot.spring.LoginAccess;
+import xyz.lawlietbot.spring.NoLiteAccess;
+import xyz.lawlietbot.spring.SetDivStretchBackground;
+import xyz.lawlietbot.spring.backend.Redirector;
+import xyz.lawlietbot.spring.backend.language.PageTitleGen;
+import xyz.lawlietbot.spring.backend.userdata.SessionData;
+import xyz.lawlietbot.spring.backend.userdata.UIData;
+import xyz.lawlietbot.spring.frontend.Styles;
+import xyz.lawlietbot.spring.frontend.components.CookieConsent;
+import xyz.lawlietbot.spring.frontend.components.FooterArea;
+import xyz.lawlietbot.spring.frontend.components.header.HeaderComponent;
+import xyz.lawlietbot.spring.frontend.components.header.VerticalMenuBarComponent;
+import xyz.lawlietbot.spring.frontend.views.ExceptionView;
+import xyz.lawlietbot.spring.frontend.views.IEView;
+import xyz.lawlietbot.spring.frontend.views.PageNotFoundView;
 
 @CssImport("./styles/styles.css")
 @CssImport("./styles/styles-reversed.css")
@@ -141,23 +140,19 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
         }
 
         LoginAccess loginAccess = target.getAnnotation(LoginAccess.class);
-        if ((!sessionData.isLoggedIn() && loginAccess != null) ||
-                (sessionData.isLoggedIn() && !sessionData.getDiscordUser().get().hasGuilds() && loginAccess != null && loginAccess.withGuilds())
-        ) {
+        if (!sessionData.isLoggedIn() && loginAccess != null) {
             if (PageLayout.class.isAssignableFrom(target))
                 sessionData.setCurrentTarget((Class<? extends PageLayout>)target);
 
-            new Redirector().redirect(sessionData.getLoginUrl(loginAccess.withGuilds()));
+            new Redirector().redirect(sessionData.getLoginUrl());
             event.postpone();
         }
     }
 
     private void checkLoginStatusChanged(BeforeEnterEvent event) {
         LoginAccess loginAccess = event.getNavigationTarget().getAnnotation(LoginAccess.class);
-        if ((!sessionData.isLoggedIn() && loginAccess != null) ||
-                (sessionData.isLoggedIn() && !sessionData.getDiscordUser().get().hasGuilds() && loginAccess != null && loginAccess.withGuilds())
-        ) {
-            new Redirector().redirect(sessionData.getLoginUrl(loginAccess.withGuilds()));
+        if (!sessionData.isLoggedIn() && loginAccess != null) {
+            new Redirector().redirect(sessionData.getLoginUrl());
             return;
         }
 

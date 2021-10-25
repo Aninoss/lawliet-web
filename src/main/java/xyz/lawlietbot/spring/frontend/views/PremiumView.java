@@ -2,11 +2,18 @@ package xyz.lawlietbot.spring.frontend.views;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import bell.oauth.discord.domain.Guild;
-import com.vaadin.flow.component.*;
+import com.stripe.exception.StripeException;
+import com.stripe.model.checkout.Session;
+import com.stripe.param.checkout.SessionCreateParams;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ItemLabelGenerator;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -20,14 +27,17 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.NumberField;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import xyz.lawlietbot.spring.LoginAccess;
 import xyz.lawlietbot.spring.NoLiteAccess;
+import xyz.lawlietbot.spring.backend.Redirector;
 import xyz.lawlietbot.spring.backend.commandlist.CommandListContainer;
 import xyz.lawlietbot.spring.backend.commandlist.CommandListSlot;
+import xyz.lawlietbot.spring.backend.payment.*;
 import xyz.lawlietbot.spring.backend.premium.UserPremium;
 import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
@@ -45,50 +55,37 @@ import xyz.lawlietbot.spring.syncserver.SendEvent;
 @Route(value = "premium", layout = MainLayout.class)
 @CssImport("./styles/premium.css")
 @NoLiteAccess
-@LoginAccess(withGuilds = true)
-public class PremiumView extends PageLayout {
+public class PremiumView extends PageLayout implements HasUrlParameter<String> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PremiumView.class);
 
-    private enum Duration { MONTHLY, YEARLY }
-
-    private enum Tier { LITE, PRO }
-
+    private final VerticalLayout mainContent = new VerticalLayout();
     private final ArrayList<Card> cards = new ArrayList<>();
     private final HashMap<Integer, ComboBox<Guild>> comboBoxMap = new HashMap<>();
     private final ConfirmationDialog dialog = new ConfirmationDialog(getTranslation("premium.confirm"));
+    private final Select<SubDuration> durationSelect = new Select<>();
+    private final Select<SubCurrency> currencySelect = new Select<>();
     private ArrayList<Guild> availableGuilds;
     private UserPremium userPremium;
     private Div tiersContent = new Div();
+    private boolean slotsBuild = false;
 
     public PremiumView(@Autowired SessionData sessionData, @Autowired UIData uiData) throws InterruptedException, ExecutionException, TimeoutException {
         super(sessionData, uiData);
-        getStyle().set("margin-bottom", "48px");
+        add(new PageHeader(getUiData(), getTitleText(), getTranslation("premium.desc"), getRoute()), dialog);
 
-        VerticalLayout mainContent = new VerticalLayout();
         mainContent.addClassName(Styles.APP_WIDTH);
         mainContent.setPadding(true);
-        mainContent.add(dialog);
 
-        if (sessionData.getDiscordUser().map(DiscordUser::hasGuilds).orElse(false)) {
-            this.userPremium = SendEvent.sendRequestUserPremium(sessionData.getDiscordUser().get().getId()).get(5, TimeUnit.SECONDS);
-            this.availableGuilds = new ArrayList<>(sessionData.getDiscordUser().get().getGuilds());
-            if (userPremium.getSlots().size() > 0) {
-                mainContent.add(generatePremium());
-            }
-        }
         mainContent.add(generateTiers());
-
-        add(
-                new PageHeader(getUiData(), getTitleText(), getTranslation("premium.desc"), getRoute()),
-                mainContent
-        );
+        add(mainContent);
     }
 
     private Component generateTiers() {
         VerticalLayout premiumContent = new VerticalLayout();
         premiumContent.setWidthFull();
         premiumContent.setPadding(false);
+        premiumContent.getStyle().set("margin-bottom", "48px");
 
         premiumContent.add(generateTiersTitle(), generateSeparator(), generateTiersTiers());
         return premiumContent;
@@ -99,7 +96,7 @@ public class PremiumView extends PageLayout {
         content.setWidthFull();
         content.setSpacing(false);
         content.setPadding(false);
-        content.getStyle().set("margin-top", "8px");
+        content.getStyle().set("margin-top", "12px");
         content.setAlignItems(FlexComponent.Alignment.END);
         content.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         content.add(generateTiersTitleText(), generateTiersTitleDuration());
@@ -121,58 +118,78 @@ public class PremiumView extends PageLayout {
     }
 
     private Component generateTiersTitleDuration() {
-        Select<Duration> durationSelect = new Select<>();
-        durationSelect.setItemLabelGenerator((ItemLabelGenerator<Duration>) duration -> getTranslation("premium.duration." + duration.name()));
-        durationSelect.setItems(Duration.values());
-        durationSelect.setValue(Duration.MONTHLY);
-        durationSelect.addValueChangeListener(e -> setTiers(e.getValue()));
-        return durationSelect;
+        HorizontalLayout content = new HorizontalLayout();
+        content.setSpacing(false);
+        content.setPadding(false);
+
+        currencySelect.setItemLabelGenerator((ItemLabelGenerator<SubCurrency>) currency -> getTranslation("premium.currency." + currency.name()));
+        currencySelect.setItems(SubCurrency.values());
+        currencySelect.setValue(SubCurrency.retrieveDefaultCurrency(getLocale()));
+        currencySelect.addValueChangeListener(e -> setTiers());
+        currencySelect.setMaxWidth("90px");
+        currencySelect.getStyle().set("margin-right", "12px");
+        content.add(currencySelect);
+
+        durationSelect.setItemLabelGenerator((ItemLabelGenerator<SubDuration>) duration -> getTranslation("premium.duration." + duration.name()));
+        durationSelect.setItems(SubDuration.values());
+        durationSelect.setValue(SubDuration.MONTHLY);
+        durationSelect.addValueChangeListener(e -> setTiers());
+        durationSelect.setMaxWidth("150px");
+        content.add(durationSelect);
+
+        return content;
     }
 
     private Component generateTiersTiers() {
         tiersContent = new Div();
         tiersContent.setId("premium-tiers");
-        setTiers(Duration.MONTHLY);
+        setTiers();
         return tiersContent;
     }
 
-    private void setTiers(Duration duration) {
+    private void setTiers() {
         tiersContent.removeAll();
-        for (Tier tier : Tier.values()) {
-            tiersContent.add(generateTiersCard(duration, tier));
+        for (SubLevel level : SubLevel.getSubLevelsOfCurrency(currencySelect.getValue())) {
+            tiersContent.add(generateTiersCard(durationSelect.getValue(), level));
         }
     }
 
-    private Component generateTiersCard(Duration duration, Tier tier) {
+    private Component generateTiersCard(SubDuration duration, SubLevel level) {
         VerticalLayout content = new VerticalLayout();
         content.setAlignItems(FlexComponent.Alignment.CENTER);
         content.addClassNames("tier-card");
 
-        H2 title = new H2(getTranslation("premium.tier." + tier.name()));
+        String name = getTranslation("premium.tier." + level.getSubLevelType().name());
+        if (level.getSubLevelType().isRecommended()) {
+            name += " " + getTranslation("premium.tier.recommended");
+        }
+
+        H2 title = new H2(name);
         title.getStyle().set("margin-top", "14px")
                 .set("margin-bottom", "0");
-        Text price = new Text(getTranslation("premium.price." + tier.name(), duration == Duration.YEARLY, getPrice(duration, tier)));
+        String priceString = SubscriptionUtil.generatePriceString(SubscriptionUtil.getPrice(duration, level));
+        Text price = new Text(getTranslation("premium.price." + level.getSubLevelType().name(), duration == SubDuration.YEARLY, level.getCurrency().getSymbol(), priceString));
         Div div = new Div();
 
-        content.add(title, price, generateTierPerks(tier), div, generateButtonSeparator(), generateBuyLayout(duration, tier));
+        content.add(title, price, generateTierPerks(level), div, generateButtonSeparator(), generateBuyLayout(duration, level));
         content.setFlexGrow(1, div);
         return content;
     }
 
-    private Component generateTierPerks(Tier tier) {
+    private Component generateTierPerks(SubLevel level) {
         VerticalLayout content = new VerticalLayout();
         content.setWidthFull();
         content.setPadding(false);
         content.getStyle().set("margin-top", "32px");
-        for (String perk : getTranslation("premium.perks." + tier.name(), StringUtil.numToString(countPremiumCommands())).split("\n")) {
+        for (String perk : getTranslation("premium.perks." + level.getSubLevelType().name(), StringUtil.numToString(countPremiumCommands())).split("\n")) {
             Icon icon = VaadinIcon.CHECK_CIRCLE.create();
             icon.addClassName("prop-check");
             content.add(generateTierPerk(icon, perk));
         }
-        if (tier == Tier.LITE) {
+        if (level.getSubLevelType() == SubLevelType.BASIC) {
             Icon icon = VaadinIcon.CLOSE_CIRCLE.create();
             icon.addClassName("prop-notcheck");
-            content.add(generateTierPerk(icon, getTranslation("premium.perks.LITE.notpremium")));
+            content.add(generateTierPerk(icon, getTranslation("premium.perks.BASIC.notpremium")));
         }
         return content;
     }
@@ -184,25 +201,11 @@ public class PremiumView extends PageLayout {
         return hr;
     }
 
-    private Component generateBuyLayout(Duration duration, Tier tier) {
-        Div outerDiv = new Div();
-        outerDiv.setWidthFull();
-
-        Div paypalDiv = new Div();
-        paypalDiv.setWidthFull();
-        paypalDiv.setId("buy-button-" + duration.name() + "-" + tier.name());
-
-        Html script = new Html("<script src=\"https://www.paypal.com/sdk/js?client-id=AdfrVhawnCJKYyeqRrXv_a-sz9-ylfW8Db4uBZFDSXeOcOYJ6eh42mpeKVxJDNGLlarx7wc61q53LuEi&vault=true&intent=subscription\" data-sdk-integration-source=\"button-factory\"></script>");
-        outerDiv.add(paypalDiv, script, generatePreBuyLayout(outerDiv, duration, tier, paypalDiv));
-        return outerDiv;
-    }
-
-    private Component generatePreBuyLayout(Div outerDiv, Duration duration, Tier tier, Div paypalDiv) {
+    private Component generateBuyLayout(SubDuration duration, SubLevel level) {
         VerticalLayout controlLayout = new VerticalLayout();
         controlLayout.setPadding(false);
         controlLayout.setWidthFull();
-        controlLayout.getStyle().set("margin-top", "0")
-                .set("margin-bottom", "24px");
+        controlLayout.getStyle().set("margin-bottom", "24px");
 
         HorizontalLayout quantityLayout = new HorizontalLayout();
         quantityLayout.setPadding(false);
@@ -212,7 +215,8 @@ public class PremiumView extends PageLayout {
         quantityLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         quantityLayout.getStyle().set("margin-top", "0");
 
-        Text price = new Text(getTranslation("premium.price.LITE", duration == Duration.YEARLY, getPrice(duration, tier)));
+        String priceString = SubscriptionUtil.generatePriceString(SubscriptionUtil.getPrice(duration, level));
+        Text priceText = new Text(getTranslation("premium.price.BASIC", duration == SubDuration.YEARLY, level.getCurrency().getSymbol(), priceString));
 
         NumberField quantity = new NumberField();
         quantity.getStyle().set("margin-top", "-6px");
@@ -225,7 +229,8 @@ public class PremiumView extends PageLayout {
         quantity.addValueChangeListener(e -> {
             int value = extractValueFromQuantity(e.getValue());
             quantity.setValue((double) value);
-            price.setText(getTranslation("premium.price.LITE", duration == Duration.YEARLY, getPrice(duration, tier) * value));
+            String totalPriceString = SubscriptionUtil.generatePriceString(SubscriptionUtil.getPrice(duration, level) * value);
+            priceText.setText(getTranslation("premium.price.BASIC", duration == SubDuration.YEARLY, level.getCurrency().getSymbol(), totalPriceString));
         });
 
         Button buyButton = new Button(getTranslation("premium.buy"), VaadinIcon.CART.create());
@@ -233,31 +238,53 @@ public class PremiumView extends PageLayout {
         buyButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         buyButton.setHeight("43px");
         buyButton.getStyle().set("margin-bottom", "-4px");
+        if (!getSessionData().isLoggedIn()) {
+            buyButton.setText(getTranslation("category.discordlogin"));
+            buyButton.setIcon(null);
+        }
         buyButton.addClickListener(e -> {
-            int value = extractValueFromQuantity(quantity.getValue());
-            outerDiv.remove(controlLayout);
-            Span text = new Span(getTranslation("premium.changequantity"));
-            text.setWidthFull();
-            text.addClassName("change-quantities");
-            text.addClickListener(e2 -> {
-                outerDiv.remove(text);
-                paypalDiv.removeAll();
-                outerDiv.add(generatePreBuyLayout(outerDiv, duration, tier, paypalDiv));
-            });
-            outerDiv.addComponentAsFirst(text);
-            UI.getCurrent().getPage().executeJs("showPayPalButtons($0, $1, $2, $3)",
-                    "P-2ND832908M568673AMFZMTQA",
-                    value,
-                    "#" + paypalDiv.getId().orElse(""),
-                    String.valueOf(getSessionData().getDiscordUser().get().getId())
-            );
+            DiscordUser discordUser = getSessionData().getDiscordUser().orElse(null);
+            if (discordUser != null) {
+                int value = extractValueFromQuantity(quantity.getValue());
+                String domain = ((VaadinServletRequest) VaadinService.getCurrentRequest()).getServerName();
+                String returnUrl = "https://" + domain + "/" + getRoute();
+                SessionCreateParams params = new SessionCreateParams.Builder()
+                        .setSuccessUrl(returnUrl + "?session_id={CHECKOUT_SESSION_ID}")
+                        .setCancelUrl(returnUrl)
+                        .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
+                        .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
+                        .putMetadata("discord_id", String.valueOf(discordUser.getId()))
+                        .setAutomaticTax(SessionCreateParams.AutomaticTax.builder().setEnabled(false).build())
+                        .addLineItem(new SessionCreateParams.LineItem.Builder()
+                                .setQuantity((long) value)
+                                .setPrice(StripeManager.getPriceId(duration, level))
+                                .build()
+                        )
+                        .build();
+
+                try {
+                    Session session = Session.create(params);
+                    new Redirector().redirect(session.getUrl());
+                } catch (Exception ex) {
+                    LOGGER.error("Exception", ex);
+                    CustomNotification.showError(getTranslation("error"));
+                }
+            } else {
+                new Redirector().redirect(getSessionData().getLoginUrl());
+            }
         });
 
-        quantityLayout.add(quantity, price);
-        if (tier == Tier.PRO) {
+        quantityLayout.add(quantity, priceText);
+        if (level.getSubLevelType() == SubLevelType.PRO) {
             controlLayout.add(quantityLayout);
         }
         controlLayout.add(buyButton);
+        if (!getSessionData().isLoggedIn()) {
+            Span notLoggedIn = new Span(getTranslation("premium.notloggedin"));
+            notLoggedIn.getStyle().set("color", "var(--lumo-error-text-color)")
+                    .set("margin-bottom", "-8px");
+            controlLayout.add(notLoggedIn);
+        }
         return controlLayout;
     }
 
@@ -279,19 +306,11 @@ public class PremiumView extends PageLayout {
         return content;
     }
 
-    private int getPrice(Duration duration, Tier tier) {
-        int price = tier == Tier.LITE ? 3 : 5;
-        if (duration == Duration.YEARLY) {
-            price *= 10;
-        }
-        return price;
-    }
-
     private Component generatePremium() {
         VerticalLayout premiumContent = new VerticalLayout();
         premiumContent.setWidthFull();
         premiumContent.setPadding(false);
-        premiumContent.getStyle().set("margin-bottom", "56px");
+        premiumContent.getStyle().set("margin-bottom", "120px");
 
         premiumContent.add(generatePremiumTitle(), generatePremiumSubtitle());
         for (int i = 0; i < userPremium.getSlots().size(); i++) {
@@ -440,6 +459,38 @@ public class PremiumView extends PageLayout {
             LOGGER.error("Could not modify premium", e);
             CustomNotification.showError(getTranslation("error"));
             return false;
+        }
+    }
+
+    @Override
+    public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
+        Location location = event.getLocation();
+        QueryParameters queryParameters = location.getQueryParameters();
+        Map<String, List<String>> parametersMap = queryParameters.getParameters();
+        if (parametersMap != null && parametersMap.containsKey("session_id")) {
+            String sessionId = parametersMap.get("session_id").get(0);
+            try {
+                StripeManager.registerSubscription(Session.retrieve(sessionId));
+                CustomNotification.showSuccess(getTranslation("premium.buy.success"));
+            } catch (StripeException e) {
+                LOGGER.error("Could not update subscription", e);
+                CustomNotification.showError(getTranslation("error"));
+            }
+        }
+
+        SessionData sessionData = getSessionData();
+        if (!slotsBuild && sessionData.getDiscordUser().map(DiscordUser::hasGuilds).orElse(false)) {
+            slotsBuild = true;
+            try {
+                this.userPremium = SendEvent.sendRequestUserPremium(sessionData.getDiscordUser().get().getId()).get(5, TimeUnit.SECONDS);
+                this.availableGuilds = new ArrayList<>(sessionData.getDiscordUser().get().getGuilds());
+                if (userPremium.getSlots().size() > 0) {
+                    mainContent.addComponentAsFirst(generatePremium());
+                }
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                LOGGER.error("Could not load slots", e);
+                CustomNotification.showError(getTranslation("error"));
+            }
         }
     }
 

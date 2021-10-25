@@ -59,7 +59,7 @@ public class VerticalMenuBarComponent extends VerticalLayout {
                 login.setWidthFull();
                 login.setHeight("42px");
                 login.getStyle().set("color", "white");
-                Anchor loginAnchor = new Anchor(sessionData.getLoginUrl(false), login);
+                Anchor loginAnchor = new Anchor(sessionData.getLoginUrl(), login);
                 loginAnchor.getStyle().set("margin-bottom", "16px");
                 loginAnchor.setWidthFull();
                 add(loginAnchor);

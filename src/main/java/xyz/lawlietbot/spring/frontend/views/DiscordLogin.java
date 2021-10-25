@@ -1,17 +1,16 @@
 package xyz.lawlietbot.spring.frontend.views;
 
-import xyz.lawlietbot.spring.backend.userdata.SessionData;
-import xyz.lawlietbot.spring.backend.userdata.UIData;
-import xyz.lawlietbot.spring.frontend.components.CustomNotification;
-import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
-import xyz.lawlietbot.spring.NoLiteAccess;
+import java.util.List;
+import java.util.Map;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.*;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
-import java.util.Map;
+import xyz.lawlietbot.spring.NoLiteAccess;
+import xyz.lawlietbot.spring.backend.userdata.SessionData;
+import xyz.lawlietbot.spring.backend.userdata.UIData;
+import xyz.lawlietbot.spring.frontend.components.CustomNotification;
+import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
 
 @Route(value = "discordlogin")
 @NoLiteAccess
@@ -27,11 +26,8 @@ public class DiscordLogin extends PageLayout implements HasUrlParameter<String> 
         UIData uiData = getUiData();
 
         Location location = event.getLocation();
-        QueryParameters queryParameters = location
-                .getQueryParameters();
-
-        Map<String, List<String>> parametersMap =
-                queryParameters.getParameters();
+        QueryParameters queryParameters = location.getQueryParameters();
+        Map<String, List<String>> parametersMap = queryParameters.getParameters();
 
         boolean ok = false;
         if (parametersMap != null && parametersMap.containsKey("code") && parametersMap.containsKey("state")) {

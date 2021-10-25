@@ -42,8 +42,8 @@ public class SessionData {
         return requestUrl.substring(0, requestUrl.indexOf('/')).replace("|", "//") + "/";
     }
 
-    public String getLoginUrl(boolean withGuilds) {
-        builder = builder.setScopes(withGuilds ? new String[]{"identify", "guilds"} : new String[]{"identify"});
+    public String getLoginUrl() {
+        builder = builder.setScopes(new String[]{"identify", "guilds"});
         return builder.getAuthorizationUrl(id) + "&prompt=none";
     }
 

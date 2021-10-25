@@ -1,14 +1,6 @@
 package xyz.lawlietbot.spring.frontend.components.featurerequests;
 
-import xyz.lawlietbot.spring.backend.featurerequests.FRDynamicBean;
-import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
-import xyz.lawlietbot.spring.backend.userdata.SessionData;
-import xyz.lawlietbot.spring.ExternalLinks;
-import xyz.lawlietbot.spring.frontend.components.Card;
-import xyz.lawlietbot.spring.frontend.components.CustomNotification;
-import xyz.lawlietbot.spring.frontend.Styles;
-import xyz.lawlietbot.spring.frontend.views.FeatureRequestsNewPostView;
-import xyz.lawlietbot.spring.syncserver.SendEvent;
+import java.util.concurrent.ExecutionException;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -23,8 +15,15 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.ExecutionException;
+import xyz.lawlietbot.spring.ExternalLinks;
+import xyz.lawlietbot.spring.backend.featurerequests.FRDynamicBean;
+import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
+import xyz.lawlietbot.spring.backend.userdata.SessionData;
+import xyz.lawlietbot.spring.frontend.Styles;
+import xyz.lawlietbot.spring.frontend.components.Card;
+import xyz.lawlietbot.spring.frontend.components.CustomNotification;
+import xyz.lawlietbot.spring.frontend.views.FeatureRequestsNewPostView;
+import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 public class FeatureRequestUserHeader extends Card {
 
@@ -131,7 +130,7 @@ public class FeatureRequestUserHeader extends Card {
     private void addLogInButton() {
         Button login = new Button(getTranslation("login"));
         login.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        Anchor loginAnchor = new Anchor(sessionData.getLoginUrl(false), login);
+        Anchor loginAnchor = new Anchor(sessionData.getLoginUrl(), login);
         notLoggedInLayout.add(loginAnchor);
     }
 
