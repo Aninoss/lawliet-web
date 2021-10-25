@@ -1,5 +1,6 @@
 package xyz.lawlietbot.spring.frontend.views;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import com.stripe.param.checkout.SessionCreateParams;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -70,7 +72,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
     private Div tiersContent = new Div();
     private boolean slotsBuild = false;
 
-    public PremiumView(@Autowired SessionData sessionData, @Autowired UIData uiData) throws InterruptedException, ExecutionException, TimeoutException {
+    public PremiumView(@Autowired SessionData sessionData, @Autowired UIData uiData) throws IOException {
         super(sessionData, uiData);
         add(new PageHeader(getUiData(), getTitleText(), getTranslation("premium.desc"), getRoute()), dialog);
 
@@ -81,7 +83,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         add(mainContent);
     }
 
-    private Component generateTiers() {
+    private Component generateTiers() throws IOException {
         VerticalLayout premiumContent = new VerticalLayout();
         premiumContent.setWidthFull();
         premiumContent.setPadding(false);
@@ -91,7 +93,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         return premiumContent;
     }
 
-    private Component generateTiersTitle() {
+    private Component generateTiersTitle() throws IOException {
         HorizontalLayout content = new HorizontalLayout();
         content.setWidthFull();
         content.setSpacing(false);
@@ -117,14 +119,14 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         return title;
     }
 
-    private Component generateTiersTitleDuration() {
+    private Component generateTiersTitleDuration() throws IOException {
         HorizontalLayout content = new HorizontalLayout();
         content.setSpacing(false);
         content.setPadding(false);
 
-        currencySelect.setItemLabelGenerator((ItemLabelGenerator<SubCurrency>) currency -> getTranslation("premium.currency." + currency.name()));
+        currencySelect.setItemLabelGenerator((ItemLabelGenerator<SubCurrency>) Enum::name);
         currencySelect.setItems(SubCurrency.values());
-        currencySelect.setValue(SubCurrency.retrieveDefaultCurrency(getLocale()));
+        currencySelect.setValue(SubCurrency.retrieveDefaultCurrency(UI.getCurrent().getSession().getBrowser().getAddress()));
         currencySelect.addValueChangeListener(e -> setTiers());
         currencySelect.setMaxWidth("90px");
         currencySelect.getStyle().set("margin-right", "12px");

@@ -10,7 +10,10 @@ public enum SubLevel {
     PRO_USD(SubLevelType.PRO, SubCurrency.USD, 500),
 
     BASIC_EUR(SubLevelType.BASIC, SubCurrency.EUR, 300),
-    PRO_EUR(SubLevelType.PRO, SubCurrency.EUR, 450);
+    PRO_EUR(SubLevelType.PRO, SubCurrency.EUR, 450),
+
+    BASIC_GBP(SubLevelType.BASIC, SubCurrency.GBP, 250),
+    PRO_GBP(SubLevelType.PRO, SubCurrency.GBP, 400);
 
 
     private final SubLevelType subLevelType;
