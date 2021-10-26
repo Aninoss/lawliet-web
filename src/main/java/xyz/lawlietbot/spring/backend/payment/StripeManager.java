@@ -3,11 +3,13 @@ package xyz.lawlietbot.spring.backend.payment;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Customer;
 import com.stripe.model.Subscription;
 import com.stripe.model.checkout.Session;
+import com.stripe.param.CustomerListParams;
 import com.stripe.param.SubscriptionListParams;
 import xyz.lawlietbot.spring.backend.Pair;
 
@@ -22,6 +24,21 @@ public class StripeManager {
                 ).getData().stream()
                 .filter(sub -> sub.getMetadata().containsKey("discord_id") && sub.getMetadata().get("discord_id").equals(String.valueOf(userId)))
                 .collect(Collectors.toList());
+    }
+
+    public static Optional<Customer> retrieveCustomer(long userId) throws StripeException {
+        return retrieveCustomer(userId, null);
+    }
+
+    public static Optional<Customer> retrieveCustomer(long userId, SubCurrency currency) throws StripeException {
+        return Customer.list(CustomerListParams.builder()
+                .build()
+        ).getData().stream()
+                .filter(customer -> customer.getMetadata().containsKey("discord_id") &&
+                        customer.getMetadata().get("discord_id").equals(String.valueOf(userId)) &&
+                        (currency == null || customer.getCurrency().equalsIgnoreCase(currency.name()))
+                )
+                .findFirst();
     }
 
     public static synchronized void registerSubscription(Session session) throws StripeException {

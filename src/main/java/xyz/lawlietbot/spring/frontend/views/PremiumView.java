@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import bell.oauth.discord.domain.Guild;
 import com.stripe.exception.StripeException;
+import com.stripe.model.Customer;
 import com.stripe.model.Subscription;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
@@ -246,25 +247,34 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
             DiscordUser discordUser = getSessionData().getDiscordUser().orElse(null);
             if (discordUser != null) {
                 if (level.getSubLevelType() == SubLevelType.PRO || userSubscriptions.isEmpty()) {
-                    int value = extractValueFromQuantity(quantity.getValue());
-                    String domain = ((VaadinServletRequest) VaadinService.getCurrentRequest()).getServerName();
-                    String returnUrl = "https://" + domain + "/" + getRoute();
-                    SessionCreateParams params = new SessionCreateParams.Builder()
-                            .setSuccessUrl(returnUrl + "?session_id={CHECKOUT_SESSION_ID}")
-                            .setCancelUrl(returnUrl)
-                            .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
-                            .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
-                            .putMetadata("discord_id", String.valueOf(discordUser.getId()))
-                            .setAutomaticTax(SessionCreateParams.AutomaticTax.builder().setEnabled(false).build())
-                            .addLineItem(new SessionCreateParams.LineItem.Builder()
-                                    .setQuantity((long) value)
-                                    .setPrice(StripeManager.getPriceId(duration, level))
-                                    .build()
-                            )
-                            .build();
-
                     try {
-                        Session session = Session.create(params);
+                        int value = extractValueFromQuantity(quantity.getValue());
+                        String domain = ((VaadinServletRequest) VaadinService.getCurrentRequest()).getServerName();
+                        String returnUrl = "https://" + domain + "/" + getRoute();
+                        SessionCreateParams.Builder paramsBuilder = new SessionCreateParams.Builder()
+                                .setSuccessUrl(returnUrl + "?session_id={CHECKOUT_SESSION_ID}")
+                                .setCancelUrl(returnUrl)
+                                .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
+                                .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
+                                .putMetadata("discord_id", String.valueOf(discordUser.getId()))
+                                .setAutomaticTax(SessionCreateParams.AutomaticTax.builder().setEnabled(false).build())
+                                .addLineItem(new SessionCreateParams.LineItem.Builder()
+                                        .setQuantity((long) value)
+                                        .setPrice(StripeManager.getPriceId(duration, level))
+                                        .build()
+                                );
+
+                        Optional<Customer> customerOpt = StripeManager.retrieveCustomer(discordUser.getId(), level.getCurrency());
+                        if (customerOpt.isPresent()) {
+                            paramsBuilder = paramsBuilder.setCustomer(customerOpt.get().getId());
+                        } else {
+                            customerOpt = StripeManager.retrieveCustomer(discordUser.getId());
+                            if (customerOpt.isPresent()) {
+                                paramsBuilder = paramsBuilder.setCustomerEmail(customerOpt.get().getEmail());
+                            }
+                        }
+
+                        Session session = Session.create(paramsBuilder.build());
                         new Redirector().redirect(session.getUrl());
                     } catch (Exception ex) {
                         LOGGER.error("Exception", ex);
