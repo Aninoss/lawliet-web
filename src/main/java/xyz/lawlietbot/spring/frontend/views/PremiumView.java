@@ -65,10 +65,10 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
     private final ConfirmationDialog dialog = new ConfirmationDialog(getTranslation("premium.confirm"));
     private final Select<SubDuration> durationSelect = new Select<>();
     private final Select<SubCurrency> currencySelect = new Select<>();
+    private List<Subscription> userSubscriptions = Collections.emptyList();
     private ArrayList<Guild> availableGuilds;
     private UserPremium userPremium;
     private Div tiersContent = new Div();
-    private Button buyBasicButton;
     private boolean slotsBuild = false;
 
     public PremiumView(@Autowired SessionData sessionData, @Autowired UIData uiData) throws IOException {
@@ -234,44 +234,44 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
             priceText.setText(getTranslation("premium.price.BASIC", duration == SubDuration.YEARLY, level.getCurrency().getSymbol(), totalPriceString));
         });
 
-        Button buyButton = new Button(getTranslation("premium.buy"), VaadinIcon.CART.create());
+        Button buyButton = new Button(getTranslation("premium.buy"));
         buyButton.setWidthFull();
         buyButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         buyButton.setHeight("43px");
         buyButton.getStyle().set("margin-bottom", "-4px");
-        if (level.getSubLevelType() == SubLevelType.BASIC) {
-            buyBasicButton = buyButton;
-        }
         if (!getSessionData().isLoggedIn()) {
             buyButton.setText(getTranslation("category.discordlogin"));
-            buyButton.setIcon(null);
         }
         buyButton.addClickListener(e -> {
             DiscordUser discordUser = getSessionData().getDiscordUser().orElse(null);
             if (discordUser != null) {
-                int value = extractValueFromQuantity(quantity.getValue());
-                String domain = ((VaadinServletRequest) VaadinService.getCurrentRequest()).getServerName();
-                String returnUrl = "https://" + domain + "/" + getRoute();
-                SessionCreateParams params = new SessionCreateParams.Builder()
-                        .setSuccessUrl(returnUrl + "?session_id={CHECKOUT_SESSION_ID}")
-                        .setCancelUrl(returnUrl)
-                        .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
-                        .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
-                        .putMetadata("discord_id", String.valueOf(discordUser.getId()))
-                        .setAutomaticTax(SessionCreateParams.AutomaticTax.builder().setEnabled(false).build())
-                        .addLineItem(new SessionCreateParams.LineItem.Builder()
-                                .setQuantity((long) value)
-                                .setPrice(StripeManager.getPriceId(duration, level))
-                                .build()
-                        )
-                        .build();
+                if (level.getSubLevelType() == SubLevelType.PRO || userSubscriptions.isEmpty()) {
+                    int value = extractValueFromQuantity(quantity.getValue());
+                    String domain = ((VaadinServletRequest) VaadinService.getCurrentRequest()).getServerName();
+                    String returnUrl = "https://" + domain + "/" + getRoute();
+                    SessionCreateParams params = new SessionCreateParams.Builder()
+                            .setSuccessUrl(returnUrl + "?session_id={CHECKOUT_SESSION_ID}")
+                            .setCancelUrl(returnUrl)
+                            .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
+                            .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
+                            .putMetadata("discord_id", String.valueOf(discordUser.getId()))
+                            .setAutomaticTax(SessionCreateParams.AutomaticTax.builder().setEnabled(false).build())
+                            .addLineItem(new SessionCreateParams.LineItem.Builder()
+                                    .setQuantity((long) value)
+                                    .setPrice(StripeManager.getPriceId(duration, level))
+                                    .build()
+                            )
+                            .build();
 
-                try {
-                    Session session = Session.create(params);
-                    new Redirector().redirect(session.getUrl());
-                } catch (Exception ex) {
-                    LOGGER.error("Exception", ex);
-                    CustomNotification.showError(getTranslation("error"));
+                    try {
+                        Session session = Session.create(params);
+                        new Redirector().redirect(session.getUrl());
+                    } catch (Exception ex) {
+                        LOGGER.error("Exception", ex);
+                        CustomNotification.showError(getTranslation("error"));
+                    }
+                } else {
+                    CustomNotification.showError(getTranslation("premium.alreadypaying"));
                 }
             } else {
                 new Redirector().redirect(getSessionData().getLoginUrl());
@@ -487,8 +487,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
             slotsBuild = true;
             try {
                 DiscordUser discordUser = sessionData.getDiscordUser().get();
-                List<Subscription> userSubscriptions = StripeManager.retrieveActiveSubscriptions(discordUser.getId());
-                this.buyBasicButton.setEnabled(userSubscriptions.isEmpty());
+                this.userSubscriptions = StripeManager.retrieveActiveSubscriptions(discordUser.getId());
                 this.userPremium = SendEvent.sendRequestUserPremium(discordUser.getId()).get(5, TimeUnit.SECONDS);
                 this.availableGuilds = new ArrayList<>(discordUser.getGuilds());
                 if (userPremium.getSlots().size() > 0) {
