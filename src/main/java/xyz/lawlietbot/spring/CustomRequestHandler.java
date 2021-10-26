@@ -5,9 +5,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.stripe.exception.SignatureVerificationException;
+import com.stripe.model.Event;
+import com.stripe.net.Webhook;
 import com.vaadin.flow.server.RequestHandler;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
@@ -35,15 +39,9 @@ public class CustomRequestHandler implements RequestHandler {
 
     @Override
     public boolean handleRequest(VaadinSession session, VaadinRequest request, VaadinResponse response) {
-        String auth = request.getHeader("Authorization");
-        if (auth != null) {
-            if (request.getPathInfo().equals("/print") && handlePrint(request, auth)) return true;
-            if (request.getPathInfo().equals("/topgg") && handleTopGG(request, auth)) return true;
-            if (request.getPathInfo().equals("/topgg_aninoss") && handleTopGGAninoss(request, auth)) return true;
-        }
-
         response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubdomains");
-        response.setHeader("Content-Security-Policy",
+        response.setHeader(
+                "Content-Security-Policy",
                 "default-src data: 'self' https://widgetbot.io https://e.widgetbot.io ws://localhost:35729/ https://fonts.gstatic.com/ https://www.paypal.com; " +
                         "img-src 'self' https://*.lawlietbot.xyz/ https://cdn.discordapp.com/ https://*.donmai.us/ https://*.rule34.xxx/ https://realbooru.com/ https://*.e621.net/ https://safebooru.org/ https://www.paypal.com;" +
                         "media-src 'self' https://*.lawlietbot.xyz/ https://*.donmai.us/ https://*.rule34.xxx/ https://realbooru.com/ https://*.e621.net/ https://safebooru.org/; " +
@@ -59,14 +57,86 @@ public class CustomRequestHandler implements RequestHandler {
         response.setHeader("Access-Control-Allow-Origin", "https://top.gg https://discords.com");
         response.setHeader("X-XSS-Protection", "1; mode=block");
 
-        if (request.getPathInfo().equalsIgnoreCase("/invite")) {
-            return handleInvite(response, request.getParameterMap());
-        }
+        String auth = request.getHeader("Authorization");
+        switch (request.getPathInfo()) {
+            case "/print":
+                handlePrint(request, response, auth);
+                return true;
 
-        return false;
+            case "/topgg":
+                handleTopGG(request, response, auth);
+                return true;
+
+            case "/topgg_aninoss":
+                handleTopGGAnicord(request, response, auth);
+                return true;
+
+            case "/invite":
+                handleInvite(response, request.getParameterMap());
+                return true;
+
+            case "/stripe":
+                handleStripe(request, response);
+                return true;
+
+            default:
+                return false;
+        }
     }
 
-    private boolean handleInvite(VaadinResponse response, Map<String, String[]> params) {
+    private void handlePrint(VaadinRequest request, VaadinResponse response, String auth) {
+        if (System.getenv("PRINT_AUTH").equals(auth)) {
+            try (BufferedReader br = request.getReader()) {
+                String body = br.lines().collect(Collectors.joining());
+                if (body.length() > 0) {
+                    LOGGER.info("Content:\n" + body);
+                }
+            } catch (IOException e) {
+                LOGGER.error("Error while handling print", e);
+                response.setStatus(500);
+            }
+        } else {
+            response.setStatus(403);
+        }
+    }
+
+    private void handleTopGG(VaadinRequest request, VaadinResponse response, String auth) {
+        if (System.getenv("TOPGG_AUTH").equals(auth)) {
+            try (BufferedReader br = request.getReader()) {
+                String body = br.lines().collect(Collectors.joining());
+                if (body.length() > 0) {
+                    JSONObject jsonObject = new JSONObject(body);
+                    LOGGER.info("UPVOTE | {}", jsonObject.getLong("user"));
+                    SendEvent.sendTopGG(jsonObject);
+                }
+            } catch (IOException e) {
+                LOGGER.error("Error while handling upvote", e);
+                response.setStatus(500);
+            }
+        } else {
+            response.setStatus(403);
+        }
+    }
+
+    private void handleTopGGAnicord(VaadinRequest request, VaadinResponse response, String auth) {
+        if (System.getenv("TOPGG_ANINOSS_AUTH").equals(auth)) {
+            try (BufferedReader br = request.getReader()) {
+                String body = br.lines().collect(Collectors.joining());
+                if (body.length() > 0) {
+                    JSONObject jsonObject = new JSONObject(body);
+                    LOGGER.info("UPVOTE ANINOSS | {}", jsonObject.getLong("user"));
+                    SendEvent.sendTopGGAnicord(jsonObject);
+                }
+            } catch (IOException e) {
+                LOGGER.error("Error while handling upvote", e);
+                response.setStatus(500);
+            }
+        } else {
+            response.setStatus(403);
+        }
+    }
+
+    private void handleInvite(VaadinResponse response, Map<String, String[]> params) {
         response.setHeader("Location", ExternalLinks.BOT_INVITE_URL_EXT);
         response.setStatus(301);
 
@@ -76,84 +146,31 @@ public class CustomRequestHandler implements RequestHandler {
                 SendEvent.sendInvite(type);
             }
         }
-
-        return true;
     }
 
-    private boolean handlePrint(VaadinRequest request, String auth) {
-        try {
-            if (auth.equals(System.getenv("PRINT_AUTH"))) {
-                StringBuilder sb = new StringBuilder();
-                BufferedReader br = request.getReader();
-
-                String line;
-                while ((line = br.readLine()) != null) {
-                    sb.append(line).append("\n");
+    private void handleStripe(VaadinRequest request, VaadinResponse response) {
+        try (BufferedReader br = request.getReader()) {
+            String sigHeader = request.getHeader("Stripe-Signature");
+            if (sigHeader != null) {
+                String payload = br.lines().collect(Collectors.joining());
+                String signature = System.getenv("STRIPE_WEBHOOK_SIGNATURE");
+                Event event = Webhook.constructEvent(payload, sigHeader, signature);
+                if (event.getType().equals("checkout.session.completed")) {
+                    String json = event.getData().toJson();
+                    System.out.println(json);
+                    JSONObject data = new JSONObject(json);
+                } else {
+                    response.setStatus(500);
                 }
-
-                if (sb.length() > 0) {
-                    LOGGER.info("Content:\n" + sb);
-                }
-
-                return true;
+            } else {
+                response.setStatus(403);
             }
+        } catch (SignatureVerificationException e) {
+            response.setStatus(403);
         } catch (IOException e) {
-            LOGGER.error("Error while handling upvote", e);
+            LOGGER.error("Error while handling Stripe", e);
+            response.setStatus(500);
         }
-
-        return false;
-    }
-
-    private boolean handleTopGG(VaadinRequest request, String auth) {
-        try {
-            if (auth.equals(System.getenv("TOPGG_AUTH"))) {
-                StringBuilder sb = new StringBuilder();
-                BufferedReader br = request.getReader();
-
-                String line;
-                while((line = br.readLine()) != null) {
-                    sb.append("\n").append(line);
-                }
-
-                if (sb.length() > 0) {
-                    JSONObject jsonObject = new JSONObject(sb.substring(1));
-                    LOGGER.info("UPVOTE | {}", jsonObject.getLong("user"));
-                    SendEvent.sendTopGG(jsonObject);
-                }
-
-                return true;
-            }
-        } catch (IOException e) {
-            LOGGER.error("Error while handling upvote", e);
-        }
-
-        return false;
-    }
-
-    private boolean handleTopGGAninoss(VaadinRequest request, String auth) {
-        try {
-            if (auth.equals(System.getenv("TOPGG_ANINOSS_AUTH"))) {
-                StringBuilder sb = new StringBuilder();
-                BufferedReader br = request.getReader();
-
-                String line;
-                while((line = br.readLine()) != null) {
-                    sb.append("\n").append(line);
-                }
-
-                if (sb.length() > 0) {
-                    JSONObject jsonObject = new JSONObject(sb.substring(1));
-                    LOGGER.info("UPVOTE ANINOSS | {}", jsonObject.getLong("user"));
-                    SendEvent.sendTopGGAnicord(jsonObject);
-                }
-
-                return true;
-            }
-        } catch (IOException e) {
-            LOGGER.error("Error while handling upvote", e);
-        }
-
-        return false;
     }
 
 }
