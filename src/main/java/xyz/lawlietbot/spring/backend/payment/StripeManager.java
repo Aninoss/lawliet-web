@@ -1,16 +1,28 @@
 package xyz.lawlietbot.spring.backend.payment;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Customer;
 import com.stripe.model.Subscription;
 import com.stripe.model.checkout.Session;
+import com.stripe.param.SubscriptionListParams;
 import xyz.lawlietbot.spring.backend.Pair;
 
 public class StripeManager {
 
     private static final HashSet<String> usedSubscriptions = new HashSet<>();
+
+    public static List<Subscription> retrieveActiveSubscriptions(long userId) throws StripeException {
+        return Subscription.list(SubscriptionListParams.builder()
+                        .setStatus(SubscriptionListParams.Status.ACTIVE)
+                        .build()
+                ).getData().stream()
+                .filter(sub -> sub.getMetadata().containsKey("discord_id") && sub.getMetadata().get("discord_id").equals(String.valueOf(userId)))
+                .collect(Collectors.toList());
+    }
 
     public static synchronized void registerSubscription(Session session) throws StripeException {
         if (!usedSubscriptions.contains(session.getId())) {

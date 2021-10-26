@@ -1,15 +1,13 @@
 package xyz.lawlietbot.spring.frontend.views;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import bell.oauth.discord.domain.Guild;
 import com.stripe.exception.StripeException;
+import com.stripe.model.Subscription;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import com.vaadin.flow.component.Component;
@@ -70,6 +68,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
     private ArrayList<Guild> availableGuilds;
     private UserPremium userPremium;
     private Div tiersContent = new Div();
+    private Button buyBasicButton;
     private boolean slotsBuild = false;
 
     public PremiumView(@Autowired SessionData sessionData, @Autowired UIData uiData) throws IOException {
@@ -240,6 +239,9 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         buyButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         buyButton.setHeight("43px");
         buyButton.getStyle().set("margin-bottom", "-4px");
+        if (level.getSubLevelType() == SubLevelType.BASIC) {
+            buyBasicButton = buyButton;
+        }
         if (!getSessionData().isLoggedIn()) {
             buyButton.setText(getTranslation("category.discordlogin"));
             buyButton.setIcon(null);
@@ -484,12 +486,15 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         if (!slotsBuild && sessionData.getDiscordUser().map(DiscordUser::hasGuilds).orElse(false)) {
             slotsBuild = true;
             try {
-                this.userPremium = SendEvent.sendRequestUserPremium(sessionData.getDiscordUser().get().getId()).get(5, TimeUnit.SECONDS);
-                this.availableGuilds = new ArrayList<>(sessionData.getDiscordUser().get().getGuilds());
+                DiscordUser discordUser = sessionData.getDiscordUser().get();
+                List<Subscription> userSubscriptions = StripeManager.retrieveActiveSubscriptions(discordUser.getId());
+                this.buyBasicButton.setEnabled(userSubscriptions.isEmpty());
+                this.userPremium = SendEvent.sendRequestUserPremium(discordUser.getId()).get(5, TimeUnit.SECONDS);
+                this.availableGuilds = new ArrayList<>(discordUser.getGuilds());
                 if (userPremium.getSlots().size() > 0) {
                     mainContent.addComponentAsFirst(generatePremium());
                 }
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            } catch (InterruptedException | ExecutionException | TimeoutException | StripeException e) {
                 LOGGER.error("Could not load slots", e);
                 CustomNotification.showError(getTranslation("error"));
             }
