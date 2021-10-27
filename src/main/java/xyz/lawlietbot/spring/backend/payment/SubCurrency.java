@@ -1,11 +1,11 @@
 package xyz.lawlietbot.spring.backend.payment;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +16,12 @@ public enum SubCurrency {
     GBP('£');
 
     private final static Logger LOGGER = LoggerFactory.getLogger(SubCurrency.class);
+    private final static OkHttpClient httpClient = new OkHttpClient.Builder()
+            .connectTimeout(5, TimeUnit.SECONDS)
+            .writeTimeout(5, TimeUnit.SECONDS)
+            .readTimeout(5, TimeUnit.SECONDS)
+            .cache(null)
+            .build();
 
     public static HashMap<String, SubCurrency> currencyHashMap = new HashMap<>();
 
@@ -34,15 +40,13 @@ public enum SubCurrency {
             return currencyHashMap.get(ipAddress);
         }
 
-        try {
-            URL ipapi = new URL("http://ipapi.co/" + ipAddress + "/currency/");
-            URLConnection c = ipapi.openConnection();
-            c.setRequestProperty("User-Agent", "java-ipapi-client");
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(c.getInputStream())
-            );
-            String currency = reader.readLine();
-            reader.close();
+        Request request = new Request.Builder()
+                .url("https://ipapi.co/" + ipAddress + "/currency/")
+                .header("User-Agent", "lawlietbot.xyz")
+                .build();
+
+        try (Response response = httpClient.newCall(request).execute()) {
+            String currency = response.body().string();
 
             for (SubCurrency value : SubCurrency.values()) {
                 if (value.name().equals(currency)) {
