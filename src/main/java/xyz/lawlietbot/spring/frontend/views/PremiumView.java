@@ -413,7 +413,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
 
     private void onAdd(Guild guild, int i) {
         if (!dialog.isOpened()) {
-            dialog.open(() -> {
+            dialog.open(getTranslation("premium.confirm"), () -> {
                 long guildId = guild.getId();
                 if (modify(i, guildId)) {
                     availableGuilds.remove(guild);
@@ -423,7 +423,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                     card.add(generateCardContent(guild, i, false));
                     refreshComboBoxes();
                 }
-            }, getTranslation("premium.confirm"));
+            }, () -> {});
         }
     }
 
@@ -468,9 +468,12 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         Map<String, List<String>> parametersMap = queryParameters.getParameters();
         if (parametersMap != null && parametersMap.containsKey("session_id")) {
             String sessionId = parametersMap.get("session_id").get(0);
+            UI.getCurrent().getPage().getHistory().replaceState(null, getRoute());
             try {
                 StripeManager.registerSubscription(Session.retrieve(sessionId));
-                CustomNotification.showSuccess(getTranslation("premium.buy.success"));
+                ConfirmationDialog confirmationDialog = new ConfirmationDialog();
+                confirmationDialog.open(getTranslation("premium.buy.success"), () -> {});
+                add(confirmationDialog);
             } catch (StripeException e) {
                 LOGGER.error("Could not update subscription", e);
                 CustomNotification.showError(getTranslation("error"));

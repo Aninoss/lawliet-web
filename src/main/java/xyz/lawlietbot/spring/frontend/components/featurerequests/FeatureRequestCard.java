@@ -163,7 +163,7 @@ public class FeatureRequestCard extends Div {
             Label warningLabel = new Label(getTranslation("fr.boost.confirm.notpush"));
             warningLabel.getStyle().set("color", "black")
                     .set("margin-bottom", "32px");
-            confirmationDialog.open(this::onBoostConfirm, this::onBoostCancel, getTranslation("fr.boost.confirm", frEntry.getTitle()), warningLabel);
+            confirmationDialog.open(getTranslation("fr.boost.confirm", frEntry.getTitle()), this::onBoostConfirm, this::onBoostCancel, warningLabel);
         }
     }
 

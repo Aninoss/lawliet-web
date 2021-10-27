@@ -49,19 +49,21 @@ public class ConfirmationDialog extends Div {
         return textParagraph;
     }
 
-    private Component generateButtons() {
+    private Component generateButtons(boolean withCancelButton) {
         FlexLayout buttonLayout = new FlexLayout();
         buttonLayout.getStyle().set("flex-direction", "row-reverse");
         buttonLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
         buttonLayout.setWidthFull();
 
-        Button buttonCancel = new Button(getTranslation("dialog.cancel"), e -> onCancel());
-        buttonCancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        buttonCancel.setWidth("100px");
-        buttonCancel.addClickShortcut(Key.ESCAPE);
-        buttonLayout.add(buttonCancel);
+        if (withCancelButton) {
+            Button buttonCancel = new Button(getTranslation("dialog.cancel"), e -> close(false));
+            buttonCancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+            buttonCancel.setWidth("100px");
+            buttonCancel.addClickShortcut(Key.ESCAPE);
+            buttonLayout.add(buttonCancel);
+        }
 
-        Button buttonConfirm = new Button(getTranslation("dialog.confirm"), e -> onConfirm());
+        Button buttonConfirm = new Button(getTranslation("dialog.confirm"), e -> close(true));
         buttonConfirm.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         buttonConfirm.setWidth("100px");
         buttonLayout.add(buttonConfirm);
@@ -69,23 +71,11 @@ public class ConfirmationDialog extends Div {
         return buttonLayout;
     }
 
-    private void onConfirm() {
-        close(true);
+    public void open(String text, ConfirmationDialogConfirmListener confirmListener, Component... components) {
+        open(text, confirmListener, null, components);
     }
 
-    private void onCancel() {
-        close(false);
-    }
-
-    public void open(String text, Component... components) {
-        open(null, text, components);
-    }
-
-    public void open(ConfirmationDialogConfirmListener confirmListener, String text, Component... components) {
-        open(confirmListener, null, text, components);
-    }
-
-    public void open(ConfirmationDialogConfirmListener confirmListener, ConfirmationDialogCancelListener cancelListener, String text, Component... components) {
+    public void open(String text, ConfirmationDialogConfirmListener confirmListener, ConfirmationDialogCancelListener cancelListener, Component... components) {
         if (!opened) {
             this.confirmListener = confirmListener;
             this.cancelListener = cancelListener;
@@ -97,7 +87,7 @@ public class ConfirmationDialog extends Div {
             if (components != null && components.length > 0) {
                 this.dialogLayout.add(components);
             }
-            this.dialogLayout.add(generateButtons());
+            this.dialogLayout.add(generateButtons(cancelListener != null));
             this.dialogLayout.setFlexGrow(1, textComponent);
 
             getStyle().set("opacity", "1")
