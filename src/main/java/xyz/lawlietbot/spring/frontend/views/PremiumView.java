@@ -7,10 +7,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import bell.oauth.discord.domain.Guild;
 import com.stripe.exception.StripeException;
-import com.stripe.model.Customer;
 import com.stripe.model.Subscription;
 import com.stripe.model.checkout.Session;
-import com.stripe.param.checkout.SessionCreateParams;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Text;
@@ -251,31 +249,8 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                         int value = extractValueFromQuantity(quantity.getValue());
                         String domain = ((VaadinServletRequest) VaadinService.getCurrentRequest()).getServerName();
                         String returnUrl = "https://" + domain + "/" + getRoute();
-                        SessionCreateParams.Builder paramsBuilder = new SessionCreateParams.Builder()
-                                .setSuccessUrl(returnUrl + "?session_id={CHECKOUT_SESSION_ID}")
-                                .setCancelUrl(returnUrl)
-                                .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
-                                .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
-                                .putMetadata("discord_id", String.valueOf(discordUser.getId()))
-                                .setAutomaticTax(SessionCreateParams.AutomaticTax.builder().setEnabled(false).build())
-                                .addLineItem(new SessionCreateParams.LineItem.Builder()
-                                        .setQuantity((long) value)
-                                        .setPrice(StripeManager.getPriceId(duration, level))
-                                        .build()
-                                );
-
-                        Optional<Customer> customerOpt = StripeManager.retrieveCustomer(discordUser.getId(), level.getCurrency());
-                        if (customerOpt.isPresent()) {
-                            paramsBuilder = paramsBuilder.setCustomer(customerOpt.get().getId());
-                        } else {
-                            customerOpt = StripeManager.retrieveCustomer(discordUser.getId());
-                            if (customerOpt.isPresent()) {
-                                paramsBuilder = paramsBuilder.setCustomerEmail(customerOpt.get().getEmail());
-                            }
-                        }
-
-                        Session session = Session.create(paramsBuilder.build());
-                        new Redirector().redirect(session.getUrl());
+                        String sessionUrl = StripeManager.generateSession(duration, level, returnUrl, discordUser.getId(), value);
+                        new Redirector().redirect(sessionUrl);
                     } catch (Exception ex) {
                         LOGGER.error("Exception", ex);
                         CustomNotification.showError(getTranslation("error"));

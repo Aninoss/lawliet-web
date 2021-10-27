@@ -10,7 +10,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.stripe.exception.SignatureVerificationException;
+import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
+import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import com.vaadin.flow.server.RequestHandler;
 import com.vaadin.flow.server.VaadinRequest;
@@ -20,6 +22,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.lawlietbot.spring.backend.payment.StripeManager;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 public class CustomRequestHandler implements RequestHandler {
@@ -87,7 +90,7 @@ public class CustomRequestHandler implements RequestHandler {
     private void handlePrint(VaadinRequest request, VaadinResponse response, String auth) {
         if (System.getenv("PRINT_AUTH").equals(auth)) {
             try (BufferedReader br = request.getReader()) {
-                String body = br.lines().collect(Collectors.joining());
+                String body = br.lines().collect(Collectors.joining("\n"));
                 if (body.length() > 0) {
                     LOGGER.info("Content:\n" + body);
                 }
@@ -103,7 +106,7 @@ public class CustomRequestHandler implements RequestHandler {
     private void handleTopGG(VaadinRequest request, VaadinResponse response, String auth) {
         if (System.getenv("TOPGG_AUTH").equals(auth)) {
             try (BufferedReader br = request.getReader()) {
-                String body = br.lines().collect(Collectors.joining());
+                String body = br.lines().collect(Collectors.joining("\n"));
                 if (body.length() > 0) {
                     JSONObject jsonObject = new JSONObject(body);
                     LOGGER.info("UPVOTE | {}", jsonObject.getLong("user"));
@@ -121,7 +124,7 @@ public class CustomRequestHandler implements RequestHandler {
     private void handleTopGGAnicord(VaadinRequest request, VaadinResponse response, String auth) {
         if (System.getenv("TOPGG_ANINOSS_AUTH").equals(auth)) {
             try (BufferedReader br = request.getReader()) {
-                String body = br.lines().collect(Collectors.joining());
+                String body = br.lines().collect(Collectors.joining("\n"));
                 if (body.length() > 0) {
                     JSONObject jsonObject = new JSONObject(body);
                     LOGGER.info("UPVOTE ANINOSS | {}", jsonObject.getLong("user"));
@@ -152,13 +155,14 @@ public class CustomRequestHandler implements RequestHandler {
         try (BufferedReader br = request.getReader()) {
             String sigHeader = request.getHeader("Stripe-Signature");
             if (sigHeader != null) {
-                String payload = br.lines().collect(Collectors.joining());
+                String payload = br.lines().collect(Collectors.joining("\n"));
                 String signature = System.getenv("STRIPE_WEBHOOK_SIGNATURE");
                 Event event = Webhook.constructEvent(payload, sigHeader, signature);
                 if (event.getType().equals("checkout.session.completed")) {
                     String json = event.getData().toJson();
-                    System.out.println(json);
                     JSONObject data = new JSONObject(json);
+                    String sessionId = data.getJSONObject("object").getString("id");
+                    StripeManager.registerSubscription(Session.retrieve(sessionId));
                 } else {
                     response.setStatus(500);
                 }
@@ -167,7 +171,7 @@ public class CustomRequestHandler implements RequestHandler {
             }
         } catch (SignatureVerificationException e) {
             response.setStatus(403);
-        } catch (IOException e) {
+        } catch (IOException | StripeException e) {
             LOGGER.error("Error while handling Stripe", e);
             response.setStatus(500);
         }

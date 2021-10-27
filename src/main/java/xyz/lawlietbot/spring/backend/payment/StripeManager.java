@@ -11,6 +11,7 @@ import com.stripe.model.Subscription;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.CustomerListParams;
 import com.stripe.param.SubscriptionListParams;
+import com.stripe.param.checkout.SessionCreateParams;
 import xyz.lawlietbot.spring.backend.Pair;
 
 public class StripeManager {
@@ -39,6 +40,34 @@ public class StripeManager {
                         (currency == null || customer.getCurrency().equalsIgnoreCase(currency.name()))
                 )
                 .findFirst();
+    }
+
+    public static String generateSession(SubDuration duration, SubLevel level, String returnUrl, long discordId, int quantity) throws StripeException {
+        SessionCreateParams.Builder paramsBuilder = new SessionCreateParams.Builder()
+                .setSuccessUrl(returnUrl + "?session_id={CHECKOUT_SESSION_ID}")
+                .setCancelUrl(returnUrl)
+                .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
+                .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
+                .putMetadata("discord_id", String.valueOf(discordId))
+                .setAutomaticTax(SessionCreateParams.AutomaticTax.builder().setEnabled(false).build())
+                .addLineItem(new SessionCreateParams.LineItem.Builder()
+                        .setQuantity((long) quantity)
+                        .setPrice(StripeManager.getPriceId(duration, level))
+                        .build()
+                );
+
+        Optional<Customer> customerOpt = StripeManager.retrieveCustomer(discordId, level.getCurrency());
+        if (customerOpt.isPresent()) {
+            paramsBuilder = paramsBuilder.setCustomer(customerOpt.get().getId());
+        } else {
+            customerOpt = StripeManager.retrieveCustomer(discordId);
+            if (customerOpt.isPresent()) {
+                paramsBuilder = paramsBuilder.setCustomerEmail(customerOpt.get().getEmail());
+            }
+        }
+
+        Session session = Session.create(paramsBuilder.build());
+        return session.getUrl();
     }
 
     public static synchronized void registerSubscription(Session session) throws StripeException {
