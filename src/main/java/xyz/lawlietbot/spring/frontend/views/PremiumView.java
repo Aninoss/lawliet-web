@@ -159,19 +159,33 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         content.setAlignItems(FlexComponent.Alignment.CENTER);
         content.addClassNames("tier-card");
 
-        String name = getTranslation("premium.tier." + level.getSubLevelType().name());
-        if (level.getSubLevelType().isRecommended()) {
-            name += " " + getTranslation("premium.tier.recommended");
+        HorizontalLayout titleLayout = new HorizontalLayout();
+        titleLayout.setPadding(false);
+        titleLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+
+        H2 title = new H2(getTranslation("premium.tier." + level.getSubLevelType().name()));
+        title.getStyle().set("margin-top", "0")
+                .set("margin-bottom", "0");
+        titleLayout.add(title);
+
+        if (level.getSubLevelType() == SubLevelType.PRO) {
+            Span recommended = new Span(getTranslation("premium.tier.recommended").toUpperCase());
+            recommended.getStyle().set("margin-top", "0")
+                    .set("margin-bottom", "0")
+                    .set("margin-left", "8px")
+                    .set("font-size", "75%")
+                    .set("background", "#f8b84e")
+                    .set("padding", "0 5px")
+                    .set("border-radius", "4px")
+                    .set("color", "var(--lumo-shade)");
+            titleLayout.add(recommended);
         }
 
-        H2 title = new H2(name);
-        title.getStyle().set("margin-top", "14px")
-                .set("margin-bottom", "0");
         String priceString = SubscriptionUtil.generatePriceString(SubscriptionUtil.getPrice(duration, level));
         Text price = new Text(getTranslation("premium.price." + level.getSubLevelType().name(), duration == SubDuration.YEARLY, level.getCurrency().getSymbol(), priceString));
         Div div = new Div();
 
-        content.add(title, price, generateTierPerks(level), div, generateButtonSeparator(), generateBuyLayout(duration, level));
+        content.add(titleLayout, price, generateTierPerks(level), div, generateButtonSeparator(), generateBuyLayout(duration, level));
         content.setFlexGrow(1, div);
         return content;
     }

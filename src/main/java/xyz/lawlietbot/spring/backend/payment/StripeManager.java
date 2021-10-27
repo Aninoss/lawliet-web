@@ -50,6 +50,7 @@ public class StripeManager {
                 .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                 .putMetadata("discord_id", String.valueOf(discordId))
                 .setAutomaticTax(SessionCreateParams.AutomaticTax.builder().setEnabled(false).build())
+                .setAllowPromotionCodes(true)
                 .addLineItem(new SessionCreateParams.LineItem.Builder()
                         .setQuantity((long) quantity)
                         .setPrice(StripeManager.getPriceId(duration, level))
@@ -64,6 +65,10 @@ public class StripeManager {
             if (customerOpt.isPresent()) {
                 paramsBuilder = paramsBuilder.setCustomerEmail(customerOpt.get().getEmail());
             }
+        }
+
+        if (level.getCurrency() == SubCurrency.EUR) {
+            paramsBuilder = paramsBuilder.addPaymentMethodType(SessionCreateParams.PaymentMethodType.SEPA_DEBIT);
         }
 
         Session session = Session.create(paramsBuilder.build());
