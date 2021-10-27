@@ -12,7 +12,6 @@ import com.stripe.model.checkout.Session;
 import com.stripe.param.CustomerListParams;
 import com.stripe.param.SubscriptionListParams;
 import com.stripe.param.checkout.SessionCreateParams;
-import xyz.lawlietbot.spring.backend.Pair;
 
 public class StripeManager {
 
@@ -49,6 +48,7 @@ public class StripeManager {
                 .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
                 .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                 .putMetadata("discord_id", String.valueOf(discordId))
+                .putMetadata("unlock_servers", String.valueOf(level.getSubLevelType() == SubLevelType.PRO))
                 .setAutomaticTax(SessionCreateParams.AutomaticTax.builder().setEnabled(false).build())
                 .setAllowPromotionCodes(true)
                 .addLineItem(new SessionCreateParams.LineItem.Builder()
@@ -138,49 +138,6 @@ public class StripeManager {
                 default:
                     return null;
             }
-        }
-    }
-
-    public static Pair<SubDuration, SubLevel> getSubDurationAndLevel(String priceId) {
-        switch (priceId) {
-            case "price_1JnmJ4AXVG0I7dQKbrLsqgoo":
-                return new Pair<>(SubDuration.MONTHLY, SubLevel.BASIC_USD);
-
-            case "price_1Jo8LdAXVG0I7dQKzdLBOlB7":
-                return new Pair<>(SubDuration.MONTHLY, SubLevel.BASIC_EUR);
-
-            case "price_1JoXFMAXVG0I7dQKebMAcbQr":
-                return new Pair<>(SubDuration.MONTHLY, SubLevel.BASIC_GBP);
-
-            case "price_1Jo8i6AXVG0I7dQKYCLy5TEm":
-                return new Pair<>(SubDuration.MONTHLY, SubLevel.PRO_USD);
-
-            case "price_1Jo8j8AXVG0I7dQKYHzodoF7":
-                return new Pair<>(SubDuration.MONTHLY, SubLevel.PRO_EUR);
-
-            case "price_1JoXHTAXVG0I7dQKu1BTc3LK":
-                return new Pair<>(SubDuration.MONTHLY, SubLevel.PRO_GBP);
-
-            case "price_1JnmKUAXVG0I7dQKMDzrczi5":
-                return new Pair<>(SubDuration.YEARLY, SubLevel.BASIC_USD);
-
-            case "price_1Jo8LLAXVG0I7dQKP9SuM54c":
-                return new Pair<>(SubDuration.YEARLY, SubLevel.BASIC_EUR);
-
-            case "price_1JoXFnAXVG0I7dQKS7Jg9xBl":
-                return new Pair<>(SubDuration.YEARLY, SubLevel.BASIC_GBP);
-
-            case "price_1Jo8kBAXVG0I7dQK1LOdDXB8":
-                return new Pair<>(SubDuration.YEARLY, SubLevel.PRO_USD);
-
-            case "price_1Jo8oEAXVG0I7dQKkRacDwFk":
-                return new Pair<>(SubDuration.YEARLY, SubLevel.PRO_EUR);
-
-            case "price_1JoXHeAXVG0I7dQKK4CXf9X9":
-                return new Pair<>(SubDuration.YEARLY, SubLevel.PRO_GBP);
-
-            default:
-                return null;
         }
     }
 

@@ -1,14 +1,7 @@
 package xyz.lawlietbot.spring.frontend.components.featurerequests;
 
-import xyz.lawlietbot.spring.backend.util.StringUtil;
-import xyz.lawlietbot.spring.backend.featurerequests.FREntry;
-import xyz.lawlietbot.spring.backend.featurerequests.FRPanelType;
-import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
-import xyz.lawlietbot.spring.backend.userdata.SessionData;
-import xyz.lawlietbot.spring.backend.userdata.UIData;
-import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
-import xyz.lawlietbot.spring.frontend.components.CustomNotification;
-import xyz.lawlietbot.spring.frontend.Styles;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
@@ -18,9 +11,15 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
+import xyz.lawlietbot.spring.backend.featurerequests.FREntry;
+import xyz.lawlietbot.spring.backend.featurerequests.FRPanelType;
+import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
+import xyz.lawlietbot.spring.backend.userdata.SessionData;
+import xyz.lawlietbot.spring.backend.userdata.UIData;
+import xyz.lawlietbot.spring.backend.util.StringUtil;
+import xyz.lawlietbot.spring.frontend.Styles;
+import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
+import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 
 public class FeatureRequestCard extends Div {
 
@@ -34,7 +33,7 @@ public class FeatureRequestCard extends Div {
     private Button boostButton = null;
     private ConfirmationDialog confirmationDialog = null;
 
-    public FeatureRequestCard(FREntry frEntry, SessionData sessionData, UIData uiData) {
+    public FeatureRequestCard(FREntry frEntry, ConfirmationDialog confirmationDialog, SessionData sessionData, UIData uiData) {
         this.frEntry = frEntry;
         this.sessionData = sessionData;
         this.uiData = uiData;
@@ -52,11 +51,7 @@ public class FeatureRequestCard extends Div {
             addFooter();
             addSeperator(action);
             addBoostButton(frEntry.getBoosts().get());
-
-            Label warningLabel = new Label(getTranslation("fr.boost.confirm.notpush"));
-            warningLabel.getStyle().set("color", "black")
-                    .set("margin-bottom", "32px");
-            this.confirmationDialog = new ConfirmationDialog(getTranslation("fr.boost.confirm", frEntry.getTitle()), this::onBoostConfirm, this::onBoostCancel, warningLabel);
+            this.confirmationDialog = confirmationDialog;
             add(confirmationDialog);
         } else {
             addNoPublicText(frEntry.getType() == FRPanelType.PENDING);
@@ -165,7 +160,10 @@ public class FeatureRequestCard extends Div {
 
     private void onBoostClick() {
         if (confirmationDialog != null && !uiData.isLite()) {
-            confirmationDialog.open();
+            Label warningLabel = new Label(getTranslation("fr.boost.confirm.notpush"));
+            warningLabel.getStyle().set("color", "black")
+                    .set("margin-bottom", "32px");
+            confirmationDialog.open(this::onBoostConfirm, this::onBoostCancel, getTranslation("fr.boost.confirm", frEntry.getTitle()), warningLabel);
         }
     }
 

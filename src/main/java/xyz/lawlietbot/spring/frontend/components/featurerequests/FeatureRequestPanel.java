@@ -15,6 +15,7 @@ import xyz.lawlietbot.spring.backend.featurerequests.FRDynamicBean;
 import xyz.lawlietbot.spring.backend.featurerequests.FREntry;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
+import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.featurerequests.sort.FeatureRequestSort;
 
 public class FeatureRequestPanel extends Div {
@@ -24,12 +25,13 @@ public class FeatureRequestPanel extends Div {
     private final SessionData sessionData;
     private final UIData uiData;
     private final FRDynamicBean frDynamicBean;
-    private FlexibleGridLayout gridLayout = null;
+    private final ConfirmationDialog confirmationDialog;
 
-    public FeatureRequestPanel(SessionData sessionData, UIData uiData, FRDynamicBean frDynamicBean) {
+    public FeatureRequestPanel(SessionData sessionData, UIData uiData, FRDynamicBean frDynamicBean, ConfirmationDialog confirmationDialog) {
         this.sessionData = sessionData;
         this.uiData = uiData;
         this.frDynamicBean = frDynamicBean;
+        this.confirmationDialog = confirmationDialog;
         setWidthFull();
     }
 
@@ -40,14 +42,14 @@ public class FeatureRequestPanel extends Div {
         ArrayList<Article> articles = new ArrayList<>();
         for (int i = ENTRIES_PER_PAGE * page; i < Math.min(entryList.size(), ENTRIES_PER_PAGE * (page + 1)); i++) {
             FREntry entry = entryList.get(i);
-            FeatureRequestCard featureRequestCard = new FeatureRequestCard(entry, sessionData, uiData);
+            FeatureRequestCard featureRequestCard = new FeatureRequestCard(entry, confirmationDialog, sessionData, uiData);
             Article article = new Article(featureRequestCard);
             articles.add(article);
         }
 
         removeAll();
         if (entryList.size() > 0) {
-            gridLayout = new FlexibleGridLayout()
+            FlexibleGridLayout gridLayout = new FlexibleGridLayout()
                     .withColumns(Repeat.RepeatMode.AUTO_FILL, new MinMax(new Length("270px"), new Flex(1)))
                     .withItems(articles.toArray(new Article[0]))
                     .withPadding(false)

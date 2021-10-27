@@ -61,7 +61,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
     private final VerticalLayout mainContent = new VerticalLayout();
     private final ArrayList<Card> cards = new ArrayList<>();
     private final HashMap<Integer, ComboBox<Guild>> comboBoxMap = new HashMap<>();
-    private final ConfirmationDialog dialog = new ConfirmationDialog(getTranslation("premium.confirm"));
+    private final ConfirmationDialog dialog = new ConfirmationDialog();
     private final Select<SubDuration> durationSelect = new Select<>();
     private final Select<SubCurrency> currencySelect = new Select<>();
     private List<Subscription> userSubscriptions = Collections.emptyList();
@@ -143,7 +143,6 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
     private Component generateTiersTiers() {
         tiersContent = new Div();
         tiersContent.setId("premium-tiers");
-        setTiers();
         return tiersContent;
     }
 
@@ -252,25 +251,23 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         buyButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         buyButton.setHeight("43px");
         buyButton.getStyle().set("margin-bottom", "-4px");
-        if (!getSessionData().isLoggedIn()) {
+        if (getSessionData().isLoggedIn()) {
+            buyButton.setEnabled(level.getSubLevelType() == SubLevelType.PRO || userSubscriptions.isEmpty());
+        } else {
             buyButton.setText(getTranslation("category.discordlogin"));
         }
         buyButton.addClickListener(e -> {
             DiscordUser discordUser = getSessionData().getDiscordUser().orElse(null);
             if (discordUser != null) {
-                if (level.getSubLevelType() == SubLevelType.PRO || userSubscriptions.isEmpty()) {
-                    try {
-                        int value = extractValueFromQuantity(quantity.getValue());
-                        String domain = ((VaadinServletRequest) VaadinService.getCurrentRequest()).getServerName();
-                        String returnUrl = "https://" + domain + "/" + getRoute();
-                        String sessionUrl = StripeManager.generateSession(duration, level, returnUrl, discordUser.getId(), value);
-                        new Redirector().redirect(sessionUrl);
-                    } catch (Exception ex) {
-                        LOGGER.error("Exception", ex);
-                        CustomNotification.showError(getTranslation("error"));
-                    }
-                } else {
-                    CustomNotification.showError(getTranslation("premium.alreadypaying"));
+                try {
+                    int value = extractValueFromQuantity(quantity.getValue());
+                    String domain = ((VaadinServletRequest) VaadinService.getCurrentRequest()).getServerName();
+                    String returnUrl = "https://" + domain + "/" + getRoute();
+                    String sessionUrl = StripeManager.generateSession(duration, level, returnUrl, discordUser.getId(), value);
+                    new Redirector().redirect(sessionUrl);
+                } catch (Exception ex) {
+                    LOGGER.error("Exception", ex);
+                    CustomNotification.showError(getTranslation("error"));
                 }
             } else {
                 new Redirector().redirect(getSessionData().getLoginUrl());
@@ -416,7 +413,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
 
     private void onAdd(Guild guild, int i) {
         if (!dialog.isOpened()) {
-            dialog.setConfirmListener(() -> {
+            dialog.open(() -> {
                 long guildId = guild.getId();
                 if (modify(i, guildId)) {
                     availableGuilds.remove(guild);
@@ -426,8 +423,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                     card.add(generateCardContent(guild, i, false));
                     refreshComboBoxes();
                 }
-            });
-            dialog.open();
+            }, getTranslation("premium.confirm"));
         }
     }
 
@@ -482,20 +478,23 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         }
 
         SessionData sessionData = getSessionData();
-        if (!slotsBuild && sessionData.getDiscordUser().map(DiscordUser::hasGuilds).orElse(false)) {
+        if (!slotsBuild) {
             slotsBuild = true;
-            try {
-                DiscordUser discordUser = sessionData.getDiscordUser().get();
-                this.userSubscriptions = StripeManager.retrieveActiveSubscriptions(discordUser.getId());
-                this.userPremium = SendEvent.sendRequestUserPremium(discordUser.getId()).get(5, TimeUnit.SECONDS);
-                this.availableGuilds = new ArrayList<>(discordUser.getGuilds());
-                if (userPremium.getSlots().size() > 0) {
-                    mainContent.addComponentAsFirst(generatePremium());
+            if (sessionData.getDiscordUser().map(DiscordUser::hasGuilds).orElse(false)) {
+                try {
+                    DiscordUser discordUser = sessionData.getDiscordUser().get();
+                    this.userSubscriptions = StripeManager.retrieveActiveSubscriptions(discordUser.getId());
+                    this.userPremium = SendEvent.sendRequestUserPremium(discordUser.getId()).get(5, TimeUnit.SECONDS);
+                    this.availableGuilds = new ArrayList<>(discordUser.getGuilds());
+                    if (userPremium.getSlots().size() > 0) {
+                        mainContent.addComponentAsFirst(generatePremium());
+                    }
+                } catch (InterruptedException | ExecutionException | TimeoutException | StripeException e) {
+                    LOGGER.error("Could not load slots", e);
+                    CustomNotification.showError(getTranslation("error"));
                 }
-            } catch (InterruptedException | ExecutionException | TimeoutException | StripeException e) {
-                LOGGER.error("Could not load slots", e);
-                CustomNotification.showError(getTranslation("error"));
             }
+            setTiers();
         }
     }
 

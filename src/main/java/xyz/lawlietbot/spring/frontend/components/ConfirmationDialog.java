@@ -1,6 +1,5 @@
 package xyz.lawlietbot.spring.frontend.components;
 
-import xyz.lawlietbot.spring.frontend.Styles;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
@@ -10,71 +9,47 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import xyz.lawlietbot.spring.frontend.Styles;
 
 public class ConfirmationDialog extends Div {
 
     private ConfirmationDialogConfirmListener confirmListener = null;
     private ConfirmationDialogCancelListener cancelListener = null;
     private final VerticalLayout dialogLayout = new VerticalLayout();
-    private Label textParagraph;
-    private boolean confirm = false;
-    private boolean opened = true;
+    private boolean opened = false;
 
-    public ConfirmationDialog(String text, ConfirmationDialogConfirmListener confirmListener, ConfirmationDialogCancelListener cancelListener, Component... components) {
-        this(text, confirmListener, components);
-        this.cancelListener = cancelListener;
-    }
-
-    public ConfirmationDialog(String text, ConfirmationDialogConfirmListener confirmListener, Component... components) {
-        this(text);
-        this.confirmListener = confirmListener;
-    }
-
-    public ConfirmationDialog(String text, Component... components) {
-        setBackgroundStyles();
-        setDialogStyles();
-        getStyle().set("transition", "opacity 0.2s");
-
-        addText(text);
-        if (components.length > 0) dialogLayout.add(components);
-        addButtons();
-        dialogLayout.setFlexGrow(1, textParagraph);
-        add(dialogLayout);
-    }
-
-    private void setBackgroundStyles() {
+    public ConfirmationDialog() {
+        setSizeFull();
         getStyle().set("position", "fixed")
                 .set("background-color", "rgba(0, 0, 0, 0.5)")
                 .set("z-index", "7")
                 .set("left", "0")
-                .set("top", "0");
-        setSizeFull();
+                .set("top", "0")
+                .set("transition", "opacity 0.2s")
+                .set("opacity", "0")
+                .set("pointer-events", "none");;
+        addClickListener(e -> close(false));
 
-        addClickListener(e -> close());
-    }
-
-    private void setDialogStyles() {
         dialogLayout.setMaxWidth("min(500px, calc(100% - 32px))");
         dialogLayout.setWidthFull();
         dialogLayout.setMinHeight("200px");
+        dialogLayout.addClassName(Styles.CENTER_FIXED_FULL);
         dialogLayout.getStyle().set("position", "fixed")
                 .set("background-color", "white")
                 .set("z-index", "8")
                 .set("border-radius", "5px")
                 .set("padding", "32px");
-        dialogLayout.addClassName(Styles.CENTER_FIXED_FULL);
-        close();
+        add(dialogLayout);
     }
 
-    private void addText(String text) {
-        textParagraph = new Label(text);
+    private Component generateText(String text) {
+        Label textParagraph = new Label(text);
         textParagraph.setWidthFull();
         textParagraph.getStyle().set("color", "black");
-
-        dialogLayout.add(textParagraph);
+        return textParagraph;
     }
 
-    private void addButtons() {
+    private Component generateButtons() {
         FlexLayout buttonLayout = new FlexLayout();
         buttonLayout.getStyle().set("flex-direction", "row-reverse");
         buttonLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
@@ -91,60 +66,82 @@ public class ConfirmationDialog extends Div {
         buttonConfirm.setWidth("100px");
         buttonLayout.add(buttonConfirm);
 
-        dialogLayout.add(buttonLayout);
+        return buttonLayout;
     }
 
     private void onConfirm() {
-        if (opened) {
-            confirm = true;
-            close();
-        }
+        close(true);
     }
 
     private void onCancel() {
-        close();
+        close(false);
     }
 
-    public void open() {
+    public void open(String text, Component... components) {
+        open(null, text, components);
+    }
+
+    public void open(ConfirmationDialogConfirmListener confirmListener, String text, Component... components) {
+        open(confirmListener, null, text, components);
+    }
+
+    public void open(ConfirmationDialogConfirmListener confirmListener, ConfirmationDialogCancelListener cancelListener, String text, Component... components) {
         if (!opened) {
-            confirm = false;
+            this.confirmListener = confirmListener;
+            this.cancelListener = cancelListener;
+
+            this.dialogLayout.removeAll();
+            Component textComponent = generateText(text);
+            this.dialogLayout.add(textComponent);
+
+            if (components != null && components.length > 0) {
+                this.dialogLayout.add(components);
+            }
+            this.dialogLayout.add(generateButtons());
+            this.dialogLayout.setFlexGrow(1, textComponent);
+
             getStyle().set("opacity", "1")
                     .set("pointer-events", "all");
-            opened = true;
+            this.opened = true;
         }
     }
 
     public void close() {
+        close(false);
+    }
+
+    private void close(boolean confirmed) {
         if (opened) {
             opened = false;
             getStyle().set("opacity", "0")
                     .set("pointer-events", "none");
-            if (confirm) {
-                confirmListener.onConfirm();
+            if (confirmed) {
+                if (confirmListener != null) {
+                    confirmListener.onConfirm();
+                }
             } else {
-                if (cancelListener != null) cancelListener.onCancel();
+                if (cancelListener != null) {
+                    cancelListener.onCancel();
+                }
             }
         }
-    }
-
-    public void setConfirmListener(ConfirmationDialogConfirmListener confirmListener) {
-        this.confirmListener = confirmListener;
-    }
-
-    public void setCancelListener(ConfirmationDialogCancelListener cancelListener) {
-        this.cancelListener = cancelListener;
     }
 
     public boolean isOpened() {
         return opened;
     }
 
+
     public interface ConfirmationDialogConfirmListener {
+
         void onConfirm();
+
     }
 
     public interface ConfirmationDialogCancelListener {
+
         void onCancel();
+
     }
 
 }

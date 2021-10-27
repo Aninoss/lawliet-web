@@ -9,7 +9,13 @@ body {
     overflow-y: scroll;
 }
 
-vaadin-button { cursor: pointer; }
+vaadin-button {
+    cursor: pointer;
+}
+
+vaadin-button[disabled] {
+    color: var(--lumo-disabled-text-color);
+}
 
 content-card {
     -webkit-box-shadow: none;
@@ -17,7 +23,9 @@ content-card {
     box-shadow: none;
 }
 
-.pointer { cursor: pointer; }
+.pointer {
+    cursor: pointer;
+}
 
 .app-width {
     width: 100%;
@@ -26,9 +34,13 @@ content-card {
     margin-right: auto;
 }
 
-.round { border-radius: 50%; }
+.round {
+    border-radius: 50%;
+}
 
-.center-text { text-align: center; }
+.center-text {
+    text-align: center;
+}
 
 .center-fixed-width {
     left: 50%;
@@ -64,9 +76,9 @@ content-card {
 
 .fadein-class {
     -webkit-animation: fadein 1s;
-       -moz-animation: fadein 1s;
-         -o-animation: fadein 1s;
-            animation: fadein 1s;
+    -moz-animation: fadein 1s;
+    -o-animation: fadein 1s;
+    animation: fadein 1s;
 }
 
 .fadein-class-fast {
@@ -77,9 +89,9 @@ content-card {
 }
 
 .drop-shadow {
-    -webkit-box-shadow: 2px 2px 5px 0 rgba(0,0,0,0.2);
-    -moz-box-shadow: 2px 2px 5px 0 rgba(0,0,0,0.2);
-    box-shadow: 2px 2px 5px 0 rgba(0,0,0,0.2);
+    -webkit-box-shadow: 2px 2px 5px 0 rgba(0, 0, 0, 0.2);
+    -moz-box-shadow: 2px 2px 5px 0 rgba(0, 0, 0, 0.2);
+    box-shadow: 2px 2px 5px 0 rgba(0, 0, 0, 0.2);
 }
 
 #header-dummy {
@@ -142,6 +154,7 @@ content-card {
     width: 80px;
     height: 80px;
 }
+
 .lds-ring2 div {
     box-sizing: border-box;
     display: block;
@@ -154,53 +167,93 @@ content-card {
     animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
     border-color: #fff transparent transparent;
 }
+
 .lds-ring2 div:nth-child(1) {
     animation-delay: -0.45s;
 }
+
 .lds-ring2 div:nth-child(2) {
     animation-delay: -0.3s;
 }
+
 .lds-ring2 div:nth-child(3) {
     animation-delay: -0.15s;
 }
 
 
-
 /* Keyframes */
 @keyframes lds-ring {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-@keyframes fadein {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
-@-moz-keyframes fadein {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
-@-webkit-keyframes fadein {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
-@-ms-keyframes fadein {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
+@keyframes fadein {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@-moz-keyframes fadein {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@-webkit-keyframes fadein {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@-ms-keyframes fadein {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
 
 
 /* Tablet */
 @media (max-width: 1000px) {
 
-    .visible-large { display: none; }
+    .visible-large {
+        display: none;
+    }
 
-    .flex-small-row { flex-direction: row !important; }
-    .flex-small-column { flex-direction: column !important; }
-    .flex-small-row-reverse { flex-direction: row-reverse !important; }
-    .flex-small-column-reverse { flex-direction: column-reverse !important; }
+    .flex-small-row {
+        flex-direction: row !important;
+    }
 
-    .size-small-fullwidth { max-width: 100%; }
+    .flex-small-column {
+        flex-direction: column !important;
+    }
+
+    .flex-small-row-reverse {
+        flex-direction: row-reverse !important;
+    }
+
+    .flex-small-column-reverse {
+        flex-direction: column-reverse !important;
+    }
+
+    .size-small-fullwidth {
+        max-width: 100%;
+    }
 
     .center-fixed {
         left: 50%;
@@ -221,16 +274,28 @@ content-card {
 }
 
 
-
 /* Mobile */
 @media (max-width: 700px) {
 
-    .visible-not-xsmall { display: none; }
+    .visible-not-xsmall {
+        display: none;
+    }
 
-    .flex-xsmall-row { flex-direction: row !important; }
-    .flex-xsmall-column { flex-direction: column !important; }
-    .flex-xsmall-row-reverse { flex-direction: row-reverse !important; }
-    .flex-xsmall-column-reverse { flex-direction: column-reverse !important; }
+    .flex-xsmall-row {
+        flex-direction: row !important;
+    }
+
+    .flex-xsmall-column {
+        flex-direction: column !important;
+    }
+
+    .flex-xsmall-row-reverse {
+        flex-direction: row-reverse !important;
+    }
+
+    .flex-xsmall-column-reverse {
+        flex-direction: column-reverse !important;
+    }
 
     #header-dummy {
         height: 60px;

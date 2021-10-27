@@ -6,6 +6,7 @@ import xyz.lawlietbot.spring.backend.featurerequests.FRDynamicBean;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.frontend.Styles;
+import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.featurerequests.sort.FeatureRequestSort;
 import xyz.lawlietbot.spring.frontend.views.FeatureRequestsView;
 import com.vaadin.flow.component.UI;
@@ -43,7 +44,10 @@ public class FeatureRequestMain extends VerticalLayout {
         hr.getStyle().set("margin-bottom", "0");
         add(hr);
 
-        featureRequestPanel = new FeatureRequestPanel(sessionData, uiData, frDynamicBean);
+        ConfirmationDialog confirmationDialog = new ConfirmationDialog();
+        add(confirmationDialog);
+
+        featureRequestPanel = new FeatureRequestPanel(sessionData, uiData, frDynamicBean, confirmationDialog);
         page = checkPageBounds();
         featureRequestPanel.updateEntries(page, sort, search);
         featureRequestChangeSort.onPageChanged(page, featureRequestPanel.getPageSize(search));
