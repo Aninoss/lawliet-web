@@ -275,7 +275,16 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
             controlLayout.add(quantityLayout);
         }
         controlLayout.add(buyButton);
-        if (!getSessionData().isLoggedIn()) {
+        if (getSessionData().isLoggedIn()) {
+            Span manageSubscriptions = new Span(getTranslation("premium.managesubs"));
+            manageSubscriptions.setWidthFull();
+            manageSubscriptions.getStyle().set("text-align", "center")
+                    .set("text-decoration", "underline")
+                    .set("margin-bottom", "-8px")
+                    .set("cursor", "pointer");
+            manageSubscriptions.addClickListener(e -> dialog.open(getTranslation("premium.wip"), () -> {}));
+            controlLayout.add(manageSubscriptions);
+        } else {
             Span notLoggedIn = new Span(getTranslation("premium.notloggedin"));
             notLoggedIn.getStyle().set("color", "var(--lumo-error-text-color)")
                     .set("margin-bottom", "-8px");
