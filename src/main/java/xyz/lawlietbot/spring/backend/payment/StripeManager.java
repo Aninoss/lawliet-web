@@ -1,9 +1,6 @@
 package xyz.lawlietbot.spring.backend.payment;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Customer;
@@ -46,7 +43,8 @@ public class StripeManager {
                 .findFirst();
     }
 
-    public static String generateSession(SubDuration duration, SubLevel level, String returnUrl, long discordId, int quantity) throws StripeException {
+    public static String generateCheckoutSession(SubDuration duration, SubLevel level, long discordId, int quantity) throws StripeException {
+        String returnUrl = ExternalLinks.LAWLIET_PREMIUM;
         SessionCreateParams.Builder paramsBuilder = new SessionCreateParams.Builder()
                 .setSuccessUrl(returnUrl + "?session_id={CHECKOUT_SESSION_ID}")
                 .setCancelUrl(returnUrl)
@@ -78,6 +76,19 @@ public class StripeManager {
 
         Session session = Session.create(paramsBuilder.build());
         return session.getUrl();
+    }
+
+    public static String generateCustomerPortalSession(long discordId) throws StripeException {
+        Optional<Customer> customerOpt = StripeManager.retrieveCustomer(discordId);
+        if (customerOpt.isPresent()) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("customer", customerOpt.get().getId());
+
+            com.stripe.model.billingportal.Session session = com.stripe.model.billingportal.Session.create(params);
+            return session.getUrl();
+        } else {
+            return null;
+        }
     }
 
     public static synchronized void registerSubscription(Session session) throws StripeException {

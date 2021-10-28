@@ -29,7 +29,6 @@ import com.vaadin.flow.router.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import xyz.lawlietbot.spring.ExternalLinks;
 import xyz.lawlietbot.spring.NoLiteAccess;
 import xyz.lawlietbot.spring.backend.Redirector;
 import xyz.lawlietbot.spring.backend.commandlist.CommandListContainer;
@@ -259,7 +258,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
             if (discordUser != null) {
                 try {
                     int value = extractValueFromQuantity(quantity.getValue());
-                    String sessionUrl = StripeManager.generateSession(duration, level, ExternalLinks.LAWLIET_PREMIUM, discordUser.getId(), value);
+                    String sessionUrl = StripeManager.generateCheckoutSession(duration, level, discordUser.getId(), value);
                     new Redirector().redirect(sessionUrl);
                 } catch (Exception ex) {
                     LOGGER.error("Exception", ex);
@@ -282,7 +281,21 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                     .set("text-decoration", "underline")
                     .set("margin-bottom", "-8px")
                     .set("cursor", "pointer");
-            manageSubscriptions.addClickListener(e -> dialog.open(getTranslation("premium.wip"), () -> {}));
+            manageSubscriptions.addClickListener(e -> {
+                String sessionUrl = getSessionData().getDiscordUser().map(user -> {
+                    try {
+                        return StripeManager.generateCustomerPortalSession(user.getId());
+                    } catch (StripeException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }).orElse(null);
+                if (sessionUrl != null) {
+                    new Redirector().redirect(sessionUrl);
+                } else {
+                    dialog.open(getTranslation("premium.nosubs"), () -> {
+                    });
+                }
+            });
             controlLayout.add(manageSubscriptions);
         } else {
             Span notLoggedIn = new Span(getTranslation("premium.notloggedin"));
