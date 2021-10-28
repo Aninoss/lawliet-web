@@ -72,9 +72,8 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         super(sessionData, uiData);
         add(new PageHeader(getUiData(), getTitleText(), getTranslation("premium.desc"), getRoute()), dialog);
 
-        mainContent.addClassName(Styles.APP_WIDTH);
-        mainContent.setPadding(true);
-
+        mainContent.setPadding(false);
+        mainContent.setSpacing(false);
         mainContent.add(generateTiers());
         add(mainContent);
     }
@@ -82,7 +81,8 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
     private Component generateTiers() {
         VerticalLayout premiumContent = new VerticalLayout();
         premiumContent.setWidthFull();
-        premiumContent.setPadding(false);
+        premiumContent.setPadding(true);
+        premiumContent.addClassName(Styles.APP_WIDTH);
         premiumContent.getStyle().set("margin-bottom", "48px");
 
         premiumContent.add(generateTiersTitle(), generateSeparator(), generateTiersTiers());
@@ -303,17 +303,26 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
     }
 
     private Component generatePremium() {
-        VerticalLayout premiumContent = new VerticalLayout();
-        premiumContent.setWidthFull();
-        premiumContent.setPadding(false);
-        premiumContent.getStyle().set("margin-bottom", "120px");
+        Div premiumSegment = new Div();
+        premiumSegment.setWidthFull();
+        premiumSegment.getStyle().set("background", "var(--lumo-secondary)");
 
-        premiumContent.add(generatePremiumTitle(), generatePremiumSubtitle());
-        for (int i = 0; i < userPremium.getSlots().size(); i++) {
-            premiumContent.add(generatePremiumSlot(i));
+        VerticalLayout premiumContent = new VerticalLayout();
+        premiumContent.addClassName(Styles.APP_WIDTH);
+        premiumContent.setPadding(true);
+        premiumContent.getStyle().set("margin-top", "48px")
+                .set("margin-bottom", "56px");
+
+        boolean withSlots = userPremium != null && userPremium.getSlots().size() > 0;
+        premiumContent.add(generatePremiumTitle(), generatePremiumSubtitle(withSlots));
+        if (withSlots) {
+            for (int i = 0; i < userPremium.getSlots().size(); i++) {
+                premiumContent.add(generatePremiumSlot(i));
+            }
         }
 
-        return premiumContent;
+        premiumSegment.add(premiumContent);
+        return premiumSegment;
     }
 
     private Component generatePremiumTitle() {
@@ -322,7 +331,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         return title;
     }
 
-    private Component generatePremiumSubtitle() {
+    private Component generatePremiumSubtitle(boolean withSlots) {
         Paragraph p = new Paragraph(getTranslation("premium.subtitle"));
         p.getStyle().set("margin-bottom", "26px")
                 .set("margin-top", "0");
@@ -487,10 +496,6 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                     this.userSubscriptions = StripeManager.retrieveActiveSubscriptions(discordUser.getId());
                     this.userPremium = SendEvent.sendRequestUserPremium(discordUser.getId()).get(5, TimeUnit.SECONDS);
                     this.availableGuilds = new ArrayList<>(discordUser.getGuilds());
-                    if (userPremium.getSlots().size() > 0) {
-                        mainContent.addComponentAsFirst(generatePremium());
-                    }
-
                     StripeManager.retrieveCustomer(discordUser.getId())
                             .ifPresent(customer -> {
                                 currencySelect.setValue(SubCurrency.getFromCurrency(customer.getCurrency()));
@@ -501,6 +506,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                     CustomNotification.showError(getTranslation("error"));
                 }
             }
+            this.mainContent.add(generatePremium());
             setTiers();
         }
     }
