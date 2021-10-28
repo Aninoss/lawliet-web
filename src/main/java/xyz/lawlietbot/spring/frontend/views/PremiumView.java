@@ -1,6 +1,5 @@
 package xyz.lawlietbot.spring.frontend.views;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -27,11 +26,10 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import xyz.lawlietbot.spring.ExternalLinks;
 import xyz.lawlietbot.spring.NoLiteAccess;
 import xyz.lawlietbot.spring.backend.Redirector;
 import xyz.lawlietbot.spring.backend.commandlist.CommandListContainer;
@@ -70,7 +68,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
     private Div tiersContent = new Div();
     private boolean slotsBuild = false;
 
-    public PremiumView(@Autowired SessionData sessionData, @Autowired UIData uiData) throws IOException {
+    public PremiumView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         super(sessionData, uiData);
         add(new PageHeader(getUiData(), getTitleText(), getTranslation("premium.desc"), getRoute()), dialog);
 
@@ -81,7 +79,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         add(mainContent);
     }
 
-    private Component generateTiers() throws IOException {
+    private Component generateTiers() {
         VerticalLayout premiumContent = new VerticalLayout();
         premiumContent.setWidthFull();
         premiumContent.setPadding(false);
@@ -91,7 +89,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         return premiumContent;
     }
 
-    private Component generateTiersTitle() throws IOException {
+    private Component generateTiersTitle() {
         HorizontalLayout content = new HorizontalLayout();
         content.setWidthFull();
         content.setSpacing(false);
@@ -117,7 +115,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         return title;
     }
 
-    private Component generateTiersTitleDuration() throws IOException {
+    private Component generateTiersTitleDuration() {
         HorizontalLayout content = new HorizontalLayout();
         content.setSpacing(false);
         content.setPadding(false);
@@ -261,9 +259,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
             if (discordUser != null) {
                 try {
                     int value = extractValueFromQuantity(quantity.getValue());
-                    String domain = ((VaadinServletRequest) VaadinService.getCurrentRequest()).getServerName();
-                    String returnUrl = "https://" + domain + "/" + getRoute();
-                    String sessionUrl = StripeManager.generateSession(duration, level, returnUrl, discordUser.getId(), value);
+                    String sessionUrl = StripeManager.generateSession(duration, level, ExternalLinks.LAWLIET_PREMIUM, discordUser.getId(), value);
                     new Redirector().redirect(sessionUrl);
                 } catch (Exception ex) {
                     LOGGER.error("Exception", ex);
@@ -423,7 +419,8 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                     card.add(generateCardContent(guild, i, false));
                     refreshComboBoxes();
                 }
-            }, () -> {});
+            }, () -> {
+            });
         }
     }
 
@@ -472,7 +469,8 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
             try {
                 StripeManager.registerSubscription(Session.retrieve(sessionId));
                 ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-                confirmationDialog.open(getTranslation("premium.buy.success"), () -> {});
+                confirmationDialog.open(getTranslation("premium.buy.success"), () -> {
+                });
                 add(confirmationDialog);
             } catch (StripeException e) {
                 LOGGER.error("Could not update subscription", e);
@@ -492,6 +490,12 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                     if (userPremium.getSlots().size() > 0) {
                         mainContent.addComponentAsFirst(generatePremium());
                     }
+
+                    StripeManager.retrieveCustomer(discordUser.getId())
+                            .ifPresent(customer -> {
+                                currencySelect.setValue(SubCurrency.getFromCurrency(customer.getCurrency()));
+                                currencySelect.setVisible(false);
+                            });
                 } catch (InterruptedException | ExecutionException | TimeoutException | StripeException e) {
                     LOGGER.error("Could not load slots", e);
                     CustomNotification.showError(getTranslation("error"));

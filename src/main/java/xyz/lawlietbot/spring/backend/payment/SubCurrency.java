@@ -35,6 +35,15 @@ public enum SubCurrency {
         return symbol;
     }
 
+    public static SubCurrency getFromCurrency(String currency) {
+        for (SubCurrency value : values()) {
+            if (value.name().equalsIgnoreCase(currency)) {
+                return value;
+            }
+        }
+        return USD;
+    }
+
     public static synchronized SubCurrency retrieveDefaultCurrency(String ipAddress) {
         if (currencyHashMap.containsKey(ipAddress)) {
             return currencyHashMap.get(ipAddress);

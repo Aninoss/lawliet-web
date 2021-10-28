@@ -12,6 +12,9 @@ import com.stripe.model.checkout.Session;
 import com.stripe.param.CustomerListParams;
 import com.stripe.param.SubscriptionListParams;
 import com.stripe.param.checkout.SessionCreateParams;
+import com.vaadin.flow.component.UI;
+import xyz.lawlietbot.spring.ExternalLinks;
+import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 public class StripeManager {
 
@@ -21,7 +24,9 @@ public class StripeManager {
         return Subscription.list(SubscriptionListParams.builder()
                         .setStatus(SubscriptionListParams.Status.ACTIVE)
                         .build()
-                ).getData().stream()
+                )
+                .getData()
+                .stream()
                 .filter(sub -> sub.getMetadata().containsKey("discord_id") && sub.getMetadata().get("discord_id").equals(String.valueOf(userId)))
                 .collect(Collectors.toList());
     }
@@ -50,7 +55,7 @@ public class StripeManager {
                 .putMetadata("discord_id", String.valueOf(discordId))
                 .putMetadata("unlock_servers", String.valueOf(level.getSubLevelType() == SubLevelType.PRO))
                 .setAutomaticTax(SessionCreateParams.AutomaticTax.builder().setEnabled(false).build())
-                .setAllowPromotionCodes(true)
+                .setAllowPromotionCodes(duration == SubDuration.MONTHLY)
                 .addLineItem(new SessionCreateParams.LineItem.Builder()
                         .setQuantity((long) quantity)
                         .setPrice(StripeManager.getPriceId(duration, level))
@@ -89,6 +94,11 @@ public class StripeManager {
         Map<String, String> metadata = session.getMetadata();
         Customer.retrieve(session.getCustomer()).update(Map.of("metadata", metadata));
         subscription.update(Map.of("metadata", metadata));
+        SendEvent.sendStripe(
+                Long.parseLong(metadata.get("discord_id")),
+                UI.getCurrent().getTranslation("premium.usermessage.title"),
+                UI.getCurrent().getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE)
+        );
     }
 
     public static String getPriceId(SubDuration duration, SubLevel level) {

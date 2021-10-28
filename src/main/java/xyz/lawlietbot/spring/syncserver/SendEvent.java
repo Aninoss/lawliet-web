@@ -148,6 +148,19 @@ public class SendEvent {
         );
     }
 
+    public static CompletableFuture<Void> sendStripe(long userId, String title, String desc) {
+        JSONObject json = new JSONObject();
+        json.put("user_id", userId);
+        json.put("title", title);
+        json.put("desc", desc);
+
+        return process(
+                "STRIPE",
+                json,
+                r -> null
+        );
+    }
+
     private static <T> CompletableFuture<T> process(String event, JSONObject dataJson, Function<JSONObject, T> function) {
         CompletableFuture<T> future = new CompletableFuture<>();
 
