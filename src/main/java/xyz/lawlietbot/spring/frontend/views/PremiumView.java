@@ -252,7 +252,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         if (getSessionData().isLoggedIn()) {
             buyButton.setEnabled(level.getSubLevelType() == SubLevelType.PRO || userSubscriptions.isEmpty());
         } else {
-            buyButton.setText(getTranslation("category.discordlogin"));
+            buyButton.setText(getTranslation("login"));
         }
         buyButton.addClickListener(e -> {
             DiscordUser discordUser = getSessionData().getDiscordUser().orElse(null);
@@ -313,12 +313,17 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         premiumContent.getStyle().set("margin-top", "48px")
                 .set("margin-bottom", "56px");
 
-        boolean withSlots = userPremium != null && userPremium.getSlots().size() > 0;
-        premiumContent.add(generatePremiumTitle(), generatePremiumSubtitle(withSlots));
-        if (withSlots) {
-            for (int i = 0; i < userPremium.getSlots().size(); i++) {
-                premiumContent.add(generatePremiumSlot(i));
+        premiumContent.add(generatePremiumTitle(), generatePremiumSubtitle());
+        if (userPremium != null) {
+            if (userPremium.getSlots().size() > 0) {
+                for (int i = 0; i < userPremium.getSlots().size(); i++) {
+                    premiumContent.add(generatePremiumSlot(i));
+                }
+            } else {
+                premiumContent.add(generateNoPremiumCard(getTranslation("premium.slots.noslots"), false));
             }
+        } else {
+            premiumContent.add(generateNoPremiumCard(getTranslation("logout.status"), true));
         }
 
         premiumSegment.add(premiumContent);
@@ -331,11 +336,42 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         return title;
     }
 
-    private Component generatePremiumSubtitle(boolean withSlots) {
+    private Component generatePremiumSubtitle() {
         Paragraph p = new Paragraph(getTranslation("premium.subtitle"));
         p.getStyle().set("margin-bottom", "26px")
                 .set("margin-top", "0");
         return p;
+    }
+
+    private Component generateNoPremiumCard(String text, boolean withLoginButton) {
+        Card card = new Card();
+        card.setWidthFull();
+        card.setHeight("72px");
+        card.getStyle().set("margin-bottom", "-8px");
+
+        card.add(generateNoPremiumCardContent(text, withLoginButton));
+        cards.add(card);
+        return card;
+    }
+
+    private Component generateNoPremiumCardContent(String text, boolean withLoginButton) {
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+        horizontalLayout.setSizeFull();
+        horizontalLayout.setPadding(true);
+        horizontalLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+
+        Label label = new Label(text);
+        horizontalLayout.add(label);
+        horizontalLayout.setFlexGrow(1, label);
+
+        if (withLoginButton) {
+            Button login = new Button(getTranslation("login"));
+            login.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            Anchor loginAnchor = new Anchor(getSessionData().getLoginUrl(), login);
+            horizontalLayout.add(loginAnchor);
+        }
+
+        return horizontalLayout;
     }
 
     private Component generatePremiumSlot(int i) {
