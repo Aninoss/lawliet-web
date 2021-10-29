@@ -116,22 +116,22 @@ public class StripeManager {
         if (duration == SubDuration.MONTHLY) {
             switch (level) {
                 case BASIC_USD:
-                    return "price_1JnmJ4AXVG0I7dQKbrLsqgoo";
+                    return "price_1Jpwd7AXVG0I7dQKmwG96kMu";
 
                 case BASIC_EUR:
-                    return "price_1Jo8LdAXVG0I7dQKzdLBOlB7";
+                    return "price_1Jpwd7AXVG0I7dQK5ynjRkk5";
 
                 case BASIC_GBP:
-                    return "price_1JoXFMAXVG0I7dQKebMAcbQr";
+                    return "price_1Jpwd7AXVG0I7dQKfhQJedUf";
 
                 case PRO_USD:
-                    return "price_1Jo8i6AXVG0I7dQKYCLy5TEm";
+                    return "price_1JpwdFAXVG0I7dQKXJMsmNud";
 
                 case PRO_EUR:
-                    return "price_1Jo8j8AXVG0I7dQKYHzodoF7";
+                    return "price_1JpwdFAXVG0I7dQKyU3a6BNu";
 
                 case PRO_GBP:
-                    return "price_1JoXHTAXVG0I7dQKu1BTc3LK";
+                    return "price_1JpwdEAXVG0I7dQK19ORzM8E";
 
                 default:
                     return null;
@@ -139,22 +139,22 @@ public class StripeManager {
         } else {
             switch (level) {
                 case BASIC_USD:
-                    return "price_1JnmKUAXVG0I7dQKMDzrczi5";
+                    return "price_1Jpwd7AXVG0I7dQKrwBUQn2M";
 
                 case BASIC_EUR:
-                    return "price_1Jo8LLAXVG0I7dQKP9SuM54c";
+                    return "price_1Jpwd7AXVG0I7dQKMLeVC8uZ";
 
                 case BASIC_GBP:
-                    return "price_1JoXFnAXVG0I7dQKS7Jg9xBl";
+                    return "price_1Jpwd7AXVG0I7dQKmnRfmc51";
 
                 case PRO_USD:
-                    return "price_1Jo8kBAXVG0I7dQK1LOdDXB8";
+                    return "price_1JpwdFAXVG0I7dQK26d9VRiA";
 
                 case PRO_EUR:
-                    return "price_1Jo8oEAXVG0I7dQKkRacDwFk";
+                    return "price_1JpwdEAXVG0I7dQK4VBLgW7l";
 
                 case PRO_GBP:
-                    return "price_1JoXHeAXVG0I7dQKK4CXf9X9";
+                    return "price_1JpwdEAXVG0I7dQK70LbHisi";
 
                 default:
                     return null;
