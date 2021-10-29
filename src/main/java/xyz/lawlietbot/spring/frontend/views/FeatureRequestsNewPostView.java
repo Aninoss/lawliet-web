@@ -1,16 +1,7 @@
 package xyz.lawlietbot.spring.frontend.views;
 
-import xyz.lawlietbot.spring.backend.featurerequests.FRNewBean;
-import xyz.lawlietbot.spring.backend.userdata.SessionData;
-import xyz.lawlietbot.spring.backend.userdata.UIData;
-import xyz.lawlietbot.spring.frontend.components.CustomNotification;
-import xyz.lawlietbot.spring.frontend.components.PageHeader;
-import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
-import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
-import xyz.lawlietbot.spring.frontend.Styles;
-import xyz.lawlietbot.spring.LoginAccess;
-import xyz.lawlietbot.spring.NoLiteAccess;
-import xyz.lawlietbot.spring.syncserver.SendEvent;
+import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -25,13 +16,22 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
-import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RoutePrefix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Arrays;
-import java.util.concurrent.ExecutionException;
+import xyz.lawlietbot.spring.LoginAccess;
+import xyz.lawlietbot.spring.NoLiteAccess;
+import xyz.lawlietbot.spring.backend.featurerequests.FRNewBean;
+import xyz.lawlietbot.spring.backend.userdata.SessionData;
+import xyz.lawlietbot.spring.backend.userdata.UIData;
+import xyz.lawlietbot.spring.frontend.Styles;
+import xyz.lawlietbot.spring.frontend.components.CustomNotification;
+import xyz.lawlietbot.spring.frontend.components.PageHeader;
+import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
+import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
+import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 @Route(value = "new", layout = MainLayout.class)
 @RoutePrefix("featurerequests")
@@ -76,7 +76,6 @@ public class FeatureRequestsNewPostView extends PageLayout {
 
         Button btSubmit = new Button(getTranslation("fr.new.submit"));
         btSubmit.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        btSubmit.addClickShortcut(Key.ENTER);
         btSubmit.addClickListener(event -> {
             try {
                 binder.writeBean(newBean);
