@@ -11,6 +11,7 @@ import com.stripe.param.SubscriptionListParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import com.vaadin.flow.component.UI;
 import xyz.lawlietbot.spring.ExternalLinks;
+import xyz.lawlietbot.spring.backend.UICache;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 public class StripeManager {
@@ -105,11 +106,15 @@ public class StripeManager {
         Map<String, String> metadata = session.getMetadata();
         Customer.retrieve(session.getCustomer()).update(Map.of("metadata", metadata));
         subscription.update(Map.of("metadata", metadata));
-        SendEvent.sendStripe(
-                Long.parseLong(metadata.get("discord_id")),
-                UI.getCurrent().getTranslation("premium.usermessage.title"),
-                UI.getCurrent().getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE)
-        );
+        long discordId = Long.parseLong(metadata.get("discord_id"));
+        UI ui = UICache.get(discordId);
+        if (ui != null) {
+            SendEvent.sendStripe(
+                    discordId,
+                    ui.getTranslation("premium.usermessage.title"),
+                    ui.getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE)
+            );
+        }
     }
 
     public static String getPriceId(SubDuration duration, SubLevel level) {

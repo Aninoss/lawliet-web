@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import xyz.lawlietbot.spring.NoLiteAccess;
 import xyz.lawlietbot.spring.backend.Redirector;
+import xyz.lawlietbot.spring.backend.UICache;
 import xyz.lawlietbot.spring.backend.commandlist.CommandListContainer;
 import xyz.lawlietbot.spring.backend.commandlist.CommandListSlot;
 import xyz.lawlietbot.spring.backend.payment.*;
@@ -259,6 +260,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                 try {
                     int value = extractValueFromQuantity(quantity.getValue());
                     String sessionUrl = StripeManager.generateCheckoutSession(duration, level, discordUser.getId(), value);
+                    UICache.put(discordUser.getId(), UI.getCurrent());
                     new Redirector().redirect(sessionUrl);
                 } catch (Exception ex) {
                     LOGGER.error("Exception", ex);
