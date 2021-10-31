@@ -259,7 +259,13 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
             if (discordUser != null) {
                 try {
                     int value = extractValueFromQuantity(quantity.getValue());
-                    String sessionUrl = StripeManager.generateCheckoutSession(duration, level, discordUser.getId(), value);
+                    String sessionUrl = StripeManager.generateCheckoutSession(
+                            duration,
+                            level,
+                            discordUser.getId(),
+                            discordUser.getUsername() + "#" + discordUser.getDiscriminator(),
+                            value
+                    );
                     UICache.put(discordUser.getId(), UI.getCurrent());
                     new Redirector().redirect(sessionUrl);
                 } catch (Exception ex) {
@@ -314,9 +320,14 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
     }
 
     private int countPremiumCommands() {
-        return CommandListContainer.getInstance().getCategories().stream()
-                .mapToInt(category -> (int) category.getSlots().stream().filter(CommandListSlot::isPatreonOnly).count())
-                .sum();
+        try {
+            return CommandListContainer.getInstance().getCategories().stream()
+                    .mapToInt(category -> (int) category.getSlots().stream().filter(CommandListSlot::isPatreonOnly).count())
+                    .sum();
+        } catch (Throwable e) {
+            LOGGER.error("Error", e);
+            return -1;
+        }
     }
 
     private Component generateTierPerk(Icon icon, String text) {

@@ -44,7 +44,7 @@ public class StripeManager {
                 .findFirst();
     }
 
-    public static String generateCheckoutSession(SubDuration duration, SubLevel level, long discordId, int quantity) throws StripeException {
+    public static String generateCheckoutSession(SubDuration duration, SubLevel level, long discordId, String discordTag, int quantity) throws StripeException {
         String returnUrl = ExternalLinks.LAWLIET_PREMIUM;
         SessionCreateParams.Builder paramsBuilder = new SessionCreateParams.Builder()
                 .setSuccessUrl(returnUrl + "?session_id={CHECKOUT_SESSION_ID}")
@@ -53,6 +53,9 @@ public class StripeManager {
                 .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                 .putMetadata("discord_id", String.valueOf(discordId))
                 .putMetadata("unlock_servers", String.valueOf(level.getSubLevelType() == SubLevelType.PRO))
+                .putMetadata("quantity", String.valueOf(quantity))
+                .putMetadata("tier", level.getSubLevelType().name() + " " + duration.name())
+                .putMetadata("discord_tag", discordTag)
                 .setAutomaticTax(SessionCreateParams.AutomaticTax.builder().setEnabled(false).build())
                 .setAllowPromotionCodes(duration == SubDuration.MONTHLY)
                 .addLineItem(new SessionCreateParams.LineItem.Builder()
