@@ -10,6 +10,7 @@ import com.stripe.param.CustomerListParams;
 import com.stripe.param.SubscriptionListParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import com.vaadin.flow.component.UI;
+import org.apache.commons.lang3.text.WordUtils;
 import xyz.lawlietbot.spring.ExternalLinks;
 import xyz.lawlietbot.spring.backend.UICache;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
@@ -54,7 +55,7 @@ public class StripeManager {
                 .putMetadata("discord_id", String.valueOf(discordId))
                 .putMetadata("unlock_servers", String.valueOf(level.getSubLevelType() == SubLevelType.PRO))
                 .putMetadata("quantity", String.valueOf(quantity))
-                .putMetadata("tier", level.getSubLevelType().name() + " " + duration.name())
+                .putMetadata("tier", WordUtils.capitalizeFully(level.getSubLevelType().name() + " " + duration.name()))
                 .putMetadata("discord_tag", discordTag)
                 .setAutomaticTax(SessionCreateParams.AutomaticTax.builder().setEnabled(false).build())
                 .setAllowPromotionCodes(duration == SubDuration.MONTHLY)
