@@ -23,7 +23,6 @@ public class FooterArea extends Footer {
                 {"footer.upvote", ExternalLinks.UPVOTE_URL},
                 {"footer.invite", uiData.getBotInviteUrl()},
                 {"footer.server", ExternalLinks.SERVER_INVITE_URL},
-                {"footer.patreon", ExternalLinks.PATREON_PAGE},
                 {"footer.privacy", PrivacyView.class}
         };
 

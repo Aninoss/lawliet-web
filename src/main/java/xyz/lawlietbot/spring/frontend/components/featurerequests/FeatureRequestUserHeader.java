@@ -70,7 +70,7 @@ public class FeatureRequestUserHeader extends Card {
 
         Button patreonButton = new Button(getTranslation("fr.patreon"));
         patreonButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        Anchor patreonAnchor = new Anchor(ExternalLinks.PATREON_PAGE, patreonButton);
+        Anchor patreonAnchor = new Anchor(ExternalLinks.LAWLIET_PREMIUM, patreonButton);
         patreonAnchor.setTarget("_blank");
 
         layout.add(patreonAnchor, postButton);
