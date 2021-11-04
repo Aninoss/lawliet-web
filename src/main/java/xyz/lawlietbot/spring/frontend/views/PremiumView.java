@@ -85,7 +85,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         premiumContent.addClassName(Styles.APP_WIDTH);
         premiumContent.getStyle().set("margin-bottom", "48px");
 
-        premiumContent.add(generateTiersTitle(), generateSeparator(), generateTiersTiers());
+        premiumContent.add(generateTiersTitle(), generateTiersSubtitle(), generateSeparator(), generateTiersTiers());
         return premiumContent;
     }
 
@@ -99,6 +99,12 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         content.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         content.add(generateTiersTitleText(), generateTiersTitleDuration());
         return content;
+    }
+
+    private Component generateTiersSubtitle() {
+        Span span = new Span(getTranslation("premium.tiers.subtitle"));
+        span.setWidthFull();
+        return span;
     }
 
     private Component generateSeparator() {
@@ -547,9 +553,13 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
             String sessionId = parametersMap.get("session_id").get(0);
             UI.getCurrent().getPage().getHistory().replaceState(null, getRoute());
             try {
-                StripeManager.registerSubscription(Session.retrieve(sessionId));
+                Session session = Session.retrieve(sessionId);
+                StripeManager.registerSubscription(session);
+
+                boolean unlockServers = Boolean.parseBoolean(session.getMetadata().getOrDefault("unlock_servers", "false"));
+                String dialogText = unlockServers ? "premium.buy.success.pro" : "premium.buy.success";
                 ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-                confirmationDialog.open(getTranslation("premium.buy.success"), () -> {
+                confirmationDialog.open(getTranslation(dialogText), () -> {
                 });
                 add(confirmationDialog);
             } catch (StripeException e) {
