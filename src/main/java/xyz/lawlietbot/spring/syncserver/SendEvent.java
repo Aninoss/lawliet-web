@@ -136,10 +136,11 @@ public class SendEvent {
         );
     }
 
-    public static CompletableFuture<Void> sendReport(String url, String reason) {
+    public static CompletableFuture<Void> sendReport(String url, String reason, String ip) {
         JSONObject json = new JSONObject();
         json.put("url", url);
         json.put("text", reason);
+        json.put("ip_hash", ip.hashCode());
 
         return process(
                 "REPORT",

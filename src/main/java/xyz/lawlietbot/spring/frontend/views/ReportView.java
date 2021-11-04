@@ -136,7 +136,8 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
             if (reason.getValue().replaceAll("\\s", "").length() > 0) {
                 reason.setInvalid(false);
                 try {
-                    SendEvent.sendReport(urlSelect.getValue(), reason.getValue()).get(5, TimeUnit.SECONDS);
+                    SendEvent.sendReport(urlSelect.getValue(), reason.getValue(), UI.getCurrent().getSession().getBrowser().getAddress())
+                            .get(5, TimeUnit.SECONDS);
                     CustomNotification.showSuccess(getTranslation("report.success"));
                     UI.getCurrent().navigate(HomeView.class);
                 } catch (InterruptedException | ExecutionException | TimeoutException ex) {
