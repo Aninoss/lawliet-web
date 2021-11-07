@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import xyz.lawlietbot.spring.backend.payment.StripeCache;
 import xyz.lawlietbot.spring.syncserver.SyncManager;
 
 /**
@@ -22,6 +23,7 @@ public class Application extends SpringBootServletInitializer {
         LOGGER.info("###########################");
         Console.getInstance().start();
         SyncManager.getInstance().start();
+        StripeCache.startScheduler();
     }
 
 }

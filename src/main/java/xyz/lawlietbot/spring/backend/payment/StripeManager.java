@@ -6,8 +6,6 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.Customer;
 import com.stripe.model.Subscription;
 import com.stripe.model.checkout.Session;
-import com.stripe.param.CustomerListParams;
-import com.stripe.param.SubscriptionListParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import com.vaadin.flow.component.UI;
 import org.apache.commons.lang3.text.WordUtils;
@@ -20,24 +18,19 @@ public class StripeManager {
     private static final HashSet<String> usedSubscriptions = new HashSet<>();
 
     public static List<Subscription> retrieveActiveSubscriptions(long userId) throws StripeException {
-        return Subscription.list(SubscriptionListParams.builder()
-                        .setStatus(SubscriptionListParams.Status.ACTIVE)
-                        .build()
-                )
-                .getData()
+        return StripeCache.getSubscriptions()
                 .stream()
                 .filter(sub -> sub.getMetadata().containsKey("discord_id") && sub.getMetadata().get("discord_id").equals(String.valueOf(userId)))
                 .collect(Collectors.toList());
     }
 
-    public static Optional<Customer> retrieveCustomer(long userId) throws StripeException {
+    public static Optional<Customer> retrieveCustomer(long userId) {
         return retrieveCustomer(userId, null);
     }
 
-    public static Optional<Customer> retrieveCustomer(long userId, SubCurrency currency) throws StripeException {
-        return Customer.list(CustomerListParams.builder()
-                .build()
-        ).getData().stream()
+    public static Optional<Customer> retrieveCustomer(long userId, SubCurrency currency) {
+        return StripeCache.getCustomers()
+                .stream()
                 .filter(customer -> customer.getMetadata().containsKey("discord_id") &&
                         customer.getMetadata().get("discord_id").equals(String.valueOf(userId)) &&
                         (currency == null || customer.getCurrency().equalsIgnoreCase(currency.name()))
@@ -101,6 +94,7 @@ public class StripeManager {
             usedSubscriptions.add(session.getId());
             Subscription subscription = Subscription.retrieve(session.getSubscription());
             if (subscription.getMetadata().isEmpty()) {
+                StripeCache.reload();
                 processSubscription(session, subscription);
             }
         }
