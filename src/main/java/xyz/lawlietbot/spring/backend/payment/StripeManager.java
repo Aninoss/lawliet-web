@@ -94,8 +94,8 @@ public class StripeManager {
             usedSubscriptions.add(session.getId());
             Subscription subscription = Subscription.retrieve(session.getSubscription());
             if (subscription.getMetadata().isEmpty()) {
-                StripeCache.reload();
                 processSubscription(session, subscription);
+                StripeCache.reload();
             }
         }
     }
