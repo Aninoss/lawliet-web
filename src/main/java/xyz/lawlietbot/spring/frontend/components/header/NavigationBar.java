@@ -21,6 +21,7 @@ public class NavigationBar extends Tabs implements AfterNavigationObserver {
                 new NavigationBarLink(CommandsView.class),
                 new NavigationBarLink(FAQView.class),
                 new NavigationBarLink(FeatureRequestsView.class),
+                new NavigationBarLink(DashboardView.class),
                 new NavigationBarLink(PremiumView.class).standOut(),
                 new NavigationBarLink(uiData.getBotInviteUrl(), "invite"),
                 new NavigationBarLink(ExternalLinks.SERVER_INVITE_URL, "server"),
