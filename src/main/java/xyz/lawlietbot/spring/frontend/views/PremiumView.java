@@ -439,11 +439,16 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         if (guild == null) {
             Label label = new Label(getTranslation("premium.notset"));
             horizontalLayout.add(label);
-            horizontalLayout.setFlexGrow(1, label);
+
+            HorizontalLayout guildLayout = new HorizontalLayout();
+            guildLayout.setPadding(false);
+            guildLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+            guildLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
             GuildComboBox guildComboBox = new GuildComboBox();
+            guildComboBox.getStyle().set("max-width", "300px");
             guildComboBox.setItems(availableGuilds);
-            horizontalLayout.add(guildComboBox);
+            guildLayout.add(guildComboBox);
             comboBoxMap.put(i, guildComboBox);
 
             Button button = new Button(VaadinIcon.PLUS.create());
@@ -453,7 +458,11 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                 }
             });
             button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            horizontalLayout.add(button);
+            guildLayout.add(button);
+            guildLayout.setFlexGrow(1, guildComboBox);
+
+            horizontalLayout.add(guildLayout);
+            horizontalLayout.setFlexGrow(1, guildLayout);
         } else {
             comboBoxMap.remove(i);
             availableGuilds.remove(guild);
