@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import xyz.lawlietbot.spring.LoginAccess;
+import xyz.lawlietbot.spring.NavBarSolid;
 import xyz.lawlietbot.spring.NoLiteAccess;
 import xyz.lawlietbot.spring.SetDivStretchBackground;
 import xyz.lawlietbot.spring.backend.Redirector;
@@ -45,6 +46,7 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
     private UIData uiData;
     private String target;
     private Div divStretch;
+    private HeaderComponent headerComponent;
 
     public MainLayout(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         if (VaadinSession.getCurrent().getBrowser().isIE()) return;
@@ -67,7 +69,8 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
 
         VerticalMenuBarComponent verticalMenuBarComponent = new VerticalMenuBarComponent(sessionData, uiData);
 
-        UI.getCurrent().getElement().appendChild(new HeaderComponent(sessionData, uiData).getElement());
+        headerComponent = new HeaderComponent(sessionData, uiData);
+        UI.getCurrent().getElement().appendChild(headerComponent.getElement());
         UI.getCurrent().getElement().appendChild(blackscreen.getElement());
         UI.getCurrent().getElement().appendChild(verticalMenuBarComponent.getElement());
         UI.getCurrent().getElement().appendChild(new CookieConsent().getElement());
@@ -99,10 +102,15 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
                 divStretch.getStyle().set("background", background);
             }
 
-            if (checkLiteModeAccess(event)) return;
+            if (checkLiteModeAccess(event)) {
+                return;
+            }
             setPageTarget(c);
-            if (checkBrowserIE(event)) return;
+            if (checkBrowserIE(event)) {
+                return;
+            }
             checkLoginStatusChanged(event);
+            headerComponent.setNavBarSolid(event.getNavigationTarget().isAnnotationPresent(NavBarSolid.class));
         }
     }
 

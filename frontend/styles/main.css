@@ -20,6 +20,11 @@
     background-color: var(--lumo-shade);
 }
 
+.solid#header-out {
+    transform: translateY(-8px);
+    background-color: var(--lumo-shade);
+}
+
 .lite#header-out {
     transform: translateY(-8px);
     background-color: var(--lumo-shade);

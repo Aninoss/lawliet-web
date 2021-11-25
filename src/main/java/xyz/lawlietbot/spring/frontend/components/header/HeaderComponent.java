@@ -50,11 +50,11 @@ public class HeaderComponent extends Header {
         content.add(logo);
 
         //Navigation Bar
-        NavigationBar tabs = new NavigationBar(uiData);
-        tabs.setOrientation(Tabs.Orientation.HORIZONTAL);
-        tabs.addClassName(Styles.VISIBLE_NOTMOBILE);
+        NavigationBar navigationBar = new NavigationBar(uiData);
+        navigationBar.setOrientation(Tabs.Orientation.HORIZONTAL);
+        navigationBar.addClassName(Styles.VISIBLE_NOTMOBILE);
 
-        Nav nav = new Nav(tabs);
+        Nav nav = new Nav(navigationBar);
         nav.setMinWidth("0px");
         content.add(nav);
 
@@ -101,6 +101,10 @@ public class HeaderComponent extends Header {
 
         content.setFlexGrow(1, nav);
         add(content);
+    }
+
+    public void setNavBarSolid(boolean solid) {
+        setClassName("solid", solid);
     }
 
 }

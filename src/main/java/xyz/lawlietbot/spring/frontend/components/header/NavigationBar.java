@@ -1,5 +1,6 @@
 package xyz.lawlietbot.spring.frontend.components.header;
 
+import com.vaadin.flow.component.tabs.TabsVariant;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.ExternalLinks;
 import com.vaadin.flow.component.Component;
@@ -22,7 +23,7 @@ public class NavigationBar extends Tabs implements AfterNavigationObserver {
                 new NavigationBarLink(FAQView.class),
                 new NavigationBarLink(FeatureRequestsView.class),
                 new NavigationBarLink(DashboardView.class),
-                new NavigationBarLink(PremiumView.class).standOut(),
+                new NavigationBarLink(PremiumView.class),
                 new NavigationBarLink(uiData.getBotInviteUrl(), "invite"),
                 new NavigationBarLink(ExternalLinks.SERVER_INVITE_URL, "server"),
         };
@@ -36,20 +37,20 @@ public class NavigationBar extends Tabs implements AfterNavigationObserver {
             }
         }
 
+        addThemeVariants(TabsVariant.LUMO_MINIMAL);
         setSelectedIndex(-1);
-
         addSelectedChangeListener(this::onSelectChangeListener);
     }
 
     private void onSelectChangeListener(SelectedChangeEvent event) {
-        if (event.getSelectedTab().getChildren().anyMatch(children -> children instanceof Anchor))
+        if (event.getSelectedTab().getChildren().anyMatch(children -> children instanceof Anchor)) {
             setSelectedTab(event.getPreviousTab());
+        }
     }
 
     @Override
     public void afterNavigation(AfterNavigationEvent afterNavigationEvent) {
         String path = afterNavigationEvent.getLocation().getPath();
-
         for (int i = 0; i < getComponentCount(); i++) {
             Component c = getComponentAt(i);
             if (c instanceof Tab) {
@@ -57,8 +58,9 @@ public class NavigationBar extends Tabs implements AfterNavigationObserver {
                         .filter(child -> child instanceof RouterLink)
                         .map(routerLink -> (RouterLink) routerLink)
                         .anyMatch(routerLink -> (path.startsWith(routerLink.getHref()) && !routerLink.getHref().isEmpty()) || path.equals(routerLink.getHref()));
-
-                if (found) setSelectedIndex(i);
+                if (found) {
+                    setSelectedIndex(i);
+                }
             }
         }
     }

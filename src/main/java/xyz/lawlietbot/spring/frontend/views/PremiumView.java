@@ -14,7 +14,6 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
@@ -41,10 +40,7 @@ import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.backend.util.StringUtil;
 import xyz.lawlietbot.spring.frontend.Styles;
-import xyz.lawlietbot.spring.frontend.components.Card;
-import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
-import xyz.lawlietbot.spring.frontend.components.CustomNotification;
-import xyz.lawlietbot.spring.frontend.components.PageHeader;
+import xyz.lawlietbot.spring.frontend.components.*;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
@@ -58,7 +54,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
 
     private final VerticalLayout mainContent = new VerticalLayout();
     private final ArrayList<Card> cards = new ArrayList<>();
-    private final HashMap<Integer, ComboBox<Guild>> comboBoxMap = new HashMap<>();
+    private final HashMap<Integer, GuildComboBox> comboBoxMap = new HashMap<>();
     private final ConfirmationDialog dialog = new ConfirmationDialog();
     private final Select<SubDuration> durationSelect = new Select<>();
     private final Select<SubCurrency> currencySelect = new Select<>();
@@ -445,9 +441,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
             horizontalLayout.add(label);
             horizontalLayout.setFlexGrow(1, label);
 
-            ComboBox<Guild> guildComboBox = new ComboBox<>();
-            guildComboBox.setItemLabelGenerator((ItemLabelGenerator<Guild>) Guild::getName);
-            guildComboBox.setPlaceholder(getTranslation("premium.server"));
+            GuildComboBox guildComboBox = new GuildComboBox();
             guildComboBox.setItems(availableGuilds);
             horizontalLayout.add(guildComboBox);
             comboBoxMap.put(i, guildComboBox);

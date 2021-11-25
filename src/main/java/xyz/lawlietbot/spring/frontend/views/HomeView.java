@@ -9,7 +9,6 @@ import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.frontend.components.home.botinfo.BotInfoLayout;
 import xyz.lawlietbot.spring.frontend.components.home.botpros.BotPropertiesList;
 import xyz.lawlietbot.spring.frontend.components.home.botpros.BotProsLayout;
-import xyz.lawlietbot.spring.frontend.components.home.botstats.BotStatsLayout;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
 
