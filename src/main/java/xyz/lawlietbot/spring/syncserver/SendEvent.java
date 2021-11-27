@@ -2,10 +2,12 @@ package xyz.lawlietbot.spring.syncserver;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import xyz.lawlietbot.spring.backend.dashboard.DashboardInitData;
 import xyz.lawlietbot.spring.backend.featurerequests.FRDynamicBean;
 import xyz.lawlietbot.spring.backend.featurerequests.FRPanelType;
 import xyz.lawlietbot.spring.backend.premium.UserPremium;
@@ -159,6 +161,30 @@ public class SendEvent {
                 "STRIPE",
                 json,
                 r -> null
+        );
+    }
+
+    public static CompletableFuture<DashboardInitData> sendDashboardInit(long guildId, Locale locale) {
+        JSONObject json = new JSONObject();
+        json.put("guild_id", guildId);
+        json.put("locale", locale);
+
+        return process(
+                "DASH_INIT",
+                json,
+                r -> {
+                    ArrayList<DashboardInitData.Category> categories = new ArrayList<>();
+                    JSONArray titlesJson = r.getJSONArray("titles");
+                    for (int i = 0; i < titlesJson.length(); i++) {
+                        JSONObject data = titlesJson.getJSONObject(i);
+                        DashboardInitData.Category category = new DashboardInitData.Category(
+                                data.getString("id"),
+                                data.getString("title")
+                        );
+                        categories.add(category);
+                    }
+                    return new DashboardInitData(categories);
+                }
         );
     }
 

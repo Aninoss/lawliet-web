@@ -1,9 +1,8 @@
 package xyz.lawlietbot.spring.frontend.views;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -20,12 +19,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import xyz.lawlietbot.spring.LoginAccess;
 import xyz.lawlietbot.spring.NavBarSolid;
 import xyz.lawlietbot.spring.NoLiteAccess;
+import xyz.lawlietbot.spring.backend.dashboard.DashboardInitData;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.frontend.Styles;
 import xyz.lawlietbot.spring.frontend.components.GuildComboBox;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
+import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 @Route(value = "dashboard", layout = MainLayout.class)
 @CssImport("./styles/dashboard.css")
@@ -36,7 +37,7 @@ public class DashboardView extends PageLayout {
 
     private final VerticalLayout mainLayout = new VerticalLayout();
     private final Tabs categoryTabs = new Tabs();
-    private List<Category> categoryList;
+    private List<DashboardInitData.Category> categoryList;
 
     public DashboardView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         super(sessionData, uiData);
@@ -78,8 +79,8 @@ public class DashboardView extends PageLayout {
         categoryTabs.getStyle().set("margin-left", "-16px");
         categoryTabs.addSelectedChangeListener(e -> {
             if (categoryTabs.getSelectedIndex() >= 0) {
-                String id = categoryList.get(categoryTabs.getSelectedIndex()).id;
-                updateMainContent(id);
+                DashboardInitData.Category category = categoryList.get(categoryTabs.getSelectedIndex());
+                updateMainContent(category);
             }
         });
 
@@ -103,11 +104,11 @@ public class DashboardView extends PageLayout {
         guildComboBox.setWidthFull();
         guildComboBox.addValueChangeListener(e -> {
             categoryTabs.removeAll();
-            categoryList = Stream.of("General", "Reaction Roles", "Giveaway", "Invite Tracking", "Tickets")
-                    .map(s -> new Category(s, s))
-                    .collect(Collectors.toList());
-            for (Category category : categoryList) {
-                Tab tab = new Tab(category.name);
+            long guildId = e.getValue().getId();
+            DashboardInitData dashboardInitData = SendEvent.sendDashboardInit(guildId, UI.getCurrent().getLocale()).join();
+            categoryList = dashboardInitData.getCategories();
+            for (DashboardInitData.Category category : categoryList) {
+                Tab tab = new Tab(category.getTitle());
                 categoryTabs.add(tab);
             }
             categoryTabs.setVisible(true);
@@ -123,27 +124,14 @@ public class DashboardView extends PageLayout {
         return guildLayout;
     }
 
-    private void updateMainContent(String categoryId) {
+    private void updateMainContent(DashboardInitData.Category category) {
         mainLayout.removeAll();
 
-        if (categoryId != null) {
-            H2 categoryTitle = new H2(categoryId);
+        if (category != null) {
+            H2 categoryTitle = new H2(category.getTitle());
             categoryTitle.getStyle().set("margin-top", "12px");
             mainLayout.add(categoryTitle);
         }
-    }
-
-
-    private static class Category {
-
-        private final String id;
-        private final String name;
-
-        public Category(String id, String name) {
-            this.id = id;
-            this.name = name;
-        }
-
     }
 
 }
