@@ -173,17 +173,21 @@ public class SendEvent {
                 "DASH_INIT",
                 json,
                 r -> {
-                    ArrayList<DashboardInitData.Category> categories = new ArrayList<>();
-                    JSONArray titlesJson = r.getJSONArray("titles");
-                    for (int i = 0; i < titlesJson.length(); i++) {
-                        JSONObject data = titlesJson.getJSONObject(i);
-                        DashboardInitData.Category category = new DashboardInitData.Category(
-                                data.getString("id"),
-                                data.getString("title")
-                        );
-                        categories.add(category);
+                    if (r.getBoolean("ok")) {
+                        ArrayList<DashboardInitData.Category> categories = new ArrayList<>();
+                        JSONArray titlesJson = r.getJSONArray("titles");
+                        for (int i = 0; i < titlesJson.length(); i++) {
+                            JSONObject data = titlesJson.getJSONObject(i);
+                            DashboardInitData.Category category = new DashboardInitData.Category(
+                                    data.getString("id"),
+                                    data.getString("title")
+                            );
+                            categories.add(category);
+                        }
+                        return new DashboardInitData(categories);
+                    } else {
+                        return null;
                     }
-                    return new DashboardInitData(categories);
                 }
         );
     }
