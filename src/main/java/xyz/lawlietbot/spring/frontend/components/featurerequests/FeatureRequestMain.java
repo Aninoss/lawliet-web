@@ -2,6 +2,8 @@ package xyz.lawlietbot.spring.frontend.components.featurerequests;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import xyz.lawlietbot.spring.backend.featurerequests.FRDynamicBean;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
@@ -9,12 +11,10 @@ import xyz.lawlietbot.spring.frontend.Styles;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.featurerequests.sort.FeatureRequestSort;
 import xyz.lawlietbot.spring.frontend.views.FeatureRequestsView;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 public class FeatureRequestMain extends VerticalLayout {
 
+    private final SessionData sessionData;
     private final FeatureRequestChangeSort featureRequestChangeSort;
     private final FeatureRequestPanel featureRequestPanel;
     private final FeatureRequestPages featureRequestPages;
@@ -25,6 +25,7 @@ public class FeatureRequestMain extends VerticalLayout {
 
     public FeatureRequestMain(SessionData sessionData, UIData uiData, FRDynamicBean frDynamicBean,
                               FeatureRequestSort[] comparators, int page, FeatureRequestSort sort, String search) {
+        this.sessionData = sessionData;
         this.page = page;
         this.sort = sort;
         this.search = search;
@@ -92,7 +93,7 @@ public class FeatureRequestMain extends VerticalLayout {
         featureRequestChangeSort.onPageChanged(page, featureRequestPanel.getPageSize(search));
         featureRequestPanel.updateEntries(page, sort, search);
         featureRequestPages.setPage(page, featureRequestPanel.getPageSize(search));
-        UI.getCurrent().getPage().getHistory().pushState(null, getUri());
+        sessionData.pushUri(getUri());
     }
 
     private void onSortChange(FeatureRequestSort sort) {
@@ -102,7 +103,7 @@ public class FeatureRequestMain extends VerticalLayout {
         featureRequestChangeSort.onPageChanged(0, featureRequestPanel.getPageSize(search));
         featureRequestPanel.updateEntries(0, sort, search);
         featureRequestPages.setPage(0, featureRequestPanel.getPageSize(search));
-        UI.getCurrent().getPage().getHistory().pushState(null, getUri());
+        sessionData.pushUri(getUri());
     }
 
     private void onSearch(String search) {
@@ -112,7 +113,7 @@ public class FeatureRequestMain extends VerticalLayout {
         featureRequestChangeSort.onPageChanged(0, featureRequestPanel.getPageSize(search));
         featureRequestPanel.updateEntries(page, sort, search);
         featureRequestPages.setPage(0, featureRequestPanel.getPageSize(search));
-        UI.getCurrent().getPage().getHistory().pushState(null, getUri());
+        sessionData.pushUri(getUri());
     }
 
     private String getUri() {

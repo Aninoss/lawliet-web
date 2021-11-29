@@ -6,15 +6,15 @@ import javax.servlet.http.HttpServletRequest;
 import bell.oauth.discord.domain.Guild;
 import bell.oauth.discord.main.OAuthBuilder;
 import bell.oauth.discord.main.Response;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.router.Location;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import org.springframework.stereotype.Component;
 import xyz.lawlietbot.spring.backend.util.StringUtil;
-import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
-import xyz.lawlietbot.spring.frontend.views.DiscordLogin;
-import xyz.lawlietbot.spring.frontend.views.HomeView;
 
 @Component
 @VaadinSessionScope
@@ -23,16 +23,17 @@ public class SessionData {
     private OAuthBuilder builder;
     private final String id;
     private DiscordUser discordUser = null;
-    private Class<? extends PageLayout> currentTarget = HomeView.class;
+    private String currentTarget = "";
 
     public SessionData() {
+        VaadinSession.getCurrent().getSession().setAttribute("session", this);
         id = StringUtil.getRandomString();
         setData();
     }
 
     private void setData() {
         builder = new OAuthBuilder(System.getenv("BOT_CLIENT_ID"), System.getenv("BOT_CLIENT_SECRET"))
-                .setRedirectURI(getCurrentDomain() + PageLayout.getRouteStatic(DiscordLogin.class));
+                .setRedirectURI(getCurrentDomain() + "discordlogin");
     }
 
     private String getCurrentDomain() {
@@ -47,13 +48,12 @@ public class SessionData {
         return builder.getAuthorizationUrl(id) + "&prompt=none";
     }
 
-    public boolean login(String code, String state, UIData uiData) {
+    public boolean login(String code, String state) {
         if (state.equals(id)) {
             Response response = builder.exchange(code);
             if (response != Response.ERROR) {
                 List<Guild> guilds = builder.getScopes().contains("guilds") ? builder.getGuilds() : null;
                 discordUser = new DiscordUser(builder.getUser(), guilds);
-                uiData.login(discordUser.getId());
                 return true;
             }
         }
@@ -68,6 +68,10 @@ public class SessionData {
         }
     }
 
+    public String getId() {
+        return id;
+    }
+
     public Optional<DiscordUser> getDiscordUser() {
         return Optional.ofNullable(discordUser);
     }
@@ -76,11 +80,20 @@ public class SessionData {
         return discordUser != null;
     }
 
-    public void setCurrentTarget(Class<? extends PageLayout> c) {
-        currentTarget = c;
+    public void pushUri(String uri) {
+        UI.getCurrent().getPage().getHistory().pushState(null, uri);
+        currentTarget = uri;
     }
 
-    public Class<? extends PageLayout> getCurrentTarget() {
+    public void setCurrentTarget(Location location) {
+        String path = location.getPath();
+        if (location.getQueryParameters().getParameters().size() > 0) {
+            path += "?" + location.getQueryParameters().getQueryString();
+        }
+        currentTarget = path;
+    }
+
+    public String getCurrentTarget() {
         return currentTarget;
     }
 

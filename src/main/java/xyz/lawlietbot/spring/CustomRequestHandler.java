@@ -4,11 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
@@ -18,27 +14,16 @@ import com.vaadin.flow.server.RequestHandler;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinSession;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.lawlietbot.spring.backend.payment.StripeManager;
+import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 public class CustomRequestHandler implements RequestHandler {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(CustomRequestHandler.class);
-
-    private final LoadingCache<String, Boolean> inviteIPAdresses = CacheBuilder.newBuilder()
-            .expireAfterWrite(1, TimeUnit.HOURS)
-            .build(
-                    new CacheLoader<String, Boolean>() {
-                        @Override
-                        public Boolean load(@NonNull String ip) throws Exception {
-                            return true;
-                        }
-                    }
-            );
 
     @Override
     public boolean handleRequest(VaadinSession session, VaadinRequest request, VaadinResponse response) {
@@ -62,6 +47,9 @@ public class CustomRequestHandler implements RequestHandler {
 
         String auth = request.getHeader("Authorization");
         switch (request.getPathInfo()) {
+            case "/discordlogin":
+                return handleDiscordLogin(request, response);
+
             case "/print":
                 handlePrint(request, response, auth);
                 return true;
@@ -85,6 +73,21 @@ public class CustomRequestHandler implements RequestHandler {
             default:
                 return false;
         }
+    }
+
+    private boolean handleDiscordLogin(VaadinRequest request, VaadinResponse response) {
+        String code = request.getParameter("code");
+        String state = request.getParameter("state");
+        SessionData sessionData = (SessionData) request.getWrappedSession().getAttribute("session");
+
+        if (code != null && state != null && sessionData != null) {
+            boolean ok = sessionData.login(code, state);
+            String resumeTarget = ok ? sessionData.getCurrentTarget() : "";
+            response.setHeader("Location", "/" + resumeTarget);
+            response.setStatus(301);
+            return true;
+        }
+        return false;
     }
 
     private void handlePrint(VaadinRequest request, VaadinResponse response, String auth) {

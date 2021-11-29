@@ -1,11 +1,10 @@
 package xyz.lawlietbot.spring.backend.userdata;
 
+import java.util.Map;
+import java.util.Optional;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
-import java.util.Optional;
 
 @Component
 @UIScope

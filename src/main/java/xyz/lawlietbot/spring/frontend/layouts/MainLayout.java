@@ -30,7 +30,6 @@ import xyz.lawlietbot.spring.frontend.components.header.HeaderComponent;
 import xyz.lawlietbot.spring.frontend.components.header.VerticalMenuBarComponent;
 import xyz.lawlietbot.spring.frontend.views.ExceptionView;
 import xyz.lawlietbot.spring.frontend.views.IEView;
-import xyz.lawlietbot.spring.frontend.views.PageNotFoundView;
 
 @CssImport("./styles/styles.css")
 @CssImport("./styles/styles-reversed.css")
@@ -105,10 +104,11 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
             if (checkLiteModeAccess(event)) {
                 return;
             }
-            setPageTarget(c);
+            target = PageLayout.getRouteStatic(c);
             if (checkBrowserIE(event)) {
                 return;
             }
+            sessionData.setCurrentTarget(event.getLocation());
             checkLoginStatusChanged(event);
             headerComponent.setNavBarSolid(event.getNavigationTarget().isAnnotationPresent(NavBarSolid.class));
         }
@@ -149,9 +149,7 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
 
         LoginAccess loginAccess = target.getAnnotation(LoginAccess.class);
         if (!sessionData.isLoggedIn() && loginAccess != null) {
-            if (PageLayout.class.isAssignableFrom(target))
-                sessionData.setCurrentTarget((Class<? extends PageLayout>)target);
-
+            sessionData.setCurrentTarget(event.getLocation());
             new Redirector().redirect(sessionData.getLoginUrl());
             event.postpone();
         }
@@ -180,11 +178,6 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
             return true;
         }
         return false;
-    }
-
-    private void setPageTarget(Class<? extends PageLayout> c) {
-        target = PageLayout.getRouteStatic(c);
-        if (c != PageNotFoundView.class) sessionData.setCurrentTarget(c);
     }
 
     private boolean checkLiteModeAccess(BeforeEnterEvent event) {
