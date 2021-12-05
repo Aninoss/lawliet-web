@@ -55,6 +55,7 @@ dependencies {
     implementation 'com.github.appreciated:vaadin-css-grid:2.0.0'
     implementation 'com.vaadin:vaadin-charts-flow:21.0.3'
     implementation 'com.stripe:stripe-java:20.85.0'
+    implementation 'com.github.Aninoss:lawliet-dashboard-components:86e2bc4678'
 }
 
 dependencyManagement {

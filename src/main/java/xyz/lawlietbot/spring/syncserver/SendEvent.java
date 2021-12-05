@@ -5,8 +5,11 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import dashboard.DashboardComponent;
+import dashboard.container.DashboardContainer;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import xyz.lawlietbot.spring.backend.dashboard.DashboardCategoryInitData;
 import xyz.lawlietbot.spring.backend.dashboard.DashboardInitData;
 import xyz.lawlietbot.spring.backend.featurerequests.FRDynamicBean;
 import xyz.lawlietbot.spring.backend.featurerequests.FRPanelType;
@@ -164,9 +167,10 @@ public class SendEvent {
         );
     }
 
-    public static CompletableFuture<DashboardInitData> sendDashboardInit(long guildId, Locale locale) {
+    public static CompletableFuture<DashboardInitData> sendDashboardInit(long guildId, long userId, Locale locale) {
         JSONObject json = new JSONObject();
         json.put("guild_id", guildId);
+        json.put("user_id", userId);
         json.put("locale", locale);
 
         return process(
@@ -185,6 +189,43 @@ public class SendEvent {
                             categories.add(category);
                         }
                         return new DashboardInitData(categories);
+                    } else {
+                        return null;
+                    }
+                }
+        );
+    }
+
+    public static CompletableFuture<DashboardCategoryInitData> sendDashboardCategoryInit(String categoryId, long guildId, long userId, Locale locale) {
+        JSONObject json = new JSONObject();
+        json.put("category", categoryId);
+        json.put("guild_id", guildId);
+        json.put("user_id", userId);
+        json.put("locale", locale);
+
+        return process(
+                "DASH_CAT_INIT",
+                json,
+                r -> {
+                    if (r.getBoolean("ok")) {
+                        ArrayList<String> missingBotPermissions = new ArrayList<>();
+                        JSONArray missingBotPermissionsJson = r.getJSONArray("missing_bot_permissions");
+                        for (int i = 0; i < missingBotPermissionsJson.length(); i++) {
+                            missingBotPermissions.add(missingBotPermissionsJson.getString(i));
+                        }
+
+                        ArrayList<String> missingUserPermissions = new ArrayList<>();
+                        JSONArray missingUserPermissionsJson = r.getJSONArray("missing_user_permissions");
+                        for (int i = 0; i < missingUserPermissionsJson.length(); i++) {
+                            missingUserPermissions.add(missingUserPermissionsJson.getString(i));
+                        }
+
+                        DashboardContainer components = null;
+                        if (missingBotPermissions.isEmpty() && missingUserPermissions.isEmpty()) {
+                            components = (DashboardContainer) DashboardComponent.generate(r.getJSONObject("components"));
+                        }
+
+                        return new DashboardCategoryInitData(missingBotPermissions, missingUserPermissions, components);
                     } else {
                         return null;
                     }

@@ -22,6 +22,7 @@ html {
     height: 100%;
     background: var(--lumo-secondary);
     padding-top: var(--dashboard-dist-top);
+    padding-bottom: 64px;
 }
 
 #dashboard-main {
@@ -29,4 +30,32 @@ html {
     height: 100%;
     padding-top: var(--dashboard-dist-top);
     padding-left: 48px;
+    padding-bottom: 64px;
+}
+
+#dashboard-lock-layout {
+    width: calc(auto + 32px) !important;
+    max-width: 500px;
+    background: var(--lumo-tint-5pct);
+    border-radius: 8px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#dashboard-lock-h3 {
+    margin-top: 16px;
+    width: 100%;
+    text-align: center;
+}
+
+#dashboard-lock-icon {
+    width: 48px;
+    height: auto;
+    margin-top: 32px;
+    margin-bottom: 24px;
+}
+
+#dashboard-lock-ul {
+    margin-left: -24px;
+    margin-top: 8px;
 }
