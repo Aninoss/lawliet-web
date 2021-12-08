@@ -45,6 +45,7 @@ import xyz.lawlietbot.spring.syncserver.SendEvent;
 public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
 
     private final VerticalLayout mainLayout = new VerticalLayout();
+    private final VerticalLayout tabsLayout = new VerticalLayout();
     private final Tabs categoryTabs = new Tabs();
     private final GuildComboBox guildComboBox = new GuildComboBox();
     private List<DashboardInitData.Category> categoryList;
@@ -72,16 +73,14 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         content.setId("dashboard-center");
         if (getSessionData().isLoggedIn()) {
             mainLayout.setId("dashboard-main");
+            mainLayout.addClassNames(Styles.VISIBLE_PC);
             content.add(generateCategoryBar(), mainLayout);
         }
         return content;
     }
 
     private Component generateCategoryBar() {
-        VerticalLayout content = new VerticalLayout();
-        content.setId("dashboard-category-bar");
-        content.addClassNames(Styles.VISIBLE_NOTMOBILE);
-
+        tabsLayout.setId("dashboard-category-bar");
         categoryTabs.setWidthFull();
         categoryTabs.setOrientation(Tabs.Orientation.VERTICAL);
         categoryTabs.addThemeVariants(TabsVariant.LUMO_MINIMAL);
@@ -96,8 +95,11 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
             }
         });
 
-        content.add(generateGuildSelection(), categoryTabs);
-        return content;
+        Hr hr = new Hr();
+        hr.setId("dashboard-tabs-hr");
+
+        tabsLayout.add(generateGuildSelection(), hr, categoryTabs);
+        return tabsLayout;
     }
 
     private Component generateGuildSelection() {
@@ -108,6 +110,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
 
         Image image = new Image();
         image.setHeight("32px");
+        image.setVisible(false);
         image.getStyle().set("border-radius", "50%")
                 .set("margin-right", "-4px");
 
@@ -115,33 +118,38 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         guildComboBox.setWidthFull();
         guildComboBox.addValueChangeListener(e -> {
             categoryTabs.removeAll();
-            long guildId = e.getValue().getId();
-            long userId = getSessionData().getDiscordUser().get().getId();
-            DashboardInitData dashboardInitData = null;
-            try {
-                dashboardInitData = SendEvent.sendDashboardInit(guildId, userId, UI.getCurrent().getLocale()).get(5, TimeUnit.SECONDS);
-            } catch (InterruptedException | ExecutionException | TimeoutException ex) {
-                throw new RuntimeException(ex);
-            }
-            if (dashboardInitData != null) {
-                categoryList = dashboardInitData.getCategories();
-                for (DashboardInitData.Category category : categoryList) {
-                    Tab tab = new Tab(category.getTitle());
-                    categoryTabs.add(tab);
+            if (e.getValue() != null) {
+                long guildId = e.getValue().getId();
+                long userId = getSessionData().getDiscordUser().get().getId();
+                DashboardInitData dashboardInitData = null;
+                try {
+                    dashboardInitData = SendEvent.sendDashboardInit(guildId, userId, UI.getCurrent().getLocale()).get(5, TimeUnit.SECONDS);
+                } catch (InterruptedException | ExecutionException | TimeoutException ex) {
+                    throw new RuntimeException(ex);
                 }
-                categoryTabs.setVisible(true);
-                mainLayout.removeAll();
-            } else {
-                categoryList = Collections.emptyList();
-                updateMainContent(null);
-            }
-            if (e.getValue().getIcon() != null) {
-                image.setVisible(true);
-                image.setSrc(e.getValue().getIcon());
+                if (dashboardInitData != null) {
+                    categoryList = dashboardInitData.getCategories();
+                    for (DashboardInitData.Category category : categoryList) {
+                        Tab tab = new Tab(category.getTitle());
+                        categoryTabs.add(tab);
+                    }
+                    categoryTabs.setVisible(true);
+                    mainLayout.removeAll();
+                } else {
+                    categoryList = Collections.emptyList();
+                    updateMainContent(null);
+                }
+                if (e.getValue().getIcon() != null) {
+                    image.setVisible(true);
+                    image.setSrc(e.getValue().getIcon());
+                } else {
+                    image.setVisible(false);
+                }
+                pushNewUri();
             } else {
                 image.setVisible(false);
+                categoryList = Collections.emptyList();
             }
-            pushNewUri();
         });
 
         guildLayout.add(image, guildComboBox);
@@ -150,6 +158,8 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
 
     private void updateMainContent(DashboardInitData.Category category) {
         mainLayout.removeAll();
+        mainLayout.setClassName(Styles.VISIBLE_PC, false);
+        tabsLayout.setClassName(Styles.VISIBLE_PC, true);
 
         if (category != null) {
             H2 categoryTitle = new H2(category.getTitle());
@@ -182,10 +192,22 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
             mainLayout.add(invalidServerText);
             mainLayout.add(generateInvalidServerButtons());
         }
+
+        Button backButton = new Button(getTranslation("dash.back"), VaadinIcon.ARROW_LEFT.create());
+        backButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        backButton.addClickListener(e -> updateMainContentBack(category == null));
+        mainLayout.add(backButton);
     }
 
-    private void updateMainContentBack() {
+    private void updateMainContentBack(boolean resetGuild) {
         mainLayout.removeAll();
+        mainLayout.setClassName(Styles.VISIBLE_PC, true);
+        tabsLayout.setClassName(Styles.VISIBLE_PC, false);
+        categoryTabs.setSelectedIndex(-1);
+        if (resetGuild) {
+            guildComboBox.setValue(null);
+        }
+        pushNewUri();
     }
 
     private Component generateMissingPermissions(List<String> missingUserPermissions, List<String> missingBotPermissions) {
@@ -279,7 +301,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                             }
                             categoryTabs.setSelectedIndex(index);
                             if (index == -1) {
-                                updateMainContentBack();
+                                updateMainContentBack(false);
                             }
                         }
                     });
