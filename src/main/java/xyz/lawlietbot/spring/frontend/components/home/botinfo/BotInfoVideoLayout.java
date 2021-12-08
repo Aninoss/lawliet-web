@@ -11,7 +11,7 @@ import com.vaadin.flow.server.VaadinSession;
 public class BotInfoVideoLayout extends Div {
     public BotInfoVideoLayout() {
         setId("bot-info-video");
-        addClassName(Styles.VISIBLE_NOTMOBILE);
+        addClassName(Styles.VISIBLE_NOT_SMALL);
         setWidthFull();
 
         //Video
@@ -43,7 +43,7 @@ public class BotInfoVideoLayout extends Div {
         Div fade = new Div();
         ComponentChanger.setNotInteractive(fade);
         fade.addClassName("videofade");
-        fade.addClassName(Styles.VISIBLE_NOTMOBILE);
+        fade.addClassName(Styles.VISIBLE_NOT_SMALL);
         add(fade);
     }
 }

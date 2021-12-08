@@ -14,18 +14,19 @@ public interface Styles {
     String DROP_SHADOW = "drop-shadow";
 
     /* Responsive Design */
-    String VISIBLE_MOBILE = "visible-xsmall";
-    String VISIBLE_TABLET = "visible-small";
-    String VISIBLE_PC = "visible-large";
-    String VISIBLE_NOTMOBILE = "visible-not-xsmall";
+    String VISIBLE_SMALL = "visible-small";
+    String VISIBLE_MEDIUM = "visible-medium";
+    String VISIBLE_LARGE = "visible-large";
+    String VISIBLE_NOT_SMALL = "visible-not-small";
+    String VISIBLE_NOT_LARGE = "visible-not-large";
 
-    String FLEX_NOTPC_SWITCH_ROW = "flex-small-row";
-    String FLEX_NOTPC_SWITCH_COLUMN = "flex-small-column";
-    String FLEX_NOTPC_SWITCH_ROW_REVERSE = "flex-small-row-reverse";
-    String FLEX_NOTPC_SWITCH_COLUMN_REVERSE = "flex-small-column-reverse";
+    String FLEX_NOT_LARGE_SWITCH_ROW = "flex-not-large-row";
+    String FLEX_NOT_LARGE_SWITCH_COLUMN = "flex-not-large-column";
+    String FLEX_NOT_LARGE_SWITCH_ROW_REVERSE = "flex-not-large-row-reverse";
+    String FLEX_NOT_LARGE_SWITCH_COLUMN_REVERSE = "flex-not-large-column-reverse";
 
-    String FLEX_MOBILE_SWITCH_ROW = "flex-xsmall-row";
-    String FLEX_MOBILE_SWITCH_COLUMN = "flex-xsmall-column";
-    String FLEX_MOBILE_SWITCH_ROW_REVERSE = "flex-xsmall-row-reverse";
-    String FLEX_MOBILE_SWITCH_COLUMN_REVERSE = "flex-xsmall-column-reverse";
+    String FLEX_SMALL_SWITCH_ROW = "flex-small-row";
+    String FLEX_SMALL_SWITCH_COLUMN = "flex-small-column";
+    String FLEX_SMALL_SWITCH_ROW_REVERSE = "flex-small-row-reverse";
+    String FLEX_SMALL_SWITCH_COLUMN_REVERSE = "flex-small-column-reverse";
 }

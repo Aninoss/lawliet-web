@@ -4,7 +4,7 @@ widgetbot-crate { display: none; }
 /* Tablet */
 @media (min-width: 700px) {
 
-    .visible-xsmall { display: none; }
+    .visible-small { display: none; }
 
     widgetbot-crate { display: block; }
     #page-icon {
@@ -23,7 +23,8 @@ widgetbot-crate { display: none; }
 /* PC */
 @media (min-width: 1000px) {
 
-    .visible-small { display: none; }
+    .visible-medium { display: none; }
+    .visible-not-large { display: none; }
 
     #page-icon {
         max-width: 125px;

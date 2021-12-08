@@ -73,7 +73,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         content.setId("dashboard-center");
         if (getSessionData().isLoggedIn()) {
             mainLayout.setId("dashboard-main");
-            mainLayout.addClassNames(Styles.VISIBLE_PC);
+            mainLayout.addClassNames(Styles.VISIBLE_LARGE);
             content.add(generateCategoryBar(), mainLayout);
         }
         return content;
@@ -158,8 +158,8 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
 
     private void updateMainContent(DashboardInitData.Category category) {
         mainLayout.removeAll();
-        mainLayout.setClassName(Styles.VISIBLE_PC, false);
-        tabsLayout.setClassName(Styles.VISIBLE_PC, true);
+        mainLayout.setClassName(Styles.VISIBLE_LARGE, false);
+        tabsLayout.setClassName(Styles.VISIBLE_LARGE, true);
 
         if (category != null) {
             H2 categoryTitle = new H2(category.getTitle());
@@ -194,6 +194,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         }
 
         Button backButton = new Button(getTranslation("dash.back"), VaadinIcon.ARROW_LEFT.create());
+        backButton.addClassNames(Styles.VISIBLE_NOT_LARGE);
         backButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         backButton.addClickListener(e -> updateMainContentBack(category == null));
         mainLayout.add(backButton);
@@ -201,8 +202,8 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
 
     private void updateMainContentBack(boolean resetGuild) {
         mainLayout.removeAll();
-        mainLayout.setClassName(Styles.VISIBLE_PC, true);
-        tabsLayout.setClassName(Styles.VISIBLE_PC, false);
+        mainLayout.setClassName(Styles.VISIBLE_LARGE, true);
+        tabsLayout.setClassName(Styles.VISIBLE_LARGE, false);
         categoryTabs.setSelectedIndex(-1);
         if (resetGuild) {
             guildComboBox.setValue(null);

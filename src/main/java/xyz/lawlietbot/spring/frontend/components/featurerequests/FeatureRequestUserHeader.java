@@ -46,7 +46,7 @@ public class FeatureRequestUserHeader extends Card {
         notLoggedInLayout.setId("fr-flex");
         notLoggedInLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         notLoggedInLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        notLoggedInLayout.addClassName(Styles.FLEX_MOBILE_SWITCH_COLUMN);
+        notLoggedInLayout.addClassName(Styles.FLEX_SMALL_SWITCH_COLUMN);
         notLoggedInLayout.setSizeFull();
 
         if (sessionData.isLoggedIn()) {

@@ -36,7 +36,7 @@ public class HeaderComponent extends Header {
         //Show Menu Button
         Button showMenu = new Button("");
         showMenu.getElement().setAttribute("onclick", "verticalBarSwitch()");
-        showMenu.addClassName(Styles.VISIBLE_MOBILE);
+        showMenu.addClassName(Styles.VISIBLE_SMALL);
         showMenu.setId("menu-toggle");
         showMenu.setIcon(VaadinIcon.MENU.create());
         content.add(showMenu);
@@ -52,7 +52,7 @@ public class HeaderComponent extends Header {
         //Navigation Bar
         NavigationBar navigationBar = new NavigationBar(uiData);
         navigationBar.setOrientation(Tabs.Orientation.HORIZONTAL);
-        navigationBar.addClassName(Styles.VISIBLE_NOTMOBILE);
+        navigationBar.addClassName(Styles.VISIBLE_NOT_SMALL);
 
         Nav nav = new Nav(navigationBar);
         nav.setMinWidth("0px");
@@ -72,19 +72,19 @@ public class HeaderComponent extends Header {
                 accountName.setSpacing(false);
                 accountName.setPadding(false);
                 accountName.setSizeUndefined();
-                accountName.addClassName(Styles.VISIBLE_NOTMOBILE);
+                accountName.addClassName(Styles.VISIBLE_NOT_SMALL);
 
                 Div username = new Div(new Text(discordUser.getUsername()));
                 username.getStyle()
                         .set("margin-left", "-4px")
                         .set("color", "white");
-                username.addClassName(Styles.VISIBLE_NOTMOBILE);
+                username.addClassName(Styles.VISIBLE_NOT_SMALL);
                 RouterLink link = new RouterLink(getTranslation("logout"), DiscordLogout.class);
                 link.getStyle()
                         .set("margin-top", "-4px")
                         .set("font-size", "80%")
                         .set("margin-left", "-4px");
-                link.addClassName(Styles.VISIBLE_NOTMOBILE);
+                link.addClassName(Styles.VISIBLE_NOT_SMALL);
 
                 accountName.add(username, link);
                 content.add(accountName);
@@ -94,7 +94,7 @@ public class HeaderComponent extends Header {
                         .set("margin-right", "-6px");
                 login.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
                 Anchor loginAnchor = new Anchor(sessionData.getLoginUrl(), login);
-                loginAnchor.addClassName(Styles.VISIBLE_NOTMOBILE);
+                loginAnchor.addClassName(Styles.VISIBLE_NOT_SMALL);
                 content.add(loginAnchor);
             }
         }

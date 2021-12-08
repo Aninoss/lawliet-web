@@ -100,7 +100,7 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
     private Component generateContentLink() {
         link = new Anchor(urls[0], urls[0]);
         link.setTarget("_blank");
-        link.addClassNames(Styles.VISIBLE_NOTMOBILE);
+        link.addClassNames(Styles.VISIBLE_NOT_SMALL);
         return link;
     }
 

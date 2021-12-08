@@ -15,7 +15,7 @@ public class BotInfoDetailsLayout extends VerticalLayout {
 
     public BotInfoDetailsLayout(UIData uiData) {
         setId("bot-info-details");
-        addClassNames(Styles.FLEX_NOTPC_SWITCH_ROW, "size-small-fullwidth");
+        addClassNames(Styles.FLEX_NOT_LARGE_SWITCH_ROW, "size-small-fullwidth");
         setPadding(true);
 
         //Bot Icon

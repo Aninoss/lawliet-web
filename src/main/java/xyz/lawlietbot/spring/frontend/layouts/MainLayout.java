@@ -62,7 +62,7 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
         /* black background in mobile burger menu */
         Div blackscreen = new Div();
         blackscreen.setId("blackscreen");
-        blackscreen.addClassName(Styles.VISIBLE_MOBILE);
+        blackscreen.addClassName(Styles.VISIBLE_SMALL);
         blackscreen.addClassName("expandable");
         blackscreen.getElement().setAttribute("onclick", "verticalBarHide()");
 

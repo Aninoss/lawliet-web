@@ -34,7 +34,7 @@ public class FeatureRequestChangeSort extends VerticalLayout {
 
         TextField searchField = generateSearchField(search, onSearch);
         searchField.setWidthFull();
-        searchField.addClassName(Styles.VISIBLE_MOBILE);
+        searchField.addClassName(Styles.VISIBLE_SMALL);
         searchField.getStyle().set("margin-bottom", "-12px");
         add(searchField);
 
@@ -52,9 +52,9 @@ public class FeatureRequestChangeSort extends VerticalLayout {
         buttonNext.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
         pageIndicator = new Label("");
-        pageIndicator.addClassNames(Styles.VISIBLE_NOTMOBILE);
+        pageIndicator.addClassNames(Styles.VISIBLE_NOT_SMALL);
         pageIndicatorMobile = new Label("");
-        pageIndicatorMobile.addClassNames(Styles.VISIBLE_MOBILE);
+        pageIndicatorMobile.addClassNames(Styles.VISIBLE_SMALL);
         content.add(buttonPrevious, pageIndicator, pageIndicatorMobile, buttonNext);
     }
 
@@ -62,7 +62,7 @@ public class FeatureRequestChangeSort extends VerticalLayout {
         Div div = new Div();
 
         TextField searchField = generateSearchField(search, onSearch);
-        searchField.addClassName(Styles.VISIBLE_NOTMOBILE);
+        searchField.addClassName(Styles.VISIBLE_NOT_SMALL);
         div.add(searchField);
 
         content.add(div);
@@ -84,7 +84,7 @@ public class FeatureRequestChangeSort extends VerticalLayout {
 
     private void addDropdownMenu(OnSortChange listener, FeatureRequestSort[] comparators, FeatureRequestSort sortDefault) {
         Label label = new Label(getTranslation("fr.sort.label"));
-        label.addClassName(Styles.VISIBLE_NOTMOBILE);
+        label.addClassName(Styles.VISIBLE_NOT_SMALL);
         content.add(label);
         String[] options = getTranslation("fr.sort.options").split("\n");
 

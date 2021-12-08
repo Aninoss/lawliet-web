@@ -32,7 +32,6 @@ html {
 
 #dashboard-lock-layout {
     width: calc(auto + 32px) !important;
-    max-width: 500px;
     background: var(--lumo-tint-5pct);
     border-radius: 8px;
 }
@@ -82,6 +81,10 @@ html {
 
     #dashboard-main {
         padding-left: 48px;
+    }
+
+    #dashboard-lock-layout {
+        max-width: 500px;
     }
 
 }

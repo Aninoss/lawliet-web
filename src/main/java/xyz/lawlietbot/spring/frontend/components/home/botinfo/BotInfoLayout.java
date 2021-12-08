@@ -14,7 +14,7 @@ public class BotInfoLayout extends Div {
         setWidthFull();
 
         FlexLayout parts = new FlexLayout();
-        parts.addClassNames(Styles.APP_WIDTH, Styles.FLEX_NOTPC_SWITCH_COLUMN_REVERSE);
+        parts.addClassNames(Styles.APP_WIDTH, Styles.FLEX_NOT_LARGE_SWITCH_COLUMN_REVERSE);
 
         parts.add(new BotInfoVideoLayout());
         parts.add(new BotInfoDetailsLayout(uiData));
