@@ -60,6 +60,11 @@ html {
     margin-bottom: 0;
 }
 
+.dashboard-card {
+    border-radius: 6px;
+    background: var(--lumo-tint-5pct);
+}
+
 @media (min-width: 700px) {
 
     html {
@@ -81,10 +86,7 @@ html {
 
     #dashboard-main {
         padding-left: 48px;
-    }
-
-    #dashboard-lock-layout {
-        max-width: 500px;
+        padding-right: 48px;
     }
 
 }

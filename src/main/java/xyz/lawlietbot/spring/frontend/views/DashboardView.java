@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -33,6 +34,7 @@ import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.frontend.Styles;
 import xyz.lawlietbot.spring.frontend.components.GuildComboBox;
+import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardComponentConverter;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
@@ -179,7 +181,10 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
             }
 
             if (data.getMissingUserPermissions().isEmpty() && data.getMissingBotPermissions().isEmpty()) {
-                //TODO
+                Component component = DashboardComponentConverter.convert(data.getComponents());
+                ((HasSize) component).setWidthFull();
+                mainLayout.add(component);
+                //TODO: action listeners
             } else {
                 mainLayout.add(generateMissingPermissions(data.getMissingUserPermissions(), data.getMissingBotPermissions()));
             }
