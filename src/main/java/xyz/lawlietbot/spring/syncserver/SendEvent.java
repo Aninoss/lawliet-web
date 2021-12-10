@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import dashboard.ActionResult;
 import dashboard.DashboardComponent;
 import dashboard.container.DashboardContainer;
 import org.json.JSONArray;
@@ -228,6 +229,32 @@ public class SendEvent {
                         return new DashboardCategoryInitData(missingBotPermissions, missingUserPermissions, components);
                     } else {
                         return null;
+                    }
+                }
+        );
+    }
+
+    public static CompletableFuture<ActionResult> sendDashboardAction(long guildId, long userId, JSONObject actionJson) {
+        JSONObject json = new JSONObject();
+        json.put("guild_id", guildId);
+        json.put("user_id", userId);
+        json.put("action", actionJson);
+
+        return process(
+                "DASH_ACTION",
+                json,
+                r -> {
+                    if (r.getBoolean("ok")) {
+                        ActionResult actionResult = new ActionResult(r.getBoolean("redraw"));
+                        if (r.has("success_message")) {
+                            actionResult = actionResult.withSuccessMessage(r.getString("success_message"));
+                        }
+                        if (r.has("error_message")) {
+                            actionResult = actionResult.withErrorMessage(r.getString("error_message"));
+                        }
+                        return actionResult;
+                    } else {
+                        throw new RuntimeException();
                     }
                 }
         );

@@ -9,10 +9,12 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.dom.Style;
 import dashboard.DashboardComponent;
 import dashboard.component.ActionComponent;
+import dashboard.component.DashboardButton;
 import dashboard.component.DashboardText;
 import dashboard.container.HorizontalContainer;
 import dashboard.container.HorizontalPusher;
 import dashboard.container.VerticalContainer;
+import xyz.lawlietbot.spring.frontend.components.dashboard.adapters.DashboardButtonAdapter;
 import xyz.lawlietbot.spring.frontend.components.dashboard.adapters.HorizontalContainerAdapter;
 import xyz.lawlietbot.spring.frontend.components.dashboard.adapters.VerticalContainerAdapter;
 
@@ -31,6 +33,10 @@ public class DashboardComponentConverter {
 
             case DashboardText.TYPE:
                 component = convertText((DashboardText) dashboardComponent);
+                break;
+
+            case DashboardButton.TYPE:
+                component = new DashboardButtonAdapter((DashboardButton) dashboardComponent);
                 break;
 
             case HorizontalPusher.TYPE:

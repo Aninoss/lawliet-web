@@ -24,6 +24,7 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.*;
+import dashboard.ActionResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import xyz.lawlietbot.spring.LoginAccess;
 import xyz.lawlietbot.spring.NavBarSolid;
@@ -33,6 +34,7 @@ import xyz.lawlietbot.spring.backend.dashboard.DashboardInitData;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.frontend.Styles;
+import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.frontend.components.GuildComboBox;
 import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardComponentConverter;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
@@ -184,7 +186,26 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                 Component component = DashboardComponentConverter.convert(data.getComponents());
                 ((HasSize) component).setWidthFull();
                 mainLayout.add(component);
-                //TODO: action listeners
+                data.getComponents().setActionSendListener(json -> {
+                    try {
+                        ActionResult actionResult = SendEvent.sendDashboardAction(
+                                guildComboBox.getValue().getId(),
+                                getSessionData().getDiscordUser().get().getId(),
+                                json
+                        ).get(5, TimeUnit.SECONDS);
+                        if (actionResult.getSuccessMessage() != null) {
+                            CustomNotification.showSuccess(actionResult.getSuccessMessage());
+                        }
+                        if (actionResult.getErrorMessage() != null) {
+                            //TODO: show error
+                        }
+                        if (actionResult.getRedraw()) {
+                            updateMainContent(category);
+                        }
+                    } catch (Throwable e) {
+                        //TODO: show error
+                    }
+                });
             } else {
                 mainLayout.add(generateMissingPermissions(data.getMissingUserPermissions(), data.getMissingBotPermissions()));
             }
