@@ -6,17 +6,14 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.dom.Style;
 import dashboard.DashboardComponent;
-import dashboard.component.ActionComponent;
-import dashboard.component.DashboardButton;
-import dashboard.component.DashboardText;
+import dashboard.component.*;
 import dashboard.container.HorizontalContainer;
 import dashboard.container.HorizontalPusher;
 import dashboard.container.VerticalContainer;
-import xyz.lawlietbot.spring.frontend.components.dashboard.adapters.DashboardButtonAdapter;
-import xyz.lawlietbot.spring.frontend.components.dashboard.adapters.HorizontalContainerAdapter;
-import xyz.lawlietbot.spring.frontend.components.dashboard.adapters.VerticalContainerAdapter;
+import xyz.lawlietbot.spring.frontend.components.dashboard.adapters.*;
 
 public class DashboardComponentConverter {
 
@@ -39,8 +36,20 @@ public class DashboardComponentConverter {
                 component = new DashboardButtonAdapter((DashboardButton) dashboardComponent);
                 break;
 
+            case DashboardSeparator.TYPE:
+                component = new Hr();
+                break;
+
             case HorizontalPusher.TYPE:
                 component = new Div();
+                break;
+
+            case DashboardImage.TYPE:
+                component = new DashboardImageAdapter((DashboardImage) dashboardComponent);
+                break;
+
+            case DashboardImageUpload.TYPE:
+                component = new DashboardImageUploadAdapter((DashboardImageUpload) dashboardComponent);
                 break;
 
             default:

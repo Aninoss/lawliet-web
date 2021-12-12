@@ -65,6 +65,11 @@ html {
     background: var(--lumo-tint-5pct);
 }
 
+.dashboard-img {
+    width: auto !important;
+    max-width: 100%;
+}
+
 @media (min-width: 700px) {
 
     html {
