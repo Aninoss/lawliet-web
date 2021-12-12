@@ -63,6 +63,7 @@ html {
 .dashboard-card {
     border-radius: 6px;
     background: var(--lumo-tint-5pct);
+    padding: 16px;
 }
 
 .dashboard-img {
@@ -70,10 +71,30 @@ html {
     max-width: 100%;
 }
 
+.dashboard-horizontal {
+    flex-direction: row;
+}
+
+.dashboard-vertical {
+    flex-direction: column;
+}
+
+.dashboard-horizontal-child:not(:first-child) {
+    margin-left: 1em;
+}
+
+.dashboard-vertical-child:not(:first-child) {
+    margin-top: 1em;
+}
+
 @media (min-width: 700px) {
 
     html {
         --dashboard-dist-top: 118px;
+    }
+
+    .dashboard-horizontal-child-wrap:not(:first-child) {
+        margin-left: 1em;
     }
 
 }
@@ -92,6 +113,18 @@ html {
     #dashboard-main {
         padding-left: 48px;
         padding-right: 48px;
+    }
+
+}
+
+@media (max-width: 700px) {
+
+    .dashboard-horizontal-wrap {
+        flex-direction: column;
+    }
+
+    .dashboard-horizontal-child-wrap:not(:first-child) {
+        margin-top: 1em;
     }
 
 }

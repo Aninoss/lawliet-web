@@ -1,20 +1,23 @@
 package xyz.lawlietbot.spring.frontend.components.dashboard.adapters;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import dashboard.DashboardComponent;
 import dashboard.container.HorizontalContainer;
 import dashboard.container.HorizontalPusher;
 import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardComponentConverter;
 
-public class HorizontalContainerAdapter extends HorizontalLayout {
+public class HorizontalContainerAdapter extends FlexLayout {
 
     public HorizontalContainerAdapter(HorizontalContainer horizontalContainer) {
+        addClassName("dashboard-horizontal");
         if (horizontalContainer.isCard()) {
             addClassName("dashboard-card");
-        } else {
-            setPadding(false);
+        }
+        if (horizontalContainer.getAllowWrap()) {
+            addClassName("dashboard-horizontal-wrap");
         }
 
         switch (horizontalContainer.getAlignment()) {
@@ -40,6 +43,13 @@ public class HorizontalContainerAdapter extends HorizontalLayout {
                 add(component);
                 if (dashboardComponent instanceof HorizontalPusher || noPusher) {
                     setFlexGrow(1, component);
+                }
+                if (component instanceof HasStyle && !(dashboardComponent instanceof HorizontalPusher)) {
+                    if (horizontalContainer.getAllowWrap()) {
+                        ((HasStyle) component).addClassName("dashboard-horizontal-child-wrap");
+                    } else {
+                        ((HasStyle) component).addClassName("dashboard-horizontal-child");
+                    }
                 }
             }
         }
