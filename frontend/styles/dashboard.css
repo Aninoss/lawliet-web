@@ -87,6 +87,11 @@ html {
     margin-top: 1em;
 }
 
+.dashboard-switch-layout:not(:first-child) {
+    border-top: 1px solid var(--lumo-contrast-10pct);
+    padding-top: 1em;
+}
+
 @media (min-width: 700px) {
 
     html {
@@ -125,6 +130,10 @@ html {
 
     .dashboard-horizontal-child-wrap:not(:first-child) {
         margin-top: 1em;
+    }
+
+    .dashboard-horizontal-child-wrap {
+        width: 100%;
     }
 
 }

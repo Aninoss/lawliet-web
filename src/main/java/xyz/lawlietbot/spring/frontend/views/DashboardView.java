@@ -167,65 +167,74 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         mainLayout.setClassName(Styles.VISIBLE_LARGE, false);
         tabsLayout.setClassName(Styles.VISIBLE_LARGE, true);
 
-        if (category != null) {
-            H2 categoryTitle = new H2(category.getTitle());
-            categoryTitle.getStyle().set("margin-top", "12px");
-            mainLayout.add(categoryTitle);
+        FlexLayout titleLayout = new FlexLayout();
+        titleLayout.setFlexDirection(FlexLayout.FlexDirection.ROW);
+        titleLayout.getStyle().set("margin-top", "12px");
 
-            DashboardCategoryInitData data;
-            try {
-                data = SendEvent.sendDashboardCategoryInit(
-                        category.getId(),
-                        guildComboBox.getValue().getId(),
-                        getSessionData().getDiscordUser().get().getId(),
-                        getLocale()
-                ).get(5, TimeUnit.SECONDS);
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                throw new RuntimeException(e);
-            }
-
-            if (data.getMissingUserPermissions().isEmpty() && data.getMissingBotPermissions().isEmpty()) {
-                Component component = DashboardComponentConverter.convert(data.getComponents());
-                ((HasSize) component).setWidthFull();
-                mainLayout.add(component);
-                data.getComponents().setActionSendListener(json -> {
-                    try {
-                        ActionResult actionResult = SendEvent.sendDashboardAction(
-                                guildComboBox.getValue().getId(),
-                                getSessionData().getDiscordUser().get().getId(),
-                                json
-                        ).get(5, TimeUnit.SECONDS);
-                        if (actionResult.getSuccessMessage() != null) {
-                            CustomNotification.showSuccess(actionResult.getSuccessMessage());
-                        }
-                        if (actionResult.getErrorMessage() != null) {
-                            confirmationDialog.open(actionResult.getErrorMessage(), () -> {});
-                        }
-                        if (actionResult.getRedraw()) {
-                            updateMainContent(category);
-                        }
-                    } catch (Throwable e) {
-                        confirmationDialog.open(getTranslation("error"), () -> {});
-                    }
-                });
-            } else {
-                mainLayout.add(generateMissingPermissions(data.getMissingUserPermissions(), data.getMissingBotPermissions()));
-            }
-        } else {
-            H2 invalidServerTitle = new H2(getTranslation("dash.invalidserver.title"));
-            invalidServerTitle.getStyle().set("margin-top", "12px");
-            mainLayout.add(invalidServerTitle);
-
-            Text invalidServerText = new Text(getTranslation("dash.invalidserver.desc"));
-            mainLayout.add(invalidServerText);
-            mainLayout.add(generateInvalidServerButtons());
-        }
-
-        Button backButton = new Button(getTranslation("dash.back"), VaadinIcon.ARROW_LEFT.create());
+        Button backButton = new Button(VaadinIcon.ARROW_LEFT.create());
+        backButton.getStyle().set("margin-left", "-12px");
         backButton.addClassNames(Styles.VISIBLE_NOT_LARGE);
         backButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         backButton.addClickListener(e -> updateMainContentBack(category == null));
         mainLayout.add(backButton);
+
+        H2 pageTitle = new H2();
+        pageTitle.getStyle().set("margin-top", "0");
+
+        titleLayout.add(backButton, pageTitle);
+        mainLayout.add(titleLayout);
+
+        if (category != null) {
+            mainLayout.add(generateMainWithCategory(pageTitle, category));
+        } else {
+            pageTitle.setText(getTranslation("dash.invalidserver.title"));
+            Text invalidServerText = new Text(getTranslation("dash.invalidserver.desc"));
+            mainLayout.add(invalidServerText);
+            mainLayout.add(generateInvalidServerButtons());
+        }
+    }
+
+    private Component generateMainWithCategory(H2 pageTitle, DashboardInitData.Category category) {
+        pageTitle.setText(category.getTitle());
+        DashboardCategoryInitData data;
+        try {
+            data = SendEvent.sendDashboardCategoryInit(
+                    category.getId(),
+                    guildComboBox.getValue().getId(),
+                    getSessionData().getDiscordUser().get().getId(),
+                    getLocale()
+            ).get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (data.getMissingUserPermissions().isEmpty() && data.getMissingBotPermissions().isEmpty()) {
+            Component component = DashboardComponentConverter.convert(data.getComponents());
+            ((HasSize) component).setWidthFull();
+            data.getComponents().setActionSendListener(json -> {
+                try {
+                    ActionResult actionResult = SendEvent.sendDashboardAction(
+                            guildComboBox.getValue().getId(),
+                            getSessionData().getDiscordUser().get().getId(),
+                            json
+                    ).get(5, TimeUnit.SECONDS);
+                    if (actionResult.getSuccessMessage() != null) {
+                        CustomNotification.showSuccess(actionResult.getSuccessMessage());
+                    }
+                    if (actionResult.getErrorMessage() != null) {
+                        confirmationDialog.open(actionResult.getErrorMessage(), () -> {});
+                    }
+                    if (actionResult.getRedraw()) {
+                        updateMainContent(category);
+                    }
+                } catch (Throwable e) {
+                    confirmationDialog.open(getTranslation("error"), () -> {});
+                }
+            });
+            return component;
+        } else {
+            return generateMissingPermissions(data.getMissingUserPermissions(), data.getMissingBotPermissions());
+        }
     }
 
     private void updateMainContentBack(boolean resetGuild) {

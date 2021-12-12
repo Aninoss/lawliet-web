@@ -28,16 +28,18 @@ public class DashboardComponentConverter {
                 component = new VerticalContainerAdapter((VerticalContainer) dashboardComponent);
                 break;
 
-            case DashboardText.TYPE:
-                component = convertText((DashboardText) dashboardComponent);
-                break;
-
             case DashboardButton.TYPE:
                 component = new DashboardButtonAdapter((DashboardButton) dashboardComponent);
                 break;
 
+            //TODO: selection menu
+
             case DashboardSeparator.TYPE:
                 component = new Hr();
+                break;
+
+            case DashboardText.TYPE:
+                component = convertText((DashboardText) dashboardComponent);
                 break;
 
             case HorizontalPusher.TYPE:
@@ -50,6 +52,10 @@ public class DashboardComponentConverter {
 
             case DashboardImageUpload.TYPE:
                 component = new DashboardImageUploadAdapter((DashboardImageUpload) dashboardComponent);
+                break;
+
+            case DashboardSwitch.TYPE:
+                component = new DashboardSwitchAdapter((DashboardSwitch) dashboardComponent);
                 break;
 
             default:
