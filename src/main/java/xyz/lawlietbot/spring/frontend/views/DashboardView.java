@@ -34,6 +34,7 @@ import xyz.lawlietbot.spring.backend.dashboard.DashboardInitData;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.frontend.Styles;
+import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.frontend.components.GuildComboBox;
 import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardComponentConverter;
@@ -52,6 +53,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
     private final VerticalLayout tabsLayout = new VerticalLayout();
     private final Tabs categoryTabs = new Tabs();
     private final GuildComboBox guildComboBox = new GuildComboBox();
+    private final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
     private List<DashboardInitData.Category> categoryList;
 
     public DashboardView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
@@ -68,7 +70,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         right.addClassName("dashboard-col");
 
         content.add(left, generateMain(), right);
-        add(content);
+        add(content, confirmationDialog);
     }
 
     private Component generateMain() {
@@ -197,13 +199,13 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                             CustomNotification.showSuccess(actionResult.getSuccessMessage());
                         }
                         if (actionResult.getErrorMessage() != null) {
-                            //TODO: show error
+                            confirmationDialog.open(actionResult.getErrorMessage(), () -> {});
                         }
                         if (actionResult.getRedraw()) {
                             updateMainContent(category);
                         }
                     } catch (Throwable e) {
-                        //TODO: show error
+                        confirmationDialog.open(getTranslation("error"), () -> {});
                     }
                 });
             } else {
