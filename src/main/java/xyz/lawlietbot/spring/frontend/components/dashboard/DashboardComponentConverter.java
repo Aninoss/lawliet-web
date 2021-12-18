@@ -39,7 +39,13 @@ public class DashboardComponentConverter {
                 break;
 
             case DashboardText.TYPE:
-                component = convertText((DashboardText) dashboardComponent);
+                DashboardText dashboardText = (DashboardText) dashboardComponent;
+                component = new Div(new Text(dashboardText.getText()));
+                break;
+
+            case DashboardTitle.TYPE:
+                DashboardTitle dashboardTitle = (DashboardTitle) dashboardComponent;
+                component = new H3(dashboardTitle.getText());
                 break;
 
             case HorizontalPusher.TYPE:
@@ -74,12 +80,6 @@ public class DashboardComponentConverter {
 
         component.setVisible(dashboardComponent.isVisible());
         return component;
-    }
-
-    private static Component convertText(DashboardText dashboardText) {
-        return dashboardText.getStyle() == DashboardText.Style.TITLE
-                ? new H3(dashboardText.getText())
-                : new Div(new Text(dashboardText.getText()));
     }
 
 }

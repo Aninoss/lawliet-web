@@ -1,6 +1,6 @@
 package xyz.lawlietbot.spring.frontend.components.dashboard.adapters;
 
-import com.vaadin.componentfactory.ToggleButton;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
@@ -16,21 +16,26 @@ public class DashboardSwitchAdapter extends HorizontalLayout {
         addClassName("dashboard-switch-layout");
 
         Label label = new Label(dashboardSwitch.getLabel());
+        if (!dashboardSwitch.isEnabled()) {
+            label.getStyle().set("color", "var(--lumo-disabled-text-color)");
+        }
+
         Div space = new Div();
-        ToggleButton toggleButton = new ToggleButton(dashboardSwitch.isChecked());
-        toggleButton.setEnabled(dashboardSwitch.isEnabled());
-        toggleButton.addValueChangeListener(e -> dashboardSwitch.trigger(e.getValue()));
+        Checkbox checkbox = new Checkbox();
+        checkbox.setClassName("toggle-button");
+        checkbox.setEnabled(dashboardSwitch.isEnabled());
+        checkbox.addValueChangeListener(e -> dashboardSwitch.trigger(e.getValue()));
 
         add(label);
         if (dashboardSwitch.getSubtitle() != null) {
             Icon infoIcon = VaadinIcon.INFO_CIRCLE.create();
             infoIcon.addClassName("dashboard-info-icon");
             infoIcon.getStyle().set("height", "16px")
-                            .set("margin-left", "8px");
+                            .set("margin-left", "4px");
             infoIcon.getElement().setProperty("title", dashboardSwitch.getSubtitle());
             add(infoIcon);
         }
-        add(space, toggleButton);
+        add(space, checkbox);
         setFlexGrow(1, space);
     }
 
