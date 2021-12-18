@@ -41,6 +41,7 @@ public class StripeCache {
         ).autoPagingIterable();
         subscriptionIterable.forEach(subscriptionList::add);
         subscriptions = Collections.unmodifiableList(subscriptionList);
+        LOGGER.info("Stripe subscriptions load successful ({})", subscriptions.size());
 
         ArrayList<Customer> customerList = new ArrayList<>();
         Iterable<Customer> customerIterable = Customer.list(CustomerListParams.builder()
@@ -49,8 +50,7 @@ public class StripeCache {
         ).autoPagingIterable();
         customerIterable.forEach(customerList::add);
         customers = Collections.unmodifiableList(customerList);
-
-        LOGGER.info("Stripe load successful");
+        LOGGER.info("Stripe customers load successful ({})", customers.size());
     }
 
     public static List<Subscription> getSubscriptions() {
