@@ -228,7 +228,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                         updateMainContent(category);
                     }
                 } catch (Throwable e) {
-                    confirmationDialog.open(getTranslation("error"), () -> {});
+                    confirmationDialog.open(getTranslation("error"), () -> UI.getCurrent().getPage().reload());
                 }
             });
             return component;

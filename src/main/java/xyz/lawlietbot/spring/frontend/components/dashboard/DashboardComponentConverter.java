@@ -64,6 +64,18 @@ public class DashboardComponentConverter {
                 component = new DashboardSwitchAdapter((DashboardSwitch) dashboardComponent);
                 break;
 
+            case DashboardTextField.TYPE:
+                component = new DashboardTextFieldAdapter((DashboardTextField) dashboardComponent);
+                break;
+
+            case DashboardMultiLineTextField.TYPE:
+                component = new DashboardMultiLineTextFieldAdapter((DashboardMultiLineTextField) dashboardComponent);
+                break;
+
+            case DashboardNumberField.TYPE:
+                component = new DashboardNumberFieldAdapter((DashboardNumberField) dashboardComponent);
+                break;
+
             default:
                 return null;
         }
