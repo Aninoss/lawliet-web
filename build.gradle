@@ -54,7 +54,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.9.2'
     implementation 'com.github.appreciated:vaadin-css-grid:2.0.0'
     implementation 'com.vaadin:vaadin-charts-flow:21.0.3'
-    implementation 'com.stripe:stripe-java:20.85.0'
+    implementation 'com.stripe:stripe-java:20.92.0'
     implementation 'com.vaadin.componentfactory:togglebutton:1.0.1'
     implementation 'com.github.Aninoss:lawliet-dashboard-components:7718292eb1'
 }

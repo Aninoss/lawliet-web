@@ -1,5 +1,6 @@
 package xyz.lawlietbot.spring.backend.payment;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -19,7 +20,7 @@ public class StripeCache {
     private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
     private static List<Subscription> subscriptions = Collections.emptyList();
-    private static List<Customer> customers = Collections.emptyList();;
+    private static List<Customer> customers = Collections.emptyList();
 
     public static void startScheduler() {
         executor.scheduleAtFixedRate(() -> {
@@ -32,16 +33,22 @@ public class StripeCache {
     }
 
     public static void reload() throws StripeException {
-        subscriptions = Subscription.list(SubscriptionListParams.builder()
+        ArrayList<Subscription> subscriptionList = new ArrayList<>();
+        Iterable<Subscription> subscriptionIterable = Subscription.list(SubscriptionListParams.builder()
                 .setStatus(SubscriptionListParams.Status.ACTIVE)
-                .setLimit(9999L)
+                .setLimit(100L)
                 .build()
-        ).getData();
+        ).autoPagingIterable();
+        subscriptionIterable.forEach(subscriptionList::add);
+        subscriptions = Collections.unmodifiableList(subscriptionList);
 
-        customers = Customer.list(CustomerListParams.builder()
-                .setLimit(9999L)
+        ArrayList<Customer> customerList = new ArrayList<>();
+        Iterable<Customer> customerIterable = Customer.list(CustomerListParams.builder()
+                .setLimit(100L)
                 .build()
-        ).getData();
+        ).autoPagingIterable();
+        customerIterable.forEach(customerList::add);
+        customers = Collections.unmodifiableList(customerList);
 
         LOGGER.info("Stripe load successful");
     }
