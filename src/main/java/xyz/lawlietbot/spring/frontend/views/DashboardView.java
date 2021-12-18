@@ -25,6 +25,7 @@ import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.*;
 import dashboard.ActionResult;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import xyz.lawlietbot.spring.LoginAccess;
 import xyz.lawlietbot.spring.NavBarSolid;
@@ -211,29 +212,37 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         if (data.getMissingUserPermissions().isEmpty() && data.getMissingBotPermissions().isEmpty()) {
             Component component = DashboardComponentConverter.convert(data.getComponents());
             ((HasSize) component).setWidthFull();
-            data.getComponents().setActionSendListener(json -> {
-                try {
-                    ActionResult actionResult = SendEvent.sendDashboardAction(
-                            guildComboBox.getValue().getId(),
-                            getSessionData().getDiscordUser().get().getId(),
-                            json
-                    ).get(5, TimeUnit.SECONDS);
-                    if (actionResult.getSuccessMessage() != null) {
-                        CustomNotification.showSuccess(actionResult.getSuccessMessage());
-                    }
-                    if (actionResult.getErrorMessage() != null) {
-                        confirmationDialog.open(actionResult.getErrorMessage(), () -> {});
-                    }
-                    if (actionResult.getRedraw()) {
-                        updateMainContent(category);
-                    }
-                } catch (Throwable e) {
-                    confirmationDialog.open(getTranslation("error"), () -> UI.getCurrent().getPage().reload());
+            data.getComponents().setActionSendListener((json, confirmationMessage) -> {
+                if (confirmationMessage != null) {
+                    confirmationDialog.open(confirmationMessage, () -> sendAction(category, json), () -> updateMainContent(category));
+                } else {
+                    sendAction(category, json);
                 }
             });
             return component;
         } else {
             return generateMissingPermissions(data.getMissingUserPermissions(), data.getMissingBotPermissions());
+        }
+    }
+
+    private void sendAction(DashboardInitData.Category category, JSONObject json) {
+        try {
+            ActionResult actionResult = SendEvent.sendDashboardAction(
+                    guildComboBox.getValue().getId(),
+                    getSessionData().getDiscordUser().get().getId(),
+                    json
+            ).get(5, TimeUnit.SECONDS);
+            if (actionResult.getSuccessMessage() != null) {
+                CustomNotification.showSuccess(actionResult.getSuccessMessage());
+            }
+            if (actionResult.getErrorMessage() != null) {
+                confirmationDialog.open(actionResult.getErrorMessage(), () -> {});
+            }
+            if (actionResult.getRedraw()) {
+                updateMainContent(category);
+            }
+        } catch (Throwable e) {
+            confirmationDialog.open(getTranslation("error"), () -> UI.getCurrent().getPage().reload());
         }
     }
 
