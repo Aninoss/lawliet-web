@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
@@ -113,9 +114,13 @@ public class CustomRequestHandler implements RequestHandler {
                 if (body.length() > 0) {
                     JSONObject jsonObject = new JSONObject(body);
                     LOGGER.info("UPVOTE | {}", jsonObject.getLong("user"));
-                    SendEvent.sendTopGG(jsonObject);
+                    JSONObject responseJson = SendEvent.sendTopGG(jsonObject).get(5, TimeUnit.SECONDS);
+                    if (!responseJson.getBoolean("success")) {
+                        LOGGER.error("Error while handling upvote");
+                        response.setStatus(500);
+                    }
                 }
-            } catch (IOException e) {
+            } catch (Throwable e) {
                 LOGGER.error("Error while handling upvote", e);
                 response.setStatus(500);
             }
@@ -131,9 +136,13 @@ public class CustomRequestHandler implements RequestHandler {
                 if (body.length() > 0) {
                     JSONObject jsonObject = new JSONObject(body);
                     LOGGER.info("UPVOTE ANINOSS | {}", jsonObject.getLong("user"));
-                    SendEvent.sendTopGGAnicord(jsonObject);
+                    JSONObject responseJson = SendEvent.sendTopGGAnicord(jsonObject).get(5, TimeUnit.SECONDS);
+                    if (!responseJson.getBoolean("success")) {
+                        LOGGER.error("Error while handling upvote");
+                        response.setStatus(500);
+                    }
                 }
-            } catch (IOException e) {
+            } catch (Throwable e) {
                 LOGGER.error("Error while handling upvote", e);
                 response.setStatus(500);
             }

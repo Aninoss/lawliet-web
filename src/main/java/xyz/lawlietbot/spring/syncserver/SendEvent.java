@@ -54,11 +54,11 @@ public class SendEvent {
     }
 
     public static CompletableFuture<JSONObject> sendTopGG(JSONObject dataJson) {
-        return SyncManager.getInstance().getClient().sendSecure("TOPGG", dataJson);
+        return SyncManager.getInstance().getClient().send("TOPGG", dataJson);
     }
 
     public static CompletableFuture<JSONObject> sendTopGGAnicord(JSONObject dataJson) {
-        return SyncManager.getInstance().getClient().sendSecure("TOPGG_ANICORD", dataJson);
+        return SyncManager.getInstance().getClient().send("TOPGG_ANICORD", dataJson);
     }
 
     public static CompletableFuture<FRDynamicBean> sendRequestFeatureRequestMainData(SessionData sessionData) {
