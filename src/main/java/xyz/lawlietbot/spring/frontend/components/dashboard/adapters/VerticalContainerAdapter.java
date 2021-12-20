@@ -10,14 +10,14 @@ import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardComponentCon
 
 public class VerticalContainerAdapter extends FlexLayout {
 
-    public VerticalContainerAdapter(VerticalContainer verticalContainer) {
+    public VerticalContainerAdapter(long guildId, long userId, VerticalContainer verticalContainer) {
         addClassName("dashboard-vertical");
         if (verticalContainer.isCard()) {
             addClassName("dashboard-card");
         }
 
         for (DashboardComponent dashboardComponent : verticalContainer.getChildren()) {
-            Component component = DashboardComponentConverter.convert(dashboardComponent);
+            Component component = DashboardComponentConverter.convert(guildId, userId, dashboardComponent);
             if (component != null) {
                 if (component instanceof HasSize) {
                     ((HasSize) component).setWidthFull();

@@ -28,7 +28,7 @@ public class DashboardSwitchAdapter extends HorizontalLayout {
 
         add(label);
         if (dashboardSwitch.getSubtitle() != null) {
-            Icon infoIcon = VaadinIcon.INFO_CIRCLE.create();
+            Icon infoIcon = VaadinIcon.QUESTION_CIRCLE.create();
             infoIcon.addClassName("dashboard-info-icon");
             infoIcon.getStyle().set("height", "16px")
                             .set("margin-left", "4px");

@@ -2,12 +2,16 @@ package xyz.lawlietbot.spring.syncserver;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import dashboard.ActionResult;
 import dashboard.DashboardComponent;
+import dashboard.component.DashboardDiscordEntitySelection;
 import dashboard.container.DashboardContainer;
+import dashboard.data.DiscordEntity;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import xyz.lawlietbot.spring.backend.dashboard.DashboardCategoryInitData;
@@ -257,6 +261,48 @@ public class SendEvent {
                         throw new RuntimeException();
                     }
                 }
+        );
+    }
+
+    public static CompletableFuture<List<DiscordEntity>> sendDashboardListDiscordEntities(DashboardDiscordEntitySelection.DataType type, long guildId, long userId, int offset, int limit, String filterText) {
+        JSONObject json = new JSONObject();
+        json.put("type", type.name());
+        json.put("guild_id", guildId);
+        json.put("user_id", userId);
+        json.put("offset", offset);
+        json.put("limit", limit);
+        json.put("filter_text", filterText);
+
+        return process(
+                "DASH_LIST_DISCORD_ENTITIES",
+                json,
+                r -> {
+                    ArrayList<DiscordEntity> discordEntities = new ArrayList<>();
+                    JSONArray entitiesJson = r.getJSONArray("entities");
+                    for (int i = 0; i < entitiesJson.length(); i++) {
+                        JSONObject entityJson = entitiesJson.getJSONObject(i);
+                        DiscordEntity discordEntity = new DiscordEntity(
+                                entityJson.getLong("id"),
+                                entityJson.getString("name")
+                        );
+                        discordEntities.add(discordEntity);
+                    }
+                    return Collections.unmodifiableList(discordEntities);
+                }
+        );
+    }
+
+    public static CompletableFuture<Long> sendDashboardCountDiscordEntities(DashboardDiscordEntitySelection.DataType type, long guildId, long userId, String filterText) {
+        JSONObject json = new JSONObject();
+        json.put("type", type.name());
+        json.put("user_id", userId);
+        json.put("guild_id", guildId);
+        json.put("filter_text", filterText);
+
+        return process(
+                "DASH_COUNT_DISCORD_ENTITIES",
+                json,
+                r -> r.getLong("count")
         );
     }
 

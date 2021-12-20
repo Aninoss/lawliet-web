@@ -56,7 +56,8 @@ dependencies {
     implementation 'com.vaadin:vaadin-charts-flow:21.0.3'
     implementation 'com.stripe:stripe-java:20.92.0'
     implementation 'com.vaadin.componentfactory:togglebutton:1.0.1'
-    implementation 'com.github.Aninoss:lawliet-dashboard-components:7718292eb1'
+    implementation 'org.vaadin.gatanaso:multiselect-combo-box-flow:3.0.2'
+    implementation 'com.github.Aninoss:lawliet-dashboard-components:aa3c7b3cac'
 }
 
 dependencyManagement {

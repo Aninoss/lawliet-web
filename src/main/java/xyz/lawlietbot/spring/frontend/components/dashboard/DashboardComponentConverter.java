@@ -17,22 +17,20 @@ import xyz.lawlietbot.spring.frontend.components.dashboard.adapters.*;
 
 public class DashboardComponentConverter {
 
-    public static Component convert(DashboardComponent dashboardComponent) {
+    public static Component convert(long guildId, long userId, DashboardComponent dashboardComponent) {
         Component component;
         switch (dashboardComponent.getType()) {
             case HorizontalContainer.TYPE:
-                component = new HorizontalContainerAdapter((HorizontalContainer) dashboardComponent);
+                component = new HorizontalContainerAdapter(guildId, userId, (HorizontalContainer) dashboardComponent);
                 break;
 
             case VerticalContainer.TYPE:
-                component = new VerticalContainerAdapter((VerticalContainer) dashboardComponent);
+                component = new VerticalContainerAdapter(guildId, userId, (VerticalContainer) dashboardComponent);
                 break;
 
             case DashboardButton.TYPE:
                 component = new DashboardButtonAdapter((DashboardButton) dashboardComponent);
                 break;
-
-            //TODO: selection menu
 
             case DashboardSeparator.TYPE:
                 component = new Hr();
@@ -74,6 +72,10 @@ public class DashboardComponentConverter {
 
             case DashboardNumberField.TYPE:
                 component = new DashboardNumberFieldAdapter((DashboardNumberField) dashboardComponent);
+                break;
+
+            case DashboardDiscordEntitySelection.TYPE:
+                component = new DashboardDiscordEntitySelectionAdapter(guildId, userId, (DashboardDiscordEntitySelection) dashboardComponent);
                 break;
 
             default:

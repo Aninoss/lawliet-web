@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import bell.oauth.discord.domain.Guild;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Text;
@@ -32,6 +33,7 @@ import xyz.lawlietbot.spring.NavBarSolid;
 import xyz.lawlietbot.spring.NoLiteAccess;
 import xyz.lawlietbot.spring.backend.dashboard.DashboardCategoryInitData;
 import xyz.lawlietbot.spring.backend.dashboard.DashboardInitData;
+import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.frontend.Styles;
@@ -196,13 +198,16 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
     }
 
     private Component generateMainWithCategory(H2 pageTitle, DashboardInitData.Category category) {
+        Guild guild = guildComboBox.getValue();
+        DiscordUser discordUser = getSessionData().getDiscordUser().get();
+
         pageTitle.setText(category.getTitle());
         DashboardCategoryInitData data;
         try {
             data = SendEvent.sendDashboardCategoryInit(
                     category.getId(),
-                    guildComboBox.getValue().getId(),
-                    getSessionData().getDiscordUser().get().getId(),
+                    guild.getId(),
+                    discordUser.getId(),
                     getLocale()
             ).get(5, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -210,7 +215,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         }
 
         if (data.getMissingUserPermissions().isEmpty() && data.getMissingBotPermissions().isEmpty()) {
-            Component component = DashboardComponentConverter.convert(data.getComponents());
+            Component component = DashboardComponentConverter.convert(guild.getId(), discordUser.getId(), data.getComponents());
             ((HasSize) component).setWidthFull();
             data.getComponents().setActionSendListener((json, confirmationMessage) -> {
                 if (confirmationMessage != null) {

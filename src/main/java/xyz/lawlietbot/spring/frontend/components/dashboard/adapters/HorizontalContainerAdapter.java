@@ -11,7 +11,7 @@ import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardComponentCon
 
 public class HorizontalContainerAdapter extends FlexLayout {
 
-    public HorizontalContainerAdapter(HorizontalContainer horizontalContainer) {
+    public HorizontalContainerAdapter(long guildId, long userId, HorizontalContainer horizontalContainer) {
         addClassName("dashboard-horizontal");
         if (horizontalContainer.isCard()) {
             addClassName("dashboard-card");
@@ -38,7 +38,7 @@ public class HorizontalContainerAdapter extends FlexLayout {
 
         boolean noPusher = horizontalContainer.getChildren().stream().noneMatch(c -> c instanceof HorizontalPusher);
         for (DashboardComponent dashboardComponent : horizontalContainer.getChildren()) {
-            Component component = DashboardComponentConverter.convert(dashboardComponent);
+            Component component = DashboardComponentConverter.convert(guildId, userId, dashboardComponent);
             if (component != null) {
                 add(component);
                 if (dashboardComponent instanceof HorizontalPusher || noPusher) {
