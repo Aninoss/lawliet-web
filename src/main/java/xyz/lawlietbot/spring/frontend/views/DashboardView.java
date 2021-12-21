@@ -321,7 +321,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         if (guildComboBox.getValue() != null) {
             uri.append("/").append(guildComboBox.getValue().getId());
             if (categoryTabs.getSelectedIndex() >= 0) {
-                uri.append("?cat=").append(categoryList.get(categoryTabs.getSelectedIndex()).getId());
+                uri.append("?c=").append(categoryList.get(categoryTabs.getSelectedIndex()).getId());
             }
         }
         getSessionData().pushUri(uri.toString());
@@ -342,7 +342,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                     .ifPresent(guild -> {
                         guildComboBox.setValue(guild);
                         if (categoryList != null && categoryList.size() > 0) {
-                            List<String> categoryIdList = parametersMap.getOrDefault("cat", Collections.emptyList());
+                            List<String> categoryIdList = parametersMap.getOrDefault("c", Collections.emptyList());
                             String categoryId = categoryIdList.size() > 0 ? categoryIdList.get(0) : null;
                             int index = -1;
                             for (int i = 0; i < categoryList.size(); i++) {

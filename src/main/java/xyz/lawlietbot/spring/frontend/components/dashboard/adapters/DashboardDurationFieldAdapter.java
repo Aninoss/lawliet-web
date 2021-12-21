@@ -53,6 +53,10 @@ public class DashboardDurationFieldAdapter extends FlexLayout {
                         checkNumberField(minutesField, 59)
                 ) {
                     long value = minutesField.getValue().longValue() + hoursField.getValue().longValue() * 60 + daysField.getValue().longValue() * 3600;
+                    if (value == 0) {
+                        value = 1;
+                        minutesField.setValue(1.0);
+                    }
                     if (value != defaultValue) {
                         defaultValue = value;
                         dashboardDurationField.trigger(value);
@@ -74,7 +78,7 @@ public class DashboardDurationFieldAdapter extends FlexLayout {
 
     private NumberField generateNumberField(String label, boolean enabled, int max, int value, boolean marginLeft) {
         NumberField numberField = new NumberField();
-        numberField.setHasControls(true);
+        numberField.setHasControls(false);
         numberField.setStep(1.0);
         numberField.setLabel(label);
         numberField.setReadOnly(true);
@@ -83,6 +87,7 @@ public class DashboardDurationFieldAdapter extends FlexLayout {
         numberField.setMax(max);
         numberField.setErrorMessage(getTranslation("dash.numberfield.minmax", 0, max));
         numberField.setValue((double) value);
+        numberField.setMinWidth("50px");
         if (marginLeft) {
             numberField.getStyle().set("margin-left", "8px");
         }
