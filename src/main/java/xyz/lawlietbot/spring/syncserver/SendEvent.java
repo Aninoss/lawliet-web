@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import dashboard.ActionResult;
 import dashboard.DashboardComponent;
-import dashboard.component.DashboardDiscordEntitySelection;
+import dashboard.component.DashboardComboBox;
 import dashboard.container.DashboardContainer;
 import dashboard.data.DiscordEntity;
 import org.json.JSONArray;
@@ -264,7 +264,7 @@ public class SendEvent {
         );
     }
 
-    public static CompletableFuture<List<DiscordEntity>> sendDashboardListDiscordEntities(DashboardDiscordEntitySelection.DataType type, long guildId, long userId, int offset, int limit, String filterText) {
+    public static CompletableFuture<List<DiscordEntity>> sendDashboardListDiscordEntities(DashboardComboBox.DataType type, long guildId, long userId, int offset, int limit, String filterText) {
         JSONObject json = new JSONObject();
         json.put("type", type.name());
         json.put("guild_id", guildId);
@@ -281,18 +281,14 @@ public class SendEvent {
                     JSONArray entitiesJson = r.getJSONArray("entities");
                     for (int i = 0; i < entitiesJson.length(); i++) {
                         JSONObject entityJson = entitiesJson.getJSONObject(i);
-                        DiscordEntity discordEntity = new DiscordEntity(
-                                entityJson.getLong("id"),
-                                entityJson.getString("name")
-                        );
-                        discordEntities.add(discordEntity);
+                        discordEntities.add(DiscordEntity.fromJson(entityJson));
                     }
                     return Collections.unmodifiableList(discordEntities);
                 }
         );
     }
 
-    public static CompletableFuture<Long> sendDashboardCountDiscordEntities(DashboardDiscordEntitySelection.DataType type, long guildId, long userId, String filterText) {
+    public static CompletableFuture<Long> sendDashboardCountDiscordEntities(DashboardComboBox.DataType type, long guildId, long userId, String filterText) {
         JSONObject json = new JSONObject();
         json.put("type", type.name());
         json.put("user_id", userId);

@@ -74,8 +74,12 @@ public class DashboardComponentConverter {
                 component = new DashboardNumberFieldAdapter((DashboardNumberField) dashboardComponent);
                 break;
 
-            case DashboardDiscordEntitySelection.TYPE:
-                component = new DashboardDiscordEntitySelectionAdapter(guildId, userId, (DashboardDiscordEntitySelection) dashboardComponent);
+            case DashboardComboBox.TYPE:
+                component = new DashboardComboBoxAdapter(guildId, userId, (DashboardComboBox) dashboardComponent);
+                break;
+
+            case DashboardSelect.TYPE:
+                component = new DashboardSelectAdapter((DashboardSelect) dashboardComponent);
                 break;
 
             default:
