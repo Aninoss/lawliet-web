@@ -82,6 +82,10 @@ public class DashboardComponentConverter {
                 component = new DashboardSelectAdapter((DashboardSelect) dashboardComponent);
                 break;
 
+            case DashboardDurationField.TYPE:
+                component = new DashboardDurationFieldAdapter((DashboardDurationField) dashboardComponent);
+                break;
+
             default:
                 return null;
         }
