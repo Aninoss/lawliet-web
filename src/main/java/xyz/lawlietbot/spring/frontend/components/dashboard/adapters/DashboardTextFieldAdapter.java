@@ -13,6 +13,7 @@ public class DashboardTextFieldAdapter extends FlexLayout {
         setFlexDirection(FlexDirection.ROW);
 
         TextField textField = new TextField();
+        textField.getStyle().set("margin-top", "-16px");
         textField.setLabel(dashboardTextField.getLabel());
         textField.setPlaceholder(dashboardTextField.getPlaceholder());
         textField.setReadOnly(true);

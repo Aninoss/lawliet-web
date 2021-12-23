@@ -13,6 +13,7 @@ public class DashboardNumberFieldAdapter extends FlexLayout {
         setFlexDirection(FlexDirection.ROW);
 
         NumberField numberField = new NumberField();
+        numberField.getStyle().set("margin-top", "-16px");
         numberField.setHasControls(true);
         numberField.setStep(1.0);
         numberField.setLabel(dashboardNumberField.getLabel());

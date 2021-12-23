@@ -1,6 +1,7 @@
 package xyz.lawlietbot.spring.frontend.components.dashboard.adapters;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
@@ -41,8 +42,8 @@ public class HorizontalContainerAdapter extends FlexLayout {
             Component component = DashboardComponentConverter.convert(guildId, userId, dashboardComponent);
             if (component != null) {
                 add(component);
-                if (dashboardComponent instanceof HorizontalPusher || noPusher) {
-                    setFlexGrow(1, component);
+                if (component instanceof HasSize && (dashboardComponent instanceof HorizontalPusher || noPusher)) {
+                    ((HasSize) component).setWidthFull();
                 }
                 if (component instanceof HasStyle && !(dashboardComponent instanceof HorizontalPusher)) {
                     if (horizontalContainer.getAllowWrap()) {

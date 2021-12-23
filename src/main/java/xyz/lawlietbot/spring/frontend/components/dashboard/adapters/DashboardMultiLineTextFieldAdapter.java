@@ -13,6 +13,7 @@ public class DashboardMultiLineTextFieldAdapter extends FlexLayout {
         setFlexDirection(FlexDirection.ROW);
 
         TextArea textArea = new TextArea();
+        textArea.getStyle().set("margin-top", "-16px");
         textArea.setLabel(dashboardTextField.getLabel());
         textArea.setPlaceholder(dashboardTextField.getPlaceholder());
         textArea.setReadOnly(true);

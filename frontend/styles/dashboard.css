@@ -79,6 +79,16 @@ html {
     flex-direction: column;
 }
 
+.dashboard-vertical-child {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.dashboard-horizontal-child {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
 .dashboard-horizontal-child:not(:first-child) {
     margin-left: 1em;
 }

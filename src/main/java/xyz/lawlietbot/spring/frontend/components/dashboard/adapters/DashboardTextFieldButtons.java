@@ -17,7 +17,7 @@ public class DashboardTextFieldButtons extends FlexLayout {
 
     public DashboardTextFieldButtons(boolean useEnterShortcut) {
         this.useEnterShortcut = useEnterShortcut;
-        getStyle().set("margin-top", "32px")
+        getStyle().set("margin-top", "16px")
                 .set("margin-left", "8px");
         setWidth("75px");
         setFlexDirection(FlexDirection.ROW);
