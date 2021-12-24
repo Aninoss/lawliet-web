@@ -24,6 +24,7 @@ public class DashboardSwitchAdapter extends HorizontalLayout {
         Checkbox checkbox = new Checkbox();
         checkbox.setClassName("toggle-button");
         checkbox.setEnabled(dashboardSwitch.isEnabled());
+        checkbox.setValue(dashboardSwitch.isChecked());
         checkbox.addValueChangeListener(e -> dashboardSwitch.trigger(e.getValue()));
 
         add(label);
