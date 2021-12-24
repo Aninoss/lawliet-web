@@ -7,10 +7,11 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import dashboard.component.DashboardSwitch;
+import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 
 public class DashboardSwitchAdapter extends HorizontalLayout {
 
-    public DashboardSwitchAdapter(DashboardSwitch dashboardSwitch) {
+    public DashboardSwitchAdapter(DashboardSwitch dashboardSwitch, ConfirmationDialog dialog) {
         setPadding(false);
         setAlignItems(Alignment.CENTER);
         addClassName("dashboard-switch-layout");
@@ -31,9 +32,9 @@ public class DashboardSwitchAdapter extends HorizontalLayout {
         if (dashboardSwitch.getSubtitle() != null) {
             Icon infoIcon = VaadinIcon.QUESTION_CIRCLE.create();
             infoIcon.addClassName("dashboard-info-icon");
-            infoIcon.getStyle().set("height", "16px")
-                            .set("margin-left", "4px");
             infoIcon.getElement().setProperty("title", dashboardSwitch.getSubtitle());
+            infoIcon.addClickListener(e -> dialog.open(dashboardSwitch.getSubtitle(), () -> {
+            }));
             add(infoIcon);
         }
         add(space, checkbox);

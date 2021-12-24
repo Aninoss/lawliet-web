@@ -13,19 +13,20 @@ import dashboard.component.*;
 import dashboard.container.HorizontalContainer;
 import dashboard.container.HorizontalPusher;
 import dashboard.container.VerticalContainer;
+import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.dashboard.adapters.*;
 
 public class DashboardComponentConverter {
 
-    public static Component convert(long guildId, long userId, DashboardComponent dashboardComponent) {
+    public static Component convert(long guildId, long userId, DashboardComponent dashboardComponent, ConfirmationDialog dialog) {
         Component component;
         switch (dashboardComponent.getType()) {
             case HorizontalContainer.TYPE:
-                component = new HorizontalContainerAdapter(guildId, userId, (HorizontalContainer) dashboardComponent);
+                component = new HorizontalContainerAdapter((HorizontalContainer) dashboardComponent, guildId, userId, dialog);
                 break;
 
             case VerticalContainer.TYPE:
-                component = new VerticalContainerAdapter(guildId, userId, (VerticalContainer) dashboardComponent);
+                component = new VerticalContainerAdapter((VerticalContainer) dashboardComponent, guildId, userId, dialog);
                 break;
 
             case DashboardButton.TYPE:
@@ -59,7 +60,7 @@ public class DashboardComponentConverter {
                 break;
 
             case DashboardSwitch.TYPE:
-                component = new DashboardSwitchAdapter((DashboardSwitch) dashboardComponent);
+                component = new DashboardSwitchAdapter((DashboardSwitch) dashboardComponent, dialog);
                 break;
 
             case DashboardTextField.TYPE:

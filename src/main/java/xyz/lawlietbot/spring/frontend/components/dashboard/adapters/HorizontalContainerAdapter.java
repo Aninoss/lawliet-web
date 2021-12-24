@@ -8,11 +8,12 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import dashboard.DashboardComponent;
 import dashboard.container.HorizontalContainer;
 import dashboard.container.HorizontalPusher;
+import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardComponentConverter;
 
 public class HorizontalContainerAdapter extends FlexLayout {
 
-    public HorizontalContainerAdapter(long guildId, long userId, HorizontalContainer horizontalContainer) {
+    public HorizontalContainerAdapter(HorizontalContainer horizontalContainer, long guildId, long userId, ConfirmationDialog dialog) {
         addClassName("dashboard-horizontal");
         if (horizontalContainer.isCard()) {
             addClassName("dashboard-card");
@@ -39,7 +40,7 @@ public class HorizontalContainerAdapter extends FlexLayout {
 
         boolean noPusher = horizontalContainer.getChildren().stream().noneMatch(c -> c instanceof HorizontalPusher);
         for (DashboardComponent dashboardComponent : horizontalContainer.getChildren()) {
-            Component component = DashboardComponentConverter.convert(guildId, userId, dashboardComponent);
+            Component component = DashboardComponentConverter.convert(guildId, userId, dashboardComponent, dialog);
             if (component != null) {
                 add(component);
                 if (component instanceof HasSize && (dashboardComponent instanceof HorizontalPusher || noPusher)) {
