@@ -55,6 +55,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
     private final VerticalLayout mainLayout = new VerticalLayout();
     private final VerticalLayout tabsLayout = new VerticalLayout();
     private final Tabs categoryTabs = new Tabs();
+    private final VerticalLayout premiumUnlockedLayout = new VerticalLayout();
     private final GuildComboBox guildComboBox = new GuildComboBox();
     private final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
     private List<DashboardInitData.Category> categoryList;
@@ -94,7 +95,8 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         categoryTabs.setOrientation(Tabs.Orientation.VERTICAL);
         categoryTabs.addThemeVariants(TabsVariant.LUMO_MINIMAL);
         categoryTabs.setVisible(false);
-        categoryTabs.getStyle().set("margin-left", "-16px");
+        categoryTabs.getStyle().set("margin-left", "-16px")
+                .set("margin-top", "10px");
         categoryTabs.setAutoselect(false);
         categoryTabs.addSelectedChangeListener(e -> {
             if (categoryTabs.getSelectedIndex() >= 0) {
@@ -104,10 +106,15 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
             }
         });
 
+        premiumUnlockedLayout.setId("dashboard-premium-unlocked-layout");
+        premiumUnlockedLayout.setWidthFull();
+        premiumUnlockedLayout.setVisible(false);
+        premiumUnlockedLayout.setPadding(true);
+
         Hr hr = new Hr();
         hr.setId("dashboard-tabs-hr");
 
-        tabsLayout.add(generateGuildSelection(), hr, categoryTabs);
+        tabsLayout.add(generateGuildSelection(), hr, categoryTabs, premiumUnlockedLayout);
         return tabsLayout;
     }
 
@@ -127,15 +134,17 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         guildComboBox.setWidthFull();
         guildComboBox.addValueChangeListener(e -> {
             categoryTabs.removeAll();
+            premiumUnlockedLayout.setVisible(false);
             if (e.getValue() != null) {
                 long guildId = e.getValue().getId();
                 long userId = getSessionData().getDiscordUser().get().getId();
-                DashboardInitData dashboardInitData = null;
+                DashboardInitData dashboardInitData;
                 try {
                     dashboardInitData = SendEvent.sendDashboardInit(guildId, userId, UI.getCurrent().getLocale()).get(5, TimeUnit.SECONDS);
                 } catch (InterruptedException | ExecutionException | TimeoutException ex) {
                     throw new RuntimeException(ex);
                 }
+
                 if (dashboardInitData != null) {
                     categoryList = dashboardInitData.getCategories();
                     for (DashboardInitData.Category category : categoryList) {
@@ -144,16 +153,20 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                     }
                     categoryTabs.setVisible(true);
                     mainLayout.removeAll();
+                    premiumUnlockedLayout.setVisible(true);
+                    updatePremiumUnlocked(dashboardInitData.isPremiumUnlocked());
                 } else {
                     categoryList = Collections.emptyList();
                     updateMainContent(null);
                 }
+
                 if (e.getValue().getIcon() != null) {
                     image.setVisible(true);
                     image.setSrc(e.getValue().getIcon());
                 } else {
                     image.setVisible(false);
                 }
+
                 pushNewUri();
             } else {
                 image.setVisible(false);
@@ -194,6 +207,30 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
             Text invalidServerText = new Text(getTranslation("dash.invalidserver.desc"));
             mainLayout.add(invalidServerText);
             mainLayout.add(generateInvalidServerButtons());
+        }
+    }
+
+    private void updatePremiumUnlocked(boolean premiumUnlocked) {
+        premiumUnlockedLayout.removeAll();
+
+        FlexLayout textLayout = new FlexLayout();
+        textLayout.setWidthFull();
+        textLayout.setFlexDirection(FlexLayout.FlexDirection.ROW);
+        textLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        textLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+
+        Text text = new Text(getTranslation("dash.unlocked"));
+        Icon yesNo = (premiumUnlocked ? VaadinIcon.CHECK : VaadinIcon.CLOSE).create();
+        yesNo.addClassName(premiumUnlocked ? "dashboard-premium-unlocked-yes" : "dashboard-premium-unlocked-no");
+        textLayout.add(text, yesNo);
+        premiumUnlockedLayout.add(textLayout);
+
+        if (!premiumUnlocked) {
+            Button unlockButton = new Button(getTranslation("dash.getpremium"));
+            unlockButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            unlockButton.setWidthFull();
+            unlockButton.addClickListener(e -> UI.getCurrent().navigate(PremiumView.class));
+            premiumUnlockedLayout.add(unlockButton);
         }
     }
 

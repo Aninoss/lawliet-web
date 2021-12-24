@@ -5,15 +5,20 @@ import java.util.List;
 public class DashboardInitData {
 
     private final List<Category> categories;
+    private boolean premiumUnlocked;
 
-    public DashboardInitData(List<Category> categories) {
+    public DashboardInitData(List<Category> categories, boolean premiumUnlocked) {
         this.categories = categories;
+        this.premiumUnlocked = premiumUnlocked;
     }
 
     public List<Category> getCategories() {
         return categories;
     }
 
+    public boolean isPremiumUnlocked() {
+        return premiumUnlocked;
+    }
 
     public static class Category {
 

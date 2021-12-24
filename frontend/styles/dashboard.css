@@ -108,6 +108,22 @@ html {
     cursor: pointer;
 }
 
+#dashboard-premium-unlocked-layout {
+    border-radius: 6px;
+    background: var(--lumo-shade);
+    margin-top: 21px;
+}
+
+.dashboard-premium-unlocked-yes {
+    height: 16px;
+    color: var(--lumo-success-color)
+}
+
+.dashboard-premium-unlocked-no {
+    height: 1em;
+    color: var(--lumo-error-color)
+}
+
 @media (min-width: 700px) {
 
     html {

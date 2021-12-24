@@ -193,7 +193,7 @@ public class SendEvent {
                             );
                             categories.add(category);
                         }
-                        return new DashboardInitData(categories);
+                        return new DashboardInitData(categories, r.getBoolean("premium"));
                     } else {
                         return null;
                     }
