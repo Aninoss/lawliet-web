@@ -20,6 +20,7 @@ public class DashboardButtonAdapter extends Button {
         }
 
         setText(dashboardButton.getText());
+        setEnabled(dashboardButton.isEnabled());
         addClickListener(e -> dashboardButton.trigger());
     }
 

@@ -1,7 +1,6 @@
 package xyz.lawlietbot.spring.frontend.components.dashboard;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
@@ -98,11 +97,6 @@ public class DashboardComponentConverter {
         if (component instanceof HasStyle) {
             Style style = ((HasStyle) component).getStyle();
             dashboardComponent.getCssProperties().forEach(style::set);
-        }
-
-        if (dashboardComponent instanceof ActionComponent<?> && component instanceof HasEnabled) {
-            boolean enabled = ((ActionComponent<?>) dashboardComponent).isEnabled();
-            ((HasEnabled) component).setEnabled(enabled);
         }
 
         component.setVisible(dashboardComponent.isVisible());
