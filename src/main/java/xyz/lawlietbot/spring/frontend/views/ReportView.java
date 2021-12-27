@@ -29,6 +29,7 @@ import xyz.lawlietbot.spring.backend.report.ContentType;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.frontend.Styles;
+import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.frontend.components.PageHeader;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
@@ -63,6 +64,11 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
         mainContent.setPadding(true);
 
         add(mainContent);
+
+        ConfirmationDialog confirmationDialog = new ConfirmationDialog();
+        confirmationDialog.open(getTranslation("report.confirmationdialog"), () -> {
+        });
+        add(confirmationDialog);
     }
 
     @Override
