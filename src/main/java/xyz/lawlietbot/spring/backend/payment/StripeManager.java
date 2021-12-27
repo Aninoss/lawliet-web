@@ -9,12 +9,15 @@ import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import com.vaadin.flow.component.UI;
 import org.apache.commons.lang3.text.WordUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xyz.lawlietbot.spring.ExternalLinks;
 import xyz.lawlietbot.spring.backend.UICache;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 public class StripeManager {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(StripeManager.class);
     private static final HashSet<String> usedSubscriptions = new HashSet<>();
 
     public static List<Subscription> retrieveActiveSubscriptions(long userId) throws StripeException {
@@ -38,7 +41,7 @@ public class StripeManager {
                 .findFirst();
     }
 
-    public static String generateCheckoutSession(SubDuration duration, SubLevel level, long discordId, String discordTag, int quantity) throws StripeException {
+    public static String generateCheckoutSession(SubDuration duration, SubLevel level, long discordId, String discordTag, String discordAvatar, int quantity) throws StripeException {
         String returnUrl = ExternalLinks.LAWLIET_PREMIUM;
         SessionCreateParams.Builder paramsBuilder = new SessionCreateParams.Builder()
                 .setSuccessUrl(returnUrl + "?session_id={CHECKOUT_SESSION_ID}")
@@ -50,6 +53,7 @@ public class StripeManager {
                 .putMetadata("quantity", String.valueOf(quantity))
                 .putMetadata("tier", WordUtils.capitalizeFully(level.getSubLevelType().name() + " " + duration.name()))
                 .putMetadata("discord_tag", discordTag)
+                .putMetadata("discord_avatar", discordAvatar)
                 .setAutomaticTax(SessionCreateParams.AutomaticTax.builder().setEnabled(true).build())
                 .setAllowPromotionCodes(duration == SubDuration.MONTHLY)
                 .addLineItem(new SessionCreateParams.LineItem.Builder()
@@ -112,6 +116,20 @@ public class StripeManager {
                     ui.getTranslation("premium.usermessage.title"),
                     ui.getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE)
             );
+        }
+        try {
+            WebhookNotifier.newSub(
+                    metadata.get("discord_tag"),
+                    discordId,
+                    metadata.get("discord_avatar"),
+                    metadata.get("tier"),
+                    Integer.parseInt(metadata.get("quantity")),
+                    session.getCurrency().toUpperCase(),
+                    session.getAmountTotal(),
+                    session.getCustomerObject().getAddress().getCountry()
+            );
+        } catch (Throwable e) {
+            LOGGER.error("Error in new sub webhook");
         }
     }
 

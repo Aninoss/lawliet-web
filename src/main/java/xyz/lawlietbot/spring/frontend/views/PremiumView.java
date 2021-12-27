@@ -266,6 +266,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                             level,
                             discordUser.getId(),
                             discordUser.getUsername() + "#" + discordUser.getDiscriminator(),
+                            discordUser.getUserAvatar(),
                             value
                     );
                     UICache.put(discordUser.getId(), UI.getCurrent());

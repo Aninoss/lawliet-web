@@ -21,6 +21,7 @@ import xyz.lawlietbot.spring.backend.featurerequests.FRPanelType;
 import xyz.lawlietbot.spring.backend.premium.UserPremium;
 import xyz.lawlietbot.spring.backend.serverstats.ServerStatsBean;
 import xyz.lawlietbot.spring.backend.serverstats.ServerStatsSlot;
+import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 
 public class SendEvent {
