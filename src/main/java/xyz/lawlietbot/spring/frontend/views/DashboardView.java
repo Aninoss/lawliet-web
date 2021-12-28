@@ -279,7 +279,8 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                 CustomNotification.showSuccess(actionResult.getSuccessMessage());
             }
             if (actionResult.getErrorMessage() != null) {
-                confirmationDialog.open(actionResult.getErrorMessage(), () -> {});
+                confirmationDialog.open(actionResult.getErrorMessage(), () -> {
+                });
             }
             if (actionResult.getRedraw()) {
                 updateMainContent(category);
