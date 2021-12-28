@@ -21,7 +21,6 @@ import xyz.lawlietbot.spring.backend.featurerequests.FRPanelType;
 import xyz.lawlietbot.spring.backend.premium.UserPremium;
 import xyz.lawlietbot.spring.backend.serverstats.ServerStatsBean;
 import xyz.lawlietbot.spring.backend.serverstats.ServerStatsSlot;
-import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 
 public class SendEvent {
@@ -231,7 +230,7 @@ public class SendEvent {
                             components = (DashboardContainer) DashboardComponent.generate(r.getJSONObject("components"));
                         }
 
-                        return new DashboardCategoryInitData(missingBotPermissions, missingUserPermissions, components);
+                        return new DashboardCategoryInitData(missingBotPermissions, missingUserPermissions, components, r.getBoolean("premium"));
                     } else {
                         return null;
                     }

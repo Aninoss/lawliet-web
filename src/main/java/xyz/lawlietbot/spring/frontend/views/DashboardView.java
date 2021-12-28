@@ -251,6 +251,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
             throw new RuntimeException(e);
         }
 
+        updatePremiumUnlocked(data.isPremiumUnlocked());
         if (data.getMissingUserPermissions().isEmpty() && data.getMissingBotPermissions().isEmpty()) {
             Component component = DashboardComponentConverter.convert(guild.getId(), discordUser.getId(), data.getComponents(), confirmationDialog);
             ((HasSize) component).setWidthFull();

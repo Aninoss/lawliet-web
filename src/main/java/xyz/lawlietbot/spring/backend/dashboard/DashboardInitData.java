@@ -5,7 +5,7 @@ import java.util.List;
 public class DashboardInitData {
 
     private final List<Category> categories;
-    private boolean premiumUnlocked;
+    private final boolean premiumUnlocked;
 
     public DashboardInitData(List<Category> categories, boolean premiumUnlocked) {
         this.categories = categories;
