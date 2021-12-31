@@ -129,7 +129,7 @@ public class StripeManager {
                     session.getCustomerObject().getAddress().getCountry()
             );
         } catch (Throwable e) {
-            LOGGER.error("Error in new sub webhook");
+            LOGGER.error("Error in new sub webhook", e);
         }
     }
 
