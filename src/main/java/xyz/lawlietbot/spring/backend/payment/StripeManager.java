@@ -126,7 +126,7 @@ public class StripeManager {
                     Integer.parseInt(metadata.get("quantity")),
                     session.getCurrency().toUpperCase(),
                     session.getAmountTotal(),
-                    session.getCustomerObject().getAddress().getCountry()
+                    Customer.retrieve(session.getCustomer()).getAddress().getCountry()
             );
         } catch (Throwable e) {
             LOGGER.error("Error in new sub webhook", e);
