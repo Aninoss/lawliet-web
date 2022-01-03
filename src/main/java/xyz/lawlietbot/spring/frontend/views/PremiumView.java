@@ -15,6 +15,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -41,12 +42,14 @@ import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.backend.util.StringUtil;
 import xyz.lawlietbot.spring.frontend.Styles;
 import xyz.lawlietbot.spring.frontend.components.*;
+import xyz.lawlietbot.spring.frontend.components.premium.PaddlePopup;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 @Route(value = "premium", layout = MainLayout.class)
 @CssImport("./styles/premium.css")
+@JavaScript("https://cdn.paddle.com/paddle/paddle.js")
 @NoLiteAccess
 public class PremiumView extends PageLayout implements HasUrlParameter<String> {
 
@@ -261,16 +264,9 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
             if (discordUser != null) {
                 try {
                     int value = extractValueFromQuantity(quantity.getValue());
-                    String sessionUrl = StripeManager.generateCheckoutSession(
-                            duration,
-                            level,
-                            discordUser.getId(),
-                            discordUser.getUsername() + "#" + discordUser.getDiscriminator(),
-                            discordUser.getUserAvatar(),
-                            value
-                    );
+                    PaddlePopup paddlePopup = new PaddlePopup(duration, level, discordUser, value);
+                    add(paddlePopup);
                     UICache.put(discordUser.getId(), UI.getCurrent());
-                    new Redirector().redirect(sessionUrl);
                 } catch (Exception ex) {
                     LOGGER.error("Exception", ex);
                     CustomNotification.showError(getTranslation("error"));

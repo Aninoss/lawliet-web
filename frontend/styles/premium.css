@@ -40,6 +40,37 @@
     margin-bottom: 12px;
 }
 
+#paddle-popup {
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 7;
+    left: 0;
+    top: 0;
+    pointer-events: all;
+}
+
+#paddle-main {
+    margin-left: auto;
+    margin-right: 0;
+    max-width: 600px;
+    height: 100vh;
+    background-color: #fbfcfd;
+    color: hsla(214, 40%, 16%, 0.94);
+    overflow-y: auto;
+    box-shadow: var(--lumo-box-shadow-l);
+}
+
+#paddle-header {
+    background-color: white;
+    box-shadow: 0 2px 6px -1px var(--lumo-shade-5pct), 0 8px 24px -4px var(--lumo-shade-10pct);
+    padding-bottom: 32px;
+}
+
+#paddle-title {
+    color: hsl(214, 35%, 15%);
+    margin-top: 16px;
+}
+
 
 /* Tablet */
 @media (min-width: 700px) {

@@ -27,7 +27,7 @@ public class ConfirmationDialog extends Div {
                 .set("top", "0")
                 .set("transition", "opacity 0.2s")
                 .set("opacity", "0")
-                .set("pointer-events", "none");;
+                .set("pointer-events", "none");
         addClickListener(e -> close(false));
 
         dialogLayout.setMaxWidth("min(500px, calc(100% - 32px))");

@@ -84,3 +84,38 @@ function showPayPalButtons(planId, quantity, elementId, customId) {
         }
     }).render(elementId); // Renders the PayPal button
 }
+
+function updatePaddlePrices(data) {
+    var currencyLabels = document.querySelectorAll(".paddle-currency");
+    var name = data.eventData.product.name;
+    var subtotal = data.eventData.checkout.prices.customer.total - data.eventData.checkout.prices.customer.total_tax;
+
+    for(var i = 0; i < currencyLabels.length; i++) {
+        currencyLabels[i].innerHTML = data.eventData.checkout.prices.customer.currency + " ";
+    }
+
+    document.getElementById("paddle-title").innerHTML = name;
+    document.getElementById("paddle-subtotal").innerHTML = subtotal.toFixed(2);
+    document.getElementById("paddle-tax").innerHTML = data.eventData.checkout.prices.customer.total_tax;
+    document.getElementById("paddle-total").innerHTML = data.eventData.checkout.prices.customer.total;
+}
+
+function openPaddle(vendor, planId, quantity, passthrough) {
+    Paddle.Environment.set('sandbox');
+    Paddle.Setup({
+        vendor: vendor,
+        eventCallback: function(eventData) {
+            updatePaddlePrices(eventData);
+        }
+    });
+    Paddle.Checkout.open({
+        method: 'inline',
+        product: planId,
+        quantity: quantity,
+        disableLogout: true,
+        passthrough: passthrough,
+        success: "https://lawlietbot.xyz/",
+        frameTarget: 'paddle-container',
+        frameStyle: 'width:100%; min-width:312px; background-color: transparent; border: none;'
+    });
+}

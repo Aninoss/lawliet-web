@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
 
 public enum SubCurrency {
 
-    USD('$'),
-    EUR('€'),
-    GBP('£');
+    USD("USD"),
+    EUR("€"),
+    GBP("£");
 
     private final static Logger LOGGER = LoggerFactory.getLogger(SubCurrency.class);
     private final static OkHttpClient httpClient = new OkHttpClient.Builder()
@@ -25,13 +25,13 @@ public enum SubCurrency {
 
     public static HashMap<String, SubCurrency> currencyHashMap = new HashMap<>();
 
-    private final char symbol;
+    private final String symbol;
 
-    SubCurrency(char symbol) {
+    SubCurrency(String symbol) {
         this.symbol = symbol;
     }
 
-    public char getSymbol() {
+    public String getSymbol() {
         return symbol;
     }
 

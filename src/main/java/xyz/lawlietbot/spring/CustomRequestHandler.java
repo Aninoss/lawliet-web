@@ -31,12 +31,12 @@ public class CustomRequestHandler implements RequestHandler {
         response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubdomains");
         response.setHeader(
                 "Content-Security-Policy",
-                "default-src data: 'self' https://widgetbot.io https://e.widgetbot.io ws://localhost:35729/ https://fonts.gstatic.com/ https://www.paypal.com; " +
-                        "img-src 'self' https://*.lawlietbot.xyz/ https://cdn.discordapp.com/ https://*.donmai.us/ https://*.rule34.xxx/ https://realbooru.com/ https://*.e621.net/ https://safebooru.org/ https://www.paypal.com;" +
+                "default-src data: 'self' https://widgetbot.io https://e.widgetbot.io ws://localhost:35729/ https://fonts.gstatic.com/ https://www.paypal.com https://cdn.paddle.com https://sandbox-create-checkout.paddle.com https://create-checkout.paddle.com https://sandbox-buy.paddle.com https://buy.paddle.com; " +
+                        "img-src 'self' https://*.lawlietbot.xyz/ https://cdn.discordapp.com/ https://*.donmai.us/ https://*.rule34.xxx/ https://realbooru.com/ https://*.e621.net/ https://safebooru.org/ https://www.paypal.com https://cdn.paddle.com;" +
                         "media-src 'self' https://*.lawlietbot.xyz/ https://*.donmai.us/ https://*.rule34.xxx/ https://realbooru.com/ https://*.e621.net/ https://safebooru.org/; " +
                         "object-src 'self'; " +
-                        "script-src 'unsafe-inline' 'unsafe-eval' 'self' ajax.cloudflare.com https://cdn.jsdelivr.net https://www.paypal.com; " +
-                        "style-src https://fonts.googleapis.com/ https://fonts.gstatic.com/ 'unsafe-inline' 'self'; " +
+                        "script-src 'unsafe-inline' 'unsafe-eval' 'self' ajax.cloudflare.com https://cdn.jsdelivr.net https://www.paypal.com https://cdn.paddle.com;" +
+                        "style-src https://fonts.googleapis.com/ https://fonts.gstatic.com/ https://cdn.paddle.com 'unsafe-inline' 'self'; " +
                         "frame-ancestors https://top.gg https://discords.com"
         );
         response.setHeader("X-Frame-Options", "allow-from https://top.gg/ https://discords.com/");
