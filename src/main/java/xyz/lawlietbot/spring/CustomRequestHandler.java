@@ -18,8 +18,10 @@ import com.vaadin.flow.server.VaadinSession;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xyz.lawlietbot.spring.backend.payment.StripeManager;
+import xyz.lawlietbot.spring.backend.payment.paddle.PaddleManager;
+import xyz.lawlietbot.spring.backend.payment.stripe.StripeManager;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
+import xyz.lawlietbot.spring.backend.util.StringUtil;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 public class CustomRequestHandler implements RequestHandler {
@@ -69,6 +71,10 @@ public class CustomRequestHandler implements RequestHandler {
 
             case "/stripe":
                 handleStripe(request, response);
+                return true;
+
+            case "/paddle":
+                handlePaddle(request, response);
                 return true;
 
             default:
@@ -185,6 +191,21 @@ public class CustomRequestHandler implements RequestHandler {
             response.setStatus(403);
         } catch (IOException | StripeException e) {
             LOGGER.error("Error while handling Stripe", e);
+            response.setStatus(500);
+        }
+    }
+
+    private void handlePaddle(VaadinRequest request, VaadinResponse response) {
+        try (BufferedReader br = request.getReader()) {
+            String body = br.lines().collect(Collectors.joining("\n"));
+            if (PaddleManager.verifyWebhookData(body)) {
+                JSONObject json = new JSONObject(StringUtil.paramToJson(body));
+                PaddleManager.registerSubscription(json);
+            } else {
+                response.setStatus(403);
+            }
+        } catch (IOException e) {
+            LOGGER.error("Error while handling Paddle", e);
             response.setStatus(500);
         }
     }

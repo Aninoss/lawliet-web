@@ -1,12 +1,15 @@
 package xyz.lawlietbot.spring.frontend.views;
 
-import java.util.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import bell.oauth.discord.domain.Guild;
 import com.stripe.exception.StripeException;
-import com.stripe.model.Subscription;
 import com.stripe.model.checkout.Session;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ItemLabelGenerator;
@@ -26,6 +29,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.router.*;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +39,9 @@ import xyz.lawlietbot.spring.backend.UICache;
 import xyz.lawlietbot.spring.backend.commandlist.CommandListContainer;
 import xyz.lawlietbot.spring.backend.commandlist.CommandListSlot;
 import xyz.lawlietbot.spring.backend.payment.*;
+import xyz.lawlietbot.spring.backend.payment.paddle.PaddleAPI;
+import xyz.lawlietbot.spring.backend.payment.paddle.PaddleManager;
+import xyz.lawlietbot.spring.backend.payment.stripe.StripeManager;
 import xyz.lawlietbot.spring.backend.premium.UserPremium;
 import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
@@ -61,7 +68,6 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
     private final ConfirmationDialog dialog = new ConfirmationDialog();
     private final Select<SubDuration> durationSelect = new Select<>();
     private final Select<SubCurrency> currencySelect = new Select<>();
-    private List<Subscription> userSubscriptions = Collections.emptyList();
     private ArrayList<Guild> availableGuilds;
     private UserPremium userPremium;
     private Div tiersContent = new Div();
@@ -254,9 +260,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         buyButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         buyButton.setHeight("43px");
         buyButton.getStyle().set("margin-bottom", "-4px");
-        if (getSessionData().isLoggedIn()) {
-            buyButton.setEnabled(level.getSubLevelType() == SubLevelType.PRO || userSubscriptions.isEmpty());
-        } else {
+        if (!getSessionData().isLoggedIn()) {
             buyButton.setText(getTranslation("login"));
         }
         buyButton.addClickListener(e -> {
@@ -549,22 +553,45 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         Location location = event.getLocation();
         QueryParameters queryParameters = location.getQueryParameters();
         Map<String, List<String>> parametersMap = queryParameters.getParameters();
-        if (parametersMap != null && parametersMap.containsKey("session_id")) {
-            String sessionId = parametersMap.get("session_id").get(0);
-            UI.getCurrent().getPage().getHistory().replaceState(null, getRoute());
-            try {
-                Session session = Session.retrieve(sessionId);
-                StripeManager.registerSubscription(session);
+        if (parametersMap != null) {
+            if (parametersMap.containsKey("session_id")) {
+                String sessionId = parametersMap.get("session_id").get(0);
+                UI.getCurrent().getPage().getHistory().replaceState(null, getRoute());
+                try {
+                    Session session = Session.retrieve(sessionId);
+                    StripeManager.registerSubscription(session);
 
-                boolean unlockServers = Boolean.parseBoolean(session.getMetadata().getOrDefault("unlock_servers", "false"));
-                String dialogText = unlockServers ? "premium.buy.success.pro" : "premium.buy.success";
-                ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-                confirmationDialog.open(getTranslation(dialogText), () -> {
-                });
-                add(confirmationDialog);
-            } catch (StripeException e) {
-                LOGGER.error("Could not update subscription", e);
-                CustomNotification.showError(getTranslation("error"));
+                    boolean unlockServers = Boolean.parseBoolean(session.getMetadata().getOrDefault("unlock_servers", "false"));
+                    String dialogText = unlockServers ? "premium.buy.success.pro" : "premium.buy.success";
+                    ConfirmationDialog confirmationDialog = new ConfirmationDialog();
+                    confirmationDialog.open(getTranslation(dialogText), () -> {
+                    });
+                    add(confirmationDialog);
+                } catch (StripeException e) {
+                    LOGGER.error("Could not update subscription", e);
+                    CustomNotification.showError(getTranslation("error"));
+                }
+            }
+
+            if (parametersMap.containsKey("paddle")) {
+                String checkoutId = parametersMap.get("paddle").get(0);
+                UI.getCurrent().getPage().getHistory().replaceState(null, getRoute());
+                try {
+                    PaddleManager.waitForCheckoutAsync(checkoutId).get(); //TODO
+
+                    JSONObject checkout = PaddleAPI.retrieveCheckout(checkoutId);
+                    int planId = checkout.getJSONObject("order").getInt("product_id");
+                    SubLevelType subLevelType = PaddleManager.getSubLevelType(planId);
+
+                    String dialogText = subLevelType == SubLevelType.PRO ? "premium.buy.success.pro" : "premium.buy.success";
+                    ConfirmationDialog confirmationDialog = new ConfirmationDialog();
+                    confirmationDialog.open(getTranslation(dialogText), () -> {
+                    });
+                    add(confirmationDialog);
+                } catch (IOException | InterruptedException | ExecutionException e) {
+                    LOGGER.error("Could not load subscription", e);
+                    CustomNotification.showError(getTranslation("error"));
+                }
             }
         }
 
@@ -574,15 +601,9 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
             if (sessionData.getDiscordUser().map(DiscordUser::hasGuilds).orElse(false)) {
                 try {
                     DiscordUser discordUser = sessionData.getDiscordUser().get();
-                    this.userSubscriptions = StripeManager.retrieveActiveSubscriptions(discordUser.getId());
                     this.userPremium = SendEvent.sendRequestUserPremium(discordUser.getId()).get(5, TimeUnit.SECONDS);
                     this.availableGuilds = new ArrayList<>(discordUser.getGuilds());
-                    StripeManager.retrieveCustomer(discordUser.getId())
-                            .ifPresent(customer -> {
-                                currencySelect.setValue(SubCurrency.getFromCurrency(customer.getCurrency()));
-                                currencySelect.setVisible(false);
-                            });
-                } catch (InterruptedException | ExecutionException | TimeoutException | StripeException e) {
+                } catch (InterruptedException | ExecutionException | TimeoutException e) {
                     LOGGER.error("Could not load slots", e);
                     CustomNotification.showError(getTranslation("error"));
                 }

@@ -1,4 +1,4 @@
-package xyz.lawlietbot.spring.backend.payment;
+package xyz.lawlietbot.spring.backend.payment.stripe;
 
 import java.util.ArrayList;
 import java.util.Collections;

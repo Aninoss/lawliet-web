@@ -159,11 +159,13 @@ public class SendEvent {
         );
     }
 
-    public static CompletableFuture<Void> sendStripe(long userId, String title, String desc) {
+    public static CompletableFuture<Void> sendStripe(long userId, String title, String desc, int subId, boolean unlocksServer) {
         JSONObject json = new JSONObject();
         json.put("user_id", userId);
         json.put("title", title);
         json.put("desc", desc);
+        json.put("sub_id", subId);
+        json.put("unlocks_server", unlocksServer);
 
         return process(
                 "STRIPE",

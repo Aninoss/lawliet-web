@@ -59,6 +59,7 @@ dependencies {
     implementation 'org.vaadin.gatanaso:multiselect-combo-box-flow:3.0.2'
     implementation 'com.github.Aninoss:lawliet-dashboard-components:2b0b39c8cf'
     implementation 'club.minnced:discord-webhooks:0.5.8'
+    implementation 'com.jamiussiam:paddle-verifier:2.1'
 }
 
 dependencyManagement {

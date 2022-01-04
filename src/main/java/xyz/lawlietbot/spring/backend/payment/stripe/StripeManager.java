@@ -1,4 +1,4 @@
-package xyz.lawlietbot.spring.backend.payment;
+package xyz.lawlietbot.spring.backend.payment.stripe;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.lawlietbot.spring.ExternalLinks;
 import xyz.lawlietbot.spring.backend.UICache;
+import xyz.lawlietbot.spring.backend.payment.*;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 public class StripeManager {
@@ -114,7 +115,9 @@ public class StripeManager {
             SendEvent.sendStripe(
                     discordId,
                     ui.getTranslation("premium.usermessage.title"),
-                    ui.getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE)
+                    ui.getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE),
+                    0,
+                    false
             );
         }
         try {
@@ -125,8 +128,8 @@ public class StripeManager {
                     metadata.get("tier"),
                     Integer.parseInt(metadata.get("quantity")),
                     session.getCurrency().toUpperCase(),
-                    session.getAmountTotal(),
-                    Customer.retrieve(session.getCustomer()).getAddress().getCountry()
+                    session.getAmountTotal() / 100.0,
+                    0
             );
         } catch (Throwable e) {
             LOGGER.error("Error in new sub webhook", e);

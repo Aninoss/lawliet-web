@@ -62,34 +62,15 @@ function scrollToTop() {
     window.scrollTo(0, 250);
 }
 
-function showPayPalButtons(planId, quantity, elementId, customId) {
-    paypal.Buttons({
-        style: {
-            shape: 'rect',
-            color: 'gold',
-            layout: 'vertical',
-            label: 'subscribe'
-        },
-        createSubscription: function(data, actions) {
-            return actions.subscription.create({
-                /* Creates the subscription */
-                plan_id: planId,
-                quantity: quantity, // The quantity of the product for a subscription
-                custom_id: customId,
-                application_context: { shipping_preference: "NO_SHIPPING" }
-            });
-        },
-        onApprove: function(data, actions) {
-            alert(data.subscriptionID); // You can add optional success message for the subscriber here
-        }
-    }).render(elementId); // Renders the PayPal button
-}
-
 function updatePaddlePrices(data) {
     var currencyLabels = document.querySelectorAll(".paddle-currency");
+    var quantity = data.eventData.product.quantity;
     var name = data.eventData.product.name;
     var subtotal = data.eventData.checkout.prices.customer.total - data.eventData.checkout.prices.customer.total_tax;
 
+    if (quantity > 1) {
+        name = quantity + "x " + name
+    }
     for(var i = 0; i < currencyLabels.length; i++) {
         currencyLabels[i].innerHTML = data.eventData.checkout.prices.customer.currency + " ";
     }
@@ -100,11 +81,15 @@ function updatePaddlePrices(data) {
     document.getElementById("paddle-total").innerHTML = data.eventData.checkout.prices.customer.total;
 }
 
-function openPaddle(vendor, planId, quantity, passthrough) {
+function openPaddle(vendor, planId, quantity, locale, passthrough) {
     Paddle.Environment.set('sandbox');
     Paddle.Setup({
         vendor: vendor,
         eventCallback: function(eventData) {
+            if (eventData.event === "Checkout.Complete") {
+                var checkoutId = eventData.eventData.checkout.id;
+                window.location.href = "https://localhost:8443/premium?paddle=" + checkoutId; //TODO
+            }
             updatePaddlePrices(eventData);
         }
     });
@@ -113,8 +98,8 @@ function openPaddle(vendor, planId, quantity, passthrough) {
         product: planId,
         quantity: quantity,
         disableLogout: true,
+        locale: locale,
         passthrough: passthrough,
-        success: "https://lawlietbot.xyz/",
         frameTarget: 'paddle-container',
         frameStyle: 'width:100%; min-width:312px; background-color: transparent; border: none;'
     });

@@ -1,9 +1,12 @@
 package xyz.lawlietbot.spring.backend.util;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.json.JSONObject;
 
 public class StringUtil {
 
@@ -70,6 +73,25 @@ public class StringUtil {
             str = str + " (…)";
         }
         return str;
+    }
+
+    public static String paramToJson(String paramIn) {
+        paramIn = paramIn.replaceAll("=", "\":\"");
+        paramIn = paramIn.replaceAll("&", "\",\"");
+        String result = "{\"" + paramIn + "\"}";
+        JSONObject json = new JSONObject(result);
+        JSONObject newJson = new JSONObject();
+        for (String key : json.keySet()) {
+            String value = URLDecoder.decode(json.getString(key), StandardCharsets.UTF_8);
+            if (StringUtil.stringIsLong(value)) {
+                newJson.put(key, Long.parseLong(value));
+            } else if (StringUtil.stringIsDouble(value)) {
+                newJson.put(key, Double.parseDouble(value));
+            } else {
+                newJson.put(key, value);
+            }
+        }
+        return newJson.toString();
     }
 
 }
