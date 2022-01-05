@@ -52,7 +52,7 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
     public ReportView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         super(sessionData, uiData);
         getStyle().set("margin-bottom", "48px");
-        PageHeader pageHeader = new PageHeader(getUiData(), getTitleText(), getTranslation("report.desc"), null);
+        PageHeader pageHeader = new PageHeader(getUiData(), getTitleText(), getTranslation("report.desc"));
         pageHeader.getStyle().set("padding-bottom", "42px")
                 .set("margin-bottom", "59px");
         add(pageHeader);

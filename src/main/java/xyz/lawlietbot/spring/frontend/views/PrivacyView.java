@@ -1,19 +1,18 @@
 package xyz.lawlietbot.spring.frontend.views;
 
-import xyz.lawlietbot.spring.backend.FileString;
-import xyz.lawlietbot.spring.backend.userdata.SessionData;
-import xyz.lawlietbot.spring.backend.userdata.UIData;
-import xyz.lawlietbot.spring.frontend.components.PageHeader;
-import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
-import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
-import xyz.lawlietbot.spring.frontend.Styles;
+import java.io.IOException;
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.io.IOException;
+import xyz.lawlietbot.spring.backend.FileString;
+import xyz.lawlietbot.spring.backend.userdata.SessionData;
+import xyz.lawlietbot.spring.backend.userdata.UIData;
+import xyz.lawlietbot.spring.frontend.Styles;
+import xyz.lawlietbot.spring.frontend.components.PageHeader;
+import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
+import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
 
 @Route(value = "privacy", layout = MainLayout.class)
 public class PrivacyView extends PageLayout {
@@ -35,7 +34,7 @@ public class PrivacyView extends PageLayout {
         div.add(new Html(pageString));
 
         mainContent.add(div);
-        add(new PageHeader(getUiData(), getTitleText(), null, null), mainContent);
+        add(new PageHeader(getUiData(), getTitleText(), null), mainContent);
     }
 
 }

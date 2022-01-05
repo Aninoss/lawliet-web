@@ -145,6 +145,16 @@ content-card {
     z-index: 0 !important;
 }
 
+#page-header-back-icon {
+    height: 32px;
+    width: auto;
+}
+
+#page-header-back {
+    margin-top: 44px;
+    margin-left: 8px;
+}
+
 .lds-ring2 {
     display: inline-block;
     position: relative;

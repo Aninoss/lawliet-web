@@ -1,26 +1,25 @@
 package xyz.lawlietbot.spring.frontend.views;
 
-import xyz.lawlietbot.spring.backend.featurerequests.FRDynamicBean;
-import xyz.lawlietbot.spring.backend.userdata.SessionData;
-import xyz.lawlietbot.spring.backend.userdata.UIData;
-import xyz.lawlietbot.spring.frontend.components.featurerequests.FeatureRequestMain;
-import xyz.lawlietbot.spring.frontend.components.featurerequests.FeatureRequestUserHeader;
-import xyz.lawlietbot.spring.frontend.components.PageHeader;
-import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
-import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
-import xyz.lawlietbot.spring.NoLiteAccess;
-import xyz.lawlietbot.spring.syncserver.SendEvent;
-import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import xyz.lawlietbot.spring.frontend.components.featurerequests.sort.*;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import xyz.lawlietbot.spring.NoLiteAccess;
+import xyz.lawlietbot.spring.backend.featurerequests.FRDynamicBean;
+import xyz.lawlietbot.spring.backend.userdata.SessionData;
+import xyz.lawlietbot.spring.backend.userdata.UIData;
+import xyz.lawlietbot.spring.frontend.components.PageHeader;
+import xyz.lawlietbot.spring.frontend.components.featurerequests.FeatureRequestMain;
+import xyz.lawlietbot.spring.frontend.components.featurerequests.FeatureRequestUserHeader;
+import xyz.lawlietbot.spring.frontend.components.featurerequests.sort.*;
+import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
+import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
+import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 @Route(value = "featurerequests", layout = MainLayout.class)
 @CssImport("./styles/featurerequests.css")
@@ -47,7 +46,7 @@ public class FeatureRequestsView extends PageLayout implements HasUrlParameter<S
         mainContent.setPadding(false);
 
         add(
-                new PageHeader(getUiData(), getTitleText(), getTranslation("fr.desc"), null, uiData.isLite() ? null : new FeatureRequestUserHeader(getSessionData(), frDynamicBean)),
+                new PageHeader(getUiData(), getTitleText(), getTranslation("fr.desc"), uiData.isLite() ? null : new FeatureRequestUserHeader(getSessionData(), frDynamicBean)),
                 mainContent
         );
     }

@@ -292,21 +292,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                     .set("text-decoration", "underline")
                     .set("margin-bottom", "-8px")
                     .set("cursor", "pointer");
-            manageSubscriptions.addClickListener(e -> {
-                String sessionUrl = getSessionData().getDiscordUser().map(user -> {
-                    try {
-                        return StripeManager.generateCustomerPortalSession(user.getId());
-                    } catch (StripeException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                }).orElse(null);
-                if (sessionUrl != null) {
-                    new Redirector().redirect(sessionUrl);
-                } else {
-                    dialog.open(getTranslation("premium.nosubs"), () -> {
-                    });
-                }
-            });
+            manageSubscriptions.addClickListener(e -> UI.getCurrent().navigate(ManageSubscriptionsView.class));
             controlLayout.add(manageSubscriptions);
         } else {
             Span notLoggedIn = new Span(getTranslation("premium.notloggedin"));

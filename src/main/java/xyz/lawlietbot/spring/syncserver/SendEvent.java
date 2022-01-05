@@ -18,6 +18,7 @@ import xyz.lawlietbot.spring.backend.dashboard.DashboardCategoryInitData;
 import xyz.lawlietbot.spring.backend.dashboard.DashboardInitData;
 import xyz.lawlietbot.spring.backend.featurerequests.FRDynamicBean;
 import xyz.lawlietbot.spring.backend.featurerequests.FRPanelType;
+import xyz.lawlietbot.spring.backend.payment.Subscription;
 import xyz.lawlietbot.spring.backend.premium.UserPremium;
 import xyz.lawlietbot.spring.backend.serverstats.ServerStatsBean;
 import xyz.lawlietbot.spring.backend.serverstats.ServerStatsSlot;
@@ -301,6 +302,32 @@ public class SendEvent {
                 "DASH_COUNT_DISCORD_ENTITIES",
                 json,
                 r -> r.getLong("count")
+        );
+    }
+
+    public static CompletableFuture<List<Subscription>> sendListPaddleSubscriptions(long userId, boolean clearSubCache) {
+        JSONObject json = new JSONObject();
+        json.put("user_id", userId);
+        json.put("clear_subscription_cache", clearSubCache);
+
+        return process(
+                "PADDLE_SUBS",
+                json,
+                r -> {
+                    JSONArray subsJson = r.getJSONArray("subscriptions");
+                    ArrayList<Subscription> subscriptions = new ArrayList<>();
+                    for (int i = 0; i < subsJson.length(); i++) {
+                        JSONObject subJson = subsJson.getJSONObject(i);
+                        subscriptions.add(new Subscription(
+                                subJson.getInt("sub_id"),
+                                subJson.getInt("plan_id"),
+                                subJson.getInt("quantity"),
+                                subJson.getString("total_price"),
+                                subJson.has("next_payment") ? LocalDate.parse(subJson.getString("next_payment")) : null
+                        ));
+                    }
+                    return Collections.unmodifiableList(subscriptions);
+                }
         );
     }
 

@@ -53,7 +53,7 @@ public class FeatureRequestsNewPostView extends PageLayout {
         ul.getStyle().set("margin-bottom", "-6px");
         Arrays.stream(getTranslation("fr.new.desc").split("\n"))
                 .forEach(value -> ul.add(new ListItem(value )));
-        add(new PageHeader(getUiData(), getTitleText(), null, null, ul));
+        add(new PageHeader(getUiData(), getTitleText(), null, FeatureRequestsView.class, ul));
 
         mainContent.addClassName(Styles.APP_WIDTH);
         mainContent.getStyle()
