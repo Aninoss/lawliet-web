@@ -563,7 +563,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                 String checkoutId = parametersMap.get("paddle").get(0);
                 UI.getCurrent().getPage().getHistory().replaceState(null, getRoute());
                 try {
-                    PaddleManager.waitForCheckoutAsync(checkoutId).get(5, TimeUnit.SECONDS);
+                    PaddleManager.waitForCheckoutAsync(checkoutId).get(1, TimeUnit.MINUTES);
 
                     JSONObject checkout = PaddleAPI.retrieveCheckout(checkoutId);
                     int planId = checkout.getJSONObject("order").getInt("product_id");
