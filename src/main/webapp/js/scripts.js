@@ -82,13 +82,12 @@ function updatePaddlePrices(data) {
 }
 
 function openPaddle(vendor, planId, quantity, locale, passthrough) {
-    Paddle.Environment.set('sandbox');
     Paddle.Setup({
         vendor: vendor,
         eventCallback: function(eventData) {
             if (eventData.event === "Checkout.Complete") {
-                var checkoutId = eventData.eventData.checkout.id;
-                window.location.href = "https://localhost:8443/premium?paddle=" + checkoutId; //TODO
+                const checkoutId = eventData.eventData.checkout.id;
+                window.location.href = "https://lawlietbot.xyz/premium?paddle=" + checkoutId;
             }
             updatePaddlePrices(eventData);
         }

@@ -27,7 +27,7 @@ public class PaddleAPI {
 
     public static JSONObject retrieveCheckout(String checkoutId) throws IOException {
         Request request = new Request.Builder()
-                .url("https://sandbox-checkout.paddle.com/api/1.0/order?checkout_id=" + checkoutId) //TODO
+                .url("https://checkout.paddle.com/api/1.0/order?checkout_id=" + checkoutId)
                 .addHeader("User-Agent", USER_AGENT)
                 .build();
 
@@ -43,7 +43,7 @@ public class PaddleAPI {
                 .build();
 
         Request request = new Request.Builder()
-                .url("https://sandbox-vendors.paddle.com/api/2.0/subscription/users/update") //TODO
+                .url("https://vendors.paddle.com/api/2.0/subscription/users/update")
                 .post(formBody)
                 .addHeader("User-Agent", USER_AGENT)
                 .build();
@@ -60,7 +60,7 @@ public class PaddleAPI {
                 .build();
 
         Request request = new Request.Builder()
-                .url("https://sandbox-vendors.paddle.com/api/2.0/subscription/users_cancel") //TODO
+                .url("https://vendors.paddle.com/api/2.0/subscription/users_cancel")
                 .post(formBody)
                 .addHeader("User-Agent", USER_AGENT)
                 .build();

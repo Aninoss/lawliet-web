@@ -75,7 +75,7 @@ public class StringUtil {
         return str;
     }
 
-    public static String paramToJson(String paramIn) {
+    public static String paramsToJson(String paramIn) {
         paramIn = paramIn.replaceAll("=", "\":\"");
         paramIn = paramIn.replaceAll("&", "\",\"");
         String result = "{\"" + paramIn + "\"}";

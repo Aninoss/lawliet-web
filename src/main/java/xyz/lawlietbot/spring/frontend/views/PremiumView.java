@@ -563,7 +563,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                 String checkoutId = parametersMap.get("paddle").get(0);
                 UI.getCurrent().getPage().getHistory().replaceState(null, getRoute());
                 try {
-                    PaddleManager.waitForCheckoutAsync(checkoutId).get(); //TODO
+                    PaddleManager.waitForCheckoutAsync(checkoutId).get(5, TimeUnit.SECONDS);
 
                     JSONObject checkout = PaddleAPI.retrieveCheckout(checkoutId);
                     int planId = checkout.getJSONObject("order").getInt("product_id");
@@ -574,7 +574,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                     confirmationDialog.open(getTranslation(dialogText), () -> {
                     });
                     add(confirmationDialog);
-                } catch (IOException | InterruptedException | ExecutionException e) {
+                } catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
                     LOGGER.error("Could not load subscription", e);
                     CustomNotification.showError(getTranslation("error"));
                 }

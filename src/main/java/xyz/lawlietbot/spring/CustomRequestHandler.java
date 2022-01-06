@@ -199,7 +199,7 @@ public class CustomRequestHandler implements RequestHandler {
         try (BufferedReader br = request.getReader()) {
             String body = br.lines().collect(Collectors.joining("\n"));
             if (PaddleManager.verifyWebhookData(body)) {
-                JSONObject json = new JSONObject(StringUtil.paramToJson(body));
+                JSONObject json = new JSONObject(StringUtil.paramsToJson(body));
                 PaddleManager.registerSubscription(json);
             } else {
                 response.setStatus(403);
