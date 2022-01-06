@@ -2,6 +2,7 @@ package xyz.lawlietbot.spring.backend.payment.paddle;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import com.google.common.cache.CacheBuilder;
@@ -60,11 +61,15 @@ public class PaddleManager {
         }
     }
 
-    public static void registerSubscription(JSONObject json) throws IOException {
-        String checkoutId = json.getString("checkout_id");
+    public static void registerSubscription(Map<String, String[]> parameterMap) throws IOException {
+        String checkoutId = parameterMap.get("checkout_id")[0];
         CompletableFuture<Void> future = waitForCheckoutAsync(checkoutId);
         try {
-            JSONObject passthroughJson = new JSONObject(json.getString("passthrough"));
+            JSONObject passthroughJson = new JSONObject(parameterMap.get("passthrough")[0]);
+            int subscriptionId = Integer.parseInt(parameterMap.get("subscription_id")[0]);
+            int planId = Integer.parseInt(parameterMap.get("subscription_plan_id")[0]);
+            int quantity = Integer.parseInt(parameterMap.get("quantity")[0]);
+
             JSONObject checkoutJson = PaddleAPI.retrieveCheckout(checkoutId);
             long discordId = passthroughJson.getLong("discord_id");
             UI ui = UICache.get(discordId);
@@ -72,8 +77,8 @@ public class PaddleManager {
                     discordId,
                     ui != null ? ui.getTranslation("premium.usermessage.title") : null,
                     ui != null ? ui.getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE) : null,
-                    json.getInt("subscription_id"),
-                    PaddleManager.getSubLevelType(json.getInt("subscription_plan_id")) == SubLevelType.PRO
+                    subscriptionId,
+                    PaddleManager.getSubLevelType(planId) == SubLevelType.PRO
             ).join();
             try {
                 WebhookNotifier.newSub(
@@ -81,7 +86,7 @@ public class PaddleManager {
                         discordId,
                         passthroughJson.getString("discord_avatar"),
                         checkoutJson.getJSONObject("checkout").getString("title"),
-                        json.getInt("quantity"),
+                        quantity,
                         checkoutJson.getJSONObject("order").getString("formatted_total")
                 );
             } catch (Throwable e) {

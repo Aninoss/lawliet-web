@@ -2,6 +2,8 @@ package xyz.lawlietbot.spring;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -21,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import xyz.lawlietbot.spring.backend.payment.paddle.PaddleManager;
 import xyz.lawlietbot.spring.backend.payment.stripe.StripeManager;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
-import xyz.lawlietbot.spring.backend.util.StringUtil;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 public class CustomRequestHandler implements RequestHandler {
@@ -196,11 +197,14 @@ public class CustomRequestHandler implements RequestHandler {
     }
 
     private void handlePaddle(VaadinRequest request, VaadinResponse response) {
-        try (BufferedReader br = request.getReader()) {
-            String body = br.lines().collect(Collectors.joining("\n"));
+        try {
+            StringBuilder bodyBuilder = new StringBuilder();
+            Map<String, String[]> parameterMap = request.getParameterMap();
+            parameterMap.keySet()
+                    .forEach(key -> bodyBuilder.append("&").append(key).append("=").append(URLEncoder.encode(parameterMap.get(key)[0], StandardCharsets.UTF_8)));
+            String body = bodyBuilder.substring(1);
             if (PaddleManager.verifyWebhookData(body)) {
-                JSONObject json = new JSONObject(StringUtil.paramsToJson(body));
-                PaddleManager.registerSubscription(json);
+                PaddleManager.registerSubscription(parameterMap);
             } else {
                 response.setStatus(403);
             }
