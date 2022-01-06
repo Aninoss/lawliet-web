@@ -1,6 +1,6 @@
 package xyz.lawlietbot.spring.frontend.components.dashboard.adapters;
 
-import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
@@ -22,11 +22,10 @@ public class DashboardSwitchAdapter extends HorizontalLayout {
         }
 
         Div space = new Div();
-        Checkbox checkbox = new Checkbox();
-        checkbox.setClassName("toggle-button");
-        checkbox.setEnabled(dashboardSwitch.isEnabled());
-        checkbox.setValue(dashboardSwitch.isChecked());
-        checkbox.addValueChangeListener(e -> dashboardSwitch.trigger(e.getValue()));
+        ToggleButton toggleButton = new ToggleButton();
+        toggleButton.setEnabled(dashboardSwitch.isEnabled());
+        toggleButton.setValue(dashboardSwitch.isChecked());
+        toggleButton.addValueChangeListener(e -> dashboardSwitch.trigger(e.getValue()));
 
         add(label);
         if (dashboardSwitch.getSubtitle() != null) {
@@ -37,7 +36,7 @@ public class DashboardSwitchAdapter extends HorizontalLayout {
             }));
             add(infoIcon);
         }
-        add(space, checkbox);
+        add(space, toggleButton);
         setFlexGrow(1, space);
     }
 

@@ -127,9 +127,7 @@ public class StripeManager {
                     metadata.get("discord_avatar"),
                     metadata.get("tier"),
                     Integer.parseInt(metadata.get("quantity")),
-                    session.getCurrency().toUpperCase(),
-                    session.getAmountTotal() / 100.0,
-                    0
+                    String.format("%s %.02f", session.getCurrency().toUpperCase(), session.getAmountTotal() / 100.0)
             );
         } catch (Throwable e) {
             LOGGER.error("Error in new sub webhook", e);

@@ -45,7 +45,7 @@ public class PaddleManager {
         } catch (IOException e) {
             LOGGER.error("Error on public key read");
         }
-        verifier = new Verifier(publicKey);
+        verifier = new Verifier(publicKey.replace("\r", ""));
     }
 
     public static boolean verifyWebhookData(String postBody) {
@@ -82,9 +82,7 @@ public class PaddleManager {
                         passthroughJson.getString("discord_avatar"),
                         checkoutJson.getJSONObject("checkout").getString("title"),
                         json.getInt("quantity"),
-                        json.getString("currency"),
-                        json.getDouble("unit_price") * json.getInt("quantity"),
-                        Double.parseDouble(checkoutJson.getJSONObject("order").getString("total_tax"))
+                        checkoutJson.getJSONObject("order").getString("formatted_total")
                 );
             } catch (Throwable e) {
                 LOGGER.error("Error in new Paddle sub", e);
