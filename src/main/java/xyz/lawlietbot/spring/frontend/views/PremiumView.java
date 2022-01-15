@@ -11,10 +11,7 @@ import java.util.concurrent.TimeoutException;
 import bell.oauth.discord.domain.Guild;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ItemLabelGenerator;
-import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -90,7 +87,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         premiumContent.addClassName(Styles.APP_WIDTH);
         premiumContent.getStyle().set("margin-bottom", "48px");
 
-        premiumContent.add(generateTiersTitle(), generateTiersSubtitle(), generateSeparator(), generateTiersTiers());
+        premiumContent.add(generateTiersTitle(), generateTiersSubtitle(), generateCouponNotification(), generateSeparator(), generateTiersTiers());
         return premiumContent;
     }
 
@@ -110,6 +107,26 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         Span span = new Span(getTranslation("premium.tiers.subtitle"));
         span.setWidthFull();
         return span;
+    }
+
+    private Component generateCouponNotification() {
+        HorizontalLayout content = new HorizontalLayout();
+        content.setId("notification-field");
+        content.setPadding(true);
+
+        Icon infoIcon = VaadinIcon.INFO_CIRCLE.create();
+        infoIcon.setId("notification-icon");
+        content.add(infoIcon);
+
+        String[] parts = getTranslation("premium.coupon").split("\\{0\\}");
+        Span text = new Span(
+                new Text(parts[0]),
+                new Html("<code>LAWLIET500K</code>"),
+                new Text(parts[1])
+        );
+        content.add(text);
+
+        return content;
     }
 
     private Component generateSeparator() {
@@ -182,7 +199,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                     .set("margin-bottom", "0")
                     .set("margin-left", "8px")
                     .set("font-size", "75%")
-                    .set("background", "#f8b84e")
+                    .set("background", "rgb(var(--warning-color-rgb))")
                     .set("padding", "0 5px")
                     .set("border-radius", "4px")
                     .set("color", "var(--lumo-shade)");

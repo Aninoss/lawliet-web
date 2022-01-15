@@ -1,5 +1,6 @@
 html {
     --lumo-secondary: var(--lumo-shade-10pct);
+    --warning-color-rgb: 248, 184, 78;
     --scroll-type: scroll;
 }
 
