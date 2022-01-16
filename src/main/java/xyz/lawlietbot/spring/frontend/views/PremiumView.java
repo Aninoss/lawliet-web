@@ -502,7 +502,14 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
 
     private void onAdd(Guild guild, int i) {
         if (!dialog.isOpened()) {
-            dialog.open(getTranslation("premium.confirm"), () -> {
+            Span outerSpan = new Span(getTranslation("premium.confirm") + " ");
+            outerSpan.setWidthFull();
+            outerSpan.getStyle().set("color", "black");
+            Span innerSpan = new Span(getTranslation("premium.confirm.warning"));
+            innerSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+            outerSpan.add(innerSpan);
+
+            dialog.open(outerSpan, () -> {
                 long guildId = guild.getId();
                 if (modify(i, guildId)) {
                     availableGuilds.remove(guild);

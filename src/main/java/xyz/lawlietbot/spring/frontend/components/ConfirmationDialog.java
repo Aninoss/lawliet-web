@@ -71,24 +71,28 @@ public class ConfirmationDialog extends Div {
         return buttonLayout;
     }
 
-    public void open(String text, ConfirmationDialogConfirmListener confirmListener, Component... components) {
-        open(text, confirmListener, null, components);
+    public void open(String text, ConfirmationDialogConfirmListener confirmListener) {
+        open(text, confirmListener, null);
     }
 
-    public void open(String text, ConfirmationDialogConfirmListener confirmListener, ConfirmationDialogCancelListener cancelListener, Component... components) {
+    public void open(Component component, ConfirmationDialogConfirmListener confirmListener) {
+        open(component, confirmListener, null);
+    }
+
+    public void open(String text, ConfirmationDialogConfirmListener confirmListener, ConfirmationDialogCancelListener cancelListener) {
+        open(generateText(text), confirmListener, cancelListener);
+    }
+
+    public void open(Component component, ConfirmationDialogConfirmListener confirmListener, ConfirmationDialogCancelListener cancelListener) {
         if (!opened) {
             this.confirmListener = confirmListener;
             this.cancelListener = cancelListener;
 
             this.dialogLayout.removeAll();
-            Component textComponent = generateText(text);
-            this.dialogLayout.add(textComponent);
+            this.dialogLayout.add(component);
 
-            if (components != null && components.length > 0) {
-                this.dialogLayout.add(components);
-            }
             this.dialogLayout.add(generateButtons(cancelListener != null));
-            this.dialogLayout.setFlexGrow(1, textComponent);
+            this.dialogLayout.setFlexGrow(1, component);
 
             getStyle().set("opacity", "1")
                     .set("pointer-events", "all");
