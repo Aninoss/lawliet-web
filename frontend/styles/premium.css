@@ -94,6 +94,8 @@
 
 #notification-icon {
     color: rgb(var(--warning-color-rgb));
+    min-width: 1.5em;
+    margin-top: 8px;
 }
 
 @keyframes background-fadein {
