@@ -1,5 +1,7 @@
 package xyz.lawlietbot.spring.frontend.components.premium;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HtmlContainer;
 import com.vaadin.flow.component.UI;
@@ -35,9 +37,11 @@ public class PaddlePopup extends Div {
     }
 
     private String generatePassthrough(DiscordUser discordUser) {
+        String discordTag = discordUser.getUsername() + "#" + discordUser.getDiscriminator();
+
         JSONObject json = new JSONObject();
         json.put("discord_id", discordUser.getId());
-        json.put("discord_tag", discordUser.getUsername() + "#" + discordUser.getDiscriminator());
+        json.put("discord_tag", Base64.getEncoder().encodeToString(discordTag.getBytes(StandardCharsets.UTF_8)));
         json.put("discord_avatar", discordUser.getUserAvatar());
         return json.toString();
     }

@@ -18,6 +18,7 @@ import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.backend.util.StringUtil;
 import xyz.lawlietbot.spring.frontend.Styles;
+import xyz.lawlietbot.spring.frontend.components.LineBreak;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 
@@ -160,10 +161,11 @@ public class FeatureRequestCard extends Div {
 
     private void onBoostClick() {
         if (confirmationDialog != null && !uiData.isLite()) {
-            Label warningLabel = new Label(getTranslation("fr.boost.confirm.notpush"));
-            warningLabel.getStyle().set("color", "black")
-                    .set("margin-bottom", "32px");
-            confirmationDialog.open(getTranslation("fr.boost.confirm", frEntry.getTitle()), this::onBoostConfirm, this::onBoostCancel, warningLabel);
+            Label label = new Label(getTranslation("fr.boost.confirm", frEntry.getTitle()));
+            label.add(new LineBreak());
+            label.add(getTranslation("fr.boost.confirm.notpush"));
+            label.getStyle().set("color", "black");
+            confirmationDialog.open(label, this::onBoostConfirm, this::onBoostCancel);
         }
     }
 

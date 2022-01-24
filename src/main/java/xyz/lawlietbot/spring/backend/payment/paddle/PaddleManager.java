@@ -2,6 +2,7 @@ package xyz.lawlietbot.spring.backend.payment.paddle;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -81,8 +82,9 @@ public class PaddleManager {
                     PaddleManager.getSubLevelType(planId) == SubLevelType.PRO
             ).join();
             try {
+                String discordTag = new String(Base64.getDecoder().decode(passthroughJson.getString("discord_tag")));
                 WebhookNotifier.newSub(
-                        passthroughJson.getString("discord_tag"),
+                        discordTag,
                         discordId,
                         passthroughJson.getString("discord_avatar"),
                         checkoutJson.getJSONObject("checkout").getString("title"),

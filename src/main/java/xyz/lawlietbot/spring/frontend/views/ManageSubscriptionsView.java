@@ -9,6 +9,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.Route;
@@ -26,6 +27,7 @@ import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.frontend.Styles;
+import xyz.lawlietbot.spring.frontend.components.LineBreak;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.frontend.components.PageHeader;
@@ -130,7 +132,16 @@ public class ManageSubscriptionsView extends PageLayout {
         actionSelect.addValueChangeListener(e -> {
             String action = e.getValue();
             if (action != null) {
-                confirmationDialog.open(getTranslation("manage.grid.action.dialog." + action), () -> {
+                Span outerSpan = new Span(getTranslation("manage.grid.action.dialog." + action));
+                outerSpan.setWidthFull();
+                outerSpan.getStyle().set("color", "black");
+                if (action.equals("cancel")) {
+                    Span innerSpan = new Span(getTranslation("manage.grid.action.dialog.cancel.warning"));
+                    innerSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+                    outerSpan.add(new LineBreak(), innerSpan);
+                }
+
+                confirmationDialog.open(outerSpan, () -> {
                     boolean success = false;
                     try {
                         switch (action) {
