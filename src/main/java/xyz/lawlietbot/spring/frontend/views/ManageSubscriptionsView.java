@@ -27,7 +27,6 @@ import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.frontend.Styles;
-import xyz.lawlietbot.spring.frontend.components.LineBreak;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.frontend.components.PageHeader;
@@ -136,9 +135,9 @@ public class ManageSubscriptionsView extends PageLayout {
                 outerSpan.setWidthFull();
                 outerSpan.getStyle().set("color", "black");
                 if (action.equals("cancel")) {
-                    Span innerSpan = new Span(getTranslation("manage.grid.action.dialog.cancel.warning"));
+                    Span innerSpan = new Span(" " + getTranslation("manage.grid.action.dialog.cancel.warning"));
                     innerSpan.getStyle().set("color", "var(--lumo-error-text-color)");
-                    outerSpan.add(new LineBreak(), innerSpan);
+                    outerSpan.add(innerSpan);
                 }
 
                 confirmationDialog.open(outerSpan, () -> {
