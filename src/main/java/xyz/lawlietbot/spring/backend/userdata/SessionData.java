@@ -2,15 +2,11 @@ package xyz.lawlietbot.spring.backend.userdata;
 
 import java.util.List;
 import java.util.Optional;
-import javax.servlet.http.HttpServletRequest;
 import bell.oauth.discord.domain.Guild;
 import bell.oauth.discord.main.OAuthBuilder;
 import bell.oauth.discord.main.Response;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.Location;
-import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import org.springframework.stereotype.Component;
@@ -32,15 +28,9 @@ public class SessionData {
     }
 
     private void setData() {
+        String url = "https://" + System.getenv("DOMAIN") + "/discordlogin";
         builder = new OAuthBuilder(System.getenv("BOT_CLIENT_ID"), System.getenv("BOT_CLIENT_SECRET"))
-                .setRedirectURI(getCurrentDomain() + "discordlogin");
-    }
-
-    private String getCurrentDomain() {
-        VaadinRequest vaadinRequest = VaadinService.getCurrentRequest();
-        HttpServletRequest httpServletRequest = ((VaadinServletRequest)vaadinRequest).getHttpServletRequest();
-        String requestUrl = httpServletRequest.getRequestURL().toString().replace("//", "|");
-        return requestUrl.substring(0, requestUrl.indexOf('/')).replace("|", "//") + "/";
+                .setRedirectURI(url);
     }
 
     public String getLoginUrl() {
