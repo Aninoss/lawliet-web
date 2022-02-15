@@ -87,7 +87,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         premiumContent.addClassName(Styles.APP_WIDTH);
         premiumContent.getStyle().set("margin-bottom", "48px");
 
-        premiumContent.add(generateTiersTitle(), generateTiersSubtitle(), generateCouponNotification(), generateSeparator(), generateTiersTiers());
+        premiumContent.add(generateTiersTitle(), generateTiersSubtitle(), generateSeparator(), generateTiersTiers());
         return premiumContent;
     }
 
@@ -107,26 +107,6 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         Span span = new Span(getTranslation("premium.tiers.subtitle"));
         span.setWidthFull();
         return span;
-    }
-
-    private Component generateCouponNotification() {
-        HorizontalLayout content = new HorizontalLayout();
-        content.setId("notification-field");
-        content.setPadding(true);
-
-        Icon infoIcon = VaadinIcon.INFO_CIRCLE.create();
-        infoIcon.setId("notification-icon");
-        content.add(infoIcon);
-
-        String[] parts = getTranslation("premium.coupon").split("\\{0\\}");
-        Span text = new Span(
-                new Text(parts[0]),
-                new Html("<code>LAWLIET500K</code>"),
-                new Text(parts[1])
-        );
-        content.add(text);
-
-        return content;
     }
 
     private Component generateSeparator() {
