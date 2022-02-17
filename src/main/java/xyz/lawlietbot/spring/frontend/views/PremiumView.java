@@ -106,13 +106,14 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
     private Component generateTiersSubtitle() {
         Span span = new Span(getTranslation("premium.tiers.subtitle"));
         span.setWidthFull();
+        span.getStyle().set("margin-bottom", "16px");
         return span;
     }
 
     private Component generateSeparator() {
         Hr hr = new Hr();
         hr.setWidthFull();
-        hr.getStyle().set("margin-bottom", "-4px");
+        hr.getStyle().set("margin-bottom", "12px");
         return hr;
     }
 
