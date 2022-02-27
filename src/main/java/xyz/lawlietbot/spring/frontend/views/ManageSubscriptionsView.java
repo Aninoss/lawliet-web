@@ -62,16 +62,16 @@ public class ManageSubscriptionsView extends PageLayout {
         getSessionData().getDiscordUser().ifPresent(user -> {
             try {
                 String sessionUrl = StripeManager.generateCustomerPortalSession(user.getId());
-                updateMainContent(user, sessionUrl, false);
+                updateMainContent(user, sessionUrl, 0);
             } catch (StripeException ex) {
                 throw new RuntimeException(ex);
             }
         });
     }
 
-    private void updateMainContent(DiscordUser user, String sessionUrl, boolean clearSubCache) {
+    private void updateMainContent(DiscordUser user, String sessionUrl, int reloadSubId) {
         mainContent.removeAll();
-        Component grid = generateGrid(user, sessionUrl, clearSubCache);
+        Component grid = generateGrid(user, sessionUrl, reloadSubId);
         if (grid != null) {
             mainContent.add(grid);
         }
@@ -80,8 +80,8 @@ public class ManageSubscriptionsView extends PageLayout {
         }
     }
 
-    private Component generateGrid(DiscordUser user, String sessionUrl, boolean clearSubCache) {
-        List<Subscription> subscriptionList = SendEvent.sendListPaddleSubscriptions(user.getId(), clearSubCache).join();
+    private Component generateGrid(DiscordUser user, String sessionUrl, int reloadSubId) {
+        List<Subscription> subscriptionList = SendEvent.sendListPaddleSubscriptions(user.getId(), reloadSubId).join();
 
         if (subscriptionList.size() > 0) {
             Grid<Subscription> grid = new Grid<>(Subscription.class, false);
@@ -162,7 +162,7 @@ public class ManageSubscriptionsView extends PageLayout {
                         LOGGER.error("Exception on sub update", ioException);
                     }
                     if (success) {
-                        updateMainContent(user, sessionUrl, true);
+                        updateMainContent(user, sessionUrl, subId);
                     } else {
                         CustomNotification.showError(getTranslation("error"));
                     }

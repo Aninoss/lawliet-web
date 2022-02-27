@@ -305,10 +305,13 @@ public class SendEvent {
         );
     }
 
-    public static CompletableFuture<List<Subscription>> sendListPaddleSubscriptions(long userId, boolean clearSubCache) {
+    public static CompletableFuture<List<Subscription>> sendListPaddleSubscriptions(long userId, int reloadSubId) {
         JSONObject json = new JSONObject();
         json.put("user_id", userId);
-        json.put("clear_subscription_cache", clearSubCache);
+        json.put("clear_subscription_cache", false);
+        if (reloadSubId > 0) {
+            json.put("reload_sub_id", reloadSubId);
+        }
 
         return process(
                 "PADDLE_SUBS",
