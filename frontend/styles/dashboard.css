@@ -62,8 +62,9 @@ html {
 
 .dashboard-card {
     border-radius: 6px;
-    background: var(--lumo-tint-5pct);
+    background: var(--lumo-secondary);
     padding: 16px;
+    box-sizing: border-box;
 }
 
 .dashboard-img {

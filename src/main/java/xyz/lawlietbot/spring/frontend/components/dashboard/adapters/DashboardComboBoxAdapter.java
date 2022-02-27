@@ -18,6 +18,7 @@ public class DashboardComboBoxAdapter extends Div {
         if (dashboardComboBox.getMax() > 1) {
             MultiselectComboBox<DiscordEntity> multiselectComboBox = new MultiselectComboBox<>();
             multiselectComboBox.setWidthFull();
+            multiselectComboBox.getStyle().set("padding-top", "0");
             multiselectComboBox.setPlaceholder(getTranslation("dash.select." + dashboardComboBox.getDataType().name(), true));
             multiselectComboBox.setLabel(dashboardComboBox.getLabel());
             multiselectComboBox.setItemLabelGenerator(DiscordEntity::getName);
@@ -57,6 +58,7 @@ public class DashboardComboBoxAdapter extends Div {
         } else {
             ComboBox<DiscordEntity> comboBox = new ComboBox<>();
             comboBox.setWidthFull();
+            comboBox.getStyle().set("padding-top", "0");
             comboBox.setPlaceholder(getTranslation("dash.select." + dashboardComboBox.getDataType().name(), false));
             comboBox.setLabel(dashboardComboBox.getLabel());
             comboBox.setClearButtonVisible(dashboardComboBox.getCanBeEmpty());
