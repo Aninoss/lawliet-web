@@ -43,7 +43,9 @@ public class DashboardComponentConverter {
 
             case DashboardTitle.TYPE:
                 DashboardTitle dashboardTitle = (DashboardTitle) dashboardComponent;
-                component = new H3(dashboardTitle.getText());
+                H3 h3 = new H3(dashboardTitle.getText());
+                h3.getStyle().set("padding-top", "1em");
+                component = h3;
                 break;
 
             case HorizontalPusher.TYPE:
