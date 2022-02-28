@@ -155,7 +155,6 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                     mainLayout.removeAll();
                     premiumUnlockedLayout.setVisible(true);
                     updatePremiumUnlocked(dashboardInitData.isPremiumUnlocked());
-                    updateMainContent(categoryList.get(0));
                     mainLayout.setClassName(Styles.VISIBLE_LARGE, true);
                     tabsLayout.setClassName(Styles.VISIBLE_LARGE, false);
                 } else {
