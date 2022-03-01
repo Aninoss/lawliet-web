@@ -259,7 +259,9 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
             ((HasSize) component).setWidthFull();
             data.getComponents().setActionSendListener((json, confirmationMessage) -> {
                 if (confirmationMessage != null) {
-                    confirmationDialog.open(confirmationMessage, () -> sendAction(category, json), () -> updateMainContent(category));
+                    Span confirmationMessageSpan = new Span(confirmationMessage);
+                    confirmationMessageSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+                    confirmationDialog.open(confirmationMessageSpan, () -> sendAction(category, json), () -> updateMainContent(category));
                 } else {
                     sendAction(category, json);
                 }
