@@ -5,6 +5,7 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import dashboard.DashboardComponent;
+import dashboard.component.DashboardText;
 import dashboard.container.HorizontalContainer;
 import dashboard.container.HorizontalPusher;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
@@ -42,7 +43,7 @@ public class HorizontalContainerAdapter extends FlexLayout {
             Component component = DashboardComponentConverter.convert(guildId, userId, dashboardComponent, dialog);
             if (component != null) {
                 add(component);
-                if (dashboardComponent instanceof HorizontalPusher || noPusher) {
+                if ((dashboardComponent instanceof HorizontalPusher || noPusher) && !(dashboardComponent instanceof DashboardText)) {
                     setFlexGrow(1, component);
                 }
                 if (component instanceof HasStyle && !(dashboardComponent instanceof HorizontalPusher)) {

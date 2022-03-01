@@ -58,7 +58,7 @@ public class DashboardComboBoxAdapter extends Div {
         } else {
             ComboBox<DiscordEntity> comboBox = new ComboBox<>();
             comboBox.setWidthFull();
-            comboBox.getStyle().set("padding-top", "0");
+            comboBox.getStyle().set("margin-top", "-1em");
             comboBox.setPlaceholder(getTranslation("dash.select." + dashboardComboBox.getDataType().name(), false));
             comboBox.setLabel(dashboardComboBox.getLabel());
             comboBox.setClearButtonVisible(dashboardComboBox.getCanBeEmpty());

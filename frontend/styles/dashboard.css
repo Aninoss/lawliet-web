@@ -98,11 +98,6 @@ html {
     margin-top: 1em;
 }
 
-.dashboard-switch-layout:not(:first-child) {
-    border-top: 1px solid var(--lumo-contrast-10pct);
-    padding-top: 1em;
-}
-
 .dashboard-info-icon {
     height: 16px;
     margin-left: 4px;

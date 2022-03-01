@@ -14,7 +14,6 @@ public class DashboardSwitchAdapter extends HorizontalLayout {
     public DashboardSwitchAdapter(DashboardSwitch dashboardSwitch, ConfirmationDialog dialog) {
         setPadding(false);
         setAlignItems(Alignment.CENTER);
-        addClassName("dashboard-switch-layout");
 
         Label label = new Label(dashboardSwitch.getLabel());
         if (!dashboardSwitch.isEnabled()) {
