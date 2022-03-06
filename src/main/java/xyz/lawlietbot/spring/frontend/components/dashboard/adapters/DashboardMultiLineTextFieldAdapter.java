@@ -18,8 +18,8 @@ public class DashboardMultiLineTextFieldAdapter extends FlexLayout {
         textArea.setPlaceholder(dashboardTextField.getPlaceholder());
         textArea.setReadOnly(true);
         textArea.setEnabled(dashboardTextField.isEnabled());
-        textArea.setMinLength(dashboardTextField.getMin());
-        textArea.setMaxLength(dashboardTextField.getMax());
+        textArea.setMinLength((int) dashboardTextField.getMin());
+        textArea.setMaxLength((int) dashboardTextField.getMax());
         textArea.setValue(dashboardTextField.getValue());
         if (dashboardTextField.getMin() <= 0) {
             textArea.setErrorMessage(getTranslation("dash.textfield.max", dashboardTextField.getMax()));

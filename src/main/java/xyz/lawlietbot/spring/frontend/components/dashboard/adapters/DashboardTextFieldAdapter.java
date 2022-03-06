@@ -18,8 +18,8 @@ public class DashboardTextFieldAdapter extends FlexLayout {
         textField.setPlaceholder(dashboardTextField.getPlaceholder());
         textField.setReadOnly(true);
         textField.setEnabled(dashboardTextField.isEnabled());
-        textField.setMinLength(dashboardTextField.getMin());
-        textField.setMaxLength(dashboardTextField.getMax());
+        textField.setMinLength((int) dashboardTextField.getMin());
+        textField.setMaxLength((int) dashboardTextField.getMax());
         textField.setValue(dashboardTextField.getValue());
         if (dashboardTextField.getMin() <= 0) {
             textField.setErrorMessage(getTranslation("dash.textfield.max", dashboardTextField.getMax()));
