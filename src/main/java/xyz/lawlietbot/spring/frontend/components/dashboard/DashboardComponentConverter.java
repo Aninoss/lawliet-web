@@ -2,7 +2,6 @@ package xyz.lawlietbot.spring.frontend.components.dashboard;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
@@ -12,6 +11,7 @@ import dashboard.component.*;
 import dashboard.container.HorizontalContainer;
 import dashboard.container.HorizontalPusher;
 import dashboard.container.VerticalContainer;
+import org.apache.commons.lang3.StringEscapeUtils;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.dashboard.adapters.*;
 
@@ -38,13 +38,15 @@ public class DashboardComponentConverter {
 
             case DashboardText.TYPE:
                 DashboardText dashboardText = (DashboardText) dashboardComponent;
-                component = new Div(new Text(dashboardText.getText()));
+                Div div = new Div();
+                div.getElement().setProperty("innerHTML", StringEscapeUtils.escapeHtml4(dashboardText.getText()).replace("\n", "<br>"));
+                component = div;
                 break;
 
             case DashboardTitle.TYPE:
                 DashboardTitle dashboardTitle = (DashboardTitle) dashboardComponent;
                 H3 h3 = new H3(dashboardTitle.getText());
-                h3.getStyle().set("padding-top", "1em");
+                h3.getStyle().set("padding-top", "2em");
                 component = h3;
                 break;
 

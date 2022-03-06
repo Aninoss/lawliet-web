@@ -14,10 +14,10 @@ public class DashboardGridAdapter extends FlexLayout {
 
     public DashboardGridAdapter(DashboardGrid dashboardGrid) {
         setFlexDirection(FlexDirection.COLUMN);
-        add(
-                generateGrid(dashboardGrid),
-                generateAddButton(dashboardGrid)
-        );
+        add(generateGrid(dashboardGrid));
+        if (dashboardGrid.isWithAddButton()) {
+            add(generateAddButton(dashboardGrid));
+        }
     }
 
     private Component generateGrid(DashboardGrid dashboardGrid) {
@@ -33,9 +33,11 @@ public class DashboardGridAdapter extends FlexLayout {
                     .setHeader(header[i])
                     .setAutoWidth(true);
         }
-        grid.addComponentColumn(gridRow -> generateEditButton(dashboardGrid, gridRow))
-                .setTextAlign(ColumnTextAlign.END)
-                .setWidth("50px");
+        if (dashboardGrid.isWithEditButton()) {
+            grid.addComponentColumn(gridRow -> generateEditButton(dashboardGrid, gridRow))
+                    .setTextAlign(ColumnTextAlign.END)
+                    .setWidth("50px");
+        }
         return grid;
     }
 
