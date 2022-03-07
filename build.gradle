@@ -57,7 +57,7 @@ dependencies {
     implementation 'com.stripe:stripe-java:20.92.0'
     implementation 'com.vaadin.componentfactory:togglebutton:1.0.1'
     implementation 'org.vaadin.gatanaso:multiselect-combo-box-flow:3.0.2'
-    implementation 'com.github.Aninoss:lawliet-dashboard-components:981d976411'
+    implementation 'com.github.Aninoss:lawliet-dashboard-components:7314fa8b83'
     implementation 'club.minnced:discord-webhooks:0.5.8'
     implementation 'com.jamiussiam:paddle-verifier:2.1'
 }

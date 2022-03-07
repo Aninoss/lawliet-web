@@ -1,5 +1,8 @@
 package xyz.lawlietbot.spring.frontend.components;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
@@ -13,10 +16,13 @@ import xyz.lawlietbot.spring.frontend.Styles;
 
 public class ConfirmationDialog extends Div {
 
+    private final static ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+
     private ConfirmationDialogConfirmListener confirmListener = null;
     private ConfirmationDialogCancelListener cancelListener = null;
     private final VerticalLayout dialogLayout = new VerticalLayout();
     private boolean opened = false;
+    private boolean canInteract = true;
 
     public ConfirmationDialog() {
         setSizeFull();
@@ -28,8 +34,8 @@ public class ConfirmationDialog extends Div {
                 .set("transition", "opacity 0.2s")
                 .set("opacity", "0")
                 .set("pointer-events", "none");
-        addClickListener(e -> close(false));
 
+        addClickListener(e -> close(false));
         dialogLayout.setMaxWidth("min(500px, calc(100% - 32px))");
         dialogLayout.setWidthFull();
         dialogLayout.setMinHeight("200px");
@@ -97,6 +103,9 @@ public class ConfirmationDialog extends Div {
             getStyle().set("opacity", "1")
                     .set("pointer-events", "all");
             this.opened = true;
+
+            canInteract = false;
+            executor.schedule(() -> canInteract = true, 250, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -105,7 +114,7 @@ public class ConfirmationDialog extends Div {
     }
 
     private void close(boolean confirmed) {
-        if (opened) {
+        if (opened && canInteract) {
             opened = false;
             getStyle().set("opacity", "0")
                     .set("pointer-events", "none");

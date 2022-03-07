@@ -11,7 +11,6 @@ import dashboard.component.*;
 import dashboard.container.HorizontalContainer;
 import dashboard.container.HorizontalPusher;
 import dashboard.container.VerticalContainer;
-import org.apache.commons.lang3.StringEscapeUtils;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.dashboard.adapters.*;
 
@@ -37,10 +36,7 @@ public class DashboardComponentConverter {
                 break;
 
             case DashboardText.TYPE:
-                DashboardText dashboardText = (DashboardText) dashboardComponent;
-                Div div = new Div();
-                div.getElement().setProperty("innerHTML", StringEscapeUtils.escapeHtml4(dashboardText.getText()).replace("\n", "<br>"));
-                component = div;
+                component = new DashboardTextAdapter((DashboardText) dashboardComponent);
                 break;
 
             case DashboardTitle.TYPE:
