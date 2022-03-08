@@ -7,6 +7,7 @@ import xyz.lawlietbot.spring.frontend.views.PrivacyView;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.router.RouterLink;
+import xyz.lawlietbot.spring.frontend.views.TOSView;
 
 public class FooterArea extends Footer {
 
@@ -18,11 +19,12 @@ public class FooterArea extends Footer {
 
         Div mainContent = new Div();
         mainContent.addClassName(Styles.APP_WIDTH);
+        mainContent.setId("footer");
 
         Object[][] links = {
-                {"footer.upvote", ExternalLinks.UPVOTE_URL},
                 {"footer.invite", uiData.getBotInviteUrl()},
                 {"footer.server", ExternalLinks.SERVER_INVITE_URL},
+                {"footer.tos", TOSView.class},
                 {"footer.privacy", PrivacyView.class}
         };
 
