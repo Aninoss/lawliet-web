@@ -126,12 +126,15 @@ public class CustomRequestHandler implements RequestHandler {
                         LOGGER.error("Error while handling upvote");
                         response.setStatus(500);
                     }
+                } else {
+                    LOGGER.error("Empty body while handling upvote");
                 }
             } catch (Throwable e) {
                 LOGGER.error("Error while handling upvote", e);
                 response.setStatus(500);
             }
         } else {
+            LOGGER.error("Invalid auth while handling upvote");
             response.setStatus(403);
         }
     }
@@ -142,18 +145,21 @@ public class CustomRequestHandler implements RequestHandler {
                 String body = br.lines().collect(Collectors.joining("\n"));
                 if (body.length() > 0) {
                     JSONObject jsonObject = new JSONObject(body);
-                    LOGGER.info("UPVOTE ANINOSS | {}", jsonObject.getLong("user"));
+                    LOGGER.info("UPVOTE ANICORD | {}", jsonObject.getLong("user"));
                     JSONObject responseJson = SendEvent.sendTopGGAnicord(jsonObject).get(5, TimeUnit.SECONDS);
                     if (!responseJson.getBoolean("success")) {
-                        LOGGER.error("Error while handling upvote");
+                        LOGGER.error("Error while handling Anicord upvote");
                         response.setStatus(500);
                     }
+                } else {
+                    LOGGER.error("Empty body while handling Anicord upvote");
                 }
             } catch (Throwable e) {
-                LOGGER.error("Error while handling upvote", e);
+                LOGGER.error("Error while handling Anicord upvote", e);
                 response.setStatus(500);
             }
         } else {
+            LOGGER.error("Invalid auth while handling Anicord upvote");
             response.setStatus(403);
         }
     }
