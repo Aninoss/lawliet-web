@@ -115,6 +115,7 @@ public class CustomRequestHandler implements RequestHandler {
     }
 
     private void handleTopGG(VaadinRequest request, VaadinResponse response, String auth) {
+        LOGGER.info("Receiving upvote signal...");
         if (System.getenv("TOPGG_AUTH").equals(auth)) {
             try (BufferedReader br = request.getReader()) {
                 String body = br.lines().collect(Collectors.joining("\n"));
@@ -140,6 +141,7 @@ public class CustomRequestHandler implements RequestHandler {
     }
 
     private void handleTopGGAnicord(VaadinRequest request, VaadinResponse response, String auth) {
+        LOGGER.info("Receiving Anicord upvote signal...");
         if (System.getenv("TOPGG_ANINOSS_AUTH").equals(auth)) {
             try (BufferedReader br = request.getReader()) {
                 String body = br.lines().collect(Collectors.joining("\n"));
