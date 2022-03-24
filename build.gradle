@@ -50,7 +50,6 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-to-slf4j:2.14.1'
     implementation 'org.json:json:20210307'
     implementation 'com.google.guava:guava:31.0.1-jre'
-    implementation 'com.github.Aninoss:Java-WebSocket:94609ebb95'
     implementation 'com.squareup.okhttp3:okhttp:4.9.2'
     implementation 'com.github.appreciated:vaadin-css-grid:2.0.0'
     implementation 'com.vaadin:vaadin-charts-flow:21.0.3'

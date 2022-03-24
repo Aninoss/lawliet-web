@@ -1,17 +1,21 @@
 package xyz.lawlietbot.spring.syncserver;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import dashboard.ActionResult;
 import dashboard.DashboardComponent;
 import dashboard.component.DashboardComboBox;
 import dashboard.container.DashboardContainer;
 import dashboard.data.DiscordEntity;
+import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import xyz.lawlietbot.spring.backend.dashboard.DashboardCategoryInitData;
@@ -26,15 +30,21 @@ import xyz.lawlietbot.spring.backend.userdata.SessionData;
 
 public class SendEvent {
 
+    private static final OkHttpClient httpClient = new OkHttpClient.Builder()
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .writeTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(10, TimeUnit.SECONDS)
+            .build();
+
     private SendEvent() {
     }
 
     public static CompletableFuture<JSONObject> sendRequestCommandList() {
-        return SyncManager.getInstance().getClient().send("COMMAND_LIST", new JSONObject());
+        return process("COMMAND_LIST", new JSONObject(), r -> r);
     }
 
     public static CompletableFuture<JSONObject> sendRequestFAQList() {
-        return SyncManager.getInstance().getClient().send("FAQ_LIST", new JSONObject());
+        return process("FAQ_LIST", new JSONObject(), r -> r);
     }
 
     public static CompletableFuture<ServerStatsBean> sendRequestServerStats() {
@@ -55,11 +65,11 @@ public class SendEvent {
     }
 
     public static CompletableFuture<JSONObject> sendTopGG(JSONObject dataJson) {
-        return SyncManager.getInstance().getClient().send("TOPGG", dataJson);
+        return process("TOPGG", dataJson, r -> r);
     }
 
     public static CompletableFuture<JSONObject> sendTopGGAnicord(JSONObject dataJson) {
-        return SyncManager.getInstance().getClient().send("TOPGG_ANICORD", dataJson);
+        return process("TOPGG_ANICORD", dataJson, r -> r);
     }
 
     public static CompletableFuture<FRDynamicBean> sendRequestFeatureRequestMainData(SessionData sessionData) {
@@ -96,7 +106,7 @@ public class SendEvent {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("entry_id", id);
         jsonObject.put("user_id", userId);
-        return SyncManager.getInstance().getClient().send("FR_BOOST", jsonObject);
+        return process("FR_BOOST", jsonObject, r -> r);
     }
 
     public static CompletableFuture<Boolean> sendRequestCanPost(long userId) {
@@ -111,13 +121,13 @@ public class SendEvent {
         jsonObject.put("title", title);
         jsonObject.put("description", description);
         jsonObject.put("notify", notify);
-        return SyncManager.getInstance().getClient().send("FR_POST", jsonObject);
+        return process("FR_POST", jsonObject, r -> r);
     }
 
     public static CompletableFuture<JSONObject> sendInvite(String type) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("type", type);
-        return SyncManager.getInstance().getClient().send("INVITE", jsonObject);
+        return process("INVITE", jsonObject, r -> r);
     }
 
     public static CompletableFuture<UserPremium> sendRequestUserPremium(long userId) {
@@ -334,22 +344,32 @@ public class SendEvent {
         );
     }
 
-    private static <T> CompletableFuture<T> process(String event, JSONObject dataJson, Function<JSONObject, T> function) {
-        CompletableFuture<T> future = new CompletableFuture<>();
+    private static <T> CompletableFuture<T> process(String event, JSONObject requestJson, Function<JSONObject, T> function) {
+        String url = "http://" + System.getenv("SYNC_HOST") + ":" + System.getenv("SYNC_PORT") + "/api/" + event;
+        Request request = new Request.Builder()
+                .url(url)
+                .post(RequestBody.create(requestJson.toString(), MediaType.get("application/json")))
+                .addHeader("Authorization", System.getenv("SYNC_AUTH"))
+                .build();
 
-        SyncManager.getInstance().getClient().send(event, dataJson)
-                .exceptionally(e -> {
+        CompletableFuture<T> future = new CompletableFuture<>();
+        httpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(e);
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                try {
+                    JSONObject responseJson = new JSONObject(response.body().string());
+                    T t = function.apply(responseJson);
+                    future.complete(t);
+                } catch (Throwable e) {
                     future.completeExceptionally(e);
-                    return null;
-                })
-                .thenAccept(jsonResponse -> {
-                    try {
-                        T t = function.apply(jsonResponse);
-                        future.complete(t);
-                    } catch (Throwable e) {
-                        future.completeExceptionally(e);
-                    }
-                });
+                }
+            }
+        });
 
         return future;
     }
