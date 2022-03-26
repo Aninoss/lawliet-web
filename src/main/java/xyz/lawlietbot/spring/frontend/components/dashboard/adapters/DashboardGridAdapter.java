@@ -32,7 +32,7 @@ public class DashboardGridAdapter extends FlexLayout {
         if (rowButton.length() > 0) {
             grid.addComponentColumn(gridRow -> generateRowButton(dashboardGrid, gridRow, rowButton))
                     .setTextAlign(ColumnTextAlign.END)
-                    .setWidth("50px");
+                    .setAutoWidth(true);
         }
         return grid;
     }
@@ -41,6 +41,7 @@ public class DashboardGridAdapter extends FlexLayout {
         Button rowButton = new Button(buttonText);
         rowButton.setEnabled(dashboardGrid.isEnabled());
         rowButton.addClickListener(e -> dashboardGrid.triggerRow(gridRow.getId()));
+        rowButton.setWidthFull();
         return rowButton;
     }
 
