@@ -10,7 +10,7 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 
 public class DashboardTextFieldButtons extends FlexLayout {
 
-    private boolean useEnterShortcut = false;
+    private final boolean useEnterShortcut;
     private Runnable cancelListener = () -> {};
     private Supplier<Boolean> confirmListener = () -> false;
     private Consumer<Boolean> modeChangeListener = e -> {};
