@@ -59,6 +59,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
     private final GuildComboBox guildComboBox = new GuildComboBox();
     private final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
     private List<DashboardInitData.Category> categoryList;
+    private String autoCategoryId = null;
 
     public DashboardView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         super(sessionData, uiData);
@@ -152,14 +153,37 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                         categoryTabs.add(tab);
                     }
                     categoryTabs.setVisible(true);
-                    updateMainContentEntry(e.getValue());
                     premiumUnlockedLayout.setVisible(true);
                     updatePremiumUnlocked(dashboardInitData.isPremiumUnlocked());
-                    mainLayout.setClassName(Styles.VISIBLE_LARGE, true);
-                    tabsLayout.setClassName(Styles.VISIBLE_LARGE, false);
+
+                    int index = -1;
+                    if (autoCategoryId != null && categoryList != null && categoryList.size() > 0) {
+                        for (int i = 0; i < categoryList.size(); i++) {
+                            if (categoryList.get(i).getId().equals(autoCategoryId)) {
+                                index = i;
+                                break;
+                            }
+                        }
+                    }
+                    autoCategoryId = null;
+
+                    if (index != -1) {
+                        categoryTabs.setSelectedIndex(index);
+                    } else {
+                        UI.getCurrent().getPage().retrieveExtendedClientDetails(receiver -> {
+                            int screenWidth = receiver.getScreenWidth();
+                            if (screenWidth >= 1000) {
+                                categoryTabs.setSelectedIndex(0);
+                            } else {
+                                updateMainContentEntry(e.getValue());
+                                pushNewUri();
+                            }
+                        });
+                    }
                 } else {
                     categoryList = Collections.emptyList();
                     updateMainContentCategory(null);
+                    pushNewUri();
                 }
 
                 if (e.getValue().getIcon() != null) {
@@ -168,8 +192,6 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                 } else {
                     image.setVisible(false);
                 }
-
-                pushNewUri();
             } else {
                 image.setVisible(false);
                 categoryList = Collections.emptyList();
@@ -416,21 +438,9 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
             getSessionData().getDiscordUser()
                     .flatMap(u -> u.getGuilds().stream().filter(g -> g.getId() == guildId).findFirst())
                     .ifPresent(guild -> {
+                        List<String> categoryIdList = parametersMap.getOrDefault("c", Collections.emptyList());
+                        autoCategoryId = categoryIdList.size() > 0 ? categoryIdList.get(0) : null;
                         guildComboBox.setValue(guild);
-                        if (categoryList != null && categoryList.size() > 0) {
-                            List<String> categoryIdList = parametersMap.getOrDefault("c", Collections.emptyList());
-                            String categoryId = categoryIdList.size() > 0 ? categoryIdList.get(0) : null;
-                            int index = -1;
-                            for (int i = 0; i < categoryList.size(); i++) {
-                                if (categoryList.get(i).getId().equals(categoryId)) {
-                                    index = i;
-                                    break;
-                                }
-                            }
-                            if (index != -1) {
-                                categoryTabs.setSelectedIndex(index);
-                            }
-                        }
                     });
         }
     }
