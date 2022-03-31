@@ -101,7 +101,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         categoryTabs.addSelectedChangeListener(e -> {
             if (categoryTabs.getSelectedIndex() >= 0) {
                 DashboardInitData.Category category = categoryList.get(categoryTabs.getSelectedIndex());
-                updateMainContent(category);
+                updateMainContentCategory(category);
                 pushNewUri();
             }
         });
@@ -152,14 +152,14 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                         categoryTabs.add(tab);
                     }
                     categoryTabs.setVisible(true);
-                    mainLayout.removeAll();
+                    updateMainContentEntry(e.getValue());
                     premiumUnlockedLayout.setVisible(true);
                     updatePremiumUnlocked(dashboardInitData.isPremiumUnlocked());
                     mainLayout.setClassName(Styles.VISIBLE_LARGE, true);
                     tabsLayout.setClassName(Styles.VISIBLE_LARGE, false);
                 } else {
                     categoryList = Collections.emptyList();
-                    updateMainContent(null);
+                    updateMainContentCategory(null);
                 }
 
                 if (e.getValue().getIcon() != null) {
@@ -180,7 +180,37 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         return guildLayout;
     }
 
-    private void updateMainContent(DashboardInitData.Category category) {
+    private void updateMainContentEntry(Guild guild) {
+        mainLayout.removeAll();
+        mainLayout.setClassName(Styles.VISIBLE_LARGE, true);
+        tabsLayout.setClassName(Styles.VISIBLE_LARGE, false);
+
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.setPadding(false);
+        layout.getStyle().set("margin-top", "12px");
+
+        if (guild.getIcon() != null) {
+            Image image = new Image(guild.getIcon(), "");
+            image.setHeight("100px");
+            image.getStyle().set("border-radius", "8px")
+                    .set("margin-top", "8px")
+                    .set("margin-right", "6px");
+            layout.add(image);
+        }
+
+        VerticalLayout titleLayout = new VerticalLayout();
+        titleLayout.setPadding(false);
+
+        H2 pageTitle = new H2(guild.getName());
+        pageTitle.getStyle().set("margin-top", "16px")
+                .set("margin-bottom", "8px");
+        titleLayout.add(pageTitle, new Text(getTranslation("dashboard.selectpage")));
+
+        layout.add(titleLayout);
+        mainLayout.add(layout);
+    }
+
+    private void updateMainContentCategory(DashboardInitData.Category category) {
         mainLayout.removeAll();
         mainLayout.setClassName(Styles.VISIBLE_LARGE, false);
         tabsLayout.setClassName(Styles.VISIBLE_LARGE, true);
@@ -241,7 +271,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         DiscordUser discordUser = getSessionData().getDiscordUser().get();
 
         pageTitle.setText(category.getTitle());
-        DashboardCategoryInitData data;
+        DashboardCategoryInitData data = null;
         try {
             data = SendEvent.sendDashboardCategoryInit(
                     category.getId(),
@@ -250,25 +280,30 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                     getLocale()
             ).get(5, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            throw new RuntimeException(e);
+            //ignore
         }
 
-        updatePremiumUnlocked(data.isPremiumUnlocked());
-        if (data.getMissingUserPermissions().isEmpty() && data.getMissingBotPermissions().isEmpty()) {
-            Component component = DashboardComponentConverter.convert(guild.getId(), discordUser.getId(), data.getComponents(), confirmationDialog);
-            ((HasSize) component).setWidthFull();
-            data.getComponents().setActionSendListener((json, confirmationMessage) -> {
-                if (confirmationMessage != null) {
-                    Span confirmationMessageSpan = new Span(confirmationMessage);
-                    confirmationMessageSpan.getStyle().set("color", "var(--lumo-error-text-color)");
-                    confirmationDialog.open(confirmationMessageSpan, () -> sendAction(category, json), () -> updateMainContent(category));
-                } else {
-                    sendAction(category, json);
-                }
-            });
-            return component;
+        if (data != null) {
+            updatePremiumUnlocked(data.isPremiumUnlocked());
+            if (data.getMissingUserPermissions().isEmpty() && data.getMissingBotPermissions().isEmpty()) {
+                Component component = DashboardComponentConverter.convert(guild.getId(), discordUser.getId(), data.getComponents(), confirmationDialog);
+                ((HasSize) component).setWidthFull();
+                data.getComponents().setActionSendListener((json, confirmationMessage) -> {
+                    if (confirmationMessage != null) {
+                        Span confirmationMessageSpan = new Span(confirmationMessage);
+                        confirmationMessageSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+                        confirmationDialog.open(confirmationMessageSpan, () -> sendAction(category, json), () -> updateMainContentCategory(category));
+                    } else {
+                        sendAction(category, json);
+                    }
+                });
+                return component;
+            } else {
+                return generateMissingPermissions(data.getMissingUserPermissions(), data.getMissingBotPermissions());
+            }
         } else {
-            return generateMissingPermissions(data.getMissingUserPermissions(), data.getMissingBotPermissions());
+            confirmationDialog.open(getTranslation("error"), () -> updateMainContentBack(false));
+            return new Div();
         }
     }
 
@@ -287,7 +322,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                 });
             }
             if (actionResult.getRedraw()) {
-                updateMainContent(category);
+                updateMainContentCategory(category);
             }
         } catch (Throwable e) {
             confirmationDialog.open(getTranslation("error"), () -> UI.getCurrent().getPage().reload());
@@ -295,9 +330,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
     }
 
     private void updateMainContentBack(boolean resetGuild) {
-        mainLayout.removeAll();
-        mainLayout.setClassName(Styles.VISIBLE_LARGE, true);
-        tabsLayout.setClassName(Styles.VISIBLE_LARGE, false);
+        updateMainContentEntry(guildComboBox.getValue());
         categoryTabs.setSelectedIndex(-1);
         if (resetGuild) {
             guildComboBox.setValue(null);
