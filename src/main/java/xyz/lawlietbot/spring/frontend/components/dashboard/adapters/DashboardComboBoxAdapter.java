@@ -49,11 +49,13 @@ public class DashboardComboBoxAdapter extends Div {
                     }
                 }
             });
-            multiselectComboBox.addCustomValuesSetListener(e -> {
-                if (multiselectComboBox.getSelectedItems().size() < dashboardComboBox.getMax()) {
-                    multiselectComboBox.select(new DiscordEntity(e.getDetail(), e.getDetail()));
-                }
-            });
+            if (dashboardComboBox.getAllowCustomValues()) {
+                multiselectComboBox.addCustomValuesSetListener(e -> {
+                    if (multiselectComboBox.getSelectedItems().size() < dashboardComboBox.getMax()) {
+                        multiselectComboBox.select(new DiscordEntity(e.getDetail(), e.getDetail()));
+                    }
+                });
+            }
             add(multiselectComboBox);
         } else {
             ComboBox<DiscordEntity> comboBox = new ComboBox<>();
