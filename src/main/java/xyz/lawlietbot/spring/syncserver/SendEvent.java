@@ -157,11 +157,11 @@ public class SendEvent {
         );
     }
 
-    public static CompletableFuture<Void> sendReport(String url, String reason, String ip) {
+    public static CompletableFuture<Void> sendReport(String url, String reason, String id) {
         JSONObject json = new JSONObject();
         json.put("url", url);
         json.put("text", reason);
-        json.put("ip_hash", ip.hashCode());
+        json.put("ip_hash", id.hashCode());
 
         return process(
                 "REPORT",

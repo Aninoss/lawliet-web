@@ -11,10 +11,7 @@ import java.util.concurrent.TimeoutException;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -65,10 +62,12 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
 
         add(mainContent);
 
-        ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-        confirmationDialog.open(getTranslation("report.confirmationdialog"), () -> {
-        });
-        add(confirmationDialog);
+        if (sessionData.isLoggedIn()) {
+            ConfirmationDialog confirmationDialog = new ConfirmationDialog();
+            confirmationDialog.open(getTranslation("report.confirmationdialog"), () -> {
+            });
+            add(confirmationDialog);
+        }
     }
 
     @Override
@@ -131,10 +130,15 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
         reason.setWidthFull();
         reason.setMaxWidth("400px");
         reason.setMaxLength(500);
+        reason.setEnabled(getSessionData().isLoggedIn());
         return reason;
     }
 
     private Component generateSubmitButton() {
+        HorizontalLayout mainLayout = new HorizontalLayout();
+        mainLayout.setPadding(false);
+        mainLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+
         Button button = new Button(getTranslation("report.yes"));
         button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         button.addClickShortcut(Key.ENTER);
@@ -142,7 +146,7 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
             if (reason.getValue().replaceAll("\\s", "").length() > 0) {
                 reason.setInvalid(false);
                 try {
-                    SendEvent.sendReport(urlSelect.getValue(), reason.getValue(), UI.getCurrent().getSession().getBrowser().getAddress())
+                    SendEvent.sendReport(urlSelect.getValue(), reason.getValue(), String.valueOf(getSessionData().getDiscordUser().get().getId()))
                             .get(5, TimeUnit.SECONDS);
                     CustomNotification.showSuccess(getTranslation("report.success"));
                     UI.getCurrent().navigate(HomeView.class);
@@ -156,7 +160,16 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
                 reason.setInvalid(true);
             }
         });
-        return button;
+        mainLayout.add(button);
+
+        if (!getSessionData().isLoggedIn()) {
+            button.setEnabled(false);
+
+            Span loginText = new Span(getTranslation("report.notloggedin"));
+            loginText.getStyle().set("color", "var(--lumo-error-color)");
+            mainLayout.add(loginText);
+        }
+        return mainLayout;
     }
 
     private void updateUrlSelection(String url) {
