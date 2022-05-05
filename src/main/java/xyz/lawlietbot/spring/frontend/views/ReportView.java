@@ -79,7 +79,12 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
         if (parameters.containsKey("content") && parameters.get("content").size() > 0) {
             String encodedImageUrl = URLDecoder.decode(parameters.get("content").get(0), StandardCharsets.UTF_8);
             urls = new String(Base64.getDecoder().decode(encodedImageUrl.getBytes())).split(",");
-            mainContent.add(generateComboBoxAndLink(), generateContentPreview(), generateSeparator(), generateTextFieldReason(), generateSubmitButton());
+            mainContent.add(
+                    generateComboBoxAndLink(),
+                    generateContentPreview(),
+                    generateSeparator(),
+                    generateBottomComponents()
+            );
         } else {
             event.rerouteTo(PageNotFoundView.class);
         }
@@ -124,25 +129,36 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
         return hr;
     }
 
+    private Component generateBottomComponents() {
+        VerticalLayout mainLayout = new VerticalLayout();
+        mainLayout.setPadding(false);
+
+        if (getSessionData().isLoggedIn()) {
+            mainLayout.add(
+                    generateTextFieldReason(),
+                    generateSubmitButton()
+            );
+        } else {
+            mainLayout.add(generateNotLoggedInComponents());
+        }
+
+        return mainLayout;
+    }
+
     private Component generateTextFieldReason() {
         reason = new TextField();
         reason.setLabel(getTranslation("report.reason"));
         reason.setWidthFull();
         reason.setMaxWidth("400px");
         reason.setMaxLength(500);
-        reason.setEnabled(getSessionData().isLoggedIn());
         return reason;
     }
 
     private Component generateSubmitButton() {
-        HorizontalLayout mainLayout = new HorizontalLayout();
-        mainLayout.setPadding(false);
-        mainLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-
-        Button button = new Button(getTranslation("report.yes"));
-        button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        button.addClickShortcut(Key.ENTER);
-        button.addClickListener(e -> {
+        Button submitButton = new Button(getTranslation("report.yes"));
+        submitButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        submitButton.addClickShortcut(Key.ENTER);
+        submitButton.addClickListener(e -> {
             if (reason.getValue().replaceAll("\\s", "").length() > 0) {
                 reason.setInvalid(false);
                 try {
@@ -160,15 +176,24 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
                 reason.setInvalid(true);
             }
         });
-        mainLayout.add(button);
 
-        if (!getSessionData().isLoggedIn()) {
-            button.setEnabled(false);
+        return submitButton;
+    }
 
-            Span loginText = new Span(getTranslation("report.notloggedin"));
-            loginText.getStyle().set("color", "var(--lumo-error-color)");
-            mainLayout.add(loginText);
-        }
+    private Component generateNotLoggedInComponents() {
+        HorizontalLayout mainLayout = new HorizontalLayout();
+        mainLayout.setPadding(false);
+        mainLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        mainLayout.getStyle().set("margin-top", "32px");
+
+        Button loginButton = new Button(getTranslation("login"));
+        Anchor loginAnchor = new Anchor(getSessionData().getLoginUrl(), loginButton);
+        mainLayout.add(loginAnchor);
+
+        Span loginText = new Span(getTranslation("report.notloggedin"));
+        loginText.getStyle().set("color", "var(--lumo-error-color)");
+        mainLayout.add(loginText);
+
         return mainLayout;
     }
 
