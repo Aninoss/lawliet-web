@@ -79,6 +79,7 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
         if (parameters.containsKey("content") && parameters.get("content").size() > 0) {
             String encodedImageUrl = URLDecoder.decode(parameters.get("content").get(0), StandardCharsets.UTF_8);
             urls = new String(Base64.getDecoder().decode(encodedImageUrl.getBytes())).split(",");
+            translateUrls();
             mainContent.add(
                     generateComboBoxAndLink(),
                     generateContentPreview(),
@@ -87,6 +88,17 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
             );
         } else {
             event.rerouteTo(PageNotFoundView.class);
+        }
+    }
+
+    private void translateUrls() {
+        for (int i = 0; i < urls.length; i++) {
+            if (!urls[i].startsWith("https://")) {
+                urls[i] = "https://" + urls[i];
+            }
+            urls[i] = urls[i].replace("#", "/images/")
+                    .replace("|", "/data/")
+                    .replace("\\", "/original/");
         }
     }
 
