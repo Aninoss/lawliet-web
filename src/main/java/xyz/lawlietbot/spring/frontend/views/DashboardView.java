@@ -102,7 +102,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         categoryTabs.addSelectedChangeListener(e -> {
             if (categoryTabs.getSelectedIndex() >= 0) {
                 DashboardInitData.Category category = categoryList.get(categoryTabs.getSelectedIndex());
-                updateMainContentCategory(category);
+                updateMainContentCategory(category, true);
                 pushNewUri();
             }
         });
@@ -182,7 +182,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                     }
                 } else {
                     categoryList = Collections.emptyList();
-                    updateMainContentCategory(null);
+                    updateMainContentCategory(null, true);
                     pushNewUri();
                 }
 
@@ -232,7 +232,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         mainLayout.add(layout);
     }
 
-    private void updateMainContentCategory(DashboardInitData.Category category) {
+    private void updateMainContentCategory(DashboardInitData.Category category, boolean createNew) {
         mainLayout.removeAll();
         mainLayout.setClassName(Styles.VISIBLE_LARGE, false);
         tabsLayout.setClassName(Styles.VISIBLE_LARGE, true);
@@ -255,7 +255,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         mainLayout.add(titleLayout);
 
         if (category != null) {
-            mainLayout.add(generateMainWithCategory(pageTitle, category));
+            mainLayout.add(generateMainWithCategory(pageTitle, category, createNew));
         } else {
             pageTitle.setText(getTranslation("dash.invalidserver.title"));
             Text invalidServerText = new Text(getTranslation("dash.invalidserver.desc"));
@@ -288,7 +288,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         }
     }
 
-    private Component generateMainWithCategory(H2 pageTitle, DashboardInitData.Category category) {
+    private Component generateMainWithCategory(H2 pageTitle, DashboardInitData.Category category, boolean createNew) {
         Guild guild = guildComboBox.getValue();
         DiscordUser discordUser = getSessionData().getDiscordUser().get();
 
@@ -299,7 +299,8 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                     category.getId(),
                     guild.getId(),
                     discordUser.getId(),
-                    getLocale()
+                    getLocale(),
+                    createNew
             ).get(5, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             //ignore
@@ -314,7 +315,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                     if (confirmationMessage != null) {
                         Span confirmationMessageSpan = new Span(confirmationMessage);
                         confirmationMessageSpan.getStyle().set("color", "var(--lumo-error-text-color)");
-                        confirmationDialog.open(confirmationMessageSpan, () -> sendAction(category, json), () -> updateMainContentCategory(category));
+                        confirmationDialog.open(confirmationMessageSpan, () -> sendAction(category, json), () -> updateMainContentCategory(category, true));
                     } else {
                         sendAction(category, json);
                     }
@@ -344,7 +345,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                 });
             }
             if (actionResult.getRedraw()) {
-                updateMainContentCategory(category);
+                updateMainContentCategory(category, false);
             }
         } catch (Throwable e) {
             confirmationDialog.open(getTranslation("error"), () -> UI.getCurrent().getPage().reload());

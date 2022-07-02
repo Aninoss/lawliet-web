@@ -214,12 +214,14 @@ public class SendEvent {
         );
     }
 
-    public static CompletableFuture<DashboardCategoryInitData> sendDashboardCategoryInit(String categoryId, long guildId, long userId, Locale locale) {
+    public static CompletableFuture<DashboardCategoryInitData>
+    sendDashboardCategoryInit(String categoryId, long guildId, long userId, Locale locale, boolean createNew) {
         JSONObject json = new JSONObject();
         json.put("category", categoryId);
         json.put("guild_id", guildId);
         json.put("user_id", userId);
         json.put("locale", locale);
+        json.put("create_new", createNew);
 
         return process(
                 "DASH_CAT_INIT",
