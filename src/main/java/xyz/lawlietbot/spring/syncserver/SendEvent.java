@@ -264,7 +264,14 @@ public class SendEvent {
                 json,
                 r -> {
                     if (r.getBoolean("ok")) {
-                        ActionResult actionResult = new ActionResult(r.getBoolean("redraw"));
+                        ActionResult actionResult = new ActionResult();
+                        if (r.getBoolean("redraw")) {
+                            if (r.has("scroll_to_top") && r.getBoolean("scroll_to_top")) {
+                                actionResult = actionResult.withRedrawScrollToTop();
+                            } else {
+                                actionResult = actionResult.withRedraw();
+                            }
+                        }
                         if (r.has("success_message")) {
                             actionResult = actionResult.withSuccessMessage(r.getString("success_message"));
                         }

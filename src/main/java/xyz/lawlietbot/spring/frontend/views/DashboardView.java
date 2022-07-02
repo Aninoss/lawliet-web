@@ -347,6 +347,9 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
             if (actionResult.getRedraw()) {
                 updateMainContentCategory(category, false);
             }
+            if (actionResult.getScrollToTop()) {
+                UI.getCurrent().getPage().executeJs("window.scrollTo(0, 0);");
+            }
         } catch (Throwable e) {
             confirmationDialog.open(getTranslation("error"), () -> UI.getCurrent().getPage().reload());
         }
