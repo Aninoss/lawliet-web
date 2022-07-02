@@ -70,7 +70,7 @@ public class DashboardDurationFieldAdapter extends FlexLayout {
                 checkNumberField(hoursField, 23) &&
                 checkNumberField(minutesField, 59)
         ) {
-            long value = minutesField.getValue().longValue() + hoursField.getValue().longValue() * 60 + daysField.getValue().longValue() * 3600;
+            long value = minutesField.getValue().longValue() + hoursField.getValue().longValue() * 60 + daysField.getValue().longValue() * 1440;
             if (value == 0) {
                 value = 1;
                 minutesField.setValue(1.0);
@@ -118,11 +118,11 @@ public class DashboardDurationFieldAdapter extends FlexLayout {
     }
 
     private int extractValueHours(long value) {
-        return (int) ((value / 60) % 3600);
+        return (int) ((value / 60) % 1440);
     }
 
     private int extractValueDays(long value) {
-        return (int) (value / 3600);
+        return (int) (value / 1440);
     }
 
 }
