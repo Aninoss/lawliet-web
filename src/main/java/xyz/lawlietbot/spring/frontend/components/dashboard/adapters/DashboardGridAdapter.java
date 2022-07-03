@@ -18,7 +18,7 @@ public class DashboardGridAdapter extends FlexLayout {
     private Component generateGrid(DashboardGrid dashboardGrid) {
         Grid<GridRow> grid = new Grid<>(GridRow.class, false);
         grid.setEnabled(dashboardGrid.isEnabled());
-        grid.setHeightByRows(true);
+        grid.setHeightByRows(dashboardGrid.getRows().size() <= 10);
         grid.setItems(dashboardGrid.getRows());
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         String[] header = dashboardGrid.getHeader();
