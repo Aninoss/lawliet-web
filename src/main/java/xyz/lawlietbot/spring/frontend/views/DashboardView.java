@@ -315,7 +315,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                     if (confirmationMessage != null) {
                         Span confirmationMessageSpan = new Span(confirmationMessage);
                         confirmationMessageSpan.getStyle().set("color", "var(--lumo-error-text-color)");
-                        confirmationDialog.open(confirmationMessageSpan, () -> sendAction(category, json), () -> updateMainContentCategory(category, true));
+                        confirmationDialog.open(confirmationMessageSpan, () -> sendAction(category, json), () -> updateMainContentCategory(category, false));
                     } else {
                         sendAction(category, json);
                     }
