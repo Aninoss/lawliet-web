@@ -1,34 +1,16 @@
 package xyz.lawlietbot.spring.syncserver;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import dashboard.ActionResult;
-import dashboard.DashboardComponent;
-import dashboard.component.DashboardComboBox;
-import dashboard.container.DashboardContainer;
-import dashboard.data.DiscordEntity;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONArray;
 import org.json.JSONObject;
-import xyz.lawlietbot.spring.backend.dashboard.DashboardCategoryInitData;
-import xyz.lawlietbot.spring.backend.dashboard.DashboardInitData;
-import xyz.lawlietbot.spring.backend.featurerequests.FRDynamicBean;
-import xyz.lawlietbot.spring.backend.featurerequests.FRPanelType;
-import xyz.lawlietbot.spring.backend.payment.Subscription;
-import xyz.lawlietbot.spring.backend.premium.UserPremium;
-import xyz.lawlietbot.spring.backend.serverstats.ServerStatsBean;
-import xyz.lawlietbot.spring.backend.serverstats.ServerStatsSlot;
-import xyz.lawlietbot.spring.backend.userdata.SessionData;
 
 public class SendEvent {
+
+    private enum ForwardType { ALL_CLUSTERS, ANY_CLUSTER, SPECIFIC_CLUSTER, SPECIFIC_GUILD }
 
     private static final OkHttpClient httpClient = new OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
@@ -36,332 +18,91 @@ public class SendEvent {
             .readTimeout(10, TimeUnit.SECONDS)
             .build();
 
-    private SendEvent() {
+    public static void sendToAllClusters(EventOut eventOut) {
+        sendToAllClusters(eventOut, new JSONObject());
     }
 
-    public static CompletableFuture<JSONObject> sendRequestCommandList() {
-        return process("COMMAND_LIST", new JSONObject(), r -> r);
+    public static void sendToAllClusters(EventOut eventOut, Map<String, Object> requestMap) {
+        JSONObject requestJson = new JSONObject();
+        requestMap.forEach(requestJson::put);
+        sendToAllClusters(eventOut, requestJson);
     }
 
-    public static CompletableFuture<JSONObject> sendRequestFAQList() {
-        return process("FAQ_LIST", new JSONObject(), r -> r);
+    public static void sendToAllClusters(EventOut eventOut, JSONObject requestJson) {
+        requestJson.put("forward_type", ForwardType.ALL_CLUSTERS);
+        requestJson.put("event", eventOut.name());
+        send(EventOut.FORWARD, requestJson);
     }
 
-    public static CompletableFuture<ServerStatsBean> sendRequestServerStats() {
-        return process("SERVER_STATS", new JSONObject(), responseJson -> {
-            JSONArray statsDataJson = responseJson.getJSONArray("data");
-
-            ServerStatsSlot[] slots = new ServerStatsSlot[statsDataJson.length()];
-            for (int i = 0; i < statsDataJson.length(); i++) {
-                JSONObject statsSlotJson = statsDataJson.getJSONObject(i);
-                slots[i] = new ServerStatsSlot(statsSlotJson.getInt("month"), statsSlotJson.getInt("year"), statsSlotJson.getInt("value"));
-            }
-
-            return new ServerStatsBean(
-                    responseJson.isNull("servers") ? null : responseJson.getLong("servers"),
-                    slots
-            );
-        });
+    public static CompletableFuture<JSONObject> sendToAnyCluster(EventOut eventOut) {
+        return sendToAnyCluster(eventOut, new JSONObject());
     }
 
-    public static CompletableFuture<JSONObject> sendTopGG(JSONObject dataJson) {
-        return process("TOPGG", dataJson, r -> r);
+    public static CompletableFuture<JSONObject> sendToAnyCluster(EventOut eventOut, Map<String, Object> requestMap) {
+        JSONObject requestJson = new JSONObject();
+        requestMap.forEach(requestJson::put);
+        return sendToAnyCluster(eventOut, requestJson);
     }
 
-    public static CompletableFuture<JSONObject> sendTopGGAnicord(JSONObject dataJson) {
-        return process("TOPGG_ANICORD", dataJson, r -> r);
+    public static CompletableFuture<JSONObject> sendToAnyCluster(EventOut eventOut, JSONObject requestJson) {
+        requestJson.put("forward_type", ForwardType.ANY_CLUSTER);
+        requestJson.put("event", eventOut.name());
+        return send(EventOut.FORWARD, requestJson);
     }
 
-    public static CompletableFuture<FRDynamicBean> sendRequestFeatureRequestMainData(SessionData sessionData) {
-        JSONObject jsonObject = new JSONObject();
-        if (sessionData.isLoggedIn()) jsonObject.put("user_id", sessionData.getDiscordUser().get().getId());
-        return process("FR_FETCH", jsonObject, responseJson -> {
-            int boostsTotal = responseJson.getInt("boosts_total");
-            int boostsRemaining = responseJson.getInt("boosts_remaining");
-
-            FRDynamicBean frDynamicBean = new FRDynamicBean(boostsRemaining, boostsTotal);
-
-            JSONArray jsonEntriesArray = responseJson.getJSONArray("data");
-            for (int j = 0; j < jsonEntriesArray.length(); j++) {
-                JSONObject jsonEntry = jsonEntriesArray.getJSONObject(j);
-                FRPanelType type = FRPanelType.valueOf(jsonEntry.getString("type"));
-                boolean pub = jsonEntry.getBoolean("public");
-                frDynamicBean.addEntry(
-                        jsonEntry.getInt("id"),
-                        jsonEntry.getString("title"),
-                        jsonEntry.getString("description"),
-                        type == FRPanelType.PENDING && pub ? jsonEntry.getInt("boosts") : null,
-                        type == FRPanelType.PENDING && pub ? jsonEntry.getInt("recent_boosts") : null,
-                        pub,
-                        type,
-                        LocalDate.ofEpochDay(jsonEntry.getLong("date"))
-                );
-            }
-
-            return frDynamicBean;
-        });
+    public static CompletableFuture<JSONObject> sendToCluster(EventOut eventOut, int clusterId) {
+        return sendToCluster(eventOut, new JSONObject(), clusterId);
     }
 
-    public static CompletableFuture<JSONObject> sendBoost(int id, long userId) {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("entry_id", id);
-        jsonObject.put("user_id", userId);
-        return process("FR_BOOST", jsonObject, r -> r);
+    public static CompletableFuture<JSONObject> sendToCluster(EventOut eventOut, Map<String, Object> requestMap, int clusterId) {
+        JSONObject requestJson = new JSONObject();
+        requestMap.forEach(requestJson::put);
+        return sendToCluster(eventOut, requestJson, clusterId);
     }
 
-    public static CompletableFuture<Boolean> sendRequestCanPost(long userId) {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("user_id", userId);
-        return process("FR_CAN_POST", jsonObject, responseJson -> responseJson.getBoolean("success"));
+    public static CompletableFuture<JSONObject> sendToCluster(EventOut eventOut, JSONObject requestJson, int clusterId) {
+        requestJson.put("forward_type", ForwardType.SPECIFIC_CLUSTER);
+        requestJson.put("event", eventOut.name());
+        requestJson.put("cluster_id", clusterId);
+        return send(EventOut.FORWARD, requestJson);
     }
 
-    public static CompletableFuture<JSONObject> sendNewFeatureRequest(long userId, String title, String description, boolean notify) {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("user_id", userId);
-        jsonObject.put("title", title);
-        jsonObject.put("description", description);
-        jsonObject.put("notify", notify);
-        return process("FR_POST", jsonObject, r -> r);
+    public static CompletableFuture<JSONObject> sendToGuild(EventOut eventOut, long guildId) {
+        return sendToGuild(eventOut, new JSONObject(), guildId);
     }
 
-    public static CompletableFuture<JSONObject> sendInvite(String type) {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("type", type);
-        return process("INVITE", jsonObject, r -> r);
+    public static CompletableFuture<JSONObject> sendToGuild(EventOut eventOut, Map<String, Object> requestMap, long guildId) {
+        JSONObject requestJson = new JSONObject();
+        requestMap.forEach(requestJson::put);
+        return sendToGuild(eventOut, requestJson, guildId);
     }
 
-    public static CompletableFuture<UserPremium> sendRequestUserPremium(long userId) {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("user_id", userId);
-        return process("PREMIUM", jsonObject, jsonResponse -> {
-            ArrayList<Long> slots = new ArrayList<>();
-            JSONArray jsonSlots = jsonResponse.getJSONArray("slots");
-            for (int i = 0; i < jsonSlots.length(); i++) {
-                slots.add(jsonSlots.getLong(i));
-            }
-
-            return new UserPremium(userId, slots);
-        });
+    public static CompletableFuture<JSONObject> sendToGuild(EventOut eventOut, JSONObject requestJson, long guildId) {
+        requestJson.put("forward_type", ForwardType.SPECIFIC_GUILD);
+        requestJson.put("event", eventOut.name());
+        requestJson.put("guild_id", guildId);
+        return send(EventOut.FORWARD, requestJson);
     }
 
-    public static CompletableFuture<Boolean> sendModifyPremium(long userId, int slot, long guildId) {
-        JSONObject json = new JSONObject();
-        json.put("user_id", userId);
-        json.put("slot", slot);
-        json.put("guild_id", guildId);
-
-        return process(
-                "PREMIUM_MODIFY",
-                json,
-                r -> r.getBoolean("success")
-        );
+    public static CompletableFuture<JSONObject> send(EventOut eventOut) {
+        return send(eventOut, new JSONObject());
     }
 
-    public static CompletableFuture<Void> sendReport(String url, String reason, String id) {
-        JSONObject json = new JSONObject();
-        json.put("url", url);
-        json.put("text", reason);
-        json.put("ip_hash", id.hashCode());
-
-        return process(
-                "REPORT",
-                json,
-                r -> null
-        );
+    public static CompletableFuture<JSONObject> send(EventOut eventOut, Map<String, Object> requestMap) {
+        JSONObject requestJson = new JSONObject();
+        requestMap.forEach(requestJson::put);
+        return send(eventOut, requestJson);
     }
 
-    public static CompletableFuture<Void> sendStripe(long userId, String title, String desc, int subId, boolean unlocksServer) {
-        JSONObject json = new JSONObject();
-        json.put("user_id", userId);
-        json.put("title", title);
-        json.put("desc", desc);
-        json.put("sub_id", subId);
-        json.put("unlocks_server", unlocksServer);
-
-        return process(
-                "STRIPE",
-                json,
-                r -> null
-        );
-    }
-
-    public static CompletableFuture<DashboardInitData> sendDashboardInit(long guildId, long userId, Locale locale) {
-        JSONObject json = new JSONObject();
-        json.put("guild_id", guildId);
-        json.put("user_id", userId);
-        json.put("locale", locale);
-
-        return process(
-                "DASH_INIT",
-                json,
-                r -> {
-                    if (r.getBoolean("ok")) {
-                        ArrayList<DashboardInitData.Category> categories = new ArrayList<>();
-                        JSONArray titlesJson = r.getJSONArray("titles");
-                        for (int i = 0; i < titlesJson.length(); i++) {
-                            JSONObject data = titlesJson.getJSONObject(i);
-                            DashboardInitData.Category category = new DashboardInitData.Category(
-                                    data.getString("id"),
-                                    data.getString("title")
-                            );
-                            categories.add(category);
-                        }
-                        return new DashboardInitData(categories, r.getBoolean("premium"));
-                    } else {
-                        return null;
-                    }
-                }
-        );
-    }
-
-    public static CompletableFuture<DashboardCategoryInitData>
-    sendDashboardCategoryInit(String categoryId, long guildId, long userId, Locale locale, boolean createNew) {
-        JSONObject json = new JSONObject();
-        json.put("category", categoryId);
-        json.put("guild_id", guildId);
-        json.put("user_id", userId);
-        json.put("locale", locale);
-        json.put("create_new", createNew);
-
-        return process(
-                "DASH_CAT_INIT",
-                json,
-                r -> {
-                    if (r.getBoolean("ok")) {
-                        ArrayList<String> missingBotPermissions = new ArrayList<>();
-                        JSONArray missingBotPermissionsJson = r.getJSONArray("missing_bot_permissions");
-                        for (int i = 0; i < missingBotPermissionsJson.length(); i++) {
-                            missingBotPermissions.add(missingBotPermissionsJson.getString(i));
-                        }
-
-                        ArrayList<String> missingUserPermissions = new ArrayList<>();
-                        JSONArray missingUserPermissionsJson = r.getJSONArray("missing_user_permissions");
-                        for (int i = 0; i < missingUserPermissionsJson.length(); i++) {
-                            missingUserPermissions.add(missingUserPermissionsJson.getString(i));
-                        }
-
-                        DashboardContainer components = null;
-                        if (missingBotPermissions.isEmpty() && missingUserPermissions.isEmpty()) {
-                            components = (DashboardContainer) DashboardComponent.generate(r.getJSONObject("components"));
-                        }
-
-                        return new DashboardCategoryInitData(missingBotPermissions, missingUserPermissions, components, r.getBoolean("premium"));
-                    } else {
-                        return null;
-                    }
-                }
-        );
-    }
-
-    public static CompletableFuture<ActionResult> sendDashboardAction(long guildId, long userId, JSONObject actionJson) {
-        JSONObject json = new JSONObject();
-        json.put("guild_id", guildId);
-        json.put("user_id", userId);
-        json.put("action", actionJson);
-
-        return process(
-                "DASH_ACTION",
-                json,
-                r -> {
-                    if (r.getBoolean("ok")) {
-                        ActionResult actionResult = new ActionResult();
-                        if (r.getBoolean("redraw")) {
-                            if (r.has("scroll_to_top") && r.getBoolean("scroll_to_top")) {
-                                actionResult = actionResult.withRedrawScrollToTop();
-                            } else {
-                                actionResult = actionResult.withRedraw();
-                            }
-                        }
-                        if (r.has("success_message")) {
-                            actionResult = actionResult.withSuccessMessage(r.getString("success_message"));
-                        }
-                        if (r.has("error_message")) {
-                            actionResult = actionResult.withErrorMessage(r.getString("error_message"));
-                        }
-                        return actionResult;
-                    } else {
-                        throw new RuntimeException();
-                    }
-                }
-        );
-    }
-
-    public static CompletableFuture<List<DiscordEntity>> sendDashboardListDiscordEntities(DashboardComboBox.DataType type, long guildId, long userId, int offset, int limit, String filterText) {
-        JSONObject json = new JSONObject();
-        json.put("type", type.name());
-        json.put("guild_id", guildId);
-        json.put("user_id", userId);
-        json.put("offset", offset);
-        json.put("limit", limit);
-        json.put("filter_text", filterText);
-
-        return process(
-                "DASH_LIST_DISCORD_ENTITIES",
-                json,
-                r -> {
-                    ArrayList<DiscordEntity> discordEntities = new ArrayList<>();
-                    JSONArray entitiesJson = r.getJSONArray("entities");
-                    for (int i = 0; i < entitiesJson.length(); i++) {
-                        JSONObject entityJson = entitiesJson.getJSONObject(i);
-                        discordEntities.add(DiscordEntity.fromJson(entityJson));
-                    }
-                    return Collections.unmodifiableList(discordEntities);
-                }
-        );
-    }
-
-    public static CompletableFuture<Long> sendDashboardCountDiscordEntities(DashboardComboBox.DataType type, long guildId, long userId, String filterText) {
-        JSONObject json = new JSONObject();
-        json.put("type", type.name());
-        json.put("user_id", userId);
-        json.put("guild_id", guildId);
-        json.put("filter_text", filterText);
-
-        return process(
-                "DASH_COUNT_DISCORD_ENTITIES",
-                json,
-                r -> r.getLong("count")
-        );
-    }
-
-    public static CompletableFuture<List<Subscription>> sendListPaddleSubscriptions(long userId, int reloadSubId) {
-        JSONObject json = new JSONObject();
-        json.put("user_id", userId);
-        json.put("clear_subscription_cache", false);
-        if (reloadSubId > 0) {
-            json.put("reload_sub_id", reloadSubId);
-        }
-
-        return process(
-                "PADDLE_SUBS",
-                json,
-                r -> {
-                    JSONArray subsJson = r.getJSONArray("subscriptions");
-                    ArrayList<Subscription> subscriptions = new ArrayList<>();
-                    for (int i = 0; i < subsJson.length(); i++) {
-                        JSONObject subJson = subsJson.getJSONObject(i);
-                        subscriptions.add(new Subscription(
-                                subJson.getInt("sub_id"),
-                                subJson.getInt("plan_id"),
-                                subJson.getInt("quantity"),
-                                subJson.getString("total_price"),
-                                subJson.has("next_payment") ? LocalDate.parse(subJson.getString("next_payment")) : null
-                        ));
-                    }
-                    return Collections.unmodifiableList(subscriptions);
-                }
-        );
-    }
-
-    private static <T> CompletableFuture<T> process(String event, JSONObject requestJson, Function<JSONObject, T> function) {
-        String url = "http://" + System.getenv("SYNC_HOST") + ":" + System.getenv("SYNC_PORT") + "/api/" + event;
+    public static CompletableFuture<JSONObject> send(EventOut eventOut, JSONObject requestJson) {
+        String url = "http://" + System.getenv("SYNC_HOST") + ":" + System.getenv("SYNC_PORT") + "/api/" + eventOut.name();
         Request request = new Request.Builder()
                 .url(url)
                 .post(RequestBody.create(requestJson.toString(), MediaType.get("application/json")))
                 .addHeader("Authorization", System.getenv("SYNC_AUTH"))
                 .build();
 
-        CompletableFuture<T> future = new CompletableFuture<>();
+        CompletableFuture<JSONObject> future = new CompletableFuture<>();
         httpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
@@ -370,10 +111,9 @@ public class SendEvent {
 
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) {
-                try {
-                    JSONObject responseJson = new JSONObject(response.body().string());
-                    T t = function.apply(responseJson);
-                    future.complete(t);
+                try (ResponseBody responseBody = response.body()) {
+                    JSONObject responseJson = new JSONObject(responseBody.string());
+                    future.complete(responseJson);
                 } catch (Throwable e) {
                     future.completeExceptionally(e);
                 }

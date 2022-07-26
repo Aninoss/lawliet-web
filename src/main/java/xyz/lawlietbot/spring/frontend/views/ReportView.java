@@ -18,6 +18,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.*;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.frontend.components.PageHeader;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
+import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 @Route(value = "report", layout = MainLayout.class)
@@ -174,8 +176,12 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
             if (reason.getValue().replaceAll("\\s", "").length() > 0) {
                 reason.setInvalid(false);
                 try {
-                    SendEvent.sendReport(urlSelect.getValue(), reason.getValue(), String.valueOf(getSessionData().getDiscordUser().get().getId()))
-                            .get(5, TimeUnit.SECONDS);
+                    JSONObject json = new JSONObject();
+                    json.put("url", urlSelect.getValue());
+                    json.put("text", reason.getValue());
+                    json.put("ip_hash", String.valueOf(getSessionData().getDiscordUser().get().getId()).hashCode());
+                    SendEvent.send(EventOut.REPORT).get(5, TimeUnit.SECONDS);
+
                     CustomNotification.showSuccess(getTranslation("report.success"));
                     UI.getCurrent().navigate(HomeView.class);
                 } catch (InterruptedException | ExecutionException | TimeoutException ex) {

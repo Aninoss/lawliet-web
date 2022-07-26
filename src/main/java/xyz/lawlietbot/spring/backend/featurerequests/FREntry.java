@@ -1,14 +1,14 @@
 package xyz.lawlietbot.spring.backend.featurerequests;
 
-import xyz.lawlietbot.spring.syncserver.SendEvent;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import xyz.lawlietbot.spring.syncserver.EventOut;
+import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 public class FREntry {
 
@@ -66,9 +66,12 @@ public class FREntry {
 
     public boolean boost(long userId) {
         if (boosts != null && recentBoosts != null && frDynamicBean.getBoostsRemaining() > 0) {
-            CompletableFuture<JSONObject> responseJsonFut = SendEvent.sendBoost(getId(), userId);
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("entry_id", getId());
+            jsonObject.put("user_id", userId);
+            CompletableFuture<JSONObject> responseJsonFuture = SendEvent.send(EventOut.FR_BOOST, jsonObject);
             try {
-                if (checkBoost(responseJsonFut.get())) {
+                if (checkBoost(responseJsonFuture.get())) {
                     boosts++;
                     recentBoosts++;
                     return true;

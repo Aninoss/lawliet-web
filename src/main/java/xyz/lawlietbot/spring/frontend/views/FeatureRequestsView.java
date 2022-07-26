@@ -1,5 +1,6 @@
 package xyz.lawlietbot.spring.frontend.views;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -8,9 +9,12 @@ import java.util.concurrent.ExecutionException;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import xyz.lawlietbot.spring.NoLiteAccess;
 import xyz.lawlietbot.spring.backend.featurerequests.FRDynamicBean;
+import xyz.lawlietbot.spring.backend.featurerequests.FRPanelType;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.frontend.components.PageHeader;
@@ -19,6 +23,7 @@ import xyz.lawlietbot.spring.frontend.components.featurerequests.FeatureRequestU
 import xyz.lawlietbot.spring.frontend.components.featurerequests.sort.*;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
+import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 @Route(value = "featurerequests", layout = MainLayout.class)
@@ -41,7 +46,38 @@ public class FeatureRequestsView extends PageLayout implements HasUrlParameter<S
         super(sessionData, uiData);
         getStyle().set("margin-bottom", "48px");
 
-        frDynamicBean = SendEvent.sendRequestFeatureRequestMainData(sessionData).get();
+        JSONObject jsonObject = new JSONObject();
+        if (sessionData.isLoggedIn()) {
+            jsonObject.put("user_id", sessionData.getDiscordUser().get().getId());
+        }
+
+        frDynamicBean = SendEvent.send(EventOut.FR_FETCH)
+                        .thenApply(responseJson -> {
+                            int boostsTotal = responseJson.getInt("boosts_total");
+                            int boostsRemaining = responseJson.getInt("boosts_remaining");
+
+                            FRDynamicBean frDynamicBean = new FRDynamicBean(boostsRemaining, boostsTotal);
+
+                            JSONArray jsonEntriesArray = responseJson.getJSONArray("data");
+                            for (int j = 0; j < jsonEntriesArray.length(); j++) {
+                                JSONObject jsonEntry = jsonEntriesArray.getJSONObject(j);
+                                FRPanelType type = FRPanelType.valueOf(jsonEntry.getString("type"));
+                                boolean pub = jsonEntry.getBoolean("public");
+                                frDynamicBean.addEntry(
+                                        jsonEntry.getInt("id"),
+                                        jsonEntry.getString("title"),
+                                        jsonEntry.getString("description"),
+                                        type == FRPanelType.PENDING && pub ? jsonEntry.getInt("boosts") : null,
+                                        type == FRPanelType.PENDING && pub ? jsonEntry.getInt("recent_boosts") : null,
+                                        pub,
+                                        type,
+                                        LocalDate.ofEpochDay(jsonEntry.getLong("date"))
+                                );
+                            }
+
+                            return frDynamicBean;
+                        }).get();
+
         mainContent.setWidthFull();
         mainContent.setPadding(false);
 
@@ -66,7 +102,8 @@ public class FeatureRequestsView extends PageLayout implements HasUrlParameter<S
 
         if (featureRequestMain != null) mainContent.remove(featureRequestMain);
         featureRequestMain = new FeatureRequestMain(getSessionData(), getUiData(), frDynamicBean, comparators, page,
-                sort, search);
+                sort, search
+        );
         mainContent.add(featureRequestMain);
     }
 

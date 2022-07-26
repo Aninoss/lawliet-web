@@ -1,15 +1,17 @@
 package xyz.lawlietbot.spring.backend.serverstats;
 
-import xyz.lawlietbot.spring.syncserver.SendEvent;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnull;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nonnull;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import xyz.lawlietbot.spring.syncserver.EventOut;
+import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 public class ServerStatsContainer {
 
@@ -31,7 +33,21 @@ public class ServerStatsContainer {
                 @Override
                 public ServerStatsBean load(@Nonnull final Integer n) throws Exception {
                     LOGGER.info("Updating server stats");
-                    return SendEvent.sendRequestServerStats().get();
+                    return SendEvent.send(EventOut.SERVER_STATS)
+                            .thenApply(responseJson -> {
+                                JSONArray statsDataJson = responseJson.getJSONArray("data");
+
+                                ServerStatsSlot[] slots = new ServerStatsSlot[statsDataJson.length()];
+                                for (int i = 0; i < statsDataJson.length(); i++) {
+                                    JSONObject statsSlotJson = statsDataJson.getJSONObject(i);
+                                    slots[i] = new ServerStatsSlot(statsSlotJson.getInt("month"), statsSlotJson.getInt("year"), statsSlotJson.getInt("value"));
+                                }
+
+                                return new ServerStatsBean(
+                                        responseJson.isNull("servers") ? null : responseJson.getLong("servers"),
+                                        slots
+                                );
+                            }).get();
                 }
             });
 

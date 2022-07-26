@@ -1,11 +1,7 @@
 package xyz.lawlietbot.spring.frontend.views;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import bell.oauth.discord.domain.Guild;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
@@ -26,6 +22,9 @@ import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.*;
 import dashboard.ActionResult;
+import dashboard.DashboardComponent;
+import dashboard.container.DashboardContainer;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import xyz.lawlietbot.spring.LoginAccess;
@@ -43,6 +42,7 @@ import xyz.lawlietbot.spring.frontend.components.GuildComboBox;
 import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardComponentConverter;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
+import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 @Route(value = "dashboard", layout = MainLayout.class)
@@ -139,12 +139,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
             if (e.getValue() != null) {
                 long guildId = e.getValue().getId();
                 long userId = getSessionData().getDiscordUser().get().getId();
-                DashboardInitData dashboardInitData;
-                try {
-                    dashboardInitData = SendEvent.sendDashboardInit(guildId, userId, UI.getCurrent().getLocale()).get(5, TimeUnit.SECONDS);
-                } catch (InterruptedException | ExecutionException | TimeoutException ex) {
-                    throw new RuntimeException(ex);
-                }
+                DashboardInitData dashboardInitData = sendDashboardInit(guildId, userId, UI.getCurrent().getLocale());
 
                 if (dashboardInitData != null) {
                     categoryList = dashboardInitData.getCategories();
@@ -293,18 +288,13 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         DiscordUser discordUser = getSessionData().getDiscordUser().get();
 
         pageTitle.setText(category.getTitle());
-        DashboardCategoryInitData data = null;
-        try {
-            data = SendEvent.sendDashboardCategoryInit(
-                    category.getId(),
-                    guild.getId(),
-                    discordUser.getId(),
-                    getLocale(),
-                    createNew
-            ).get(5, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            //ignore
-        }
+        DashboardCategoryInitData data = sendDashboardCategoryInit(
+                category.getId(),
+                guild.getId(),
+                discordUser.getId(),
+                getLocale(),
+                createNew
+        );
 
         if (data != null) {
             updatePremiumUnlocked(data.isPremiumUnlocked());
@@ -332,11 +322,11 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
 
     private void sendAction(DashboardInitData.Category category, JSONObject json) {
         try {
-            ActionResult actionResult = SendEvent.sendDashboardAction(
+            ActionResult actionResult = sendDashboardAction(
                     guildComboBox.getValue().getId(),
                     getSessionData().getDiscordUser().get().getId(),
                     json
-            ).get(5, TimeUnit.SECONDS);
+            );
             if (actionResult.getSuccessMessage() != null) {
                 CustomNotification.showSuccess(actionResult.getSuccessMessage());
             }
@@ -447,6 +437,103 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                         guildComboBox.setValue(guild);
                     });
         }
+    }
+
+    private DashboardInitData sendDashboardInit(long guildId, long userId, Locale locale) {
+        JSONObject json = new JSONObject();
+        json.put("user_id", userId);
+        json.put("locale", locale);
+
+        try {
+            return SendEvent.sendToGuild(EventOut.DASH_INIT, json, guildId)
+                    .thenApply(r -> {
+                        if (r.getBoolean("ok")) {
+                            ArrayList<DashboardInitData.Category> categories = new ArrayList<>();
+                            JSONArray titlesJson = r.getJSONArray("titles");
+                            for (int i = 0; i < titlesJson.length(); i++) {
+                                JSONObject data = titlesJson.getJSONObject(i);
+                                DashboardInitData.Category category = new DashboardInitData.Category(
+                                        data.getString("id"),
+                                        data.getString("title")
+                                );
+                                categories.add(category);
+                            }
+                            return new DashboardInitData(categories, r.getBoolean("premium"));
+                        } else {
+                            return null;
+                        }
+                    }).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private DashboardCategoryInitData sendDashboardCategoryInit(String categoryId, long guildId, long userId, Locale locale, boolean createNew) {
+        JSONObject json = new JSONObject();
+        json.put("category", categoryId);
+        json.put("user_id", userId);
+        json.put("locale", locale);
+        json.put("create_new", createNew);
+
+        try {
+            return SendEvent.sendToGuild(EventOut.DASH_CAT_INIT, json, guildId)
+                    .thenApply(r -> {
+                        if (r.getBoolean("ok")) {
+                            ArrayList<String> missingBotPermissions = new ArrayList<>();
+                            JSONArray missingBotPermissionsJson = r.getJSONArray("missing_bot_permissions");
+                            for (int i = 0; i < missingBotPermissionsJson.length(); i++) {
+                                missingBotPermissions.add(missingBotPermissionsJson.getString(i));
+                            }
+
+                            ArrayList<String> missingUserPermissions = new ArrayList<>();
+                            JSONArray missingUserPermissionsJson = r.getJSONArray("missing_user_permissions");
+                            for (int i = 0; i < missingUserPermissionsJson.length(); i++) {
+                                missingUserPermissions.add(missingUserPermissionsJson.getString(i));
+                            }
+
+                            DashboardContainer components = null;
+                            if (missingBotPermissions.isEmpty() && missingUserPermissions.isEmpty()) {
+                                components = (DashboardContainer) DashboardComponent.generate(r.getJSONObject("components"));
+                            }
+
+                            return new DashboardCategoryInitData(missingBotPermissions, missingUserPermissions, components, r.getBoolean("premium"));
+                        } else {
+                            return null;
+                        }
+                    }).get();
+        } catch (ExecutionException | InterruptedException e) {
+            //Ignore
+            return null;
+        }
+    }
+
+    private ActionResult sendDashboardAction(long guildId, long userId, JSONObject actionJson) throws ExecutionException, InterruptedException {
+        JSONObject json = new JSONObject();
+        json.put("user_id", userId);
+        json.put("action", actionJson);
+
+        return SendEvent.sendToGuild(EventOut.DASH_ACTION, json, guildId)
+                .thenApply(r -> {
+                    if (r.getBoolean("ok")) {
+                        ActionResult actionResult = new ActionResult();
+                        if (r.getBoolean("redraw")) {
+                            if (r.has("scroll_to_top") && r.getBoolean("scroll_to_top")) {
+                                actionResult = actionResult.withRedrawScrollToTop();
+                            } else {
+                                actionResult = actionResult.withRedraw();
+                            }
+                        }
+                        if (r.has("success_message")) {
+                            actionResult = actionResult.withSuccessMessage(r.getString("success_message"));
+                        }
+                        if (r.has("error_message")) {
+                            actionResult = actionResult.withErrorMessage(r.getString("error_message"));
+                        }
+                        return actionResult;
+                    } else {
+                        throw new RuntimeException();
+                    }
+                }).get();
     }
 
 }

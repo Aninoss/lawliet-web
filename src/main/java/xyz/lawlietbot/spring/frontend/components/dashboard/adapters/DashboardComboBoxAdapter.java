@@ -1,6 +1,7 @@
 package xyz.lawlietbot.spring.frontend.components.dashboard.adapters;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -9,7 +10,10 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import dashboard.component.DashboardComboBox;
 import dashboard.data.DiscordEntity;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.vaadin.gatanaso.MultiselectComboBox;
+import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 public class DashboardComboBoxAdapter extends Div {
@@ -92,23 +96,29 @@ public class DashboardComboBoxAdapter extends Div {
 
     private DataProvider<DiscordEntity, String> generateDataProvider(long guildId, long userId, DashboardComboBox dashboardComboBox) {
         return DataProvider.fromFilteringCallbacks(query -> {
-            String filter = query.getFilter().orElse("");
-            return SendEvent.sendDashboardListDiscordEntities(
-                    dashboardComboBox.getDataType(),
-                    guildId,
-                    userId,
-                    query.getOffset(),
-                    query.getLimit(),
-                    filter
-            ).join().stream();
+            JSONObject json = new JSONObject();
+            json.put("type", dashboardComboBox.getDataType());
+            json.put("user_id", userId);
+            json.put("offset", query.getOffset());
+            json.put("limit", query.getLimit());
+            json.put("filter_text", query.getFilter().orElse(""));
+            return SendEvent.sendToGuild(EventOut.DASH_LIST_DISCORD_ENTITIES, json, guildId)
+                    .thenApply(r -> {
+                        ArrayList<DiscordEntity> discordEntities = new ArrayList<>();
+                        JSONArray entitiesJson = r.getJSONArray("entities");
+                        for (int i = 0; i < entitiesJson.length(); i++) {
+                            JSONObject entityJson = entitiesJson.getJSONObject(i);
+                            discordEntities.add(DiscordEntity.fromJson(entityJson));
+                        }
+                        return Collections.unmodifiableList(discordEntities);
+                    }).join().stream();
         }, query -> {
-            String filter = query.getFilter().orElse("");
-            return SendEvent.sendDashboardCountDiscordEntities(
-                    dashboardComboBox.getDataType(),
-                    guildId,
-                    userId,
-                    filter
-            ).join().intValue();
+            JSONObject json = new JSONObject();
+            json.put("type", dashboardComboBox.getDataType());
+            json.put("user_id", userId);
+            json.put("filter_text", query.getFilter().orElse(""));
+            return SendEvent.sendToGuild(EventOut.DASH_COUNT_DISCORD_ENTITIES, json, guildId)
+                    .thenApply(r -> r.getLong("count")).join().intValue();
         });
     }
 

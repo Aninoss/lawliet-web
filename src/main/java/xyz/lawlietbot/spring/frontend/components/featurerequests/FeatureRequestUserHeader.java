@@ -23,7 +23,7 @@ import xyz.lawlietbot.spring.frontend.Styles;
 import xyz.lawlietbot.spring.frontend.components.Card;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.frontend.views.FeatureRequestsNewPostView;
-import xyz.lawlietbot.spring.syncserver.SendEvent;
+import xyz.lawlietbot.spring.syncserver.SyncUtil;
 
 public class FeatureRequestUserHeader extends Card {
 
@@ -79,7 +79,7 @@ public class FeatureRequestUserHeader extends Card {
 
     private void onPostButtonClick() {
         try {
-            if (SendEvent.sendRequestCanPost(sessionData.getDiscordUser().map(DiscordUser::getId).orElse(0L)).get()) {
+            if (SyncUtil.sendRequestCanPost(sessionData.getDiscordUser().map(DiscordUser::getId).orElse(0L)).get()) {
                 UI.getCurrent().navigate(FeatureRequestsNewPostView.class);
             } else {
                 CustomNotification.showError(getTranslation("fr.post.block"));

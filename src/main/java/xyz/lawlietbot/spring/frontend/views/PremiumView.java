@@ -11,7 +11,10 @@ import java.util.concurrent.TimeoutException;
 import bell.oauth.discord.domain.Guild;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
-import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ItemLabelGenerator;
+import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -26,6 +29,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.router.*;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +53,7 @@ import xyz.lawlietbot.spring.frontend.components.*;
 import xyz.lawlietbot.spring.frontend.components.premium.PaddlePopup;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
+import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 @Route(value = "premium", layout = MainLayout.class)
@@ -522,7 +527,15 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
     private boolean modify(int slot, long guildId) {
         try {
             long userId = userPremium.getUserId();
-            boolean success = SendEvent.sendModifyPremium(userId, slot, guildId).get();
+
+            JSONObject json = new JSONObject();
+            json.put("user_id", userId);
+            json.put("slot", slot);
+            json.put("guild_id", guildId);
+
+            boolean success = SendEvent.send(EventOut.PREMIUM_MODIFY, json)
+                    .thenApply(r -> r.getBoolean("success"))
+                    .get();
             if (success) {
                 if (guildId != 0) {
                     CustomNotification.showSuccess(getTranslation("premium.success", getSessionData().getDiscordUser().get().getGuildById(guildId).getName()));
@@ -592,7 +605,17 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
             if (sessionData.getDiscordUser().map(DiscordUser::hasGuilds).orElse(false)) {
                 try {
                     DiscordUser discordUser = sessionData.getDiscordUser().get();
-                    this.userPremium = SendEvent.sendRequestUserPremium(discordUser.getId()).get(5, TimeUnit.SECONDS);
+                    this.userPremium = SendEvent.send(EventOut.PREMIUM, Map.of("user_id", discordUser.getId()))
+                            .thenApply(jsonResponse -> {
+                                ArrayList<Long> slots = new ArrayList<>();
+                                JSONArray jsonSlots = jsonResponse.getJSONArray("slots");
+                                for (int i = 0; i < jsonSlots.length(); i++) {
+                                    slots.add(jsonSlots.getLong(i));
+                                }
+
+                                return new UserPremium(discordUser.getId(), slots);
+                            })
+                            .get(5, TimeUnit.SECONDS);
                     this.availableGuilds = new ArrayList<>(discordUser.getGuilds());
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
                     LOGGER.error("Could not load slots", e);

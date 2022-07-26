@@ -22,7 +22,7 @@ import xyz.lawlietbot.spring.backend.payment.SubDuration;
 import xyz.lawlietbot.spring.backend.payment.SubLevel;
 import xyz.lawlietbot.spring.backend.payment.SubLevelType;
 import xyz.lawlietbot.spring.backend.payment.WebhookNotifier;
-import xyz.lawlietbot.spring.syncserver.SendEvent;
+import xyz.lawlietbot.spring.syncserver.SyncUtil;
 
 public class PaddleManager {
 
@@ -74,7 +74,7 @@ public class PaddleManager {
             JSONObject checkoutJson = PaddleAPI.retrieveCheckout(checkoutId);
             long discordId = passthroughJson.getLong("discord_id");
             UI ui = UICache.get(discordId);
-            SendEvent.sendStripe(
+            SyncUtil.sendStripe(
                     discordId,
                     ui != null ? ui.getTranslation("premium.usermessage.title") : null,
                     ui != null ? ui.getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE) : null,

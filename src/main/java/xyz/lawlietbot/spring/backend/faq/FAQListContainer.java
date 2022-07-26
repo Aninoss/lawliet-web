@@ -1,16 +1,17 @@
 package xyz.lawlietbot.spring.backend.faq;
 
-import xyz.lawlietbot.spring.ExceptionLogger;
-import xyz.lawlietbot.spring.syncserver.SendEvent;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import xyz.lawlietbot.spring.ExceptionLogger;
+import xyz.lawlietbot.spring.syncserver.EventOut;
+import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 public class FAQListContainer {
 
@@ -56,7 +57,7 @@ public class FAQListContainer {
 
     private CompletableFuture<ArrayList<FAQListSlot>> fetch() {
         CompletableFuture<ArrayList<FAQListSlot>> future = new CompletableFuture<>();
-        SendEvent.sendRequestFAQList()
+        SendEvent.sendToAnyCluster(EventOut.FAQ_LIST)
                 .exceptionally(e -> {
                     future.completeExceptionally(e);
                     return null;

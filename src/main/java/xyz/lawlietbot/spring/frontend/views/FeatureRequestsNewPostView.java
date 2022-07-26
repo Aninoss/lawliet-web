@@ -18,6 +18,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RoutePrefix;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,9 @@ import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.frontend.components.PageHeader;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
+import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
+import xyz.lawlietbot.spring.syncserver.SyncUtil;
 
 @Route(value = "new", layout = MainLayout.class)
 @RoutePrefix("featurerequests")
@@ -98,9 +101,14 @@ public class FeatureRequestsNewPostView extends PageLayout {
     private void onSubmit() {
         if (getSessionData().isLoggedIn()) {
             long userId = getSessionData().getDiscordUser().get().getId();
-            if (SendEvent.sendRequestCanPost(userId).join()) {
+            if (SyncUtil.sendRequestCanPost(userId).join()) {
                 try {
-                    SendEvent.sendNewFeatureRequest(userId, newBean.getTitle(newBean), newBean.getDescription(newBean), newBean.getNotify(newBean)).get();
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("user_id", userId);
+                    jsonObject.put("title", newBean.getTitle(newBean));
+                    jsonObject.put("description", newBean.getDescription(newBean));
+                    jsonObject.put("notify", newBean.getNotify(newBean));
+                    SendEvent.send(EventOut.FR_POST, jsonObject).get();
                     CustomNotification.showSuccess(getTranslation("fr.new.success"));
                     exit();
                 } catch (InterruptedException | ExecutionException e) {

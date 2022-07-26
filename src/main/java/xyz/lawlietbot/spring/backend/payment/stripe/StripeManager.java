@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import xyz.lawlietbot.spring.ExternalLinks;
 import xyz.lawlietbot.spring.backend.UICache;
 import xyz.lawlietbot.spring.backend.payment.*;
-import xyz.lawlietbot.spring.syncserver.SendEvent;
+import xyz.lawlietbot.spring.syncserver.SyncUtil;
 
 public class StripeManager {
 
@@ -112,7 +112,7 @@ public class StripeManager {
         long discordId = Long.parseLong(metadata.get("discord_id"));
         UI ui = UICache.get(discordId);
         if (ui != null) {
-            SendEvent.sendStripe(
+            SyncUtil.sendStripe(
                     discordId,
                     ui.getTranslation("premium.usermessage.title"),
                     ui.getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE),

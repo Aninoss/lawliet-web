@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import xyz.lawlietbot.spring.backend.payment.paddle.PaddleManager;
 import xyz.lawlietbot.spring.backend.payment.stripe.StripeManager;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
+import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 public class CustomRequestHandler implements RequestHandler {
@@ -122,7 +123,7 @@ public class CustomRequestHandler implements RequestHandler {
                 if (body.length() > 0) {
                     JSONObject jsonObject = new JSONObject(body);
                     LOGGER.info("UPVOTE | {}", jsonObject.getLong("user"));
-                    JSONObject responseJson = SendEvent.sendTopGG(jsonObject).get(5, TimeUnit.SECONDS);
+                    JSONObject responseJson = SendEvent.send(EventOut.TOPGG, jsonObject).get(5, TimeUnit.SECONDS);
                     if (!responseJson.getBoolean("success")) {
                         LOGGER.error("Error while handling upvote");
                         response.setStatus(500);
@@ -148,7 +149,7 @@ public class CustomRequestHandler implements RequestHandler {
                 if (body.length() > 0) {
                     JSONObject jsonObject = new JSONObject(body);
                     LOGGER.info("UPVOTE ANICORD | {}", jsonObject.getLong("user"));
-                    JSONObject responseJson = SendEvent.sendTopGGAnicord(jsonObject).get(5, TimeUnit.SECONDS);
+                    JSONObject responseJson = SendEvent.send(EventOut.TOPGG_ANICORD, jsonObject).get(5, TimeUnit.SECONDS);
                     if (!responseJson.getBoolean("success")) {
                         LOGGER.error("Error while handling Anicord upvote");
                         response.setStatus(500);
@@ -173,7 +174,8 @@ public class CustomRequestHandler implements RequestHandler {
         if (params.size() > 0) {
             String type = new ArrayList<>(params.keySet()).get(0);
             if (type.length() > 0) {
-                SendEvent.sendInvite(type);
+                SendEvent.send(EventOut.INVITE, Map.of("type", type))
+                        .exceptionally(ExceptionLogger.get());
             }
         }
     }

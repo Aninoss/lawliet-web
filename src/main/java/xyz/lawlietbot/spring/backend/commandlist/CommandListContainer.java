@@ -1,18 +1,18 @@
 package xyz.lawlietbot.spring.backend.commandlist;
 
-import xyz.lawlietbot.spring.ExceptionLogger;
-import xyz.lawlietbot.spring.syncserver.SendEvent;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import xyz.lawlietbot.spring.ExceptionLogger;
+import xyz.lawlietbot.spring.syncserver.EventOut;
+import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 public class CommandListContainer {
 
@@ -71,7 +71,7 @@ public class CommandListContainer {
 
     private CompletableFuture<ArrayList<CommandListCategory>> fetch() {
         CompletableFuture<ArrayList<CommandListCategory>> future = new CompletableFuture<>();
-        SendEvent.sendRequestCommandList()
+        SendEvent.sendToAnyCluster(EventOut.COMMAND_LIST)
                 .exceptionally(e -> {
                     future.completeExceptionally(e);
                     return null;
