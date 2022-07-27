@@ -1,7 +1,7 @@
 package xyz.lawlietbot.spring.backend.userdata;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 import bell.oauth.discord.domain.Guild;
 import bell.oauth.discord.main.OAuthBuilder;
 import bell.oauth.discord.main.Response;
@@ -9,17 +9,25 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.Location;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
+import org.json.JSONException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import xyz.lawlietbot.spring.backend.util.StringUtil;
+import xyz.lawlietbot.spring.syncserver.EventOut;
+import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 @Component
 @VaadinSessionScope
 public class SessionData {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(SessionData.class);
+
     private OAuthBuilder builder;
     private final String id;
     private DiscordUser discordUser = null;
     private String currentTarget = "";
+    private ArrayList<String> errorMessages = new ArrayList<>();
 
     public SessionData() {
         VaadinSession.getCurrent().getSession().setAttribute("session", this);
@@ -41,10 +49,19 @@ public class SessionData {
     public boolean login(String code, String state) {
         if (state.equals(id)) {
             Response response = builder.exchange(code);
-            if (response != Response.ERROR) {
-                List<Guild> guilds = builder.getScopes().contains("guilds") ? builder.getGuilds() : null;
-                discordUser = new DiscordUser(builder.getUser(), guilds);
-                return true;
+            try {
+                if (response != Response.ERROR &&
+                        !SendEvent.sendToAnyCluster(EventOut.USER_CHECK_BANNED, Map.of("user_id", builder.getUser().getId())).get().getBoolean("banned")
+                ) {
+                    List<Guild> guilds = builder.getScopes().contains("guilds") ? builder.getGuilds() : null;
+                    discordUser = new DiscordUser(builder.getUser(), guilds);
+                    return true;
+                } else {
+                    pushErrorMessage("login.error");
+                }
+            } catch (InterruptedException | ExecutionException | JSONException e) {
+                LOGGER.error("Login error", e);
+                pushErrorMessage("login.error");
             }
         }
         return false;
@@ -85,6 +102,16 @@ public class SessionData {
 
     public String getCurrentTarget() {
         return currentTarget;
+    }
+
+    public void pushErrorMessage(String messageKey) {
+        errorMessages.add(messageKey);
+    }
+
+    public List<String> flushErrorMessages() {
+        ArrayList<String> oldErrorMessages = errorMessages;
+        errorMessages = new ArrayList<>();
+        return Collections.unmodifiableList(oldErrorMessages);
     }
 
 }

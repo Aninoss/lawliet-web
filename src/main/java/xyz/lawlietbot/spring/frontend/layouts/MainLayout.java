@@ -25,6 +25,7 @@ import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.frontend.Styles;
 import xyz.lawlietbot.spring.frontend.components.CookieConsent;
+import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.frontend.components.FooterArea;
 import xyz.lawlietbot.spring.frontend.components.header.HeaderComponent;
 import xyz.lawlietbot.spring.frontend.components.header.VerticalMenuBarComponent;
@@ -85,6 +86,8 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
         if (sessionData.isLoggedIn()) {
             uiData.login(sessionData.getDiscordUser().get().getId());
         }
+
+        showNotifications(sessionData);
     }
 
     @Override
@@ -186,6 +189,12 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
             return true;
         }
         return false;
+    }
+
+    private void showNotifications(SessionData sessionData) {
+        for (String messageKey : sessionData.flushErrorMessages()) {
+            CustomNotification.showError(getTranslation(messageKey));
+        }
     }
 
 }
