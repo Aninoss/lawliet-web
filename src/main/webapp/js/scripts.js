@@ -103,3 +103,11 @@ function openPaddle(vendor, planId, quantity, locale, passthrough) {
         frameStyle: 'width:100%; min-width:312px; background-color: transparent; border: none;'
     });
 }
+
+function scrollToElement(elementId) {
+    const element = document.getElementById(elementId);
+    element.scrollIntoView();
+
+    const headerBox = document.querySelector('#header-out');
+    window.scrollBy(0, -headerBox.offsetHeight);
+}

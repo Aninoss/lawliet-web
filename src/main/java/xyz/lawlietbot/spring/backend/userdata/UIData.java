@@ -18,8 +18,6 @@ public class UIData {
         Map<String, String[]> parametersMap = VaadinService.getCurrentRequest().getParameterMap();
         lite = parameterMapIsTrue(parametersMap, "lite");
         noNSFW = parameterMapIsTrue(parametersMap, "nonsfw");
-
-        String referer = VaadinService.getCurrentRequest().getHeader("Referer");
     }
 
     public boolean parameterMapIsTrue(Map<String, String[]> parametersMap, String key) {

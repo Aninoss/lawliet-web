@@ -1,22 +1,23 @@
 package xyz.lawlietbot.spring.frontend.components.commands;
 
-import xyz.lawlietbot.spring.backend.commandlist.CommandListCategory;
-import xyz.lawlietbot.spring.backend.commandlist.CommandListSlot;
-import xyz.lawlietbot.spring.frontend.components.Card;
-import xyz.lawlietbot.spring.frontend.components.LoadingIndicator;
-import xyz.lawlietbot.spring.frontend.Styles;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.accordion.AccordionPanel;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+import xyz.lawlietbot.spring.backend.commandlist.CommandListCategory;
+import xyz.lawlietbot.spring.backend.commandlist.CommandListSlot;
+import xyz.lawlietbot.spring.frontend.Styles;
+import xyz.lawlietbot.spring.frontend.components.Card;
+import xyz.lawlietbot.spring.frontend.components.LoadingIndicator;
 
 public class CommandCategoryLayout extends VerticalLayout {
 
@@ -40,7 +41,7 @@ public class CommandCategoryLayout extends VerticalLayout {
         add(loadingIndicator);
     }
 
-    public void build() {
+    public void build(boolean scrollToElement) {
         if (build) return;
         build = true;
         remove(loadingIndicator);
@@ -98,21 +99,28 @@ public class CommandCategoryLayout extends VerticalLayout {
                     spec.setMinWidth("300px");
                     spec.setWidth((100 / n) + "%");
                     spec.getStyle().set("display", "inline-block")
-                        .set("vertical-align", "top");
+                            .set("vertical-align", "top");
                     specs.add(spec);
                 }
             }
 
-            if (moreInfo)
+            if (moreInfo) {
                 openedContent.add(new Hr(), specs);
+            }
 
             Card commandContent = new Card(openedContent);
             Details component = new Details(titleContent, commandContent);
             component.addThemeVariants(DetailsVariant.REVERSE, DetailsVariant.FILLED);
             component.getElement().getStyle().set("width", "100%");
             component.getElement().setAttribute("class", Styles.FADE_IN_FAST);
-            if (!slot.isNsfw() || showNsfw) add(component);
+            if (!slot.isNsfw() || showNsfw) {
+                add(component);
+            }
             commandFields.put(slot.getTrigger(), component);
+
+            if (scrollToElement) {
+                UI.getCurrent().getPage().executeJs("scrollToElement($0)", "category-panel-" + commandListCategory.getId());
+            }
         }
 
         search(lastSearchTerm, locale, false, false);
@@ -125,11 +133,13 @@ public class CommandCategoryLayout extends VerticalLayout {
         AtomicBoolean exactHit = new AtomicBoolean(false);
 
         if (accordionPanel != null) {
-            for (CommandListSlot slot : commandListCategory.getSlots())
+            for (CommandListSlot slot : commandListCategory.getSlots()) {
                 updateSlot(slot, locale, searchKey, exactHit, found);
+            }
 
-            if (changeAccordionPanel)
+            if (changeAccordionPanel) {
                 updateAccordionPanel(found, exactHit, firstCategory);
+            }
         }
 
         return found.get();
@@ -169,4 +179,5 @@ public class CommandCategoryLayout extends VerticalLayout {
     public String getSummaryText(int n) {
         return commandListCategory.getLangName().get(getLocale()) + " (" + getTranslation("commands.searchresults", n != 1, n) + ")";
     }
+
 }

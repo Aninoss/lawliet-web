@@ -34,6 +34,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import xyz.lawlietbot.spring.ExternalLinks;
 import xyz.lawlietbot.spring.NoLiteAccess;
 import xyz.lawlietbot.spring.backend.Redirector;
 import xyz.lawlietbot.spring.backend.UICache;
@@ -206,10 +207,15 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         content.setWidthFull();
         content.setPadding(false);
         content.getStyle().set("margin-top", "32px");
-        for (String perk : getTranslation("premium.perks." + level.getSubLevelType().name(), StringUtil.numToString(countPremiumCommands())).split("\n")) {
+        String[] perks = getTranslation("premium.perks." + level.getSubLevelType().name(), StringUtil.numToString(countPremiumCommands())).split("\n");
+        for (int i = 0; i < perks.length; i++) {
+            String perk = perks[i];
             Icon icon = VaadinIcon.CHECK_CIRCLE.create();
             icon.addClassName("prop-check");
-            content.add(generateTierPerk(icon, perk));
+            String linkUrl = i == 1 && level.getSubLevelType() == SubLevelType.PRO
+                    ? ExternalLinks.LAWLIET_PREMIUM_COMMANDS
+                    : null;
+            content.add(generateTierPerk(icon, perk, linkUrl));
         }
         if (level.getSubLevelType() == SubLevelType.BASIC) {
             Icon icon = VaadinIcon.CLOSE_CIRCLE.create();
@@ -323,10 +329,22 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
     }
 
     private Component generateTierPerk(Icon icon, String text) {
+        return generateTierPerk(icon, text, null);
+    }
+
+    private Component generateTierPerk(Icon icon, String text, String linkUrl) {
         FlexLayout content = new FlexLayout();
         content.setFlexDirection(FlexLayout.FlexDirection.ROW);
         content.add(icon, new Text(text));
-        return content;
+
+        if (linkUrl != null) {
+            Anchor a = new Anchor(linkUrl, content);
+            a.setWidthFull();
+            a.setTarget("_blank");
+            return a;
+        } else {
+            return content;
+        }
     }
 
     private Component generatePremium() {
