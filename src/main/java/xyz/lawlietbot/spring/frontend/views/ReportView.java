@@ -180,7 +180,7 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
                     json.put("url", urlSelect.getValue());
                     json.put("text", reason.getValue());
                     json.put("ip_hash", String.valueOf(getSessionData().getDiscordUser().get().getId()).hashCode());
-                    SendEvent.send(EventOut.REPORT).get(5, TimeUnit.SECONDS);
+                    SendEvent.send(EventOut.REPORT, json).get(5, TimeUnit.SECONDS);
 
                     CustomNotification.showSuccess(getTranslation("report.success"));
                     UI.getCurrent().navigate(HomeView.class);

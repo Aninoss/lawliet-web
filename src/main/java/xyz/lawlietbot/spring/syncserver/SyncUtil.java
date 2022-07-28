@@ -19,7 +19,7 @@ public class SyncUtil {
         json.put("sub_id", subId);
         json.put("unlocks_server", unlocksServer);
 
-        return SendEvent.send(EventOut.STRIPE)
+        return SendEvent.send(EventOut.STRIPE, json)
                 .thenApply(r -> null);
     }
 
