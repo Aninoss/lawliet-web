@@ -51,7 +51,7 @@ public class FeatureRequestsView extends PageLayout implements HasUrlParameter<S
             jsonObject.put("user_id", sessionData.getDiscordUser().get().getId());
         }
 
-        frDynamicBean = SendEvent.send(EventOut.FR_FETCH)
+        frDynamicBean = SendEvent.send(EventOut.FR_FETCH, jsonObject)
                         .thenApply(responseJson -> {
                             int boostsTotal = responseJson.getInt("boosts_total");
                             int boostsRemaining = responseJson.getInt("boosts_remaining");
