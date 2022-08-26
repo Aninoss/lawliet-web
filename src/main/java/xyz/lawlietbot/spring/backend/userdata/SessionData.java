@@ -57,7 +57,7 @@ public class SessionData {
                     discordUser = new DiscordUser(builder.getUser(), guilds);
                     return true;
                 } else {
-                    pushErrorMessage("login.error");
+                    pushErrorMessage("login.banned");
                 }
             } catch (InterruptedException | ExecutionException | JSONException e) {
                 LOGGER.error("Login error", e);
