@@ -9,6 +9,7 @@ import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import com.vaadin.flow.component.UI;
 import org.apache.commons.lang3.text.WordUtils;
+import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.lawlietbot.spring.ExternalLinks;
@@ -117,7 +118,8 @@ public class StripeManager {
                     ui.getTranslation("premium.usermessage.title"),
                     ui.getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE),
                     0,
-                    false
+                    false,
+                    new JSONArray()
             );
         }
         try {

@@ -2,6 +2,7 @@ package xyz.lawlietbot.spring.frontend.components.premium;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.List;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HtmlContainer;
 import com.vaadin.flow.component.UI;
@@ -13,6 +14,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import xyz.lawlietbot.spring.backend.payment.paddle.PaddleManager;
 import xyz.lawlietbot.spring.backend.payment.SubDuration;
@@ -21,7 +23,7 @@ import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
 
 public class PaddlePopup extends Div {
 
-    public PaddlePopup(SubDuration duration, SubLevel level, DiscordUser discordUser, int quantity) {
+    public PaddlePopup(SubDuration duration, SubLevel level, DiscordUser discordUser, int quantity, List<Long> presetGuildIds) {
         setSizeFull();
         setId("paddle-popup");
         addClassName("fadein-class");
@@ -32,17 +34,24 @@ public class PaddlePopup extends Div {
                 PaddleManager.getPlanId(duration, level),
                 quantity,
                 getLocale().getLanguage(),
-                generatePassthrough(discordUser)
+                generatePassthrough(discordUser, presetGuildIds)
         );
     }
 
-    private String generatePassthrough(DiscordUser discordUser) {
+    private String generatePassthrough(DiscordUser discordUser, List<Long> presetGuildIds) {
         String discordTag = discordUser.getUsername() + "#" + discordUser.getDiscriminator();
 
         JSONObject json = new JSONObject();
         json.put("discord_id", discordUser.getId());
         json.put("discord_tag", Base64.getEncoder().encodeToString(discordTag.getBytes(StandardCharsets.UTF_8)));
         json.put("discord_avatar", discordUser.getUserAvatar());
+
+        JSONArray presetGuildsArray = new JSONArray();
+        for (long presetGuildId : presetGuildIds) {
+            presetGuildsArray.put(presetGuildId);
+        }
+        json.put("preset_guilds", presetGuildsArray);
+
         return json.toString();
     }
 

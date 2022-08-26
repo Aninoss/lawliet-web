@@ -79,7 +79,8 @@ public class PaddleManager {
                     ui != null ? ui.getTranslation("premium.usermessage.title") : null,
                     ui != null ? ui.getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE) : null,
                     subscriptionId,
-                    PaddleManager.getSubLevelType(planId) == SubLevelType.PRO
+                    PaddleManager.getSubLevelType(planId) == SubLevelType.PRO,
+                    passthroughJson.getJSONArray("preset_guilds")
             ).join();
             try {
                 String discordTag = new String(Base64.getDecoder().decode(passthroughJson.getString("discord_tag")));

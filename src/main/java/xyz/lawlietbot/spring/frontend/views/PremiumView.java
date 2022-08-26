@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 import bell.oauth.discord.domain.Guild;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
@@ -233,6 +234,8 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
     }
 
     private Component generateBuyLayout(SubDuration duration, SubLevel level) {
+        boolean loggedIn = getSessionData().isLoggedIn();
+
         VerticalLayout controlLayout = new VerticalLayout();
         controlLayout.setPadding(false);
         controlLayout.setWidthFull();
@@ -245,6 +248,12 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         quantityLayout.setAlignItems(FlexComponent.Alignment.END);
         quantityLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         quantityLayout.getStyle().set("margin-top", "0");
+
+        VerticalLayout preselectGuildsLayout = new VerticalLayout();
+        preselectGuildsLayout.setPadding(false);
+        preselectGuildsLayout.setMaxHeight("350px");
+        preselectGuildsLayout.getStyle().set("margin-bottom", "8px")
+                .set("overflow-y", "auto");
 
         String priceString = SubscriptionUtil.generatePriceString(SubscriptionUtil.getPrice(duration, level));
         Text priceText = new Text(getTranslation("premium.price.BASIC", duration == SubDuration.YEARLY, level.getCurrency().getSymbol(), priceString));
@@ -262,6 +271,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
             quantity.setValue((double) value);
             String totalPriceString = SubscriptionUtil.generatePriceString(SubscriptionUtil.getPrice(duration, level) * value);
             priceText.setText(getTranslation("premium.price.BASIC", duration == SubDuration.YEARLY, level.getCurrency().getSymbol(), totalPriceString));
+            updatePreselectGuildsLayout(preselectGuildsLayout, value);
         });
 
         Button buyButton = new Button(getTranslation("premium.buy"));
@@ -269,7 +279,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         buyButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         buyButton.setHeight("43px");
         buyButton.getStyle().set("margin-bottom", "-4px");
-        if (!getSessionData().isLoggedIn()) {
+        if (!loggedIn) {
             buyButton.setText(getTranslation("login"));
         }
         buyButton.addClickListener(e -> {
@@ -277,7 +287,13 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
             if (discordUser != null) {
                 try {
                     int value = extractValueFromQuantity(quantity.getValue());
-                    PaddlePopup paddlePopup = new PaddlePopup(duration, level, discordUser, value);
+                    List<Long> presetGuildIds = preselectGuildsLayout.getChildren()
+                            .map(c -> (GuildComboBox) c)
+                            .filter(g -> g.getValue() != null)
+                            .map(g -> g.getValue().getId())
+                            .collect(Collectors.toList());
+
+                    PaddlePopup paddlePopup = new PaddlePopup(duration, level, discordUser, value, presetGuildIds);
                     add(paddlePopup);
                     UICache.put(discordUser.getId(), UI.getCurrent());
                 } catch (Exception ex) {
@@ -290,19 +306,15 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         });
 
         quantityLayout.add(quantity, priceText);
-        if (level.getSubLevelType() == SubLevelType.PRO) {
-            controlLayout.add(quantityLayout);
+        if (level.getSubLevelType() == SubLevelType.PRO && loggedIn) {
+            updatePreselectGuildsLayout(preselectGuildsLayout, 1);
+            controlLayout.add(quantityLayout, preselectGuildsLayout, generateButtonSeparator());
         }
         controlLayout.add(buyButton);
-        if (getSessionData().isLoggedIn()) {
-            Span manageSubscriptions = new Span(getTranslation("premium.managesubs"));
-            manageSubscriptions.setWidthFull();
-            manageSubscriptions.getStyle().set("text-align", "center")
-                    .set("text-decoration", "underline")
-                    .set("margin-bottom", "-8px")
-                    .set("cursor", "pointer");
-            manageSubscriptions.addClickListener(e -> UI.getCurrent().navigate(ManageSubscriptionsView.class));
-            controlLayout.add(manageSubscriptions);
+        if (loggedIn) {
+            Span manageSubscriptionLink = generateManageSubscriptionsLink();
+            manageSubscriptionLink.setWidthFull();
+            controlLayout.add(manageSubscriptionLink);
         } else {
             Span notLoggedIn = new Span(getTranslation("premium.notloggedin"));
             notLoggedIn.getStyle().set("color", "var(--lumo-error-text-color)")
@@ -310,6 +322,30 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
             controlLayout.add(notLoggedIn);
         }
         return controlLayout;
+    }
+
+    private Span generateManageSubscriptionsLink() {
+        Span manageSubscriptions = new Span(getTranslation("premium.managesubs"));
+        manageSubscriptions.getStyle().set("text-align", "center")
+                .set("text-decoration", "underline")
+                .set("margin-bottom", "-8px")
+                .set("cursor", "pointer");
+        manageSubscriptions.addClickListener(e -> UI.getCurrent().navigate(ManageSubscriptionsView.class));
+        return manageSubscriptions;
+    }
+
+    private void updatePreselectGuildsLayout(VerticalLayout layout, int value) {
+        layout.removeAll();
+        for (int i = 0; i < value; i++) {
+            GuildComboBox guildComboBox = new GuildComboBox();
+            guildComboBox.setItems(getSessionData().getDiscordUser().get().getGuilds());
+            guildComboBox.setWidthFull();
+            guildComboBox.setLabel(getTranslation("premium.preselect.label", StringUtil.numToString(i + 1)));
+            guildComboBox.setPlaceholder(getTranslation("premium.preselect.placeholder"));
+            guildComboBox.setClearButtonVisible(true);
+            guildComboBox.getStyle().set("margin-top", "0");
+            layout.add(guildComboBox);
+        }
     }
 
     private int extractValueFromQuantity(Double value) {
@@ -367,6 +403,9 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
             } else {
                 premiumContent.add(generateNoPremiumCard(getTranslation("premium.slots.noslots"), false));
             }
+            Span manageSubscriptionLink = generateManageSubscriptionsLink();
+            manageSubscriptionLink.getStyle().set("margin-top", "24px");
+            premiumContent.add(manageSubscriptionLink);
         } else {
             premiumContent.add(generateNoPremiumCard(getTranslation("logout.status"), true));
         }
