@@ -36,9 +36,8 @@ public class SessionData {
     }
 
     private void setData() {
-        String url = "https://" + System.getenv("DOMAIN") + "/discordlogin";
         builder = new OAuthBuilder(System.getenv("BOT_CLIENT_ID"), System.getenv("BOT_CLIENT_SECRET"))
-                .setRedirectURI(url);
+                .setRedirectURI(System.getenv("URL") + "discordlogin");
     }
 
     public String getLoginUrl() {
@@ -50,7 +49,7 @@ public class SessionData {
         if (state.equals(id)) {
             Response response = builder.exchange(code);
             try {
-                if (response != Response.ERROR &&
+                if (response == Response.OK &&
                         !SendEvent.sendToAnyCluster(EventOut.USER_CHECK_BANNED, Map.of("user_id", builder.getUser().getId())).get().getBoolean("banned")
                 ) {
                     List<Guild> guilds = builder.getScopes().contains("guilds") ? builder.getGuilds() : null;
