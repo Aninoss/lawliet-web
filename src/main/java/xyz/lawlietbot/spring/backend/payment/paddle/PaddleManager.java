@@ -12,6 +12,7 @@ import com.google.common.cache.LoadingCache;
 import com.jamiussiam.paddle.verifier.Verifier;
 import com.vaadin.flow.component.UI;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +81,7 @@ public class PaddleManager {
                     ui != null ? ui.getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE) : null,
                     subscriptionId,
                     PaddleManager.getSubLevelType(planId) == SubLevelType.PRO,
-                    passthroughJson.getJSONArray("preset_guilds")
+                    passthroughJson.has("preset_guilds") ? passthroughJson.getJSONArray("preset_guilds") : new JSONArray()
             ).join();
             try {
                 String discordTag = new String(Base64.getDecoder().decode(passthroughJson.getString("discord_tag")));
