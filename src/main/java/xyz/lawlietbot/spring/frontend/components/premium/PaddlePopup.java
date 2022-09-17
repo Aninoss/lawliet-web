@@ -16,9 +16,9 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import xyz.lawlietbot.spring.backend.payment.SubLevel;
 import xyz.lawlietbot.spring.backend.payment.paddle.PaddleManager;
 import xyz.lawlietbot.spring.backend.payment.SubDuration;
-import xyz.lawlietbot.spring.backend.payment.SubLevel;
 import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
 
 public class PaddlePopup extends Div {

@@ -45,7 +45,7 @@ public class StripeManager {
                 .findFirst();
     }
 
-    public static String generateCheckoutSession(SubDuration duration, SubLevel level, long discordId, String discordTag, String discordAvatar, int quantity) throws StripeException {
+    public static String generateCheckoutSession(SubDuration duration, SubLevel level, SubCurrency currency, long discordId, String discordTag, String discordAvatar, int quantity) throws StripeException {
         String returnUrl = ExternalLinks.LAWLIET_PREMIUM;
         SessionCreateParams.Builder paramsBuilder = new SessionCreateParams.Builder()
                 .setSuccessUrl(returnUrl + "?session_id={CHECKOUT_SESSION_ID}")
@@ -53,20 +53,20 @@ public class StripeManager {
                 .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
                 .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                 .putMetadata("discord_id", String.valueOf(discordId))
-                .putMetadata("unlock_servers", String.valueOf(level.getSubLevelType() == SubLevelType.PRO))
+                .putMetadata("unlock_servers", String.valueOf(level == SubLevel.PRO))
                 .putMetadata("quantity", String.valueOf(quantity))
-                .putMetadata("tier", WordUtils.capitalizeFully(level.getSubLevelType().name() + " " + duration.name()))
+                .putMetadata("tier", WordUtils.capitalizeFully(level.name() + " " + duration.name()))
                 .putMetadata("discord_tag", discordTag)
                 .putMetadata("discord_avatar", discordAvatar)
                 .setAutomaticTax(SessionCreateParams.AutomaticTax.builder().setEnabled(true).build())
                 .setAllowPromotionCodes(duration == SubDuration.MONTHLY)
                 .addLineItem(new SessionCreateParams.LineItem.Builder()
                         .setQuantity((long) quantity)
-                        .setPrice(StripeManager.getPriceId(duration, level))
+                        .setPrice(StripeManager.getPriceId(duration, level, currency))
                         .build()
                 );
 
-        Optional<Customer> customerOpt = StripeManager.retrieveCustomer(discordId, level.getCurrency());
+        Optional<Customer> customerOpt = StripeManager.retrieveCustomer(discordId, currency);
         if (customerOpt.isPresent()) {
             paramsBuilder = paramsBuilder.setCustomer(customerOpt.get().getId());
         } else {
@@ -76,7 +76,7 @@ public class StripeManager {
             }
         }
 
-        if (level.getCurrency() == SubCurrency.EUR) {
+        if (currency == SubCurrency.EUR) {
             paramsBuilder = paramsBuilder.addPaymentMethodType(SessionCreateParams.PaymentMethodType.SEPA_DEBIT);
         }
 
@@ -136,48 +136,49 @@ public class StripeManager {
         }
     }
 
-    public static String getPriceId(SubDuration duration, SubLevel level) {
+    public static String getPriceId(SubDuration duration, SubLevel level, SubCurrency currency) {
+        String levelCurrency = level.name() + "_" + currency.name();
         if (duration == SubDuration.MONTHLY) {
-            switch (level) {
-                case BASIC_USD:
+            switch (levelCurrency) {
+                case "BASIC_USD":
                     return "price_1JwSZ4AXVG0I7dQKW6lVBISh";
 
-                case BASIC_EUR:
+                case "BASIC_EUR":
                     return "price_1JwSZ4AXVG0I7dQKrVfXIvFj";
 
-                case BASIC_GBP:
+                case "BASIC_GBP":
                     return "price_1JwSZ4AXVG0I7dQKska73IYA";
 
-                case PRO_USD:
+                case "PRO_USD":
                     return "price_1JwScJAXVG0I7dQKpRvKueM9";
 
-                case PRO_EUR:
+                case "PRO_EUR":
                     return "price_1JwScJAXVG0I7dQKQVIKFHAY";
 
-                case PRO_GBP:
+                case "PRO_GBP":
                     return "price_1JwScJAXVG0I7dQKQHBoWu9r";
 
                 default:
                     return null;
             }
         } else {
-            switch (level) {
-                case BASIC_USD:
+            switch (levelCurrency) {
+                case "BASIC_USD":
                     return "price_1JwSZ4AXVG0I7dQKEPWBiV4e";
 
-                case BASIC_EUR:
+                case "BASIC_EUR":
                     return "price_1JwSZ4AXVG0I7dQKrNvMDgCT";
 
-                case BASIC_GBP:
+                case "BASIC_GBP":
                     return "price_1JwSZ4AXVG0I7dQKYS4FaRB1";
 
-                case PRO_USD:
+                case "PRO_USD":
                     return "price_1JwScJAXVG0I7dQKqKFwrsEu";
 
-                case PRO_EUR:
+                case "PRO_EUR":
                     return "price_1JwScJAXVG0I7dQKs4SOBgoC";
 
-                case PRO_GBP:
+                case "PRO_GBP":
                     return "price_1JwScJAXVG0I7dQK7Nk6j3g5";
 
                 default:

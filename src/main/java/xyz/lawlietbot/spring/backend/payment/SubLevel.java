@@ -1,47 +1,26 @@
 package xyz.lawlietbot.spring.backend.payment;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 public enum SubLevel {
 
-    BASIC_USD(SubLevelType.BASIC, SubCurrency.USD, 300),
-    PRO_USD(SubLevelType.PRO, SubCurrency.USD, 500),
+    BASIC(Map.of(SubCurrency.USD, 300, SubCurrency.EUR, 300, SubCurrency.GBP, 250), false),
+    PRO(Map.of(SubCurrency.USD, 500, SubCurrency.EUR, 450, SubCurrency.GBP, 400), true);
 
-    BASIC_EUR(SubLevelType.BASIC, SubCurrency.EUR, 300),
-    PRO_EUR(SubLevelType.PRO, SubCurrency.EUR, 450),
+    private final boolean recommended;
+    private final Map<SubCurrency, Integer> priceMap;
 
-    BASIC_GBP(SubLevelType.BASIC, SubCurrency.GBP, 250),
-    PRO_GBP(SubLevelType.PRO, SubCurrency.GBP, 400);
-
-
-    private final SubLevelType subLevelType;
-    private final SubCurrency currency;
-    private final int price;
-
-    SubLevel(SubLevelType subLevelType, SubCurrency currency, int price) {
-        this.subLevelType = subLevelType;
-        this.currency = currency;
-        this.price = price;
+    SubLevel(Map<SubCurrency, Integer> priceMap, boolean recommended) {
+        this.priceMap = priceMap;
+        this.recommended = recommended;
     }
 
-    public SubLevelType getSubLevelType() {
-        return subLevelType;
+    public int getPrice(SubCurrency currency) {
+        return priceMap.get(currency);
     }
 
-    public SubCurrency getCurrency() {
-        return currency;
-    }
-
-    public int getPrice() {
-        return price;
-    }
-
-    public static List<SubLevel> getSubLevelsOfCurrency(SubCurrency currency) {
-        return Arrays.stream(SubLevel.values())
-                .filter(subLevel -> subLevel.getCurrency() == currency)
-                .collect(Collectors.toList());
+    public boolean isRecommended() {
+        return recommended;
     }
 
 }

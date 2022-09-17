@@ -21,7 +21,6 @@ import xyz.lawlietbot.spring.backend.FileString;
 import xyz.lawlietbot.spring.backend.UICache;
 import xyz.lawlietbot.spring.backend.payment.SubDuration;
 import xyz.lawlietbot.spring.backend.payment.SubLevel;
-import xyz.lawlietbot.spring.backend.payment.SubLevelType;
 import xyz.lawlietbot.spring.backend.payment.WebhookNotifier;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
@@ -91,7 +90,7 @@ public class PaddleManager {
             json.put("title", ui != null ? ui.getTranslation("premium.usermessage.title") : null);
             json.put("desc",  ui != null ? ui.getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE) : null);
             json.put("sub_id", subscriptionId);
-            json.put("unlocks_server", PaddleManager.getSubLevelType(planId) == SubLevelType.PRO);
+            json.put("unlocks_server", PaddleManager.getSubLevelType(planId) == SubLevel.PRO);
             json.put("preset_guilds", passthroughJson.has("preset_guilds") ? passthroughJson.getJSONArray("preset_guilds") : new JSONArray());
             json.put("plan_id", planId);
             json.put("quantity", quantity);
@@ -125,7 +124,7 @@ public class PaddleManager {
 
     public static int getPlanId(SubDuration duration, SubLevel level) {
         if (duration == SubDuration.MONTHLY) {
-            switch (level.getSubLevelType()) {
+            switch (level) {
                 case BASIC:
                     return 746336;
 
@@ -136,7 +135,7 @@ public class PaddleManager {
                     return 0;
             }
         } else {
-            switch (level.getSubLevelType()) {
+            switch (level) {
                 case BASIC:
                     return 746337;
 
@@ -149,15 +148,15 @@ public class PaddleManager {
         }
     }
 
-    public static SubLevelType getSubLevelType(int planId) {
+    public static SubLevel getSubLevelType(int planId) {
         switch (planId) {
             case 746336:
             case 746337:
-                return SubLevelType.BASIC;
+                return SubLevel.BASIC;
 
             case 746338:
             case 746340:
-                return SubLevelType.PRO;
+                return SubLevel.PRO;
 
             default:
                 return null;
