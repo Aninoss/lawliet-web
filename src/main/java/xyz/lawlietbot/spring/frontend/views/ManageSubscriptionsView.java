@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import xyz.lawlietbot.spring.LoginAccess;
 import xyz.lawlietbot.spring.NoLiteAccess;
+import xyz.lawlietbot.spring.backend.Redirector;
 import xyz.lawlietbot.spring.backend.payment.Subscription;
 import xyz.lawlietbot.spring.backend.payment.paddle.PaddleAPI;
 import xyz.lawlietbot.spring.backend.payment.paddle.PaddleManager;
@@ -105,7 +106,8 @@ public class ManageSubscriptionsView extends PageLayout {
                                 subJson.getInt("plan_id"),
                                 subJson.getInt("quantity"),
                                 subJson.getString("total_price"),
-                                subJson.has("next_payment") ? LocalDate.parse(subJson.getString("next_payment")) : null
+                                subJson.has("next_payment") ? LocalDate.parse(subJson.getString("next_payment")) : null,
+                                subJson.getString("update_url")
                         ));
                     }
                     return Collections.unmodifiableList(subscriptions);
@@ -132,7 +134,7 @@ public class ManageSubscriptionsView extends PageLayout {
             grid.addColumn(Subscription::getNextPayment)
                     .setHeader(getTranslation("manage.grid.header.nextpayment"))
                     .setAutoWidth(true);
-            grid.addComponentColumn(sub -> generateActionComponent(sub.getSubId(), sub.isActive(), user, sessionUrl))
+            grid.addComponentColumn(sub -> generateActionComponent(sub, user, sessionUrl))
                     .setAutoWidth(true);
             return grid;
         } else if (sessionUrl == null) {
@@ -145,10 +147,11 @@ public class ManageSubscriptionsView extends PageLayout {
         }
     }
 
-    private Component generateActionComponent(int subId, boolean active, DiscordUser user, String sessionUrl) {
+    private Component generateActionComponent(Subscription sub, DiscordUser user, String sessionUrl) {
         List<String> actionList = List.of(
-                active ? "pause" : "resume",
-                "cancel"
+                sub.isActive() ? "pause" : "resume",
+                "cancel",
+                "payment_details"
         );
 
         Select<String> actionSelect = new Select<>();
@@ -159,42 +162,46 @@ public class ManageSubscriptionsView extends PageLayout {
         actionSelect.addValueChangeListener(e -> {
             String action = e.getValue();
             if (action != null) {
-                Span outerSpan = new Span(getTranslation("manage.grid.action.dialog." + action));
-                outerSpan.setWidthFull();
-                outerSpan.getStyle().set("color", "black");
-                if (action.equals("cancel")) {
-                    Span innerSpan = new Span(" " + getTranslation("manage.grid.action.dialog.cancel.warning"));
-                    innerSpan.getStyle().set("color", "var(--lumo-error-text-color)");
-                    outerSpan.add(innerSpan);
-                }
+                if (action.equals("payment_details")) {
+                    new Redirector().redirect(sub.getUpdateUrl());
+                } else {
+                    Span outerSpan = new Span(getTranslation("manage.grid.action.dialog." + action));
+                    outerSpan.setWidthFull();
+                    outerSpan.getStyle().set("color", "black");
+                    if (action.equals("cancel")) {
+                        Span innerSpan = new Span(" " + getTranslation("manage.grid.action.dialog.cancel.warning"));
+                        innerSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+                        outerSpan.add(innerSpan);
+                    }
 
-                confirmationDialog.open(outerSpan, () -> {
-                    boolean success = false;
-                    try {
-                        switch (action) {
-                            case "pause":
-                                success = PaddleAPI.subscriptionSetPaused(subId, true);
-                                break;
+                    confirmationDialog.open(outerSpan, () -> {
+                        boolean success = false;
+                        try {
+                            switch (action) {
+                                case "pause":
+                                    success = PaddleAPI.subscriptionSetPaused(sub.getSubId(), true);
+                                    break;
 
-                            case "resume":
-                                success = PaddleAPI.subscriptionSetPaused(subId, false);
-                                break;
+                                case "resume":
+                                    success = PaddleAPI.subscriptionSetPaused(sub.getSubId(), false);
+                                    break;
 
-                            case "cancel":
-                                success = PaddleAPI.subscriptionCancel(subId);
-                                break;
+                                case "cancel":
+                                    success = PaddleAPI.subscriptionCancel(sub.getSubId());
+                                    break;
 
-                            default:
+                                default:
+                            }
+                        } catch (IOException ioException) {
+                            LOGGER.error("Exception on sub update", ioException);
                         }
-                    } catch (IOException ioException) {
-                        LOGGER.error("Exception on sub update", ioException);
-                    }
-                    if (success) {
-                        updateMainContent(user, sessionUrl, subId);
-                    } else {
-                        CustomNotification.showError(getTranslation("error"));
-                    }
-                }, () -> actionSelect.setValue(null));
+                        if (success) {
+                            updateMainContent(user, sessionUrl, sub.getSubId());
+                        } else {
+                            CustomNotification.showError(getTranslation("error"));
+                        }
+                    }, () -> actionSelect.setValue(null));
+                }
             }
         });
 

@@ -9,13 +9,15 @@ public class Subscription {
     private final int quantity;
     private final String price;
     private final LocalDate nextPayment;
+    private final String updateUrl;
 
-    public Subscription(int subId, int planId, int quantity, String price, LocalDate nextPayment) {
+    public Subscription(int subId, int planId, int quantity, String price, LocalDate nextPayment, String updateUrl) {
         this.subId = subId;
         this.planId = planId;
         this.quantity = quantity;
         this.price = price;
         this.nextPayment = nextPayment;
+        this.updateUrl = updateUrl;
     }
 
     public int getSubId() {
@@ -40,6 +42,10 @@ public class Subscription {
 
     public LocalDate getNextPayment() {
         return nextPayment;
+    }
+
+    public String getUpdateUrl() {
+        return updateUrl;
     }
 
 }
