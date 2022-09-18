@@ -50,7 +50,7 @@ public class SessionData {
             Response response = builder.exchange(code);
             try {
                 if (response == Response.OK &&
-                        !SendEvent.sendToAnyCluster(EventOut.USER_CHECK_BANNED, Map.of("user_id", builder.getUser().getId())).get().getBoolean("banned")
+                        (!Boolean.parseBoolean(System.getenv("CHECK_LOGIN")) || !SendEvent.sendToAnyCluster(EventOut.USER_CHECK_BANNED, Map.of("user_id", builder.getUser().getId())).get().getBoolean("banned"))
                 ) {
                     List<Guild> guilds = builder.getScopes().contains("guilds") ? builder.getGuilds() : null;
                     discordUser = new DiscordUser(builder.getUser(), guilds);

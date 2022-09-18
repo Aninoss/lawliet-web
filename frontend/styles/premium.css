@@ -87,15 +87,16 @@
     border-radius: 8px;
     border-style: solid;
     border-width: 2px;
-    border-color: rgb(var(--warning-color-rgb));
-    background-color: rgba(var(--warning-color-rgb), 0.1);
-    margin-bottom: 4px;
+    border-color: var(--lumo-primary-color);
+    background-color: var(--lumo-secondary);
+    margin-top: 0;
+    margin-bottom: 8px;
+    padding: 12px;
 }
 
 #notification-icon {
-    color: rgb(var(--warning-color-rgb));
+    color: var(--lumo-primary-color);
     min-width: 1.5em;
-    margin-top: 8px;
 }
 
 @keyframes background-fadein {

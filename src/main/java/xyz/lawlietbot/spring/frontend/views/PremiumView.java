@@ -82,6 +82,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
     private Text proBuyPriceText;
     private final Map<SubLevel, Text> priceTextMap = new HashMap<>();
     private VerticalLayout preselectGuildsLayout;
+    private HorizontalLayout yearlySuggestionField;
 
     public PremiumView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         super(sessionData, uiData);
@@ -102,7 +103,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         premiumContent.addClassName(Styles.APP_WIDTH);
         premiumContent.getStyle().set("margin-bottom", "48px");
 
-        premiumContent.add(generateTiersTitle(), generateTiersSubtitle(), generateSeparator(), generateTiersTiers());
+        premiumContent.add(generateTiersTitle(), generateTiersSubtitle(), generateYearlySuggestionField(), generateSeparator(), generateTiersTiers());
         return premiumContent;
     }
 
@@ -123,6 +124,35 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         span.setWidthFull();
         span.getStyle().set("margin-bottom", "16px");
         return span;
+    }
+
+    private Component generateYearlySuggestionField() {
+        yearlySuggestionField = new HorizontalLayout();
+        yearlySuggestionField.setPadding(false);
+        yearlySuggestionField.setId("notification-field");
+
+        Icon icon = VaadinIcon.INFO_CIRCLE_O.create();
+        icon.setId("notification-icon");
+        yearlySuggestionField.add(icon);
+
+        VerticalLayout content = new VerticalLayout();
+        content.setPadding(false);
+
+        Span text = new Span(getTranslation("premium.suggestyearly.text"));
+        content.add(text);
+
+        Button switchButton = new Button(getTranslation("premium.suggestyearly.button"));
+        switchButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        switchButton.getStyle().set("margin-top", "8px");
+        switchButton.addClickListener(e -> durationSelect.setValue(SubDuration.YEARLY));
+        content.add(switchButton);
+
+        yearlySuggestionField.add(content);
+        if (!getSessionData().isLoggedIn()) {
+            yearlySuggestionField.getStyle().set("display", "none");
+        }
+
+        return yearlySuggestionField;
     }
 
     private Component generateSeparator() {
@@ -155,7 +185,12 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         durationSelect.setItemLabelGenerator((ItemLabelGenerator<SubDuration>) duration -> getTranslation("premium.duration." + duration.name()));
         durationSelect.setItems(SubDuration.values());
         durationSelect.setValue(SubDuration.MONTHLY);
-        durationSelect.addValueChangeListener(e -> refreshPremiumTiers());
+        durationSelect.addValueChangeListener(e -> {
+            if (e.getValue() == SubDuration.YEARLY) {
+                yearlySuggestionField.getStyle().set("display", "none");
+            }
+            refreshPremiumTiers();
+        });
         durationSelect.setMaxWidth("150px");
         content.add(durationSelect);
 
