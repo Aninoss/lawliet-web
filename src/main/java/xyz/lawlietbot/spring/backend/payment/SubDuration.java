@@ -5,7 +5,7 @@ import com.stripe.param.checkout.SessionCreateParams;
 public enum SubDuration {
 
     MONTHLY(SessionCreateParams.LineItem.PriceData.Recurring.Interval.MONTH, 1),
-    YEARLY(SessionCreateParams.LineItem.PriceData.Recurring.Interval.YEAR, 8);
+    YEARLY(SessionCreateParams.LineItem.PriceData.Recurring.Interval.YEAR, 9);
 
 
     private final SessionCreateParams.LineItem.PriceData.Recurring.Interval interval;
