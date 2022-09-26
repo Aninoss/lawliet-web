@@ -77,7 +77,7 @@ public class PaddleManager {
             String state = parameterMap.get("status")[0];
             String currency = parameterMap.get("currency")[0];
             double unitPrice = Double.parseDouble(parameterMap.get("unit_price")[0]);
-            String totalPrice = String.format("%s >%.02f", currency, quantity * unitPrice);
+            String totalPrice = String.format("%s ~%.02f", currency, quantity * unitPrice);
             String nextPayment = parameterMap.get("next_bill_date")[0];
             String updateUrl = parameterMap.get("update_url")[0];
 
