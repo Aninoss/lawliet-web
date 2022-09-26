@@ -70,18 +70,18 @@ public class PaddleManager {
         String checkoutId = parameterMap.get("checkout_id")[0];
         CompletableFuture<Void> future = waitForCheckoutAsync(checkoutId);
         try {
+            JSONObject checkoutJson = PaddleAPI.retrieveCheckout(checkoutId);
+
             JSONObject passthroughJson = new JSONObject(parameterMap.get("passthrough")[0]);
             int subscriptionId = Integer.parseInt(parameterMap.get("subscription_id")[0]);
             int planId = Integer.parseInt(parameterMap.get("subscription_plan_id")[0]);
             int quantity = Integer.parseInt(parameterMap.get("quantity")[0]);
             String state = parameterMap.get("status")[0];
             String currency = parameterMap.get("currency")[0];
-            double unitPrice = Double.parseDouble(parameterMap.get("unit_price")[0]);
-            String totalPrice = String.format("%s ~%.02f", currency, quantity * unitPrice);
+            double total = Double.parseDouble(checkoutJson.getJSONObject("order").getString("total"));
+            String totalPrice = String.format("%s %.02f", currency, total);
             String nextPayment = parameterMap.get("next_bill_date")[0];
             String updateUrl = parameterMap.get("update_url")[0];
-
-            JSONObject checkoutJson = PaddleAPI.retrieveCheckout(checkoutId);
             long discordId = passthroughJson.getLong("discord_id");
             UI ui = UICache.get(discordId);
 
