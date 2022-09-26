@@ -9,13 +9,15 @@ import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import com.vaadin.flow.component.UI;
 import org.apache.commons.lang3.text.WordUtils;
-import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.lawlietbot.spring.ExceptionLogger;
 import xyz.lawlietbot.spring.ExternalLinks;
 import xyz.lawlietbot.spring.backend.UICache;
 import xyz.lawlietbot.spring.backend.payment.*;
-import xyz.lawlietbot.spring.syncserver.SyncUtil;
+import xyz.lawlietbot.spring.syncserver.EventOut;
+import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 public class StripeManager {
 
@@ -113,14 +115,12 @@ public class StripeManager {
         long discordId = Long.parseLong(metadata.get("discord_id"));
         UI ui = UICache.get(discordId);
         if (ui != null) {
-            SyncUtil.sendStripe(
-                    discordId,
-                    ui.getTranslation("premium.usermessage.title"),
-                    ui.getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE),
-                    0,
-                    false,
-                    new JSONArray()
-            );
+            JSONObject json = new JSONObject();
+            json.put("user_id", discordId);
+            json.put("title", ui.getTranslation("premium.usermessage.title"));
+            json.put("desc", ui.getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE));
+            SendEvent.send(EventOut.STRIPE, json)
+                            .exceptionally(ExceptionLogger.get());
         }
         try {
             WebhookNotifier.newSub(

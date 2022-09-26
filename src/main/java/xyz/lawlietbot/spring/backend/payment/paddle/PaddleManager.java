@@ -23,7 +23,8 @@ import xyz.lawlietbot.spring.backend.payment.SubDuration;
 import xyz.lawlietbot.spring.backend.payment.SubLevel;
 import xyz.lawlietbot.spring.backend.payment.SubLevelType;
 import xyz.lawlietbot.spring.backend.payment.WebhookNotifier;
-import xyz.lawlietbot.spring.syncserver.SyncUtil;
+import xyz.lawlietbot.spring.syncserver.EventOut;
+import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 public class PaddleManager {
 
@@ -64,6 +65,8 @@ public class PaddleManager {
     }
 
     public static void registerSubscription(Map<String, String[]> parameterMap) throws IOException {
+        printParameterMap(parameterMap);
+
         String checkoutId = parameterMap.get("checkout_id")[0];
         CompletableFuture<Void> future = waitForCheckoutAsync(checkoutId);
         try {
@@ -71,18 +74,32 @@ public class PaddleManager {
             int subscriptionId = Integer.parseInt(parameterMap.get("subscription_id")[0]);
             int planId = Integer.parseInt(parameterMap.get("subscription_plan_id")[0]);
             int quantity = Integer.parseInt(parameterMap.get("quantity")[0]);
+            String state = parameterMap.get("status")[0];
+            String currency = parameterMap.get("currency")[0];
+            double unitPrice = Double.parseDouble(parameterMap.get("unit_price")[0]);
+            String totalPrice = String.format("%s >%.02f", currency, quantity * unitPrice);
+            String nextPayment = parameterMap.get("next_bill_date")[0];
+            String updateUrl = parameterMap.get("update_url")[0];
 
             JSONObject checkoutJson = PaddleAPI.retrieveCheckout(checkoutId);
             long discordId = passthroughJson.getLong("discord_id");
             UI ui = UICache.get(discordId);
-            SyncUtil.sendStripe(
-                    discordId,
-                    ui != null ? ui.getTranslation("premium.usermessage.title") : null,
-                    ui != null ? ui.getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE) : null,
-                    subscriptionId,
-                    PaddleManager.getSubLevelType(planId) == SubLevelType.PRO,
-                    passthroughJson.has("preset_guilds") ? passthroughJson.getJSONArray("preset_guilds") : new JSONArray()
-            ).join();
+
+            JSONObject json = new JSONObject();
+            json.put("user_id", discordId);
+            json.put("title", ui != null ? ui.getTranslation("premium.usermessage.title") : null);
+            json.put("desc",  ui != null ? ui.getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE) : null);
+            json.put("sub_id", subscriptionId);
+            json.put("unlocks_server", PaddleManager.getSubLevelType(planId) == SubLevelType.PRO);
+            json.put("preset_guilds", passthroughJson.has("preset_guilds") ? passthroughJson.getJSONArray("preset_guilds") : new JSONArray());
+            json.put("plan_id", planId);
+            json.put("quantity", quantity);
+            json.put("state", state);
+            json.put("total_price", totalPrice);
+            json.put("next_payment", nextPayment);
+            json.put("update_url", updateUrl);
+            SendEvent.send(EventOut.PADDLE, json).join();
+
             try {
                 String discordTag = new String(Base64.getDecoder().decode(passthroughJson.getString("discord_tag")));
                 WebhookNotifier.newSub(
@@ -99,6 +116,11 @@ public class PaddleManager {
         } finally {
             future.complete(null);
         }
+    }
+
+    private static void printParameterMap(Map<String, String[]> parameterMap) {
+        LOGGER.info("--- NEW SUBSCRIPTION RECEIVED ---");
+        parameterMap.forEach((k, v) -> LOGGER.info("{}: {}", k, v[0]));
     }
 
     public static int getPlanId(SubDuration duration, SubLevel level) {

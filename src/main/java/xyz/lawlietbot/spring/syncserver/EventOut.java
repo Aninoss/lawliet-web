@@ -17,6 +17,7 @@ public enum EventOut {
     PREMIUM_MODIFY,
     REPORT,
     STRIPE,
+    PADDLE,
     DASH_INIT,
     DASH_CAT_INIT,
     DASH_ACTION,
