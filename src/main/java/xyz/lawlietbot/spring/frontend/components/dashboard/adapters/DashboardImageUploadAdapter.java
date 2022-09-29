@@ -33,7 +33,7 @@ public class DashboardImageUploadAdapter extends Div {
             String fileName = RandomUtil.generateRandomString(30) + "." + fileExt;
             String fileNameFull = System.getenv("DASHBOARD_IMAGE_PATH") + "/" + fileName;
             if (FileUtil.writeInputStreamToFile(inputStream, new File(fileNameFull))) {
-                dashboardImageUpload.trigger(fileName);
+                dashboardImageUpload.trigger("https://lawlietbot.xyz/cdn/temp/" + fileName);
             } else {
                 CustomNotification.showError(getTranslation("error"));
             }
