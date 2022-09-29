@@ -118,7 +118,7 @@ public class DashboardDurationFieldAdapter extends FlexLayout {
     }
 
     private int extractValueHours(long value) {
-        return (int) ((value / 60) % 1440);
+        return (int) ((value / 60) % 24);
     }
 
     private int extractValueDays(long value) {
