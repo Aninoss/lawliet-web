@@ -42,7 +42,7 @@ public class DashboardComponentConverter {
             case DashboardTitle.TYPE:
                 DashboardTitle dashboardTitle = (DashboardTitle) dashboardComponent;
                 H3 h3 = new H3(dashboardTitle.getText());
-                h3.getStyle().set("padding-top", "2em");
+                h3.setClassName("dashboard-header");
                 component = h3;
                 break;
 

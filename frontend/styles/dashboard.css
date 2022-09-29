@@ -104,6 +104,18 @@ html {
     cursor: pointer;
 }
 
+.dashboard-header {
+    padding-top: 2em;
+}
+
+.dashboard-vertical > .dashboard-vertical:first-child > .dashboard-header:first-child {
+    padding-top: 0;
+}
+
+#dashboard-main > .dashboard-vertical > .dashboard-header:first-child {
+    padding-top: 0;
+}
+
 #dashboard-premium-unlocked-layout {
     border-radius: 6px;
     background: var(--lumo-shade);
