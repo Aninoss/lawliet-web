@@ -69,6 +69,7 @@ public class PaddleManager {
 
         String checkoutId = parameterMap.get("checkout_id")[0];
         CompletableFuture<Void> future = waitForCheckoutAsync(checkoutId);
+
         try {
             JSONObject checkoutJson = PaddleAPI.retrieveCheckout(checkoutId);
 
@@ -100,19 +101,18 @@ public class PaddleManager {
             json.put("update_url", updateUrl);
             SendEvent.send(EventOut.PADDLE, json).join();
 
-            try {
-                String discordTag = new String(Base64.getDecoder().decode(passthroughJson.getString("discord_tag")));
-                WebhookNotifier.newSub(
-                        discordTag,
-                        discordId,
-                        passthroughJson.getString("discord_avatar"),
-                        checkoutJson.getJSONObject("checkout").getString("title"),
-                        quantity,
-                        checkoutJson.getJSONObject("order").getString("formatted_total")
-                );
-            } catch (Throwable e) {
-                LOGGER.error("Error in new Paddle sub", e);
-            }
+            String discordTag = new String(Base64.getDecoder().decode(passthroughJson.getString("discord_tag")));
+            WebhookNotifier.newSub(
+                    discordTag,
+                    discordId,
+                    passthroughJson.getString("discord_avatar"),
+                    checkoutJson.getJSONObject("checkout").getString("title"),
+                    quantity,
+                    checkoutJson.getJSONObject("order").getString("formatted_total")
+            );
+            LOGGER.info("Subscription notification sent");
+        } catch (Throwable e) {
+            LOGGER.error("Error in new Paddle sub", e);
         } finally {
             future.complete(null);
         }
