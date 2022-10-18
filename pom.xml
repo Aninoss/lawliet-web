@@ -210,7 +210,7 @@
         <dependency>
             <groupId>club.minnced</groupId>
             <artifactId>discord-webhooks</artifactId>
-            <version>0.5.8</version>
+            <version>0.8.2</version>
         </dependency>
         <dependency>
             <groupId>com.jamiussiam</groupId>
