@@ -8,7 +8,12 @@ import xyz.lawlietbot.spring.ExceptionLogger;
 
 public class WebhookNotifier {
 
-    private static final WebhookClient webhookClient = new WebhookClientBuilder(System.getenv("WEBHOOK_NEWSUBS"))
+    private static final WebhookClient newSubClient = new WebhookClientBuilder(System.getenv("WEBHOOK_NEWSUBS"))
+            .setWait(false)
+            .setAllowedMentions(AllowedMentions.all())
+            .build();
+
+    private static final WebhookClient subFeedbackClient = new WebhookClientBuilder(System.getenv("WEBHOOK_SUBFEEDBACK"))
             .setWait(false)
             .setAllowedMentions(AllowedMentions.all())
             .build();
@@ -35,7 +40,25 @@ public class WebhookNotifier {
                 .setContent("<@272037078919938058>")
                 .build();
 
-        webhookClient.send(wm)
+        newSubClient.send(wm)
+                .exceptionally(ExceptionLogger.get());
+    }
+
+    public static void newSubFeedback(String reason) {
+        if (reason.isBlank()) {
+            return;
+        }
+
+        WebhookEmbed we = new WebhookEmbedBuilder()
+                .setTimestamp(Instant.now())
+                .setColor(0xFEFEFE)
+                .addField(new WebhookEmbed.EmbedField(false, "Why did you decide to pause / cancel your subscription?", reason))
+                .build();
+        WebhookMessage wm = new WebhookMessageBuilder()
+                .addEmbeds(we)
+                .build();
+
+        subFeedbackClient.send(wm)
                 .exceptionally(ExceptionLogger.get());
     }
 

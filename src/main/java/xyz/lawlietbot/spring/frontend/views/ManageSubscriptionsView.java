@@ -5,9 +5,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import com.stripe.exception.StripeException;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
@@ -15,6 +17,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RoutePrefix;
 import org.json.JSONArray;
@@ -29,6 +32,7 @@ import xyz.lawlietbot.spring.backend.payment.Subscription;
 import xyz.lawlietbot.spring.backend.payment.paddle.PaddleAPI;
 import xyz.lawlietbot.spring.backend.payment.paddle.PaddleManager;
 import xyz.lawlietbot.spring.backend.payment.stripe.StripeManager;
+import xyz.lawlietbot.spring.backend.subscriptionfeedback.SubscriptionFeedbackIdManager;
 import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
@@ -176,10 +180,12 @@ public class ManageSubscriptionsView extends PageLayout {
 
                     confirmationDialog.open(outerSpan, () -> {
                         boolean success = false;
+                        boolean navigateToFeedbackPage = false;
                         try {
                             switch (action) {
                                 case "pause":
                                     success = PaddleAPI.subscriptionSetPaused(sub.getSubId(), true);
+                                    navigateToFeedbackPage = true;
                                     break;
 
                                 case "resume":
@@ -188,6 +194,7 @@ public class ManageSubscriptionsView extends PageLayout {
 
                                 case "cancel":
                                     success = PaddleAPI.subscriptionCancel(sub.getSubId());
+                                    navigateToFeedbackPage = true;
                                     break;
 
                                 default:
@@ -197,6 +204,11 @@ public class ManageSubscriptionsView extends PageLayout {
                         }
                         if (success) {
                             updateMainContent(user, sessionUrl, sub.getSubId());
+                            CustomNotification.showSuccess(getTranslation("manage.success"));
+                            if (navigateToFeedbackPage) {
+                                QueryParameters queryParameters = new QueryParameters(Map.of("id", List.of(SubscriptionFeedbackIdManager.generateId())));
+                                UI.getCurrent().navigate("/subscriptionfeedback", queryParameters);
+                            }
                         } else {
                             CustomNotification.showError(getTranslation("error"));
                         }
