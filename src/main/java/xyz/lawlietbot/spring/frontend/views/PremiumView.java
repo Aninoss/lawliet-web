@@ -252,7 +252,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
             String perk = perks[i];
             Icon icon = VaadinIcon.CHECK_CIRCLE.create();
             icon.addClassName("prop-check");
-            String linkUrl = i == 1 && level == SubLevel.PRO
+            String linkUrl = i == 2 && level == SubLevel.PRO
                     ? ExternalLinks.LAWLIET_PREMIUM_COMMANDS
                     : null;
             content.add(generateTierPerk(icon, perk, linkUrl));
