@@ -14,6 +14,8 @@ import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 public class DashboardImageUploadAdapter extends Div {
 
     public DashboardImageUploadAdapter(DashboardImageUpload dashboardImageUpload) {
+        String dir = dashboardImageUpload.getDir();
+
         MemoryBuffer buffer = new MemoryBuffer();
         Upload upload = new Upload(buffer);
         upload.setMaxFiles(1);
@@ -31,9 +33,9 @@ public class DashboardImageUploadAdapter extends Div {
             String[] fileParts = event.getFileName().split("\\.");
             String fileExt = fileParts[fileParts.length - 1];
             String fileName = RandomUtil.generateRandomString(30) + "." + fileExt;
-            String fileNameFull = System.getenv("DASHBOARD_IMAGE_PATH") + "/" + fileName;
+            String fileNameFull = System.getenv("DASHBOARD_IMAGE_PATH") + "/" + dir + "/" + fileName;
             if (FileUtil.writeInputStreamToFile(inputStream, new File(fileNameFull))) {
-                dashboardImageUpload.trigger("https://lawlietbot.xyz/cdn/temp/" + fileName);
+                dashboardImageUpload.trigger("https://lawlietbot.xyz/cdn/" + dir + "/" + fileName);
             } else {
                 CustomNotification.showError(getTranslation("error"));
             }

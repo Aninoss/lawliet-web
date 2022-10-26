@@ -43,7 +43,10 @@ public class HorizontalContainerAdapter extends FlexLayout {
             Component component = DashboardComponentConverter.convert(guildId, userId, dashboardComponent, dialog);
             if (component != null) {
                 add(component);
-                if ((dashboardComponent instanceof HorizontalPusher || noPusher) && !(dashboardComponent instanceof DashboardText)) {
+                if ((dashboardComponent instanceof HorizontalPusher || noPusher) &&
+                        !(dashboardComponent instanceof DashboardText) &&
+                        dashboardComponent.canExpand()
+                ) {
                     setFlexGrow(1, component);
                 }
                 if (component instanceof HasStyle && !(dashboardComponent instanceof HorizontalPusher)) {
