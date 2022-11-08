@@ -73,8 +73,8 @@ public class PaddleManager {
             JSONObject checkoutJson = PaddleAPI.retrieveCheckout(checkoutId);
 
             JSONObject passthroughJson = new JSONObject(parameterMap.get("passthrough")[0]);
-            int subscriptionId = Integer.parseInt(parameterMap.get("subscription_id")[0]);
-            int planId = Integer.parseInt(parameterMap.get("subscription_plan_id")[0]);
+            long subscriptionId = Long.parseLong(parameterMap.get("subscription_id")[0]);
+            long planId = Long.parseLong(parameterMap.get("subscription_plan_id")[0]);
             int quantity = Integer.parseInt(parameterMap.get("quantity")[0]);
             String state = parameterMap.get("status")[0];
             String currency = parameterMap.get("currency")[0];
@@ -122,40 +122,40 @@ public class PaddleManager {
         parameterMap.forEach((k, v) -> LOGGER.info("{}: {}", k, v[0]));
     }
 
-    public static int getPlanId(SubDuration duration, SubLevel level) {
+    public static long getPlanId(SubDuration duration, SubLevel level) {
         if (duration == SubDuration.MONTHLY) {
             switch (level) {
                 case BASIC:
-                    return 746336;
+                    return 746336L;
 
                 case PRO:
-                    return 746338;
+                    return 746338L;
 
                 default:
-                    return 0;
+                    return 0L;
             }
         } else {
             switch (level) {
                 case BASIC:
-                    return 746337;
+                    return 746337L;
 
                 case PRO:
-                    return 746340;
+                    return 746340L;
 
                 default:
-                    return 0;
+                    return 0L;
             }
         }
     }
 
-    public static SubLevel getSubLevelType(int planId) {
-        switch (planId) {
-            case 746336:
-            case 746337:
+    public static SubLevel getSubLevelType(long planId) {
+        switch (String.valueOf(planId)) {
+            case "746336":
+            case "746337":
                 return SubLevel.BASIC;
 
-            case 746338:
-            case 746340:
+            case "746338":
+            case "746340":
                 return SubLevel.PRO;
 
             default:

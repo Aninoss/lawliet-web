@@ -4,14 +4,14 @@ import java.time.LocalDate;
 
 public class Subscription {
 
-    private final int subId;
-    private final int planId;
+    private final long subId;
+    private final long planId;
     private final int quantity;
     private final String price;
     private final LocalDate nextPayment;
     private final String updateUrl;
 
-    public Subscription(int subId, int planId, int quantity, String price, LocalDate nextPayment, String updateUrl) {
+    public Subscription(long subId, long planId, int quantity, String price, LocalDate nextPayment, String updateUrl) {
         this.subId = subId;
         this.planId = planId;
         this.quantity = quantity;
@@ -20,11 +20,11 @@ public class Subscription {
         this.updateUrl = updateUrl;
     }
 
-    public int getSubId() {
+    public long getSubId() {
         return subId;
     }
 
-    public int getPlanId() {
+    public long getPlanId() {
         return planId;
     }
 

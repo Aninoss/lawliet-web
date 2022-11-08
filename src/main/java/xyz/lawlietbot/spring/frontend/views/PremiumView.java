@@ -704,7 +704,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                     PaddleManager.waitForCheckoutAsync(checkoutId).get(1, TimeUnit.MINUTES);
 
                     JSONObject checkout = PaddleAPI.retrieveCheckout(checkoutId);
-                    int planId = checkout.getJSONObject("order").getInt("product_id");
+                    long planId = checkout.getJSONObject("order").getInt("product_id");
                     SubLevel subLevel = PaddleManager.getSubLevelType(planId);
 
                     String dialogText = subLevel == SubLevel.PRO ? "premium.buy.success.pro" : "premium.buy.success";

@@ -80,7 +80,7 @@ public class ManageSubscriptionsView extends PageLayout {
         });
     }
 
-    private void updateMainContent(DiscordUser user, String sessionUrl, int reloadSubId) {
+    private void updateMainContent(DiscordUser user, String sessionUrl, long reloadSubId) {
         mainContent.removeAll();
         Component grid = generateGrid(user, sessionUrl, reloadSubId);
         if (grid != null) {
@@ -91,7 +91,7 @@ public class ManageSubscriptionsView extends PageLayout {
         }
     }
 
-    private Component generateGrid(DiscordUser user, String sessionUrl, int reloadSubId) {
+    private Component generateGrid(DiscordUser user, String sessionUrl, long reloadSubId) {
         JSONObject json = new JSONObject();
         json.put("user_id", user.getId());
         json.put("clear_subscription_cache", false);
@@ -106,8 +106,8 @@ public class ManageSubscriptionsView extends PageLayout {
                     for (int i = 0; i < subsJson.length(); i++) {
                         JSONObject subJson = subsJson.getJSONObject(i);
                         subscriptions.add(new Subscription(
-                                subJson.getInt("sub_id"),
-                                subJson.getInt("plan_id"),
+                                subJson.getLong("sub_id"),
+                                subJson.getLong("plan_id"),
                                 subJson.getInt("quantity"),
                                 subJson.getString("total_price"),
                                 subJson.has("next_payment") ? LocalDate.parse(subJson.getString("next_payment")) : null,

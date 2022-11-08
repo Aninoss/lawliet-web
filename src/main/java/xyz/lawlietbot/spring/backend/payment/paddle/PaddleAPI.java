@@ -34,7 +34,7 @@ public class PaddleAPI {
         return run(request);
     }
 
-    public static boolean subscriptionSetPaused(int subId, boolean paused) throws IOException {
+    public static boolean subscriptionSetPaused(long subId, boolean paused) throws IOException {
         RequestBody formBody = new FormBody.Builder()
                 .add("vendor_id", System.getenv("PADDLE_VENDOR_ID"))
                 .add("vendor_auth_code", System.getenv("PADDLE_AUTH"))
@@ -52,7 +52,7 @@ public class PaddleAPI {
         return responseJson.getBoolean("success");
     }
 
-    public static boolean subscriptionCancel(int subId) throws IOException {
+    public static boolean subscriptionCancel(long subId) throws IOException {
         RequestBody formBody = new FormBody.Builder()
                 .add("vendor_id", System.getenv("PADDLE_VENDOR_ID"))
                 .add("vendor_auth_code", System.getenv("PADDLE_AUTH"))
