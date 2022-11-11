@@ -152,11 +152,9 @@ public class ManageSubscriptionsView extends PageLayout {
     }
 
     private Component generateActionComponent(Subscription sub, DiscordUser user, String sessionUrl) {
-        List<String> actionList = List.of(
-                sub.isActive() ? "pause" : "resume",
-                "cancel",
-                "payment_details"
-        );
+        List<String> actionList = sub.isActive()
+                ? List.of("pause", "payment_details")
+                : List.of("resume", "cancel", "payment_details");
 
         Select<String> actionSelect = new Select<>();
         actionSelect.setPlaceholder(getTranslation("manage.grid.action"));
@@ -194,7 +192,6 @@ public class ManageSubscriptionsView extends PageLayout {
 
                                 case "cancel":
                                     success = PaddleAPI.subscriptionCancel(sub.getSubId());
-                                    navigateToFeedbackPage = true;
                                     break;
 
                                 default:

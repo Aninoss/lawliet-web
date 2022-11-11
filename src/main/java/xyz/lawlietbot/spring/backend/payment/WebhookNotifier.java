@@ -52,7 +52,7 @@ public class WebhookNotifier {
         WebhookEmbed we = new WebhookEmbedBuilder()
                 .setTimestamp(Instant.now())
                 .setColor(0xFEFEFE)
-                .addField(new WebhookEmbed.EmbedField(false, "Why did you decide to pause / cancel your subscription?", reason))
+                .addField(new WebhookEmbed.EmbedField(false, "Why did you decide to stop your subscription?", reason))
                 .build();
         WebhookMessage wm = new WebhookMessageBuilder()
                 .addEmbeds(we)
