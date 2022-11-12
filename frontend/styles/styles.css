@@ -1,3 +1,8 @@
+@font-face {
+    font-family: "Oswald";
+    src: url('/styles/fonts/Oswald-Regular.ttf');
+}
+
 html {
     --lumo-secondary: var(--lumo-shade-10pct);
     --warning-color-rgb: 248, 184, 78;
