@@ -31,7 +31,7 @@ public class PaddlePopup extends Div {
 
         UI.getCurrent().getPage().executeJs("openPaddle($0, $1, $2, $3, $4)",
                 Integer.parseInt(System.getenv("PADDLE_VENDOR_ID")),
-                PaddleManager.getPlanId(duration, level),
+                (int) PaddleManager.getPlanId(duration, level),
                 quantity,
                 getLocale().getLanguage(),
                 generatePassthrough(discordUser, presetGuildIds)
