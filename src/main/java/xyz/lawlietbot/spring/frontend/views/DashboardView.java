@@ -147,7 +147,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                         Tab tab = new Tab(category.getTitle());
                         categoryTabs.add(tab);
                     }
-                    categoryTabs.setVisible(true);
+                    categoryTabs.setVisible(!categoryList.isEmpty());
                     premiumUnlockedLayout.setVisible(true);
                     updatePremiumUnlocked(dashboardInitData.isPremiumUnlocked());
 
@@ -167,7 +167,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                     } else {
                         UI.getCurrent().getPage().retrieveExtendedClientDetails(receiver -> {
                             int screenWidth = receiver.getScreenWidth();
-                            if (screenWidth >= 1000) {
+                            if (screenWidth >= 1000 && !categoryList.isEmpty()) {
                                 categoryTabs.setSelectedIndex(0);
                             } else {
                                 updateMainContentEntry(e.getValue());
