@@ -88,7 +88,7 @@ public class PaddleManager {
             JSONObject json = new JSONObject();
             json.put("user_id", discordId);
             json.put("title", ui != null ? ui.getTranslation("premium.usermessage.title") : null);
-            json.put("desc",  ui != null ? ui.getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE) : null);
+            json.put("desc",  ui != null ? ui.getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE, ExternalLinks.LAWLIET_DEVELOPMENT_VOTES) : null);
             json.put("sub_id", subscriptionId);
             json.put("unlocks_server", PaddleManager.getSubLevelType(planId) == SubLevel.PRO);
             json.put("preset_guilds", passthroughJson.has("preset_guilds") ? passthroughJson.getJSONArray("preset_guilds") : new JSONArray());

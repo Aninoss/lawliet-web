@@ -40,7 +40,6 @@ import xyz.lawlietbot.spring.NoLiteAccess;
 import xyz.lawlietbot.spring.backend.Redirector;
 import xyz.lawlietbot.spring.backend.UICache;
 import xyz.lawlietbot.spring.backend.commandlist.CommandListContainer;
-import xyz.lawlietbot.spring.backend.commandlist.CommandListSlot;
 import xyz.lawlietbot.spring.backend.payment.SubCurrency;
 import xyz.lawlietbot.spring.backend.payment.SubDuration;
 import xyz.lawlietbot.spring.backend.payment.SubLevel;
@@ -252,9 +251,14 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
             String perk = perks[i];
             Icon icon = VaadinIcon.CHECK_CIRCLE.create();
             icon.addClassName("prop-check");
-            String linkUrl = i == 2 && level == SubLevel.PRO
-                    ? ExternalLinks.LAWLIET_PREMIUM_COMMANDS
-                    : null;
+            String linkUrl = null;
+            if (i == 2 && level == SubLevel.PRO) {
+                linkUrl = ExternalLinks.LAWLIET_PREMIUM_COMMANDS;
+            } else if (i == 4 && level == SubLevel.BASIC) {
+                linkUrl = ExternalLinks.LAWLIET_DEVELOPMENT_VOTES;
+            } else if (i == 5 && level == SubLevel.BASIC) {
+                linkUrl = ExternalLinks.LAWLIET_FEATURE_REQUESTS;
+            }
             content.add(generateTierPerk(icon, perk, linkUrl));
         }
         if (level == SubLevel.BASIC) {
@@ -419,7 +423,8 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
     private int countPremiumCommands() {
         try {
             return CommandListContainer.getInstance().getCategories().stream()
-                    .mapToInt(category -> (int) category.getSlots().stream().filter(CommandListSlot::isPatreonOnly).count())
+                    .filter(c -> c.getId().equals("patreon_only"))
+                    .mapToInt(category -> (int) category.getSlots().size())
                     .sum();
         } catch (Throwable e) {
             LOGGER.error("Error", e);

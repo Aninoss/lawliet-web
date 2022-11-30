@@ -37,12 +37,12 @@ import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 @Route(value = "developmentvotes", layout = MainLayout.class)
 @NoLiteAccess
-public class DevelopmentVoteView extends PageLayout {
+public class DevelopmentVotesView extends PageLayout {
 
     private final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
     private final HashSet<String> selectedVotes = new HashSet<>();
 
-    public DevelopmentVoteView(@Autowired SessionData sessionData, @Autowired UIData uiData) throws IOException, ExecutionException, InterruptedException {
+    public DevelopmentVotesView(@Autowired SessionData sessionData, @Autowired UIData uiData) throws IOException, ExecutionException, InterruptedException {
         super(sessionData, uiData);
         getStyle().set("margin-bottom", "48px");
         boolean loggedIn = getSessionData().isLoggedIn();

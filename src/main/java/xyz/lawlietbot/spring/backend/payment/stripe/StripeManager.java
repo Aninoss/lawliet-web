@@ -118,7 +118,7 @@ public class StripeManager {
             JSONObject json = new JSONObject();
             json.put("user_id", discordId);
             json.put("title", ui.getTranslation("premium.usermessage.title"));
-            json.put("desc", ui.getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE));
+            json.put("desc", ui.getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE, ExternalLinks.LAWLIET_DEVELOPMENT_VOTES));
             SendEvent.send(EventOut.STRIPE, json)
                             .exceptionally(ExceptionLogger.get());
         }
