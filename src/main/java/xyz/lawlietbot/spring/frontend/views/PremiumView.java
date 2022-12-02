@@ -35,6 +35,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import xyz.lawlietbot.spring.ExceptionLogger;
 import xyz.lawlietbot.spring.ExternalLinks;
 import xyz.lawlietbot.spring.NoLiteAccess;
 import xyz.lawlietbot.spring.backend.Redirector;
@@ -717,6 +718,15 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                     confirmationDialog.open(getTranslation(dialogText), () -> {
                     });
                     add(confirmationDialog);
+
+                    if (getSessionData().isLoggedIn()) {
+                        Map<String, Object> map = Map.of(
+                                "user_id", getSessionData().getDiscordUser().get().getId(),
+                                "locale", getLocale().getLanguage()
+                        );
+                        SendEvent.send(EventOut.DEV_VOTES_UPDATE_REMINDER, map)
+                                .exceptionally(ExceptionLogger.get());
+                    }
                 } catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
                     LOGGER.error("Could not load subscription", e);
                     CustomNotification.showError(getTranslation("error"));

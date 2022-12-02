@@ -77,7 +77,8 @@ public class DevelopmentVotesView extends PageLayout {
         Map<String, Object> requestMap = Map.of(
                 "user_id", getSessionData().getDiscordUser().get().getId(),
                 "year", year,
-                "month", month
+                "month", month,
+                "locale", getLocale().getLanguage()
         );
         JSONObject dataJson = SendEvent.send(EventOut.DEV_VOTES_INIT, requestMap).get();
 
@@ -126,7 +127,8 @@ public class DevelopmentVotesView extends PageLayout {
         toggleButton.addValueChangeListener(e -> {
             Map<String, Object> map = Map.of(
                     "user_id", getSessionData().getDiscordUser().get().getId(),
-                    "active", e.getValue()
+                    "active", e.getValue(),
+                    "locale", getLocale().getLanguage()
             );
             SendEvent.send(EventOut.DEV_VOTES_UPDATE_REMINDER, map).join();
             CustomNotification.showSuccess(getTranslation("devvotes.reminderupdate." + e.getValue()));
