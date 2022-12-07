@@ -4,9 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.Component;
@@ -26,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import xyz.lawlietbot.spring.NoLiteAccess;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
+import xyz.lawlietbot.spring.backend.util.StringUtil;
 import xyz.lawlietbot.spring.frontend.Styles;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
@@ -92,22 +91,20 @@ public class DevelopmentVotesView extends PageLayout {
         pageHeader.getOuterLayout()
                 .add(generateNotificationField(dataJson.getBoolean("reminder_active")));
 
-        Button sendButton = new Button(getTranslation("devvotes.submit"));
-        sendButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        sendButton.addClickListener(e -> onButtonClick(year, month));
-
-        JSONArray votesJson = dataJson.getJSONArray("votes");
-        for (int i = 0; i < votesJson.length(); i++) {
-            String vote = votesJson.getString(i);
-            selectedVotes.add(vote);
-        }
-
+        boolean votesOpen = dataJson.has("votes");
         mainContent.add(
                 new H2(String.format("%02d / %d", month, year)),
-                new Text(getTranslation("devvotes.help")),
-                generateVotes(month, year),
-                sendButton
+                new Text(getTranslation(votesOpen ? "devvotes.help" : "devvotes.results.help")),
+                generateVotes(month, year, dataJson, votesOpen)
         );
+
+        if (votesOpen) {
+            Button sendButton = new Button(getTranslation("devvotes.submit"));
+            sendButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            sendButton.addClickListener(e -> onButtonClick(year, month));
+            mainContent.add(sendButton);
+        }
+
         add(mainContent, confirmationDialog);
     }
 
@@ -162,7 +159,7 @@ public class DevelopmentVotesView extends PageLayout {
         return errorSpan;
     }
 
-    private Component generateVotes(int month, int year) throws IOException {
+    private Component generateVotes(int month, int year, JSONObject dataJson, boolean votesOpen) throws IOException {
         VerticalLayout mainLayout = new VerticalLayout();
         mainLayout.setPadding(false);
         mainLayout.getStyle().set("margin-top", "32px")
@@ -171,24 +168,79 @@ public class DevelopmentVotesView extends PageLayout {
         String filename = System.getenv("DEVVOTES_DIR") + "/" + month + "_" + year + "_" + getLocale().getLanguage() + ".properties";
         File file = new File(filename);
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String id = line.split("=")[0].trim();
-                String title = line.split("=")[1].trim();
-
-                Checkbox checkbox = new Checkbox(title);
-                checkbox.setValue(selectedVotes.contains(id));
-                checkbox.setWidthFull();
-                checkbox.addValueChangeListener(e -> {
-                    if (e.getValue()) {
-                        selectedVotes.add(id);
-                    } else {
-                        selectedVotes.remove(id);
-                    }
-                });
-                mainLayout.add(checkbox);
+        if (votesOpen) {
+            JSONArray votesJson = dataJson.getJSONArray("votes");
+            for (int i = 0; i < votesJson.length(); i++) {
+                String vote = votesJson.getString(i);
+                selectedVotes.add(vote);
             }
+
+            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String id = line.split("=")[0].trim();
+                    String title = line.split("=")[1].trim();
+
+                    Checkbox checkbox = new Checkbox(title);
+                    checkbox.setValue(selectedVotes.contains(id));
+                    checkbox.setWidthFull();
+                    checkbox.addValueChangeListener(e -> {
+                        if (e.getValue()) {
+                            selectedVotes.add(id);
+                        } else {
+                            selectedVotes.remove(id);
+                        }
+                    });
+                    mainLayout.add(checkbox);
+                }
+            }
+        } else {
+            HashMap<String, String> voteLabelMap = new HashMap<>();
+            HashMap<String, Integer> votePositionMap = new HashMap<>();
+            HashMap<String, Integer> voteNumberMap = new HashMap<>();
+            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                int i = 0;
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String id = line.split("=")[0].trim();
+                    String title = line.split("=")[1].trim();
+                    voteLabelMap.put(id, title);
+                    votePositionMap.put(id, i);
+                    voteNumberMap.put(id, 0);
+                    i++;
+                }
+            }
+
+            JSONArray voteResultJsonArray = dataJson.getJSONArray("vote_result");
+            for (int i = 0; i < voteResultJsonArray.length(); i++) {
+                JSONObject voteResultJson = voteResultJsonArray.getJSONObject(i);
+                String id = voteResultJson.getString("id");
+                int number = voteResultJson.getInt("number");
+                voteNumberMap.put(id, number);
+            }
+
+            voteLabelMap.keySet().stream()
+                    .sorted((id0, id1) -> {
+                        if (voteNumberMap.get(id0) < voteNumberMap.get(id1)) {
+                            return 1;
+                        } else if (voteNumberMap.get(id0) > voteNumberMap.get(id1)) {
+                            return -1;
+                        } else {
+                            return Integer.compare(votePositionMap.get(id0), votePositionMap.get(id1));
+                        }
+                    })
+                    .forEach(id -> {
+                        String label = voteLabelMap.get(id);
+                        int number = voteNumberMap.get(id);
+                        String text = getTranslation(
+                                "devvotes.results.slot",
+                                number != 1,
+                                label,
+                                StringUtil.numToString(number)
+                        );
+                        Span span = new Span(text);
+                        mainLayout.add(span);
+                    });
         }
 
         return mainLayout;
