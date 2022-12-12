@@ -4,7 +4,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.Component;
@@ -12,11 +15,13 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.router.Route;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -92,10 +97,11 @@ public class DevelopmentVotesView extends PageLayout {
                 .add(generateNotificationField(dataJson.getBoolean("reminder_active")));
 
         boolean votesOpen = dataJson.has("votes");
+        int totalVotes = dataJson.has("total_votes") ? dataJson.getInt("total_votes") : -1;
         mainContent.add(
                 new H2(String.format("%02d / %d", month, year)),
                 new Text(getTranslation(votesOpen ? "devvotes.help" : "devvotes.results.help")),
-                generateVotes(month, year, dataJson, votesOpen)
+                generateVotes(month, year, dataJson, votesOpen, totalVotes)
         );
 
         if (votesOpen) {
@@ -159,11 +165,15 @@ public class DevelopmentVotesView extends PageLayout {
         return errorSpan;
     }
 
-    private Component generateVotes(int month, int year, JSONObject dataJson, boolean votesOpen) throws IOException {
+    private Component generateVotes(int month, int year, JSONObject dataJson, boolean votesOpen, int totalVotes) throws IOException {
         VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.setPadding(false);
+        mainLayout.setPadding(true);
         mainLayout.getStyle().set("margin-top", "32px")
-                .set("margin-bottom", "16px");
+                .set("margin-bottom", "16px")
+                .set("border-radius", "8px")
+                .set("border-style", "solid")
+                .set("border-width", "2px")
+                .set("border-color", "var(--lumo-contrast-10pct)");
 
         String filename = System.getenv("DEVVOTES_DIR") + "/" + month + "_" + year + "_" + getLocale().getLanguage() + ".properties";
         File file = new File(filename);
@@ -234,12 +244,16 @@ public class DevelopmentVotesView extends PageLayout {
                         int number = voteNumberMap.get(id);
                         String text = getTranslation(
                                 "devvotes.results.slot",
-                                number != 1,
                                 label,
-                                StringUtil.numToString(number)
+                                StringUtil.numToString(number),
+                                StringUtil.numToString(totalVotes)
                         );
-                        Span span = new Span(text);
-                        mainLayout.add(span);
+                        Div textDiv = new Div();
+                        textDiv.setText(text);
+                        ProgressBar progressBar = new ProgressBar();
+                        progressBar.setValue((double) number / totalVotes);
+                        progressBar.getStyle().set("margin-top", "8px");
+                        mainLayout.add(textDiv, progressBar);
                     });
         }
 
