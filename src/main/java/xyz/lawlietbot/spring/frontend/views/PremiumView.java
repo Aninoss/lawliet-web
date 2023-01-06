@@ -255,9 +255,9 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
             String linkUrl = null;
             if (i == 2 && level == SubLevel.PRO) {
                 linkUrl = ExternalLinks.LAWLIET_PREMIUM_COMMANDS;
-            } else if (i == 4 && level == SubLevel.BASIC) {
-                linkUrl = ExternalLinks.LAWLIET_DEVELOPMENT_VOTES;
             } else if (i == 5 && level == SubLevel.BASIC) {
+                linkUrl = ExternalLinks.LAWLIET_DEVELOPMENT_VOTES;
+            } else if (i == 6 && level == SubLevel.BASIC) {
                 linkUrl = ExternalLinks.LAWLIET_FEATURE_REQUESTS;
             }
             content.add(generateTierPerk(icon, perk, linkUrl));
