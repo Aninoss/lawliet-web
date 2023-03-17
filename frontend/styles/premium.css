@@ -1,12 +1,24 @@
+li:not(:first-child) {
+    margin-top: 16px;
+}
+
+li {
+    color: var(--lumo-body-text-color);
+}
+
 #premium-tiers {
     width: 100%;
     display: flex;
-    flex-direction: column-reverse;
+    flex-direction: column;
     justify-content: center;
 }
 
-.tier-card:not(:first-child) {
+#card0, #card1 {
     margin-bottom: 16px;
+}
+
+#card1 {
+    order: -1;
 }
 
 .tier-card {
@@ -21,14 +33,31 @@
 
 .prop-check {
     color: var(--lumo-success-color);
-    margin-right: 12px;
+    margin-right: 6px;
     flex-shrink: 0;
+    height: 1em;
+    margin-top: 8px;
+}
+
+vaadin-accordion-panel > div > .prop-check {
+    margin-top: 4px;
 }
 
 .prop-notcheck {
     color: var(--lumo-error-color);
-    margin-right: 12px;
+    margin-right: 6px;
     flex-shrink: 0;
+    height: 1em;
+    margin-top: 8px;
+}
+
+.tier-perks-layout {
+    margin-top: 32px;
+}
+
+.tier-perks-layout > a {
+    text-decoration: underline;
+    text-decoration-color: var(--lumo-body-text-color);
 }
 
 .change-quantities {
@@ -90,7 +119,7 @@
     border-color: var(--lumo-primary-color);
     background-color: var(--lumo-secondary);
     margin-top: 0;
-    margin-bottom: 8px;
+    margin-bottom: 16px;
     padding: 12px;
 }
 
@@ -178,13 +207,24 @@
         flex-direction: row;
     }
 
-    .tier-card:not(:first-child) {
-        margin-left: 16px;
+    #card0, #card1 {
         margin-bottom: 0;
+    }
+
+    #card1, #card2 {
+        margin-left: 16px;
+    }
+
+    #card1 {
+        order: 0;
     }
 
     .tier-card {
         max-width: 350px;
+    }
+
+    .tier-perks-layout.ultimate-layout {
+        margin-top: calc(32px + 1.65em);
     }
 
 }

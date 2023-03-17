@@ -16,10 +16,12 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.accordion.AccordionPanel;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JavaScript;
+import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -210,6 +212,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         VerticalLayout content = new VerticalLayout();
         content.setAlignItems(FlexComponent.Alignment.CENTER);
         content.addClassNames("tier-card");
+        content.setId("card" + level.ordinal());
 
         HorizontalLayout titleLayout = new HorizontalLayout();
         titleLayout.setPadding(false);
@@ -232,12 +235,16 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                     .set("color", "var(--lumo-shade)");
             titleLayout.add(recommended);
         }
+        content.add(titleLayout);
 
-        Text price = new Text("");
-        priceTextMap.put(level, price);
+        if (level.showPrice()) {
+            Text price = new Text("");
+            priceTextMap.put(level, price);
+            content.add(price);
+        }
         Div div = new Div();
 
-        content.add(titleLayout, price, generateTierPerks(level), div, generateButtonSeparator(), generateBuyLayout(level));
+        content.add(generateTierPerks(level), div, generateButtonSeparator(), generateBuyLayout(level));
         content.setFlexGrow(1, div);
         return content;
     }
@@ -246,7 +253,10 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         VerticalLayout content = new VerticalLayout();
         content.setWidthFull();
         content.setPadding(false);
-        content.getStyle().set("margin-top", "32px");
+        content.addClassName("tier-perks-layout");
+        if (level == SubLevel.ULTIMATE) {
+            content.addClassName("ultimate-layout");
+        }
         String[] perks = getTranslation("premium.perks." + level.name(), StringUtil.numToString(countPremiumCommands())).split("\n");
         for (int i = 0; i < perks.length; i++) {
             String perk = perks[i];
@@ -255,12 +265,20 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
             String linkUrl = null;
             if (i == 2 && level == SubLevel.PRO) {
                 linkUrl = ExternalLinks.LAWLIET_PREMIUM_COMMANDS;
-            } else if (i == 5 && level == SubLevel.BASIC) {
+            } else if (i == 3 && level == SubLevel.BASIC) {
                 linkUrl = ExternalLinks.LAWLIET_DEVELOPMENT_VOTES;
-            } else if (i == 6 && level == SubLevel.BASIC) {
+            } else if (i == 4 && level == SubLevel.BASIC) {
                 linkUrl = ExternalLinks.LAWLIET_FEATURE_REQUESTS;
             }
-            content.add(generateTierPerk(icon, perk, linkUrl));
+
+            String[] subTexts = null;
+            if (i == 2 && level == SubLevel.BASIC) {
+                subTexts = getTranslation("premium.perks.autofeatures").split("\n");
+            } else if (i == 3 && level == SubLevel.PRO) {
+                subTexts = getTranslation("premium.perks.premiumfeatures").split("\n");
+            }
+
+            content.add(generateTierPerk(icon, perk, linkUrl, subTexts));
         }
         if (level == SubLevel.BASIC) {
             Icon icon = VaadinIcon.CLOSE_CIRCLE.create();
@@ -290,78 +308,107 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         buyButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         buyButton.setHeight("43px");
         buyButton.getStyle().set("margin-bottom", "-4px");
-        if (!loggedIn) {
-            buyButton.setText(getTranslation("login"));
-        }
-        buyButton.addClickListener(e -> {
-            DiscordUser discordUser = getSessionData().getDiscordUser().orElse(null);
-            if (discordUser != null) {
-                try {
-                    int value = extractValueFromQuantity(quantityNumberField.getValue());
-                    List<Long> presetGuildIds = preselectGuildsLayout.getChildren()
-                            .map(c -> (GuildComboBox) c)
-                            .filter(g -> g.getValue() != null)
-                            .map(g -> g.getValue().getId())
-                            .collect(Collectors.toList());
 
-                    PaddlePopup paddlePopup = new PaddlePopup(durationSelect.getValue(), level, discordUser, value, presetGuildIds);
-                    add(paddlePopup);
-                    UICache.put(discordUser.getId(), UI.getCurrent());
-                } catch (Exception ex) {
-                    LOGGER.error("Exception", ex);
-                    CustomNotification.showError(getTranslation("error"));
-                }
-            } else {
-                new Redirector().redirect(getSessionData().getLoginUrl());
+        if (level.showPrice()) {
+            if (!loggedIn) {
+                buyButton.setText(getTranslation("login"));
             }
-        });
+            buyButton.addClickListener(e -> {
+                DiscordUser discordUser = getSessionData().getDiscordUser().orElse(null);
+                if (discordUser != null) {
+                    try {
+                        int value = extractValueFromQuantity(quantityNumberField.getValue());
+                        List<Long> presetGuildIds = preselectGuildsLayout.getChildren()
+                                .map(c -> (GuildComboBox) c)
+                                .filter(g -> g.getValue() != null)
+                                .map(g -> g.getValue().getId())
+                                .collect(Collectors.toList());
 
-        if (level == SubLevel.PRO && loggedIn) {
-            proBuyPriceText = new Text("");
-
-            quantityNumberField = new NumberField();
-            quantityNumberField.getStyle().set("margin-top", "-6px");
-            quantityNumberField.setValue(1d);
-            quantityNumberField.setHasControls(true);
-            quantityNumberField.setMin(1);
-            quantityNumberField.setMax(99);
-            quantityNumberField.setStep(1);
-            quantityNumberField.setLabel(getTranslation("premium.servers"));
-            quantityNumberField.addValueChangeListener(e -> {
-                int value = extractValueFromQuantity(e.getValue());
-                quantityNumberField.setValue((double) value);
-                refreshPremiumTiers();
+                        PaddlePopup paddlePopup = new PaddlePopup(durationSelect.getValue(), level, discordUser, value, presetGuildIds);
+                        add(paddlePopup);
+                        UICache.put(discordUser.getId(), UI.getCurrent());
+                    } catch (Exception ex) {
+                        LOGGER.error("Exception", ex);
+                        CustomNotification.showError(getTranslation("error"));
+                    }
+                } else {
+                    new Redirector().redirect(getSessionData().getLoginUrl());
+                }
             });
 
-            HorizontalLayout quantityLayout = new HorizontalLayout();
-            quantityLayout.setPadding(false);
-            quantityLayout.setSpacing(false);
-            quantityLayout.setWidthFull();
-            quantityLayout.setAlignItems(FlexComponent.Alignment.END);
-            quantityLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-            quantityLayout.getStyle().set("margin-top", "0");
-            quantityLayout.add(quantityNumberField, proBuyPriceText);
+            if (level == SubLevel.PRO && loggedIn) {
+                proBuyPriceText = new Text("");
 
-            preselectGuildsLayout = new VerticalLayout();
-            preselectGuildsLayout.setPadding(false);
-            preselectGuildsLayout.setMaxHeight("350px");
-            preselectGuildsLayout.getStyle().set("margin-bottom", "8px")
-                    .set("overflow-y", "auto");
-            preselectGuildsLayout.add(generatePreselectGuildComboBox(0));
+                quantityNumberField = new NumberField();
+                quantityNumberField.getStyle().set("margin-top", "-6px");
+                quantityNumberField.setValue(1d);
+                quantityNumberField.setHasControls(true);
+                quantityNumberField.setMin(1);
+                quantityNumberField.setMax(99);
+                quantityNumberField.setStep(1);
+                quantityNumberField.setLabel(getTranslation("premium.servers"));
+                quantityNumberField.addValueChangeListener(e -> {
+                    int value = extractValueFromQuantity(e.getValue());
+                    quantityNumberField.setValue((double) value);
+                    refreshPremiumTiers();
+                });
 
-            controlLayout.add(quantityLayout, preselectGuildsLayout, generateButtonSeparator());
-        }
+                HorizontalLayout quantityLayout = new HorizontalLayout();
+                quantityLayout.setPadding(false);
+                quantityLayout.setSpacing(false);
+                quantityLayout.setWidthFull();
+                quantityLayout.setAlignItems(FlexComponent.Alignment.END);
+                quantityLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+                quantityLayout.getStyle().set("margin-top", "0");
+                quantityLayout.add(quantityNumberField, proBuyPriceText);
 
-        controlLayout.add(buyButton);
-        if (loggedIn) {
-            Span manageSubscriptionLink = generateManageSubscriptionsLink();
-            manageSubscriptionLink.setWidthFull();
-            controlLayout.add(manageSubscriptionLink);
+                preselectGuildsLayout = new VerticalLayout();
+                preselectGuildsLayout.setPadding(false);
+                preselectGuildsLayout.setMaxHeight("350px");
+                preselectGuildsLayout.getStyle().set("margin-bottom", "8px")
+                        .set("overflow-y", "auto");
+                preselectGuildsLayout.add(generatePreselectGuildComboBox(0));
+
+                controlLayout.add(quantityLayout, preselectGuildsLayout, generateButtonSeparator());
+            }
+
+            controlLayout.add(buyButton);
+            if (loggedIn) {
+                Span manageSubscriptionLink = generateManageSubscriptionsLink();
+                manageSubscriptionLink.setWidthFull();
+                controlLayout.add(manageSubscriptionLink);
+            } else {
+                Span notLoggedIn = new Span(getTranslation("premium.notloggedin"));
+                notLoggedIn.getStyle().set("color", "var(--lumo-error-text-color)")
+                        .set("margin-bottom", "-8px");
+                controlLayout.add(notLoggedIn);
+            }
         } else {
-            Span notLoggedIn = new Span(getTranslation("premium.notloggedin"));
-            notLoggedIn.getStyle().set("color", "var(--lumo-error-text-color)")
-                    .set("margin-bottom", "-8px");
-            controlLayout.add(notLoggedIn);
+            buyButton.setText(getTranslation("premium.contact"));
+            buyButton.addClickListener(e -> {
+                Label text1 = new Label(getTranslation("premium.contact.message"));
+                text1.setWidthFull();
+                text1.getStyle().set("color", "black");
+
+                Label text2 = new Label(getTranslation("premium.contact.messagejoin"));
+                text2.setWidthFull();
+                text2.getStyle().set("color", "black");
+
+                VerticalLayout layout = new VerticalLayout(text1, text2);
+                layout.setPadding(false);
+                layout.setSpacing(true);
+
+                dialog.open(layout, () -> {
+                    new Redirector().redirect(ExternalLinks.SERVER_INVITE_URL);
+                }, () -> {});
+            });
+            controlLayout.add(buyButton);
+
+            if (loggedIn) {
+                Span manageSubscriptionLink = generateManageSubscriptionsLink();
+                manageSubscriptionLink.setWidthFull();
+                controlLayout.add(manageSubscriptionLink);
+            }
         }
         return controlLayout;
     }
@@ -391,7 +438,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         SubDuration duration = durationSelect.getValue();
         SubCurrency subCurrency = currencySelect.getValue();
 
-        for (SubLevel subLevel : SubLevel.values()) {
+        for (SubLevel subLevel : priceTextMap.keySet()) {
             String priceString = SubscriptionUtil.generatePriceString(SubscriptionUtil.getPrice(duration, subLevel, subCurrency));
             priceTextMap.get(subLevel)
                     .setText(getTranslation("premium.price." + subLevel.name(), duration == SubDuration.YEARLY, subCurrency.getSymbol(), priceString));
@@ -437,10 +484,15 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         return generateTierPerk(icon, text, null);
     }
 
-    private Component generateTierPerk(Icon icon, String text, String linkUrl) {
+    private Component generateTierPerk(Icon icon, String text, String[] subTexts) {
+        return generateTierPerk(icon, text, null, subTexts);
+    }
+
+    private Component generateTierPerk(Icon icon, String text, String linkUrl, String[] subTexts) {
         FlexLayout content = new FlexLayout();
         content.setFlexDirection(FlexLayout.FlexDirection.ROW);
         content.add(icon, new Text(text));
+        content.getStyle().set("color", "var(--lumo-body-text-color)");
 
         if (linkUrl != null) {
             Anchor a = new Anchor(linkUrl, content);
@@ -448,7 +500,21 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
             a.setTarget("_blank");
             return a;
         } else {
-            return content;
+            if (subTexts != null) {
+                UnorderedList unorderedList = new UnorderedList();
+                for (String subText : subTexts) {
+                    unorderedList.add(new ListItem(subText));
+                }
+
+                AccordionPanel accordionPanel = new AccordionPanel(content, unorderedList);
+                accordionPanel.addThemeVariants(DetailsVariant.REVERSE);
+                accordionPanel.getStyle()
+                        .set("width", "100%")
+                        .set("border", "0");
+                return accordionPanel;
+            } else {
+                return content;
+            }
         }
     }
 
