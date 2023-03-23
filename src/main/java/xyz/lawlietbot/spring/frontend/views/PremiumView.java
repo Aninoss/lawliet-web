@@ -57,7 +57,6 @@ import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.backend.util.StringUtil;
 import xyz.lawlietbot.spring.frontend.Styles;
 import xyz.lawlietbot.spring.frontend.components.*;
-import xyz.lawlietbot.spring.frontend.components.premium.PaddlePopup;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
 import xyz.lawlietbot.spring.syncserver.EventOut;
@@ -324,8 +323,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                                 .map(g -> g.getValue().getId())
                                 .collect(Collectors.toList());
 
-                        PaddlePopup paddlePopup = new PaddlePopup(durationSelect.getValue(), level, discordUser, value, presetGuildIds);
-                        add(paddlePopup);
+                        PaddleManager.openPopup(durationSelect.getValue(), level, discordUser, value, presetGuildIds, getLocale());
                         UICache.put(discordUser.getId(), UI.getCurrent());
                     } catch (Exception ex) {
                         LOGGER.error("Exception", ex);
@@ -400,7 +398,8 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
 
                 dialog.open(layout, () -> {
                     new Redirector().redirect(ExternalLinks.SERVER_INVITE_URL);
-                }, () -> {});
+                }, () -> {
+                });
             });
             controlLayout.add(buyButton);
 
@@ -746,6 +745,10 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
 
     @Override
     public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
+        if (parameter != null) {
+            PaddleManager.openPopupCustom(parameter);
+        }
+
         Location location = event.getLocation();
         QueryParameters queryParameters = location.getQueryParameters();
         Map<String, List<String>> parametersMap = queryParameters.getParameters();

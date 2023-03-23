@@ -62,25 +62,6 @@ function scrollToTop() {
     window.scrollTo(0, 250);
 }
 
-function updatePaddlePrices(data) {
-    var currencyLabels = document.querySelectorAll(".paddle-currency");
-    var quantity = data.eventData.product.quantity;
-    var name = data.eventData.product.name;
-    var subtotal = data.eventData.checkout.prices.customer.total - data.eventData.checkout.prices.customer.total_tax;
-
-    if (quantity > 1) {
-        name = quantity + "x " + name
-    }
-    for(var i = 0; i < currencyLabels.length; i++) {
-        currencyLabels[i].innerHTML = data.eventData.checkout.prices.customer.currency + " ";
-    }
-
-    document.getElementById("paddle-title").innerHTML = name;
-    document.getElementById("paddle-subtotal").innerHTML = subtotal.toFixed(2);
-    document.getElementById("paddle-tax").innerHTML = data.eventData.checkout.prices.customer.total_tax;
-    document.getElementById("paddle-total").innerHTML = data.eventData.checkout.prices.customer.total;
-}
-
 function openPaddle(vendor, planId, quantity, locale, passthrough) {
     Paddle.Setup({
         vendor: vendor,
@@ -89,18 +70,28 @@ function openPaddle(vendor, planId, quantity, locale, passthrough) {
                 const checkoutId = eventData.eventData.checkout.id;
                 window.location.href = "https://lawlietbot.xyz/premium?paddle=" + checkoutId;
             }
-            updatePaddlePrices(eventData);
         }
     });
     Paddle.Checkout.open({
-        method: 'inline',
         product: planId,
         quantity: quantity,
-        disableLogout: true,
         locale: locale,
-        passthrough: passthrough,
-        frameTarget: 'paddle-container',
-        frameStyle: 'width:100%; min-width:312px; background-color: transparent; border: none;'
+        passthrough: passthrough
+    });
+}
+
+function openPaddleCustom(vendor, id) {
+    Paddle.Setup({
+        vendor: vendor,
+        eventCallback: function(eventData) {
+            if (eventData.event === "Checkout.Complete") {
+                const checkoutId = eventData.eventData.checkout.id;
+                window.location.href = "https://lawlietbot.xyz/premium?paddle=" + checkoutId;
+            }
+        }
+    });
+    Paddle.Checkout.open({
+        override: 'https://create-checkout.paddle.com/checkout/custom/' + id
     });
 }
 

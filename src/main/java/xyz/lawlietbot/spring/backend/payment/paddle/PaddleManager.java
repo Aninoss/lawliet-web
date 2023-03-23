@@ -1,8 +1,11 @@
 package xyz.lawlietbot.spring.backend.payment.paddle;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -22,6 +25,7 @@ import xyz.lawlietbot.spring.backend.UICache;
 import xyz.lawlietbot.spring.backend.payment.SubDuration;
 import xyz.lawlietbot.spring.backend.payment.SubLevel;
 import xyz.lawlietbot.spring.backend.payment.WebhookNotifier;
+import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
@@ -49,6 +53,25 @@ public class PaddleManager {
             LOGGER.error("Error on public key read");
         }
         verifier = new Verifier(publicKey.replace("\r", ""));
+    }
+
+    public static void openPopup(SubDuration duration, SubLevel level, DiscordUser discordUser, int quantity, List<Long> presetGuildIds, Locale locale) {
+        System.out.println(generatePassthrough(discordUser, presetGuildIds));
+        UI.getCurrent().getPage().executeJs("openPaddle($0, $1, $2, $3, $4)",
+                Integer.parseInt(System.getenv("PADDLE_VENDOR_ID")),
+                (int) PaddleManager.getPlanId(duration, level),
+                quantity,
+                locale.getLanguage(),
+                generatePassthrough(discordUser, presetGuildIds)
+        );
+    }
+
+    public static void openPopupCustom(String id) {
+        UI.getCurrent().getPage().executeJs(
+                "openPaddleCustom($0, $1)",
+                Integer.parseInt(System.getenv("PADDLE_VENDOR_ID")),
+                id
+        );
     }
 
     public static boolean verifyWebhookData(String postBody) {
@@ -131,6 +154,9 @@ public class PaddleManager {
                 case PRO:
                     return 746338L;
 
+                case ULTIMATE:
+                    return 820443L;
+
                 default:
                     return 0L;
             }
@@ -141,6 +167,9 @@ public class PaddleManager {
 
                 case PRO:
                     return 746340L;
+
+                case ULTIMATE:
+                    return 820444L;
 
                 default:
                     return 0L;
@@ -158,9 +187,30 @@ public class PaddleManager {
             case "746340":
                 return SubLevel.PRO;
 
+            case "820443":
+            case "820444":
+                return SubLevel.ULTIMATE;
+
             default:
                 return null;
         }
+    }
+
+    private static String generatePassthrough(DiscordUser discordUser, List<Long> presetGuildIds) {
+        String discordTag = discordUser.getUsername() + "#" + discordUser.getDiscriminator();
+
+        JSONObject json = new JSONObject();
+        json.put("discord_id", discordUser.getId());
+        json.put("discord_tag", Base64.getEncoder().encodeToString(discordTag.getBytes(StandardCharsets.UTF_8)));
+        json.put("discord_avatar", discordUser.getUserAvatar());
+
+        JSONArray presetGuildsArray = new JSONArray();
+        for (long presetGuildId : presetGuildIds) {
+            presetGuildsArray.put(presetGuildId);
+        }
+        json.put("preset_guilds", presetGuildsArray);
+
+        return json.toString();
     }
 
 }
