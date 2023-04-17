@@ -56,7 +56,6 @@ public class PaddleManager {
     }
 
     public static void openPopup(SubDuration duration, SubLevel level, DiscordUser discordUser, int quantity, List<Long> presetGuildIds, Locale locale) {
-        System.out.println(generatePassthrough(discordUser, presetGuildIds));
         UI.getCurrent().getPage().executeJs("openPaddle($0, $1, $2, $3, $4)",
                 Integer.parseInt(System.getenv("PADDLE_VENDOR_ID")),
                 (int) PaddleManager.getPlanId(duration, level),
