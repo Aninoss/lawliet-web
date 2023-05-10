@@ -236,11 +236,9 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         }
         content.add(titleLayout);
 
-        if (level.showPrice()) {
-            Text price = new Text("");
-            priceTextMap.put(level, price);
-            content.add(price);
-        }
+        Text price = new Text("");
+        priceTextMap.put(level, price);
+        content.add(price);
         Div div = new Div();
 
         content.add(generateTierPerks(level), div, generateButtonSeparator(), generateBuyLayout(level));
@@ -308,7 +306,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         buyButton.setHeight("43px");
         buyButton.getStyle().set("margin-bottom", "-4px");
 
-        if (level.showPrice()) {
+        if (level.buyDirectly()) {
             if (!loggedIn) {
                 buyButton.setText(getTranslation("login"));
             }
