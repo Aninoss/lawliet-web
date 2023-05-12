@@ -6,7 +6,7 @@ public enum SubLevel {
 
     BASIC(Map.of(SubCurrency.USD, 300, SubCurrency.EUR, 300, SubCurrency.GBP, 250), false, true),
     PRO(Map.of(SubCurrency.USD, 500, SubCurrency.EUR, 450, SubCurrency.GBP, 400), true, true),
-    ULTIMATE(Map.of(SubCurrency.USD, 1500, SubCurrency.EUR, 1350, SubCurrency.GBP, 1200), false, false);
+    ULTIMATE(Map.of(SubCurrency.USD, 2000, SubCurrency.EUR, 1800, SubCurrency.GBP, 1600), false, false);
 
     private final Map<SubCurrency, Integer> priceMap;
     private final boolean recommended;
