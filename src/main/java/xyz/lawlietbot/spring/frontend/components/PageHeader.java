@@ -84,9 +84,9 @@ public class PageHeader extends Div {
     }
 
     private void addDescription(@Nonnull String description) {
-        HtmlText htmlText = new HtmlText(description);
-        htmlText.setWidthFull();
-        innerLayout.add(htmlText);
+        SpanWithLinebreaks spanWithLinebreaks = new SpanWithLinebreaks(description);
+        spanWithLinebreaks.setWidthFull();
+        innerLayout.add(spanWithLinebreaks);
     }
 
     private void addTitle(@Nonnull String title) {

@@ -52,7 +52,6 @@ public class CommandCategoryLayout extends VerticalLayout {
             VerticalLayout titleContent = new VerticalLayout();
             titleContent.setPadding(false);
 
-
             HorizontalLayout titleArea = new HorizontalLayout();
             H5 title = new H5("L." + slot.getTrigger());
             title.getStyle().set("margin-top", "0px");
