@@ -1,13 +1,10 @@
 package xyz.lawlietbot.spring.frontend.views;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-import javax.servlet.http.Cookie;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
@@ -23,7 +20,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.VaadinService;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import xyz.lawlietbot.spring.LoginAccess;
 import xyz.lawlietbot.spring.NoLiteAccess;
@@ -33,6 +30,8 @@ import xyz.lawlietbot.spring.frontend.components.PageHeader;
 import xyz.lawlietbot.spring.frontend.components.SpanWithLinebreaks;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
+import xyz.lawlietbot.spring.syncserver.EventOut;
+import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 @Route(value = "exceptions", layout = MainLayout.class)
 @NoLiteAccess
@@ -41,7 +40,7 @@ public class ExceptionsView extends PageLayout {
 
     private final VerticalLayout mainLayout = new VerticalLayout();
 
-    public ExceptionsView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
+    public ExceptionsView(@Autowired SessionData sessionData, @Autowired UIData uiData) throws ExecutionException, InterruptedException {
         super(sessionData, uiData);
         getStyle().set("margin-bottom", "48px");
 
@@ -54,12 +53,12 @@ public class ExceptionsView extends PageLayout {
         mainContent.setPadding(true);
 
         add(
-                new PageHeader(getUiData(), getTitleText(), null, generateHeaderMenu()),
+                new PageHeader(getUiData(), getTitleText(), null, generateHeaderMenu(sessionData)),
                 mainContent
         );
     }
 
-    private Component generateHeaderMenu() {
+    private Component generateHeaderMenu(SessionData sessionData) throws ExecutionException, InterruptedException {
         VerticalLayout mainLayout = new VerticalLayout();
         mainLayout.setWidthFull();
         mainLayout.setPadding(false);
@@ -101,17 +100,22 @@ public class ExceptionsView extends PageLayout {
 
         TextArea textAreaHide = new TextArea();
         textAreaHide.setLabel("Hide");
-        textAreaHide.setValue(getTextValueFromCookies("exceptions-hide-" + dirSelect.getValue()));
-        dirSelect.addValueChangeListener(e -> textAreaHide.setValue(getTextValueFromCookies("exceptions-hide-" + e.getValue())));
         operationsLayout.add(textAreaHide);
         operationsLayout.setFlexGrow(1, textAreaHide);
 
         TextArea textAreaGroup = new TextArea();
         textAreaGroup.setLabel("Group");
-        textAreaGroup.setValue(getTextValueFromCookies("exceptions-group-" + dirSelect.getValue()));
-        dirSelect.addValueChangeListener(e -> textAreaGroup.setValue(getTextValueFromCookies("exceptions-group-" + e.getValue())));
         operationsLayout.add(textAreaGroup);
         operationsLayout.setFlexGrow(1, textAreaGroup);
+
+        setTextAreaValues(sessionData.getDiscordUser().get().getId(), dirSelect.getValue(), textAreaHide, textAreaGroup);
+        dirSelect.addValueChangeListener(e -> {
+            try {
+                setTextAreaValues(sessionData.getDiscordUser().get().getId(), e.getValue(), textAreaHide, textAreaGroup);
+            } catch (ExecutionException | InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
         Button button = new Button("Fetch");
         button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -120,17 +124,13 @@ public class ExceptionsView extends PageLayout {
             LocalDate dateFrom = datePickerFrom.getValue();
             LocalDate dateTo = datePickerTo.getValue();
 
-            Cookie cookieHide = new Cookie("exceptions-hide-" + dir, textAreaHide.getValue().replace("\n", "\\n"));
-            cookieHide.setHttpOnly(true);
-            cookieHide.setSecure(true);
-            cookieHide.setMaxAge(Integer.MAX_VALUE);
-            VaadinService.getCurrentResponse().addCookie(cookieHide);
-
-            Cookie cookieGroup = new Cookie("exceptions-group-" + dir, textAreaGroup.getValue().replace("\n", "\\n"));
-            cookieGroup.setHttpOnly(true);
-            cookieGroup.setSecure(true);
-            cookieGroup.setMaxAge(Integer.MAX_VALUE);
-            VaadinService.getCurrentResponse().addCookie(cookieGroup);
+            Map<String, Object> map = Map.of(
+                    "user_id", sessionData.getDiscordUser().get().getId(),
+                    "dir", dirSelect.getValue(),
+                    "hide", textAreaHide.getValue(),
+                    "group", textAreaGroup.getValue()
+            );
+            SendEvent.send(EventOut.EXCEPTIONS_PAGE_UPDATE, map).join();
 
             List<String> headersHidden = Arrays.stream(textAreaHide.getValue().split("\n"))
                     .filter(h -> !h.isEmpty())
@@ -147,20 +147,22 @@ public class ExceptionsView extends PageLayout {
         return mainLayout;
     }
 
+    private void setTextAreaValues(long userId, String dir, TextArea textAreaHide, TextArea textAreaGroup) throws ExecutionException, InterruptedException {
+        Map<String, Object> map = Map.of(
+                "user_id", userId,
+                "dir", dir
+        );
+        JSONObject jsonObject = SendEvent.send(EventOut.EXCEPTIONS_PAGE_INIT, map).get();
+        textAreaHide.setValue(jsonObject.getString("hide"));
+        textAreaGroup.setValue(jsonObject.getString("group"));
+    }
+
     private List<String> listDirs() {
         File dir = new File(System.getenv("LOGS_DIR"));
         return Arrays.stream(Objects.requireNonNull(dir.listFiles()))
                 .map(File::getName)
+                .sorted(String::compareTo)
                 .collect(Collectors.toList());
-    }
-
-    private String getTextValueFromCookies(String name) {
-        for (Cookie cookie : VaadinService.getCurrentRequest().getCookies()) {
-            if (cookie.getName().equals(name)) {
-                return cookie.getValue().replace("\\n", "\n");
-            }
-        }
-        return "";
     }
 
     private void updateMainLayout(String dir, LocalDate dateFrom, LocalDate dateTo, List<String> headersHidden,
