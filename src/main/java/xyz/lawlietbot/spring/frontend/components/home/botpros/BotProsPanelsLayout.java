@@ -1,21 +1,19 @@
 package xyz.lawlietbot.spring.frontend.components.home.botpros;
 
+import java.util.ArrayList;
 import com.github.appreciated.css.grid.GridLayoutComponent;
 import com.github.appreciated.css.grid.sizes.Flex;
 import com.github.appreciated.css.grid.sizes.Length;
 import com.github.appreciated.css.grid.sizes.MinMax;
 import com.github.appreciated.css.grid.sizes.Repeat;
 import com.github.appreciated.layout.FlexibleGridLayout;
-import xyz.lawlietbot.spring.backend.userdata.UIData;
-import xyz.lawlietbot.spring.frontend.views.CommandsView;
-import xyz.lawlietbot.spring.frontend.views.DashboardView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Article;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-
-import java.util.ArrayList;
+import xyz.lawlietbot.spring.backend.userdata.UIData;
+import xyz.lawlietbot.spring.frontend.views.CommandsView;
 
 public class BotProsPanelsLayout extends VerticalLayout {
 
@@ -68,7 +66,7 @@ public class BotProsPanelsLayout extends VerticalLayout {
         return new BotProPanelInfo[]{
                 new BotProPanelInfo("fishery", true, VaadinIcon.TROPHY.create(), 150),
                 new BotProPanelInfo("alerts", true, VaadinIcon.BELL.create()),
-                new BotProPanelInfo("nsfw", !uiData.isNSFWDisabled(), VaadinIcon.MOON_O.create()),
+                new BotProPanelInfo("nsfw", false, VaadinIcon.MOON_O.create()),
                 new BotProPanelInfo("mod", true, VaadinIcon.SHIELD.create()),
                 new BotProPanelInfo("invitetracking", true, VaadinIcon.ENVELOPE.create()),
                 new BotProPanelInfo("giveaways", true, VaadinIcon.GIFT.create()),
