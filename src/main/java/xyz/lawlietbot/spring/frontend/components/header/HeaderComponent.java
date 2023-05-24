@@ -1,13 +1,5 @@
 package xyz.lawlietbot.spring.frontend.components.header;
 
-import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
-import xyz.lawlietbot.spring.backend.userdata.SessionData;
-import xyz.lawlietbot.spring.backend.userdata.UIData;
-import xyz.lawlietbot.spring.frontend.components.DiscordIcon;
-import xyz.lawlietbot.spring.frontend.components.LawlietBotLogo;
-import xyz.lawlietbot.spring.frontend.Styles;
-import xyz.lawlietbot.spring.frontend.views.DiscordLogout;
-import xyz.lawlietbot.spring.frontend.views.HomeView;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -18,14 +10,23 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tabs;
-import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.RouterLink;
+import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
+import xyz.lawlietbot.spring.backend.userdata.SessionData;
+import xyz.lawlietbot.spring.backend.userdata.UIData;
+import xyz.lawlietbot.spring.frontend.Styles;
+import xyz.lawlietbot.spring.frontend.components.DiscordIcon;
+import xyz.lawlietbot.spring.frontend.components.LawlietBotLogo;
+import xyz.lawlietbot.spring.frontend.views.DiscordLogout;
+import xyz.lawlietbot.spring.frontend.views.HomeView;
 
 public class HeaderComponent extends Header {
 
-    public HeaderComponent(SessionData sessionData, UIData uiData)  {
+    public HeaderComponent(SessionData sessionData, UIData uiData) {
         setId("header-out");
-        if (uiData.isLite())
+        if (uiData.isLite()) {
             addClassName("lite");
+        }
 
         HorizontalLayout content = new HorizontalLayout();
         content.setId("header-content");

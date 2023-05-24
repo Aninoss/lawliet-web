@@ -10,14 +10,17 @@ public class Subscription {
     private final String price;
     private final LocalDate nextPayment;
     private final String updateUrl;
+    private final String email;
 
-    public Subscription(long subId, long planId, int quantity, String price, LocalDate nextPayment, String updateUrl) {
+    public Subscription(long subId, long planId, int quantity, String price, LocalDate nextPayment, String updateUrl,
+                        String email) {
         this.subId = subId;
         this.planId = planId;
         this.quantity = quantity;
         this.price = price;
         this.nextPayment = nextPayment;
         this.updateUrl = updateUrl;
+        this.email = email;
     }
 
     public long getSubId() {
@@ -46,6 +49,10 @@ public class Subscription {
 
     public String getUpdateUrl() {
         return updateUrl;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
 }

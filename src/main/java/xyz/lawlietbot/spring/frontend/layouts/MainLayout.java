@@ -1,5 +1,6 @@
 package xyz.lawlietbot.spring.frontend.layouts;
 
+import java.util.Comparator;
 import java.util.Map;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -21,6 +22,8 @@ import xyz.lawlietbot.spring.NoLiteAccess;
 import xyz.lawlietbot.spring.SetDivStretchBackground;
 import xyz.lawlietbot.spring.backend.Redirector;
 import xyz.lawlietbot.spring.backend.language.PageTitleGen;
+import xyz.lawlietbot.spring.backend.payment.Subscription;
+import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.frontend.Styles;
@@ -31,6 +34,7 @@ import xyz.lawlietbot.spring.frontend.components.header.HeaderComponent;
 import xyz.lawlietbot.spring.frontend.components.header.VerticalMenuBarComponent;
 import xyz.lawlietbot.spring.frontend.views.ExceptionView;
 import xyz.lawlietbot.spring.frontend.views.IEView;
+import xyz.lawlietbot.spring.syncserver.SyncUtil;
 
 @CssImport("./styles/styles.css")
 @CssImport("./styles/styles-reversed.css")
@@ -88,6 +92,9 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
         }
 
         showNotifications(sessionData);
+
+        Long userId = sessionData.getDiscordUser().map(DiscordUser::getId).orElse(null);
+        startProfitWell(userId);
     }
 
     @Override
@@ -194,6 +201,26 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
     private void showNotifications(SessionData sessionData) {
         for (String messageKey : sessionData.flushErrorMessages()) {
             CustomNotification.showError(getTranslation(messageKey));
+        }
+    }
+
+    private void startProfitWell(Long userId) {
+        String email = null;
+        if (userId != null) {
+            Subscription subscription = SyncUtil.retrievePaddleSubscriptions(userId, 0).join()
+                    .stream()
+                    .max(Comparator.comparingLong(Subscription::getPlanId))
+                    .orElse(null);
+
+            if (subscription != null) {
+                email = subscription.getEmail();
+            }
+        }
+
+        if (email != null) {
+            UI.getCurrent().getPage().executeJs("profitwell('start', { 'user_email': '" + email + "' })");
+        } else {
+            UI.getCurrent().getPage().executeJs("profitwell('start', {})");
         }
     }
 

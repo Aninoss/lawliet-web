@@ -104,6 +104,7 @@ public class PaddleManager {
             String totalPrice = String.format("%s %.02f", currency, total);
             String nextPayment = parameterMap.get("next_bill_date")[0];
             String updateUrl = parameterMap.get("update_url")[0];
+            String email = parameterMap.get("email")[0];
             long discordId = passthroughJson.getLong("discord_id");
             UI ui = UICache.get(discordId);
 
@@ -120,6 +121,7 @@ public class PaddleManager {
             json.put("total_price", totalPrice);
             json.put("next_payment", nextPayment);
             json.put("update_url", updateUrl);
+            json.put("email", email);
             SendEvent.send(EventOut.PADDLE, json).join();
 
             String discordTag = new String(Base64.getDecoder().decode(passthroughJson.getString("discord_tag")));

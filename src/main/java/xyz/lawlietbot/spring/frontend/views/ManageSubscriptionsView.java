@@ -1,9 +1,6 @@
 package xyz.lawlietbot.spring.frontend.views;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.stripe.exception.StripeException;
@@ -20,8 +17,6 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RoutePrefix;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,8 +37,7 @@ import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.frontend.components.PageHeader;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
-import xyz.lawlietbot.spring.syncserver.EventOut;
-import xyz.lawlietbot.spring.syncserver.SendEvent;
+import xyz.lawlietbot.spring.syncserver.SyncUtil;
 
 @Route(value = "manage", layout = MainLayout.class)
 @RoutePrefix("premium")
@@ -92,31 +86,7 @@ public class ManageSubscriptionsView extends PageLayout {
     }
 
     private Component generateGrid(DiscordUser user, String sessionUrl, long reloadSubId) {
-        JSONObject json = new JSONObject();
-        json.put("user_id", user.getId());
-        json.put("clear_subscription_cache", false);
-        if (reloadSubId > 0) {
-            json.put("reload_sub_id", reloadSubId);
-        }
-
-        List<Subscription> subscriptionList = SendEvent.send(EventOut.PADDLE_SUBS, json)
-                .thenApply(r -> {
-                    JSONArray subsJson = r.getJSONArray("subscriptions");
-                    ArrayList<Subscription> subscriptions = new ArrayList<>();
-                    for (int i = 0; i < subsJson.length(); i++) {
-                        JSONObject subJson = subsJson.getJSONObject(i);
-                        subscriptions.add(new Subscription(
-                                subJson.getLong("sub_id"),
-                                subJson.getLong("plan_id"),
-                                subJson.getInt("quantity"),
-                                subJson.getString("total_price"),
-                                subJson.has("next_payment") ? LocalDate.parse(subJson.getString("next_payment")) : null,
-                                subJson.getString("update_url")
-                        ));
-                    }
-                    return Collections.unmodifiableList(subscriptions);
-                }).join();
-
+        List<Subscription> subscriptionList = SyncUtil.retrievePaddleSubscriptions(user.getId(), reloadSubId).join();
         if (subscriptionList.size() > 0) {
             Grid<Subscription> grid = new Grid<>(Subscription.class, false);
             grid.setHeightByRows(true);
