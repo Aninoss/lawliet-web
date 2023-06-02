@@ -72,12 +72,13 @@ public class CustomRequestHandler implements RequestHandler {
     private void addHeaders(VaadinResponse response) {
         response.setHeader(
                 "Content-Security-Policy",
-                "default-src data: 'self' https://widgetbot.io https://e.widgetbot.io ws://localhost:35729/ https://www.paypal.com https://cdn.paddle.com https://sandbox-create-checkout.paddle.com https://create-checkout.paddle.com https://sandbox-buy.paddle.com https://buy.paddle.com https://*.profitwell.com; " +
-                        "img-src 'self' https://*.lawlietbot.xyz/ https://cdn.discordapp.com/ https://*.donmai.us/ https://*.rule34.xxx/ https://realbooru.com/ https://*.e621.net/ https://safebooru.org/ https://www.paypal.com https://cdn.paddle.com https://*.profitwell.com;" +
+                "default-src data: 'self' https://widgetbot.io https://e.widgetbot.io ws://localhost:35729/ https://www.paypal.com https://*.paddle.com https://sandbox-create-checkout.paddle.com https://create-checkout.paddle.com https://sandbox-buy.paddle.com https://buy.paddle.com https://*.profitwell.com; " +
+                        "img-src 'self' https://*.lawlietbot.xyz/ https://cdn.discordapp.com/ https://*.donmai.us/ https://*.rule34.xxx/ https://realbooru.com/ https://*.e621.net/ https://safebooru.org/ https://www.paypal.com https://cdn.paddle.com https://*.profitwell.com https://dna8twue3dlxq.cloudfront.net; " +
                         "media-src 'self' https://*.lawlietbot.xyz/ https://*.donmai.us/ https://*.rule34.xxx/ https://realbooru.com/ https://*.e621.net/ https://safebooru.org/; " +
                         "object-src 'self'; " +
-                        "script-src 'unsafe-inline' 'unsafe-eval' 'self' ajax.cloudflare.com https://cdn.jsdelivr.net https://www.paypal.com https://cdn.paddle.com https://*.profitwell.com;" +
-                        "style-src https://cdn.paddle.com https://*.profitwell.com 'unsafe-inline' 'self'; " +
+                        "script-src 'unsafe-inline' 'unsafe-eval' 'self' ajax.cloudflare.com https://cdn.jsdelivr.net https://www.paypal.com https://*.paddle.com https://*.profitwell.com https://polyfill.io https://*.googleapis.com https://*.sentry-cdn.com; " +
+                        "style-src https://*.paddle.com https://*.profitwell.com 'unsafe-inline' 'self'; " +
+                        "frame-src https://*.paddle.com; " +
                         "frame-ancestors https://top.gg https://discords.com"
         );
         response.setHeader("X-Frame-Options", "allow-from https://top.gg/ https://discords.com/");
