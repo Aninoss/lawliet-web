@@ -211,7 +211,7 @@ public class ExceptionsView extends PageLayout {
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
-                if (!line.isEmpty() && line.charAt(0) >= '0' && line.charAt(0) <= '9') {
+                if (!line.isEmpty() && ((line.charAt(0) >= '0' && line.charAt(0) <= '9') || line.charAt(0) == '-')) {
                     if (sb.length() > 0) {
                         messages.add(0, sb.toString());
                     }
@@ -260,9 +260,9 @@ public class ExceptionsView extends PageLayout {
             header = lines[0];
         }
         if (header.contains("[ERROR]")) {
-            return header.substring(header.indexOf("[ERROR]") + 8);
+            return header.substring(header.indexOf("[ERROR]"));
         } else if (header.contains("[WARN]")) {
-            return header.substring(header.indexOf("[WARN]") + 7);
+            return header.substring(header.indexOf("[WARN]"));
         } else {
             return null;
         }
