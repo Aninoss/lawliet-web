@@ -223,8 +223,4 @@ vaadin-accordion-panel > div > .prop-check {
         max-width: 350px;
     }
 
-    .tier-perks-layout.ultimate-layout {
-        margin-top: calc(32px + 1.65em);
-    }
-
 }

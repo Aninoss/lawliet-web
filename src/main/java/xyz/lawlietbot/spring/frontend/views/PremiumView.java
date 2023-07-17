@@ -1,14 +1,5 @@
 package xyz.lawlietbot.spring.frontend.views;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 import bell.oauth.discord.domain.Guild;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
@@ -61,6 +52,16 @@ import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 @Route(value = "premium", layout = MainLayout.class)
 @CssImport("./styles/premium.css")
@@ -251,9 +252,6 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         content.setWidthFull();
         content.setPadding(false);
         content.addClassName("tier-perks-layout");
-        if (level == SubLevel.ULTIMATE) {
-            content.addClassName("ultimate-layout");
-        }
         String[] perks = getTranslation("premium.perks." + level.name(), StringUtil.numToString(countPremiumCommands())).split("\n");
         for (int i = 0; i < perks.length; i++) {
             String perk = perks[i];
