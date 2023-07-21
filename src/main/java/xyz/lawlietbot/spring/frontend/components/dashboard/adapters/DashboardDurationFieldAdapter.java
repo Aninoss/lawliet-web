@@ -29,14 +29,19 @@ public class DashboardDurationFieldAdapter extends FlexLayout {
                 true,
                 dashboardDurationField.getEditButton()
         );
-        NumberField minutesField = generateNumberField(
-                getTranslation("dash.duration.minutes"),
-                dashboardDurationField.isEnabled(),
-                59,
-                extractValueMinutes(defaultValue),
-                true,
-                dashboardDurationField.getEditButton()
-        );
+        NumberField minutesField;
+        if (dashboardDurationField.getIncludeMinutes()) {
+            minutesField = generateNumberField(
+                    getTranslation("dash.duration.minutes"),
+                    dashboardDurationField.isEnabled(),
+                    59,
+                    extractValueMinutes(defaultValue),
+                    true,
+                    dashboardDurationField.getEditButton()
+            );
+        } else {
+            minutesField = null;
+        }
 
         if (dashboardDurationField.isEnabled()) {
             if (dashboardDurationField.getEditButton()) {
@@ -44,22 +49,28 @@ public class DashboardDurationFieldAdapter extends FlexLayout {
                 dashboardTextFieldButtons.setModeChangeListener(editMode -> {
                     daysField.setReadOnly(!editMode);
                     hoursField.setReadOnly(!editMode);
-                    minutesField.setReadOnly(!editMode);
+                    if (minutesField != null) {
+                        minutesField.setReadOnly(!editMode);
+                    }
                 });
                 dashboardTextFieldButtons.setCancelListener(() -> {
                     daysField.setValue((double) extractValueDays(defaultValue));
                     hoursField.setValue((double) extractValueHours(defaultValue));
-                    minutesField.setValue((double) extractValueMinutes(defaultValue));
+                    if (minutesField != null) {
+                        minutesField.setValue((double) extractValueMinutes(defaultValue));
+                    }
                 });
                 dashboardTextFieldButtons.setConfirmListener(() -> trigger(dashboardDurationField, daysField, hoursField, minutesField));
                 add(dashboardTextFieldButtons);
             } else {
                 daysField.setValueChangeMode(ValueChangeMode.ON_BLUR);
                 hoursField.setValueChangeMode(ValueChangeMode.ON_BLUR);
-                minutesField.setValueChangeMode(ValueChangeMode.ON_BLUR);
                 daysField.addValueChangeListener(event -> trigger(dashboardDurationField, daysField, hoursField, minutesField));
                 hoursField.addValueChangeListener(event -> trigger(dashboardDurationField, daysField, hoursField, minutesField));
-                minutesField.addValueChangeListener(event -> trigger(dashboardDurationField, daysField, hoursField, minutesField));
+                if (minutesField != null) {
+                    minutesField.setValueChangeMode(ValueChangeMode.ON_BLUR);
+                    minutesField.addValueChangeListener(event -> trigger(dashboardDurationField, daysField, hoursField, minutesField));
+                }
             }
         }
     }
@@ -68,12 +79,18 @@ public class DashboardDurationFieldAdapter extends FlexLayout {
         if (dashboardDurationField.isEnabled() &&
                 checkNumberField(daysField, 999) &&
                 checkNumberField(hoursField, 23) &&
-                checkNumberField(minutesField, 59)
+                (minutesField == null || checkNumberField(minutesField, 59))
         ) {
-            long value = minutesField.getValue().longValue() + hoursField.getValue().longValue() * 60 + daysField.getValue().longValue() * 1440;
+            long minutesValue = minutesField != null ? minutesField.getValue().longValue() : 0L;
+            long value = minutesValue + hoursField.getValue().longValue() * 60 + daysField.getValue().longValue() * 1440;
             if (value == 0) {
-                value = 1;
-                minutesField.setValue(1.0);
+                if (minutesField != null) {
+                    value = 1;
+                    minutesField.setValue(1.0);
+                } else {
+                    value = 60;
+                    hoursField.setValue(1.0);
+                }
             }
             if (value != defaultValue) {
                 defaultValue = value;
