@@ -187,9 +187,12 @@ public class CustomRequestHandler implements RequestHandler {
         try (BufferedReader br = request.getReader()) {
             String body = br.lines().collect(Collectors.joining("\n"));
             if (body.length() > 0) {
-                JSONObject jsonObject = new JSONObject(body);
+                JSONObject jsonObject = new JSONObject(body)
+                        .put("auth", auth);
                 long guildId = jsonObject.getLong("guild");
-                LOGGER.info("UPVOTE {} | {}", guildId, jsonObject.getLong("user"));
+                long userId = jsonObject.getLong("user");
+
+                LOGGER.info("UPVOTE {} | {}", guildId, userId);
                 JSONObject responseJson = SendEvent.sendToGuild(EventOut.TOPGG_VOTE_REWARDS, jsonObject, guildId).get(5, TimeUnit.SECONDS);
                 if (!responseJson.getBoolean("success")) {
                     LOGGER.error("Error while handling vote rewards upvote");
