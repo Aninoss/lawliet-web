@@ -1,13 +1,5 @@
 package xyz.lawlietbot.spring;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
@@ -25,6 +17,15 @@ import xyz.lawlietbot.spring.backend.payment.stripe.StripeManager;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class CustomRequestHandler implements RequestHandler {
 
@@ -50,6 +51,10 @@ public class CustomRequestHandler implements RequestHandler {
 
             case "/topgg_aninoss":
                 handleTopGGAnicord(request, response, auth);
+                return true;
+
+            case "/topgg_vote_rewards":
+                handleTopGGVoteRewards(request, response, auth);
                 return true;
 
             case "/invite":
@@ -174,6 +179,28 @@ public class CustomRequestHandler implements RequestHandler {
         } else {
             LOGGER.error("Invalid auth while handling Anicord upvote");
             response.setStatus(403);
+        }
+    }
+
+    private void handleTopGGVoteRewards(VaadinRequest request, VaadinResponse response, String auth) {
+        LOGGER.info("Receiving vote rewards upvote signal...");
+        try (BufferedReader br = request.getReader()) {
+            String body = br.lines().collect(Collectors.joining("\n"));
+            if (body.length() > 0) {
+                JSONObject jsonObject = new JSONObject(body);
+                long guildId = jsonObject.getLong("guild");
+                LOGGER.info("UPVOTE {} | {}", guildId, jsonObject.getLong("user"));
+                JSONObject responseJson = SendEvent.sendToGuild(EventOut.TOPGG_VOTE_REWARDS, jsonObject, guildId).get(5, TimeUnit.SECONDS);
+                if (!responseJson.getBoolean("success")) {
+                    LOGGER.error("Error while handling vote rewards upvote");
+                    response.setStatus(500);
+                }
+            } else {
+                LOGGER.error("Empty body while handling vote rewards upvote");
+            }
+        } catch (Throwable e) {
+            LOGGER.error("Error while handling vote rewards upvote", e);
+            response.setStatus(500);
         }
     }
 

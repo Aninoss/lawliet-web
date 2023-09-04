@@ -8,6 +8,7 @@ public enum EventOut {
     SERVER_STATS,
     TOPGG,
     TOPGG_ANICORD,
+    TOPGG_VOTE_REWARDS,
     FR_FETCH,
     FR_BOOST,
     FR_CAN_POST,
