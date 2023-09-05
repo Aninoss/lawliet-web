@@ -1,5 +1,6 @@
 package xyz.lawlietbot.spring.frontend.components.dashboard.adapters;
 
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import dashboard.component.DashboardText;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -19,7 +20,13 @@ public class DashboardTextAdapter extends Div {
             default:
         }
 
-        getElement().setProperty("innerHTML", StringEscapeUtils.escapeHtml4(dashboardText.getText()).replace("\n", "<br>"));
+        if (dashboardText.getUrl() == null) {
+            getElement().setProperty("innerHTML", StringEscapeUtils.escapeHtml4(dashboardText.getText()).replace("\n", "<br>"));
+        } else {
+            Anchor a = new Anchor(dashboardText.getUrl(), dashboardText.getText());
+            a.setTarget("_blank");
+            add(a);
+        }
     }
 
 }

@@ -205,7 +205,7 @@
         <dependency>
             <groupId>com.github.Aninoss</groupId>
             <artifactId>lawliet-dashboard-components</artifactId>
-            <version>648b4649ba</version>
+            <version>69a070fa5a</version>
         </dependency>
         <dependency>
             <groupId>club.minnced</groupId>
