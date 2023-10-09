@@ -129,7 +129,7 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
         settings.addMetaTag("og:type", "website");
         settings.addMetaTag("og:site_name", getTranslation("bot.name"));
         settings.addMetaTag("og:title", PageTitleGen.getPageTitle(target));
-        settings.addMetaTag("og:description", getTranslation("bot.desc"));
+        settings.addMetaTag("og:description", getTranslation("bot.desc.nonsfw"));
         settings.addMetaTag("og:image", "http://lawlietbot.xyz/styles/img/bot_icon.webp");
 
         //Favicons

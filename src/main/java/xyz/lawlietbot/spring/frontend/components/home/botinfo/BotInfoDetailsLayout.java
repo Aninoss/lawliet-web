@@ -37,7 +37,7 @@ public class BotInfoDetailsLayout extends VerticalLayout {
         title.setWidthFull();
 
         //Description
-        Div description = new Div(new Text(getTranslation(uiData.isNSFWDisabled() ? "bot.desc.nonsfw" : "bot.desc")));
+        Div description = new Div(new Text(getTranslation("bot.desc.nonsfw")));
         description.getStyle().set("font-size", "80%");
         description.addClassNames("bot-info-details-width", "size-small-fullwidth");
 
