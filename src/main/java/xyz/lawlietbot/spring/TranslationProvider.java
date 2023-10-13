@@ -49,8 +49,12 @@ public class TranslationProvider implements I18NProvider {
             return "";
         }
 
-        final ResourceBundle bundle = bundleCache.getUnchecked(locale);
+        String forceLocale = System.getenv("FORCE_LOCALE");
+        if (forceLocale != null) {
+            locale = new Locale(forceLocale);
+        }
 
+        final ResourceBundle bundle = bundleCache.getUnchecked(locale);
         if (bundle == null) return "!" + key + "!";
 
         String value;
