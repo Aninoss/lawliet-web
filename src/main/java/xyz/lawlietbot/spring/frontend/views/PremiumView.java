@@ -81,8 +81,8 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
     private UserPremium userPremium;
     private boolean slotsBuild = false;
     private NumberField quantityNumberField;
-    private Text proBuyPriceText;
-    private final Map<SubLevel, Text> priceTextMap = new HashMap<>();
+    private final Map<SubLevel, H2> priceTextMap = new HashMap<>();
+    private final Map<SubLevel, Span> pricePeriodTextMap = new HashMap<>();
     private VerticalLayout preselectGuildsLayout;
     private HorizontalLayout yearlySuggestionField;
 
@@ -105,7 +105,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         premiumContent.addClassName(Styles.APP_WIDTH);
         premiumContent.getStyle().set("margin-bottom", "48px");
 
-        premiumContent.add(generateTiersTitle(), generateTiersSubtitle(), generateYearlySuggestionField(), generateSeparator(), generateTiersTiers());
+        premiumContent.add(generateTiersTitle(), generateYearlySuggestionField(), generateSeparator(), generateTiersTiers());
         return premiumContent;
     }
 
@@ -114,18 +114,12 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         content.setWidthFull();
         content.setSpacing(false);
         content.setPadding(false);
-        content.getStyle().set("margin-top", "12px");
+        content.getStyle().set("margin-top", "12px")
+                .set("margin-bottom", "16px");
         content.setAlignItems(FlexComponent.Alignment.END);
         content.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         content.add(generateTiersTitleText(), generateTiersTitleDuration());
         return content;
-    }
-
-    private Component generateTiersSubtitle() {
-        Span span = new Span(getTranslation("premium.tiers.subtitle"));
-        span.setWidthFull();
-        span.getStyle().set("margin-bottom", "16px");
-        return span;
     }
 
     private Component generateYearlySuggestionField() {
@@ -213,14 +207,18 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         content.setAlignItems(FlexComponent.Alignment.CENTER);
         content.addClassNames("tier-card");
         content.setId("card" + level.ordinal());
+        if (level.isRecommended()) {
+            content.getStyle().set("border-color", "rgb(var(--warning-color-rgb))");
+        }
 
         HorizontalLayout titleLayout = new HorizontalLayout();
         titleLayout.setPadding(false);
         titleLayout.setAlignItems(FlexComponent.Alignment.CENTER);
 
-        H2 title = new H2(getTranslation("premium.tier." + level.name()));
+        Span title = new Span(getTranslation("premium.tier." + level.name()));
         title.getStyle().set("margin-top", "0")
-                .set("margin-bottom", "0");
+                .set("margin-bottom", "0")
+                .set("font-size", "125%");
         titleLayout.add(title);
 
         if (level.isRecommended()) {
@@ -237,13 +235,33 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         }
         content.add(titleLayout);
 
-        Text price = new Text("");
+        Icon icon = level.getVaadinIcon().create();
+        icon.setSize("64px");
+        icon.getStyle().set("margin-bottom", "16px")
+                .set("margin-top", "24px");
+        content.add(icon);
+
+        H2 price = new H2("");
+        price.getStyle().set("margin", "0")
+                .set("font-size", "225%");
         priceTextMap.put(level, price);
         content.add(price);
-        Div div = new Div();
 
-        content.add(generateTierPerks(level), div, generateButtonSeparator(), generateBuyLayout(level));
-        content.setFlexGrow(1, div);
+        Span period = new Span("");
+        period.getStyle().set("margin", "0")
+                .set("color", "var(--secondary-text-color)");
+        pricePeriodTextMap.put(level, period);
+        content.add(period, generateBuyButton(level));
+
+        Span desc = new Span(getTranslation("premium.desc." + level.name()));
+        desc.getStyle().set("text-align", "center");
+        content.add(desc, generateButtonSeparator());
+
+        if (level == SubLevel.PRO && getSessionData().isLoggedIn()) {
+            content.add(generateQuantityLayout());
+        }
+
+        content.add(generateTierPerks(level));
         return content;
     }
 
@@ -252,6 +270,9 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         content.setWidthFull();
         content.setPadding(false);
         content.addClassName("tier-perks-layout");
+        content.getStyle().set("margin-bottom", "24px")
+                .set("margin-top", "16px");
+
         String[] perks = getTranslation("premium.perks." + level.name(), StringUtil.numToString(countPremiumCommands())).split("\n");
         for (int i = 0; i < perks.length; i++) {
             String perk = perks[i];
@@ -286,27 +307,22 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
     private Component generateButtonSeparator() {
         Hr hr = new Hr();
         hr.setWidthFull();
-        hr.getStyle().set("margin-bottom", "4px");
+        hr.getStyle().set("margin-top", "16px");
         return hr;
     }
 
-    private Component generateBuyLayout(SubLevel level) {
+    private Component generateBuyButton(SubLevel level) {
         boolean loggedIn = getSessionData().isLoggedIn();
-
-        VerticalLayout controlLayout = new VerticalLayout();
-        controlLayout.setPadding(false);
-        controlLayout.setWidthFull();
-        controlLayout.getStyle().set("margin-bottom", "24px");
 
         Button buyButton = new Button(getTranslation("premium.buy"));
         buyButton.setWidthFull();
         buyButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         buyButton.setHeight("43px");
-        buyButton.getStyle().set("margin-bottom", "-4px");
+        buyButton.getStyle().set("margin-top", "24px");
 
         if (level.buyDirectly()) {
             if (!loggedIn) {
-                buyButton.setText(getTranslation("login"));
+                buyButton.setText(getTranslation("premium.buylogin"));
             }
             buyButton.addClickListener(e -> {
                 DiscordUser discordUser = getSessionData().getDiscordUser().orElse(null);
@@ -329,54 +345,6 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                     new Redirector().redirect(getSessionData().getLoginUrl());
                 }
             });
-
-            if (level == SubLevel.PRO && loggedIn) {
-                proBuyPriceText = new Text("");
-
-                quantityNumberField = new NumberField();
-                quantityNumberField.getStyle().set("margin-top", "-6px");
-                quantityNumberField.setValue(1d);
-                quantityNumberField.setHasControls(true);
-                quantityNumberField.setMin(1);
-                quantityNumberField.setMax(99);
-                quantityNumberField.setStep(1);
-                quantityNumberField.setLabel(getTranslation("premium.servers"));
-                quantityNumberField.addValueChangeListener(e -> {
-                    int value = extractValueFromQuantity(e.getValue());
-                    quantityNumberField.setValue((double) value);
-                    refreshPremiumTiers();
-                });
-
-                HorizontalLayout quantityLayout = new HorizontalLayout();
-                quantityLayout.setPadding(false);
-                quantityLayout.setSpacing(false);
-                quantityLayout.setWidthFull();
-                quantityLayout.setAlignItems(FlexComponent.Alignment.END);
-                quantityLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-                quantityLayout.getStyle().set("margin-top", "0");
-                quantityLayout.add(quantityNumberField, proBuyPriceText);
-
-                preselectGuildsLayout = new VerticalLayout();
-                preselectGuildsLayout.setPadding(false);
-                preselectGuildsLayout.setMaxHeight("350px");
-                preselectGuildsLayout.getStyle().set("margin-bottom", "8px")
-                        .set("overflow-y", "auto");
-                preselectGuildsLayout.add(generatePreselectGuildComboBox(0));
-
-                controlLayout.add(quantityLayout, preselectGuildsLayout, generateButtonSeparator());
-            }
-
-            controlLayout.add(buyButton);
-            if (loggedIn) {
-                Span manageSubscriptionLink = generateManageSubscriptionsLink();
-                manageSubscriptionLink.setWidthFull();
-                controlLayout.add(manageSubscriptionLink);
-            } else {
-                Span notLoggedIn = new Span(getTranslation("premium.notloggedin"));
-                notLoggedIn.getStyle().set("color", "var(--lumo-error-text-color)")
-                        .set("margin-bottom", "-8px");
-                controlLayout.add(notLoggedIn);
-            }
         } else {
             buyButton.setText(getTranslation("premium.contact"));
             buyButton.addClickListener(e -> {
@@ -397,14 +365,46 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                 }, () -> {
                 });
             });
-            controlLayout.add(buyButton);
-
-            if (loggedIn) {
-                Span manageSubscriptionLink = generateManageSubscriptionsLink();
-                manageSubscriptionLink.setWidthFull();
-                controlLayout.add(manageSubscriptionLink);
-            }
         }
+        return buyButton;
+    }
+
+    private Component generateQuantityLayout() {
+        VerticalLayout controlLayout = new VerticalLayout();
+        controlLayout.setPadding(false);
+        controlLayout.setWidthFull();
+
+        quantityNumberField = new NumberField();
+        quantityNumberField.getStyle().set("margin-top", "-6px");
+        quantityNumberField.setValue(1d);
+        quantityNumberField.setHasControls(true);
+        quantityNumberField.setMin(1);
+        quantityNumberField.setMax(99);
+        quantityNumberField.setStep(1);
+        quantityNumberField.setLabel(getTranslation("premium.servers"));
+        quantityNumberField.addValueChangeListener(e -> {
+            int value = extractValueFromQuantity(e.getValue());
+            quantityNumberField.setValue((double) value);
+            refreshPremiumTiers();
+        });
+
+        HorizontalLayout quantityLayout = new HorizontalLayout();
+        quantityLayout.setPadding(false);
+        quantityLayout.setSpacing(false);
+        quantityLayout.setWidthFull();
+        quantityLayout.setAlignItems(FlexComponent.Alignment.END);
+        quantityLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        quantityLayout.getStyle().set("margin-top", "0");
+        quantityLayout.add(quantityNumberField);
+
+        preselectGuildsLayout = new VerticalLayout();
+        preselectGuildsLayout.setPadding(false);
+        preselectGuildsLayout.setMaxHeight("350px");
+        preselectGuildsLayout.getStyle().set("margin-bottom", "4px")
+                .set("overflow-y", "auto");
+        preselectGuildsLayout.add(generatePreselectGuildComboBox(0));
+
+        controlLayout.add(quantityLayout, preselectGuildsLayout, generateButtonSeparator());
         return controlLayout;
     }
 
@@ -434,16 +434,19 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         SubCurrency subCurrency = currencySelect.getValue();
 
         for (SubLevel subLevel : priceTextMap.keySet()) {
-            String priceString = SubscriptionUtil.generatePriceString(SubscriptionUtil.getPrice(duration, subLevel, subCurrency));
+            int price = SubscriptionUtil.getPrice(duration, subLevel, subCurrency);
+            if (subLevel == SubLevel.PRO && quantityNumberField != null) {
+                price *= quantityNumberField.getValue();
+            }
+            String priceString = SubscriptionUtil.generatePriceString(price);
             priceTextMap.get(subLevel)
-                    .setText(getTranslation("premium.price." + subLevel.name(), duration == SubDuration.YEARLY, subCurrency.getSymbol(), priceString));
+                    .setText(getTranslation(subLevel == SubLevel.ULTIMATE ? "premium.price.ultimate" : "premium.price", subCurrency.getSymbol(), priceString));
+            pricePeriodTextMap.get(subLevel)
+                    .setText(getTranslation("premium.priceperiod", duration == SubDuration.YEARLY));
         }
 
         if (getSessionData().isLoggedIn()) {
             int quantity = extractValueFromQuantity(quantityNumberField.getValue());
-
-            String proTotalPriceString = SubscriptionUtil.generatePriceString(SubscriptionUtil.getPrice(duration, SubLevel.PRO, subCurrency) * quantity);
-            proBuyPriceText.setText(getTranslation("premium.price.BASIC", duration == SubDuration.YEARLY, subCurrency.getSymbol(), proTotalPriceString));
 
             int previousQuantity = (int) preselectGuildsLayout.getChildren().count();
             if (quantity > previousQuantity) {
