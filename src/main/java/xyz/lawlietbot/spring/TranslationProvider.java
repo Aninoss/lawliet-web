@@ -38,6 +38,11 @@ public class TranslationProvider implements I18NProvider {
 
     @Override
     public List<Locale> getProvidedLocales() {
+        String forceLocale = System.getenv("FORCE_LOCALE");
+        if (forceLocale != null) {
+            return List.of(new Locale(forceLocale));
+        }
+
         return locales;
     }
 
@@ -47,11 +52,6 @@ public class TranslationProvider implements I18NProvider {
             LoggerFactory.getLogger(TranslationProvider.class.getName())
                     .warn("Got lang request for key with null value!");
             return "";
-        }
-
-        String forceLocale = System.getenv("FORCE_LOCALE");
-        if (forceLocale != null) {
-            locale = new Locale(forceLocale);
         }
 
         final ResourceBundle bundle = bundleCache.getUnchecked(locale);
