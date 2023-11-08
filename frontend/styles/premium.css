@@ -118,7 +118,7 @@ vaadin-accordion-panel > div > .prop-check {
     border-width: 2px;
     border-color: var(--lumo-primary-color);
     background-color: var(--lumo-secondary);
-    margin-top: 0;
+    margin-top: 16px;
     margin-bottom: 16px;
     padding: 12px;
 }

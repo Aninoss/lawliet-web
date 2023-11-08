@@ -1,7 +1,5 @@
 package xyz.lawlietbot.spring.frontend.views;
 
-import java.util.List;
-import java.util.Map;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -22,6 +20,9 @@ import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.frontend.components.PageHeader;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
+
+import java.util.List;
+import java.util.Map;
 
 @Route(value = "subscriptionfeedback", layout = MainLayout.class)
 @NoLiteAccess
@@ -67,13 +68,13 @@ public class SubscriptionFeedbackView extends PageLayout implements HasUrlParame
             } else {
                 CustomNotification.showError(getTranslation("subfeedback.used"));
             }
-            UI.getCurrent().navigate(ManageSubscriptionsView.class);
+            UI.getCurrent().navigate(PremiumView.class);
         });
         buttonLayout.add(sendButton);
 
         Button cancelButton = new Button(getTranslation("subfeedback.cancel"));
         cancelButton.addClickListener(e -> {
-            UI.getCurrent().navigate(ManageSubscriptionsView.class);
+            UI.getCurrent().navigate(PremiumView.class);
         });
         buttonLayout.add(cancelButton);
 

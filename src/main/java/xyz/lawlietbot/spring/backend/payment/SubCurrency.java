@@ -36,16 +36,11 @@ public enum SubCurrency {
         return symbol;
     }
 
-    public static SubCurrency getFromCurrency(String currency) {
-        for (SubCurrency value : values()) {
-            if (value.name().equalsIgnoreCase(currency)) {
-                return value;
-            }
-        }
-        return USD;
-    }
-
     public static synchronized SubCurrency retrieveDefaultCurrency(String ipAddress) {
+        if (ipAddress == null) {
+            LOGGER.warn("IP address of customer is null");
+            return USD;
+        }
         if (currencyHashMap.containsKey(ipAddress)) {
             return currencyHashMap.get(ipAddress);
         }
