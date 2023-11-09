@@ -1,6 +1,5 @@
 package xyz.lawlietbot.spring.frontend.views;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JavaScript;
@@ -9,7 +8,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.*;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,15 +17,15 @@ import xyz.lawlietbot.spring.NoLiteAccess;
 import xyz.lawlietbot.spring.backend.payment.SubLevel;
 import xyz.lawlietbot.spring.backend.payment.paddle.PaddleAPI;
 import xyz.lawlietbot.spring.backend.payment.paddle.PaddleManager;
-import xyz.lawlietbot.spring.backend.premium.UserPremium;
-import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
+import xyz.lawlietbot.spring.backend.util.StringUtil;
 import xyz.lawlietbot.spring.frontend.Styles;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.frontend.components.PageHeader;
 import xyz.lawlietbot.spring.frontend.components.premium.PremiumManagePage;
+import xyz.lawlietbot.spring.frontend.components.premium.PremiumPage;
 import xyz.lawlietbot.spring.frontend.components.premium.PremiumSubscriptionsPage;
 import xyz.lawlietbot.spring.frontend.components.premium.PremiumUnlockPage;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
@@ -36,7 +34,6 @@ import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -53,14 +50,13 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
 
     private final Tabs tabs;
     private final Div content = new Div();
-    private boolean slotsBuild = false;
 
-    private final PremiumUnlockPage unlockArea;
+    private final PremiumUnlockPage premiumUnlockPage;
 
     public PremiumView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         super(sessionData, uiData);
         ConfirmationDialog dialog = new ConfirmationDialog();
-        unlockArea = new PremiumUnlockPage(sessionData, dialog);
+        premiumUnlockPage = new PremiumUnlockPage(sessionData, dialog);
 
         add(new PageHeader(getUiData(), getTitleText(), getTranslation("premium.desc"), getRoute()), dialog);
 
@@ -69,10 +65,10 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         tabUnlock.setEnabled(sessionData.isLoggedIn());
         Tab tabManage = new Tab(getTranslation("premium.tab.manage"));
         tabManage.setEnabled(sessionData.isLoggedIn());
-        Map<Tab, Component> areaMap = Map.of(
+        Map<Tab, PremiumPage> areaMap = Map.of(
                 tabSubscriptions, new PremiumSubscriptionsPage(sessionData, dialog),
-                tabUnlock, unlockArea,
-                tabManage, new PremiumManagePage(sessionData, dialog)
+                tabUnlock, premiumUnlockPage,
+                tabManage, new PremiumManagePage(sessionData, dialog, premiumUnlockPage)
         );
 
         tabs = new Tabs(tabSubscriptions, tabUnlock, tabManage);
@@ -91,9 +87,10 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         handleTabsValueChange(areaMap.get(tabs.getSelectedTab()));
     }
 
-    private void handleTabsValueChange(Component component) {
+    private void handleTabsValueChange(PremiumPage premiumPage) {
         content.removeAll();
-        content.add(component);
+        content.add(premiumPage);
+        premiumPage.initialize();
     }
 
     @Override
@@ -139,33 +136,16 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                     CustomNotification.showError(getTranslation("error"));
                 }
             }
-        }
 
-        SessionData sessionData = getSessionData();
-        if (!slotsBuild) {
-            slotsBuild = true;
-            if (sessionData.getDiscordUser().map(DiscordUser::hasGuilds).orElse(false)) {
-                try {
-                    DiscordUser discordUser = sessionData.getDiscordUser().get();
-                    UserPremium userPremium = SendEvent.send(EventOut.PREMIUM, Map.of("user_id", discordUser.getId()))
-                            .thenApply(jsonResponse -> {
-                                ArrayList<Long> slots = new ArrayList<>();
-                                JSONArray jsonSlots = jsonResponse.getJSONArray("slots");
-                                for (int i = 0; i < jsonSlots.length(); i++) {
-                                    slots.add(jsonSlots.getLong(i));
-                                }
-
-                                return new UserPremium(discordUser.getId(), slots);
-                            })
-                            .get(5, TimeUnit.SECONDS);
-                    unlockArea.setUserPremium(userPremium);
-                    unlockArea.setAvailableGuilds(new ArrayList<>(discordUser.getGuilds()));
-                } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                    LOGGER.error("Could not load slots", e);
-                    CustomNotification.showError(getTranslation("error"));
+            if (parametersMap.containsKey("tab") && getSessionData().isLoggedIn()) {
+                String indexString = parametersMap.get("tab").get(0);
+                if (StringUtil.stringIsInt(indexString)) {
+                    int index = Integer.parseInt(indexString);
+                    if (index >= 0 && index <= 2) {
+                        tabs.setSelectedIndex(index);
+                    }
                 }
             }
-            unlockArea.generate();
         }
     }
 

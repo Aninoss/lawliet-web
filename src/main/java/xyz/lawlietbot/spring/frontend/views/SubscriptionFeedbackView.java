@@ -68,18 +68,21 @@ public class SubscriptionFeedbackView extends PageLayout implements HasUrlParame
             } else {
                 CustomNotification.showError(getTranslation("subfeedback.used"));
             }
-            UI.getCurrent().navigate(PremiumView.class);
+            navigateBack();
         });
         buttonLayout.add(sendButton);
 
         Button cancelButton = new Button(getTranslation("subfeedback.cancel"));
-        cancelButton.addClickListener(e -> {
-            UI.getCurrent().navigate(PremiumView.class);
-        });
+        cancelButton.addClickListener(e -> navigateBack());
         buttonLayout.add(cancelButton);
 
         layout.add(buttonLayout);
         return layout;
+    }
+
+    private void navigateBack() {
+        QueryParameters queryParameters = new QueryParameters(Map.of("tab", List.of("2")));
+        UI.getCurrent().navigate("/premium", queryParameters);
     }
 
     @Override

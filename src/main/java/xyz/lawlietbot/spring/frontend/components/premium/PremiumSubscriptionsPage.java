@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class PremiumSubscriptionsPage extends VerticalLayout {
+public class PremiumSubscriptionsPage extends PremiumPage {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PremiumSubscriptionsPage.class);
 
@@ -60,8 +60,11 @@ public class PremiumSubscriptionsPage extends VerticalLayout {
         this.dialog = dialog;
 
         setPadding(true);
-        add(generateYearlySuggestionField(), generateTiersCurrencyDurationField(), generateTiersTiers());
+    }
 
+    @Override
+    public void build() {
+        add(generateYearlySuggestionField(), generateTiersCurrencyDurationField(), generateTiersTiers());
         refreshPremiumTiers();
     }
 
@@ -445,5 +448,4 @@ public class PremiumSubscriptionsPage extends VerticalLayout {
             }
         }
     }
-
 }

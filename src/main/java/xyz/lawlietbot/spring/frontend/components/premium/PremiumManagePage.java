@@ -6,7 +6,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.QueryParameters;
 import org.slf4j.Logger;
@@ -26,16 +25,24 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-public class PremiumManagePage extends VerticalLayout {
+public class PremiumManagePage extends PremiumPage {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PremiumManagePage.class);
 
+    private final SessionData sessionData;
     private final ConfirmationDialog dialog;
+    private final PremiumUnlockPage premiumUnlockPage;
 
-    public PremiumManagePage(SessionData sessionData, ConfirmationDialog dialog) {
+    public PremiumManagePage(SessionData sessionData, ConfirmationDialog dialog, PremiumUnlockPage premiumUnlockPage) {
+        this.sessionData = sessionData;
         this.dialog = dialog;
+        this.premiumUnlockPage = premiumUnlockPage;
 
         setPadding(true);
+    }
+
+    @Override
+    public void build() {
         sessionData.getDiscordUser().ifPresent(user -> updateMainContent(user, 0));
     }
 
@@ -128,11 +135,13 @@ public class PremiumManagePage extends VerticalLayout {
                             LOGGER.error("Exception on sub update", ioException);
                         }
                         if (success) {
-                            updateMainContent(user, sub.getSubId());
                             CustomNotification.showSuccess(getTranslation("manage.success"));
                             if (navigateToFeedbackPage) {
                                 QueryParameters queryParameters = new QueryParameters(Map.of("id", List.of(SubscriptionFeedbackIdManager.generateId())));
                                 UI.getCurrent().navigate("/subscriptionfeedback", queryParameters);
+                            } else {
+                                updateMainContent(user, sub.getSubId());
+                                premiumUnlockPage.update();
                             }
                         } else {
                             CustomNotification.showError(getTranslation("error"));
@@ -144,5 +153,4 @@ public class PremiumManagePage extends VerticalLayout {
 
         return actionSelect;
     }
-
 }

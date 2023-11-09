@@ -8,11 +8,12 @@ import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.lawlietbot.spring.backend.premium.UserPremium;
+import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.frontend.Styles;
 import xyz.lawlietbot.spring.frontend.components.Card;
@@ -24,8 +25,12 @@ import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
-public class PremiumUnlockPage extends VerticalLayout {
+public class PremiumUnlockPage extends PremiumPage {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PremiumUnlockPage.class);
 
@@ -44,15 +49,36 @@ public class PremiumUnlockPage extends VerticalLayout {
         getStyle().set("margin-top", "16px");
     }
 
-    public void setAvailableGuilds(ArrayList<Guild> availableGuilds) {
-        this.availableGuilds = availableGuilds;
+    @Override
+    public void build() {
+        update();
     }
 
-    public void setUserPremium(UserPremium userPremium) {
-        this.userPremium = userPremium;
-    }
+    public void update() {
+        removeAll();
 
-    public void generate() {
+        if (sessionData.getDiscordUser().map(DiscordUser::hasGuilds).orElse(false)) {
+            try {
+                DiscordUser discordUser = sessionData.getDiscordUser().get();
+                UserPremium userPremium = SendEvent.send(EventOut.PREMIUM, Map.of("user_id", discordUser.getId()))
+                        .thenApply(jsonResponse -> {
+                            ArrayList<Long> slots = new ArrayList<>();
+                            JSONArray jsonSlots = jsonResponse.getJSONArray("slots");
+                            for (int i = 0; i < jsonSlots.length(); i++) {
+                                slots.add(jsonSlots.getLong(i));
+                            }
+
+                            return new UserPremium(discordUser.getId(), slots);
+                        })
+                        .get(5, TimeUnit.SECONDS);
+                this.userPremium = userPremium;
+                this.availableGuilds = new ArrayList<>(discordUser.getGuilds());
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                LOGGER.error("Could not load slots", e);
+                CustomNotification.showError(getTranslation("error"));
+            }
+        }
+
         add(generatePremiumSubtitle());
         if (userPremium != null) {
             if (!userPremium.getSlots().isEmpty()) {
@@ -255,5 +281,4 @@ public class PremiumUnlockPage extends VerticalLayout {
             return false;
         }
     }
-
 }
