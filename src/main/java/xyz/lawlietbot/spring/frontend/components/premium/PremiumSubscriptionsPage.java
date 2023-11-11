@@ -27,7 +27,6 @@ import xyz.lawlietbot.spring.backend.commandlist.CommandListContainer;
 import xyz.lawlietbot.spring.backend.payment.SubCurrency;
 import xyz.lawlietbot.spring.backend.payment.SubDuration;
 import xyz.lawlietbot.spring.backend.payment.SubLevel;
-import xyz.lawlietbot.spring.backend.payment.SubscriptionUtil;
 import xyz.lawlietbot.spring.backend.payment.paddle.PaddleManager;
 import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
@@ -36,6 +35,8 @@ import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.frontend.components.GuildComboBox;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -367,11 +368,14 @@ public class PremiumSubscriptionsPage extends PremiumPage {
         SubCurrency subCurrency = currencySelect.getValue();
 
         for (SubLevel subLevel : priceTextMap.keySet()) {
-            int price = SubscriptionUtil.getPrice(duration, subLevel, subCurrency);
+            int price = subLevel.getPrice(duration, subCurrency);
             if (subLevel == SubLevel.PRO && quantityNumberField != null) {
                 price *= quantityNumberField.getValue();
             }
-            String priceString = SubscriptionUtil.generatePriceString(price);
+
+            DecimalFormat df = new DecimalFormat("#.##", DecimalFormatSymbols.getInstance(getLocale()));
+            String priceString = df.format(price / 100.0);
+
             priceTextMap.get(subLevel)
                     .setText(getTranslation(subLevel == SubLevel.ULTIMATE ? "premium.price.ultimate" : "premium.price", subCurrency.getSymbol(), priceString));
             pricePeriodTextMap.get(subLevel)
