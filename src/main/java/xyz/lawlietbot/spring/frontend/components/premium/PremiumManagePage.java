@@ -135,12 +135,12 @@ public class PremiumManagePage extends PremiumPage {
                             LOGGER.error("Exception on sub update", ioException);
                         }
                         if (success) {
+                            updateMainContent(user, sub.getSubId());
                             CustomNotification.showSuccess(getTranslation("manage.success"));
                             if (navigateToFeedbackPage) {
                                 QueryParameters queryParameters = new QueryParameters(Map.of("id", List.of(SubscriptionFeedbackIdManager.generateId())));
                                 UI.getCurrent().navigate("/subscriptionfeedback", queryParameters);
                             } else {
-                                updateMainContent(user, sub.getSubId());
                                 premiumUnlockPage.update();
                             }
                         } else {
