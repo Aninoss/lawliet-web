@@ -35,8 +35,7 @@ import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.frontend.components.GuildComboBox;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -373,11 +372,11 @@ public class PremiumSubscriptionsPage extends PremiumPage {
                 price *= quantityNumberField.getValue();
             }
 
-            DecimalFormat df = new DecimalFormat("#.##", DecimalFormatSymbols.getInstance(getLocale()));
-            String priceString = df.format(price / 100.0);
-
+            String priceString = NumberFormat.getCurrencyInstance(getLocale())
+                    .format(price / 100.0)
+                    .replace("¤", subCurrency.getSymbol());
             priceTextMap.get(subLevel)
-                    .setText(getTranslation(subLevel == SubLevel.ULTIMATE ? "premium.price.ultimate" : "premium.price", subCurrency.getSymbol(), priceString));
+                    .setText(subLevel == SubLevel.ULTIMATE ? getTranslation("premium.price.ultimate", priceString) : priceString);
             pricePeriodTextMap.get(subLevel)
                     .setText(getTranslation("premium.priceperiod", duration == SubDuration.YEARLY));
         }

@@ -1,7 +1,5 @@
 package xyz.lawlietbot.spring.frontend.layouts;
 
-import java.util.Comparator;
-import java.util.Map;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
@@ -36,6 +34,9 @@ import xyz.lawlietbot.spring.frontend.views.ExceptionView;
 import xyz.lawlietbot.spring.frontend.views.IEView;
 import xyz.lawlietbot.spring.syncserver.SyncUtil;
 
+import java.util.Comparator;
+import java.util.Map;
+
 @CssImport("./styles/styles.css")
 @CssImport("./styles/styles-reversed.css")
 @CssImport("./styles/bootstrap.css")
@@ -49,7 +50,7 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
     private SessionData sessionData;
     private UIData uiData;
     private String target;
-    private Div divStretch;
+    private final Div divStretch = new Div();
     private HeaderComponent headerComponent;
 
     public MainLayout(@Autowired SessionData sessionData, @Autowired UIData uiData) {
@@ -81,7 +82,6 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
 
         add(new FooterArea(uiData));
 
-        divStretch = new Div();
         divStretch.setWidthFull();
         add(divStretch);
         setFlexGrow(1, divStretch);
