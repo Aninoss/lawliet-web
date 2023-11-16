@@ -35,22 +35,22 @@ public class DashboardComboBoxAdapter extends Div {
             } else {
                 multiselectComboBox.setDataProvider(generateDataProvider(guildId, userId, dashboardComboBox));
             }
-            if (dashboardComboBox.getSelectedValues().size() > 0) {
+            if (!dashboardComboBox.getSelectedValues().isEmpty()) {
                 multiselectComboBox.setValue(new HashSet<>(dashboardComboBox.getSelectedValues()));
             }
             multiselectComboBox.addValueChangeListener(e -> {
-                if (e.getValue().size() > dashboardComboBox.getMax()) {
-                    multiselectComboBox.setValue(e.getOldValue());
-                } else if (e.getOldValue().size() <= dashboardComboBox.getMax()) {
-                    if (e.getValue().size() > e.getOldValue().size()) {
+                if (e.getValue().size() > e.getOldValue().size()) {
+                    if (e.getValue().size() > dashboardComboBox.getMax()) {
+                        multiselectComboBox.setValue(e.getOldValue());
+                    } else {
                         ArrayList<DiscordEntity> tempEntityList = new ArrayList<>(e.getValue());
                         tempEntityList.removeAll(e.getOldValue());
                         dashboardComboBox.triggerAdd(tempEntityList.get(0).getId());
-                    } else if (e.getValue().size() < e.getOldValue().size()) {
-                        ArrayList<DiscordEntity> tempEntityList = new ArrayList<>(e.getOldValue());
-                        tempEntityList.removeAll(e.getValue());
-                        dashboardComboBox.triggerRemove(tempEntityList.get(0).getId());
                     }
+                } else if (e.getValue().size() < e.getOldValue().size()) {
+                    ArrayList<DiscordEntity> tempEntityList = new ArrayList<>(e.getOldValue());
+                    tempEntityList.removeAll(e.getValue());
+                    dashboardComboBox.triggerRemove(tempEntityList.get(0).getId());
                 }
             });
             if (dashboardComboBox.getAllowCustomValues()) {

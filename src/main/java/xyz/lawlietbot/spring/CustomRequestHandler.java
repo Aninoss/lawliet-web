@@ -1,10 +1,5 @@
 package xyz.lawlietbot.spring;
 
-import com.stripe.exception.SignatureVerificationException;
-import com.stripe.exception.StripeException;
-import com.stripe.model.Event;
-import com.stripe.model.checkout.Session;
-import com.stripe.net.Webhook;
 import com.vaadin.flow.server.RequestHandler;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
@@ -13,7 +8,6 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.lawlietbot.spring.backend.payment.paddle.PaddleManager;
-import xyz.lawlietbot.spring.backend.payment.stripe.StripeManager;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
@@ -59,10 +53,6 @@ public class CustomRequestHandler implements RequestHandler {
 
             case "/invite":
                 handleInvite(response, request.getParameterMap());
-                return true;
-
-            case "/stripe":
-                handleStripe(request, response);
                 return true;
 
             case "/paddle":
@@ -211,38 +201,12 @@ public class CustomRequestHandler implements RequestHandler {
         response.setHeader("Location", ExternalLinks.BOT_INVITE_URL_EXT);
         response.setStatus(301);
 
-        if (params.size() > 0) {
+        if (!params.isEmpty()) {
             String type = new ArrayList<>(params.keySet()).get(0);
-            if (type.length() > 0) {
+            if (!type.isEmpty()) {
                 SendEvent.send(EventOut.INVITE, Map.of("type", type))
                         .exceptionally(ExceptionLogger.get());
             }
-        }
-    }
-
-    private void handleStripe(VaadinRequest request, VaadinResponse response) {
-        try (BufferedReader br = request.getReader()) {
-            String sigHeader = request.getHeader("Stripe-Signature");
-            if (sigHeader != null) {
-                String payload = br.lines().collect(Collectors.joining("\n"));
-                String signature = System.getenv("STRIPE_WEBHOOK_SIGNATURE");
-                Event event = Webhook.constructEvent(payload, sigHeader, signature);
-                if (event.getType().equals("checkout.session.completed")) {
-                    String json = event.getData().toJson();
-                    JSONObject data = new JSONObject(json);
-                    String sessionId = data.getJSONObject("object").getString("id");
-                    StripeManager.registerSubscription(Session.retrieve(sessionId));
-                } else {
-                    response.setStatus(500);
-                }
-            } else {
-                response.setStatus(403);
-            }
-        } catch (SignatureVerificationException e) {
-            response.setStatus(403);
-        } catch (IOException | StripeException e) {
-            LOGGER.error("Error while handling Stripe", e);
-            response.setStatus(500);
         }
     }
 
