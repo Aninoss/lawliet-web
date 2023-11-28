@@ -74,6 +74,10 @@ public class DashboardComponentConverter {
                 component = new DashboardNumberFieldAdapter((DashboardNumberField) dashboardComponent);
                 break;
 
+            case DashboardFloatingNumberField.TYPE:
+                component = new DashboardFloatingNumberFieldAdapter((DashboardFloatingNumberField) dashboardComponent);
+                break;
+
             case DashboardComboBox.TYPE:
                 component = new DashboardComboBoxAdapter(guildId, userId, (DashboardComboBox) dashboardComponent);
                 break;
