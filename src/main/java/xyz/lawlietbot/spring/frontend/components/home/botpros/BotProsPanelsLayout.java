@@ -1,6 +1,5 @@
 package xyz.lawlietbot.spring.frontend.components.home.botpros;
 
-import java.util.ArrayList;
 import com.github.appreciated.css.grid.GridLayoutComponent;
 import com.github.appreciated.css.grid.sizes.Flex;
 import com.github.appreciated.css.grid.sizes.Length;
@@ -14,6 +13,8 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.frontend.views.CommandsView;
+
+import java.util.ArrayList;
 
 public class BotProsPanelsLayout extends VerticalLayout {
 
@@ -66,6 +67,7 @@ public class BotProsPanelsLayout extends VerticalLayout {
         return new BotProPanelInfo[]{
                 new BotProPanelInfo("fishery", true, VaadinIcon.TROPHY.create(), 150),
                 new BotProPanelInfo("alerts", true, VaadinIcon.BELL.create()),
+                new BotProPanelInfo("txt2img", true, VaadinIcon.PENCIL.create()),
                 new BotProPanelInfo("nsfw", false, VaadinIcon.MOON_O.create()),
                 new BotProPanelInfo("mod", true, VaadinIcon.SHIELD.create()),
                 new BotProPanelInfo("invitetracking", true, VaadinIcon.ENVELOPE.create()),
@@ -78,9 +80,9 @@ public class BotProsPanelsLayout extends VerticalLayout {
                 new BotProPanelInfo("autochannel", true, VaadinIcon.VOLUME.create()),
                 new BotProPanelInfo("roleplay", true, VaadinIcon.GROUP.create()),
                 new BotProPanelInfo("vote", true, VaadinIcon.BULLETS.create()),
-                new BotProPanelInfo("mcdisplays", true, VaadinIcon.TRENDING_UP.create()),
                 new BotProPanelInfo("reminders", true, VaadinIcon.CLOCK.create()),
-                new BotProPanelInfo("allfeatures", true, VaadinIcon.LINK.create(), allFeaturesButton)
+                new BotProPanelInfo("mcdisplays", false, VaadinIcon.TRENDING_UP.create()),
+                new BotProPanelInfo("allfeatures", false, VaadinIcon.LINK.create(), allFeaturesButton)
         };
     }
 }
