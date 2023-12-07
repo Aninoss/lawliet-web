@@ -36,6 +36,7 @@ import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.frontend.components.GuildComboBox;
 
 import java.text.NumberFormat;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +65,12 @@ public class PremiumSubscriptionsPage extends PremiumPage {
 
     @Override
     public void build() {
-        add(generateYearlySuggestionField(), generateTiersCurrencyDurationField(), generateTiersTiers());
+        if (LocalDate.now().isBefore(LocalDate.of(2023, 12, 15))) {
+            add(generateYearlyCouponField());
+        } else {
+            add(generateYearlySuggestionField());
+        }
+        add(generateTiersCurrencyDurationField(), generateTiersTiers());
         refreshPremiumTiers();
     }
 
@@ -107,6 +113,33 @@ public class PremiumSubscriptionsPage extends PremiumPage {
         return yearlySuggestionField;
     }
 
+    private Component generateYearlyCouponField() {
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.setPadding(false);
+        layout.setId("notification-field");
+        layout.getStyle().set("border-color", "rgb(var(--warning-color-rgb))");
+
+        Icon icon = VaadinIcon.INFO_CIRCLE_O.create();
+        icon.setId("notification-icon");
+        icon.getStyle().set("color", "rgb(var(--warning-color-rgb))");
+        layout.add(icon);
+
+        VerticalLayout content = new VerticalLayout();
+        content.setPadding(false);
+
+        Span text = new Span(getTranslation("premium.suggestyearly.text.coupon"));
+        content.add(text);
+
+        Button switchButton = new Button(getTranslation("premium.suggestyearly.button"));
+        switchButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        switchButton.getStyle().set("margin-top", "8px");
+        switchButton.addClickListener(e -> durationSelect.setValue(SubDuration.YEARLY));
+        content.add(switchButton);
+
+        layout.add(content);
+        return layout;
+    }
+
     private Component generateTiersTitleDuration() {
         HorizontalLayout content = new HorizontalLayout();
         content.setSpacing(false);
@@ -125,7 +158,7 @@ public class PremiumSubscriptionsPage extends PremiumPage {
         durationSelect.setItems(SubDuration.values());
         durationSelect.setValue(SubDuration.MONTHLY);
         durationSelect.addValueChangeListener(e -> {
-            if (e.getValue() == SubDuration.YEARLY) {
+            if (e.getValue() == SubDuration.YEARLY && yearlySuggestionField != null) {
                 yearlySuggestionField.getStyle().set("display", "none");
             }
             refreshPremiumTiers();
