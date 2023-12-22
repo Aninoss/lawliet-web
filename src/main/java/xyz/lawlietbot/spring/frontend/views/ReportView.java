@@ -1,13 +1,5 @@
 package xyz.lawlietbot.spring.frontend.views;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -34,6 +26,15 @@ import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
+
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Route(value = "report", layout = MainLayout.class)
 @NoLiteAccess
@@ -78,7 +79,7 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
         QueryParameters queryParameters = location
                 .getQueryParameters();
         Map<String, List<String>> parameters = queryParameters.getParameters();
-        if (parameters.containsKey("content") && parameters.get("content").size() > 0) {
+        if (parameters.containsKey("content") && !parameters.get("content").isEmpty()) {
             String encodedImageUrl = URLDecoder.decode(parameters.get("content").get(0), StandardCharsets.UTF_8);
             urls = new String(Base64.getDecoder().decode(encodedImageUrl.getBytes())).split(",");
             translateUrls();
@@ -100,7 +101,8 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
             }
             urls[i] = urls[i].replace("#", "/images/")
                     .replace("|", "/data/")
-                    .replace("\\", "/original/");
+                    .replace("\\", "/original/")
+                    .replace("<", "/_images/");
         }
     }
 
