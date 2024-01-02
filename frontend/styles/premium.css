@@ -31,6 +31,16 @@ li {
     padding-bottom: 8px;
 }
 
+.tier-card2 {
+    border-radius: 8px;
+    border-style: solid;
+    border-width: 2px;
+    border-color: var(--lumo-contrast-10pct);
+    width: 100%;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
 .prop-check {
     color: var(--lumo-success-color);
     margin-right: 6px;
@@ -128,6 +138,13 @@ vaadin-accordion-panel > div > .prop-check {
     min-width: 1.5em;
 }
 
+#txt2img-remaining {
+    padding: 8px;
+    background-color: var(--lumo-secondary);
+    border-radius: 8px;
+    margin-left: 12px;
+}
+
 @keyframes background-fadein {
     from {
         background-color: rgba(0, 0, 0, 0);
@@ -220,6 +237,10 @@ vaadin-accordion-panel > div > .prop-check {
     }
 
     .tier-card {
+        max-width: 350px;
+    }
+
+    .tier-card2 {
         max-width: 350px;
     }
 

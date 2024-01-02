@@ -1,11 +1,5 @@
 package xyz.lawlietbot.spring.backend.commandlist;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.concurrent.CompletableFuture;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -13,6 +7,13 @@ import org.slf4j.LoggerFactory;
 import xyz.lawlietbot.spring.ExceptionLogger;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.concurrent.CompletableFuture;
 
 public class CommandListContainer {
 
@@ -53,7 +54,7 @@ public class CommandListContainer {
     }
 
     private synchronized void loadIfEmpty() {
-        if (categories.size() == 0) {
+        if (categories.isEmpty()) {
             LOGGER.info("Loading command list");
             categories = fetch().join();
             setNextUpdate();

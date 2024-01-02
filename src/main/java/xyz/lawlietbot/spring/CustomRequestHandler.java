@@ -59,6 +59,10 @@ public class CustomRequestHandler implements RequestHandler {
                 handlePaddle(request, response);
                 return true;
 
+            case "/paddle_billing":
+                handlePaddleBilling(request, response);
+                return true;
+
             default:
                 return false;
         }
@@ -226,6 +230,20 @@ public class CustomRequestHandler implements RequestHandler {
             }
         } catch (IOException e) {
             LOGGER.error("Error while handling Paddle", e);
+            response.setStatus(500);
+        }
+    }
+
+    private void handlePaddleBilling(VaadinRequest request, VaadinResponse response) {
+        try (BufferedReader br = request.getReader()) {
+            String body = br.lines().collect(Collectors.joining("\n"));
+            if (PaddleManager.verifyBillingWebhookData(body, request.getHeader("Paddle-Signature"))) {
+                PaddleManager.registerTxt2img(new JSONObject(body));
+            } else {
+                response.setStatus(403);
+            }
+        } catch (IOException e) {
+            LOGGER.error("Error while handling Paddle Billing", e);
             response.setStatus(500);
         }
     }

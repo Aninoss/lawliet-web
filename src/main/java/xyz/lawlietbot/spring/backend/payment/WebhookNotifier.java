@@ -1,10 +1,11 @@
 package xyz.lawlietbot.spring.backend.payment;
 
-import java.time.Instant;
 import club.minnced.discord.webhook.WebhookClient;
 import club.minnced.discord.webhook.WebhookClientBuilder;
 import club.minnced.discord.webhook.send.*;
 import xyz.lawlietbot.spring.ExceptionLogger;
+
+import java.time.Instant;
 
 public class WebhookNotifier {
 
@@ -20,7 +21,7 @@ public class WebhookNotifier {
 
     public static void newSub(String userTag, long userId, String avatar, String level, int quantity, String totalPrice) {
         String text = String.format(
-                "• User: %s｜%d｜<@%d>\n• Level: %s\n• Quantity: %d\n• Total: %s",
+                "• User: %s｜%d｜<@%d>\n• Product: %s\n• Quantity: %d\n• Total: %s",
                 userTag,
                 userId,
                 userId,

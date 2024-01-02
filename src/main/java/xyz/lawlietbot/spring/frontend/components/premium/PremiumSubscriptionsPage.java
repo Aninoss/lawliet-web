@@ -24,10 +24,11 @@ import xyz.lawlietbot.spring.ExternalLinks;
 import xyz.lawlietbot.spring.backend.Redirector;
 import xyz.lawlietbot.spring.backend.UICache;
 import xyz.lawlietbot.spring.backend.commandlist.CommandListContainer;
-import xyz.lawlietbot.spring.backend.payment.SubCurrency;
+import xyz.lawlietbot.spring.backend.payment.Currency;
 import xyz.lawlietbot.spring.backend.payment.SubDuration;
 import xyz.lawlietbot.spring.backend.payment.SubLevel;
 import xyz.lawlietbot.spring.backend.payment.paddle.PaddleManager;
+import xyz.lawlietbot.spring.backend.payment.paddle.PaddleSubscriptionPrices;
 import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.util.StringUtil;
@@ -49,7 +50,6 @@ public class PremiumSubscriptionsPage extends PremiumPage {
     private final SessionData sessionData;
     private final ConfirmationDialog dialog;
     private final Select<SubDuration> durationSelect = new Select<>();
-    private final Select<SubCurrency> currencySelect = new Select<>();
     private NumberField quantityNumberField;
     private final Map<SubLevel, H2> priceTextMap = new HashMap<>();
     private final Map<SubLevel, Span> pricePeriodTextMap = new HashMap<>();
@@ -145,14 +145,6 @@ public class PremiumSubscriptionsPage extends PremiumPage {
         content.setSpacing(false);
         content.setPadding(false);
         content.getStyle().set("margin-left", "auto");
-
-        currencySelect.setItemLabelGenerator((ItemLabelGenerator<SubCurrency>) Enum::name);
-        currencySelect.setItems(SubCurrency.values());
-        currencySelect.setValue(SubCurrency.retrieveDefaultCurrency(VaadinRequest.getCurrent().getHeader("CF-Connecting-IP")));
-        currencySelect.addValueChangeListener(e -> refreshPremiumTiers());
-        currencySelect.setMaxWidth("90px");
-        currencySelect.getStyle().set("margin-right", "12px");
-        content.add(currencySelect);
 
         durationSelect.setItemLabelGenerator((ItemLabelGenerator<SubDuration>) duration -> getTranslation("premium.duration." + duration.name()));
         durationSelect.setItems(SubDuration.values());
@@ -397,21 +389,27 @@ public class PremiumSubscriptionsPage extends PremiumPage {
 
     private void refreshPremiumTiers() {
         SubDuration duration = durationSelect.getValue();
-        SubCurrency subCurrency = currencySelect.getValue();
+        PaddleSubscriptionPrices paddleSubscriptionPrices = PaddleManager.retrieveSubscriptionPrices(VaadinRequest.getCurrent().getHeader("CF-Connecting-IP"));
+        Currency currency = paddleSubscriptionPrices.getCurrency();
+        Map<Long, Double> priceMap = paddleSubscriptionPrices.getPrices();
+        boolean includesVat = paddleSubscriptionPrices.getIncludesVat();
 
         for (SubLevel subLevel : priceTextMap.keySet()) {
-            int price = subLevel.getPrice(duration, subCurrency);
+            long planId = PaddleManager.getPlanId(duration, subLevel);
+
+            double price = priceMap.get(planId);
             if (subLevel == SubLevel.PRO && quantityNumberField != null) {
                 price *= quantityNumberField.getValue();
             }
 
             String priceString = NumberFormat.getCurrencyInstance(getLocale())
-                    .format(price / 100.0)
-                    .replace("¤", subCurrency.getSymbol());
+                    .format(price)
+                    .replace("¤", currency.getSymbol());
+
             priceTextMap.get(subLevel)
                     .setText(subLevel == SubLevel.ULTIMATE ? getTranslation("premium.price.ultimate", priceString) : priceString);
             pricePeriodTextMap.get(subLevel)
-                    .setText(getTranslation("premium.priceperiod", duration == SubDuration.YEARLY));
+                    .setText(getTranslation(includesVat ? "premium.priceperiod.includesvat" : "premium.priceperiod", duration == SubDuration.YEARLY));
         }
 
         if (sessionData.isLoggedIn()) {

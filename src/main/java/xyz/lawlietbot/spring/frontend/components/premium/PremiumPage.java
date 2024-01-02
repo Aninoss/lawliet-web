@@ -8,6 +8,8 @@ public abstract class PremiumPage extends VerticalLayout {
 
     protected abstract void build();
 
+    public void open() {}
+
     public void initialize() {
         if (build) {
             return;

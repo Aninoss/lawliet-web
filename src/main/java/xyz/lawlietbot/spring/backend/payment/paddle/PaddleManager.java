@@ -1,14 +1,5 @@
 package xyz.lawlietbot.spring.backend.payment.paddle;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.util.Base64;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -22,17 +13,26 @@ import org.slf4j.LoggerFactory;
 import xyz.lawlietbot.spring.ExternalLinks;
 import xyz.lawlietbot.spring.backend.FileString;
 import xyz.lawlietbot.spring.backend.UICache;
-import xyz.lawlietbot.spring.backend.payment.SubDuration;
-import xyz.lawlietbot.spring.backend.payment.SubLevel;
-import xyz.lawlietbot.spring.backend.payment.WebhookNotifier;
+import xyz.lawlietbot.spring.backend.payment.Currency;
+import xyz.lawlietbot.spring.backend.payment.*;
 import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.text.NumberFormat;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public class PaddleManager {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PaddleManager.class);
     private final static Verifier verifier;
+    private final static PaddleBillingWebhookVerifier paddleBillingWebhookVerifier;
     private final static LoadingCache<String, CompletableFuture<Void>> checkoutCache = CacheBuilder.newBuilder()
             .expireAfterWrite(Duration.ofHours(1))
             .build(new CacheLoader<>() {
@@ -42,21 +42,96 @@ public class PaddleManager {
                     return new CompletableFuture<>();
                 }
             });
+    private final static LoadingCache<String, JSONObject> subscriptionPricesCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(Duration.ofMinutes(5))
+            .build(new CacheLoader<>() {
+                @NotNull
+                @Override
+                public JSONObject load(@NotNull String ip) throws Exception {
+                    return PaddleAPI.retrieveSubscriptionPrices(ip);
+                }
+            });
+    private final static LoadingCache<String, JSONObject> productPricesCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(Duration.ofMinutes(5))
+            .build(new CacheLoader<>() {
+                @NotNull
+                @Override
+                public JSONObject load(@NotNull String ip) throws Exception {
+                    return PaddleAPI.retrieveProductPrices(ip);
+                }
+            });
 
     static {
         String publicKey = "";
         try {
             publicKey = new FileString(
-                    Thread.currentThread().getContextClassLoader().getResourceAsStream("paddle_public_key.txt")
+                    Thread.currentThread().getContextClassLoader().getResourceAsStream("paddle_public_key_" + System.getenv("PADDLE_ENVIRONMENT") + ".txt")
             ).toString();
         } catch (IOException e) {
             LOGGER.error("Error on public key read");
         }
         verifier = new Verifier(publicKey.replace("\r", ""));
+        paddleBillingWebhookVerifier = new PaddleBillingWebhookVerifier(System.getenv("PADDLE_BILLING_WEBHOOK_KEY"));
+    }
+
+    public static PaddleSubscriptionPrices retrieveSubscriptionPrices(String customerIpAddress) {
+        customerIpAddress = Objects.requireNonNullElse(customerIpAddress, System.getenv("PADDLE_DEFAULT_IP"));
+
+        JSONObject json;
+        try {
+            json = subscriptionPricesCache.get(customerIpAddress);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+
+        JSONArray productsJson = json.getJSONObject("response").getJSONArray("products");
+        HashMap<Long, Double> subscriptionPriceMap = new HashMap<>();
+
+        Currency currency = null;
+        boolean includesVat = false;
+        for (int i = 0; i < productsJson.length(); i++) {
+            JSONObject productJson = productsJson.getJSONObject(i);
+            currency = Currency.valueOf(productJson.getString("currency"));
+            includesVat = productJson.getBoolean("vendor_set_prices_included_tax");
+
+            long productId = productJson.getLong("product_id");
+            double price = productJson.getJSONObject("price").getDouble(includesVat ? "gross" : "net");
+            subscriptionPriceMap.put(productId,price);
+        }
+
+        return new PaddleSubscriptionPrices(
+                currency,
+                subscriptionPriceMap,
+                includesVat
+        );
+    }
+
+    public static Map<ProductTxt2Img, String> retrieveProductPrices(String customerIpAddress) {
+        customerIpAddress = Objects.requireNonNullElse(customerIpAddress, System.getenv("PADDLE_DEFAULT_IP"));
+
+        JSONObject json;
+        try {
+            json = productPricesCache.get(customerIpAddress);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+
+        JSONArray itemsJson = json.getJSONObject("data").getJSONObject("details").getJSONArray("line_items");
+        HashMap<ProductTxt2Img, String> productPriceMap = new HashMap<>();
+
+        for (int i = 0; i < itemsJson.length(); i++) {
+            JSONObject itemJson = itemsJson.getJSONObject(i);
+            String priceId = itemJson.getJSONObject("price").getString("id");
+            String price = itemJson.getJSONObject("formatted_totals").getString("total");
+            productPriceMap.put(ProductTxt2Img.fromPriceId(priceId), price);
+        }
+
+        return productPriceMap;
     }
 
     public static void openPopup(SubDuration duration, SubLevel level, DiscordUser discordUser, int quantity, List<Long> presetGuildIds, Locale locale) {
-        UI.getCurrent().getPage().executeJs("openPaddle($0, $1, $2, $3, $4)",
+        UI.getCurrent().getPage().executeJs("openPaddle($0, $1, $2, $3, $4, $5)",
+                System.getenv("PADDLE_ENVIRONMENT"),
                 Integer.parseInt(System.getenv("PADDLE_VENDOR_ID")),
                 (int) PaddleManager.getPlanId(duration, level),
                 quantity,
@@ -65,9 +140,22 @@ public class PaddleManager {
         );
     }
 
+    public static void openPopupBilling(String priceId, DiscordUser discordUser, Locale locale) {
+        UI.getCurrent().getPage().executeJs("openPaddleBilling($0, $1, $2, $3, $4, $5, $6)",
+                System.getenv("PADDLE_ENVIRONMENT"),
+                System.getenv("PADDLE_CLIENT_TOKEN"),
+                priceId,
+                locale.getLanguage(),
+                String.valueOf(discordUser.getId()),
+                discordUser.getUsername() + "#" + discordUser.getDiscriminator(),
+                discordUser.getUserAvatar()
+        );
+    }
+
     public static void openPopupCustom(String id) {
         UI.getCurrent().getPage().executeJs(
-                "openPaddleCustom($0, $1)",
+                "openPaddleCustom($0, $1, $2)",
+                System.getenv("PADDLE_ENVIRONMENT"),
                 Integer.parseInt(System.getenv("PADDLE_VENDOR_ID")),
                 id
         );
@@ -75,6 +163,15 @@ public class PaddleManager {
 
     public static boolean verifyWebhookData(String postBody) {
         return verifier.verifyDataWithSignature(postBody);
+    }
+
+    public static boolean verifyBillingWebhookData(String postBody, String paddleSignature) {
+        try {
+            return paddleBillingWebhookVerifier.verify(postBody.replace("\r", ""), paddleSignature);
+        } catch (InvalidKeyException e) {
+            LOGGER.error("Paddle Billing webhook verification error", e);
+            return false;
+        }
     }
 
     public static CompletableFuture<Void> waitForCheckoutAsync(String checkoutId) {
@@ -141,22 +238,74 @@ public class PaddleManager {
         }
     }
 
+    public static void registerTxt2img(JSONObject json) {
+        LOGGER.info("--- NEW PAYMENT RECEIVED ---\n{}", json);
+
+        JSONObject data = json.getJSONObject("data");
+        JSONObject itemData = data.getJSONArray("items").getJSONObject(0);
+        JSONObject priceData = itemData.getJSONObject("price");
+        JSONObject customData = data.getJSONObject("custom_data");
+        JSONObject detailsTotalData = data.getJSONObject("details").getJSONObject("totals");
+
+        String transactionId = data.getString("id");
+        CompletableFuture<Void> future = waitForCheckoutAsync(transactionId);
+
+        try {
+            long userId = Long.parseLong(customData.getString("discordId"));
+            int quantity = itemData.getInt("quantity");
+            int n = priceData.getJSONObject("custom_data").getInt("n") * quantity;
+
+            JSONObject requestJson = new JSONObject();
+            requestJson.put("user_id", userId);
+            requestJson.put("n", n);
+
+            JSONObject responseJson = SendEvent.sendToAnyCluster(EventOut.PADDLE_TXT2IMG, requestJson).join();
+            if (!responseJson.has("ok")) {
+                throw new RuntimeException("Paddle txt2img error");
+            }
+
+            Currency currency = Currency.valueOf(detailsTotalData.getString("currency_code"));
+            int total = detailsTotalData.getInt("grand_total");
+            String priceString = NumberFormat.getCurrencyInstance(Locale.ENGLISH)
+                    .format((double) total / Math.pow(10, currency.getDecimalPlaces()))
+                    .replace("¤", currency.getSymbol());
+
+            WebhookNotifier.newSub(
+                    customData.getString("discordTag"),
+                    userId,
+                    customData.getString("discordAvatar"),
+                    priceData.getString("description"),
+                    quantity,
+                    priceString
+            );
+            LOGGER.info("Txt2img notification sent");
+        } catch (Throwable e) {
+            LOGGER.error("Error in new Paddle Txt2img payment", e);
+        } finally {
+            future.complete(null);
+        }
+    }
+
     private static void printParameterMap(Map<String, String[]> parameterMap) {
         LOGGER.info("--- NEW SUBSCRIPTION RECEIVED ---");
         parameterMap.forEach((k, v) -> LOGGER.info("{}: {}", k, v[0]));
     }
 
     public static long getPlanId(SubDuration duration, SubLevel level) {
+        int i;
         if (duration == SubDuration.MONTHLY) {
             switch (level) {
                 case BASIC:
-                    return 746336L;
+                    i = 0;
+                    break;
 
                 case PRO:
-                    return 746338L;
+                    i = 1;
+                    break;
 
                 case ULTIMATE:
-                    return 820443L;
+                    i = 2;
+                    break;
 
                 default:
                     return 0L;
@@ -164,37 +313,39 @@ public class PaddleManager {
         } else {
             switch (level) {
                 case BASIC:
-                    return 746337L;
+                    i = 3;
+                    break;
 
                 case PRO:
-                    return 746340L;
+                    i = 4;
+                    break;
 
                 case ULTIMATE:
-                    return 820444L;
+                    i = 5;
+                    break;
 
                 default:
                     return 0L;
             }
         }
+
+        return Long.parseLong(System.getenv("PADDLE_SUBSCRIPTION_IDS").split(",")[i]);
     }
 
-    public static SubLevel getSubLevelType(long planId) {
-        switch (String.valueOf(planId)) {
-            case "746336":
-            case "746337":
-                return SubLevel.BASIC;
+    public static SubLevel getSubLevelType(long planIdLong) {
+        String[] subIds = System.getenv("PADDLE_SUBSCRIPTION_IDS").split(",");
+        String planId = String.valueOf(planIdLong);
 
-            case "746338":
-            case "746340":
-                return SubLevel.PRO;
-
-            case "820443":
-            case "820444":
-                return SubLevel.ULTIMATE;
-
-            default:
-                return null;
+        if (List.of(subIds[0], subIds[3]).contains(planId)) {
+            return SubLevel.BASIC;
         }
+        if (List.of(subIds[1], subIds[4]).contains(planId)) {
+            return SubLevel.PRO;
+        }
+        if (List.of(subIds[2], subIds[5]).contains(planId)) {
+            return SubLevel.ULTIMATE;
+        }
+        return null;
     }
 
     private static String generatePassthrough(DiscordUser discordUser, List<Long> presetGuildIds) {

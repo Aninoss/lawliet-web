@@ -2,7 +2,6 @@ package xyz.lawlietbot.spring.frontend.views;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
@@ -24,10 +23,7 @@ import xyz.lawlietbot.spring.frontend.Styles;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.frontend.components.PageHeader;
-import xyz.lawlietbot.spring.frontend.components.premium.PremiumManagePage;
-import xyz.lawlietbot.spring.frontend.components.premium.PremiumPage;
-import xyz.lawlietbot.spring.frontend.components.premium.PremiumSubscriptionsPage;
-import xyz.lawlietbot.spring.frontend.components.premium.PremiumUnlockPage;
+import xyz.lawlietbot.spring.frontend.components.premium.*;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
 import xyz.lawlietbot.spring.syncserver.EventOut;
@@ -36,13 +32,13 @@ import xyz.lawlietbot.spring.syncserver.SendEvent;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 @Route(value = "premium", layout = MainLayout.class)
 @CssImport("./styles/premium.css")
-@JavaScript("https://cdn.paddle.com/paddle/paddle.js")
 @NoLiteAccess
 public class PremiumView extends PageLayout implements HasUrlParameter<String> {
 
@@ -51,29 +47,29 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
     private final Tabs tabs;
     private final Div content = new Div();
 
-    private final PremiumUnlockPage premiumUnlockPage;
-
     public PremiumView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         super(sessionData, uiData);
         ConfirmationDialog dialog = new ConfirmationDialog();
-        premiumUnlockPage = new PremiumUnlockPage(sessionData, dialog);
+        PremiumUnlockPage premiumUnlockPage = new PremiumUnlockPage(sessionData, dialog);
 
         add(new PageHeader(getUiData(), getTitleText(), getTranslation("premium.desc"), getRoute()), dialog);
 
         Tab tabSubscriptions = new Tab(getTranslation("premium.tab.subscriptions"));
+        Tab tabProducts = new Tab(getTranslation("premium.tab.products"));
         Tab tabUnlock = new Tab(getTranslation("premium.tab.unlock"));
         tabUnlock.setEnabled(sessionData.isLoggedIn());
         Tab tabManage = new Tab(getTranslation("premium.tab.manage"));
         tabManage.setEnabled(sessionData.isLoggedIn());
         Map<Tab, PremiumPage> areaMap = Map.of(
                 tabSubscriptions, new PremiumSubscriptionsPage(sessionData, dialog),
+                tabProducts, new PremiumProductsPage(sessionData),
                 tabUnlock, premiumUnlockPage,
                 tabManage, new PremiumManagePage(sessionData, dialog, premiumUnlockPage)
         );
 
-        tabs = new Tabs(tabSubscriptions, tabUnlock, tabManage);
+        tabs = new Tabs(tabSubscriptions, tabProducts, tabUnlock, tabManage);
         tabs.setWidthFull();
-        tabs.addSelectedChangeListener(e -> handleTabsValueChange(areaMap.get(e.getSelectedTab())));
+        tabs.addSelectedChangeListener(e -> handleTabsValueChange(areaMap.get(e.getSelectedTab()), e.getSource().getSelectedIndex()));
 
         content.setWidthFull();
         VerticalLayout mainContent = new VerticalLayout();
@@ -84,13 +80,17 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         mainContent.add(tabs, content);
 
         add(mainContent);
-        handleTabsValueChange(areaMap.get(tabs.getSelectedTab()));
+        handleTabsValueChange(areaMap.get(tabs.getSelectedTab()), tabs.getSelectedIndex());
     }
 
-    private void handleTabsValueChange(PremiumPage premiumPage) {
+    private void handleTabsValueChange(PremiumPage premiumPage, int i) {
         content.removeAll();
         content.add(premiumPage);
         premiumPage.initialize();
+        premiumPage.open();
+
+        String uri = FeatureRequestsView.getRouteStatic(PremiumView.class) + "?tab=" + i;
+        getSessionData().pushUri(uri);
     }
 
     @Override
@@ -107,14 +107,15 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                 String checkoutId = parametersMap.get("paddle").get(0);
                 UI.getCurrent().getPage().getHistory().replaceState(null, getRoute());
                 try {
-                    PaddleManager.waitForCheckoutAsync(checkoutId).get(1, TimeUnit.MINUTES);
+                    int paddleCheckoutWaitTimeMinutes = Integer.parseInt(Objects.requireNonNullElse(System.getenv("PADDLE_CHECKOUT_WAIT_TIME_MINUTES"), "1"));
+                    PaddleManager.waitForCheckoutAsync(checkoutId).get(paddleCheckoutWaitTimeMinutes, TimeUnit.MINUTES);
 
                     JSONObject checkout = PaddleAPI.retrieveCheckout(checkoutId);
                     long planId = checkout.getJSONObject("order").getInt("product_id");
                     SubLevel subLevel = PaddleManager.getSubLevelType(planId);
 
                     if (subLevel == SubLevel.PRO) {
-                        tabs.setSelectedIndex(1);
+                        tabs.setSelectedIndex(2);
                     }
 
                     String dialogText = subLevel == SubLevel.PRO ? "premium.buy.success.pro" : "premium.buy.success";
@@ -137,11 +138,29 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                 }
             }
 
-            if (parametersMap.containsKey("tab") && getSessionData().isLoggedIn()) {
+            if (parametersMap.containsKey("paddle_billing")) {
+                String transactionId = parametersMap.get("paddle_billing").get(0);
+                UI.getCurrent().getPage().getHistory().replaceState(null, getRoute());
+                try {
+                    int paddleCheckoutWaitTimeMinutes = Integer.parseInt(Objects.requireNonNullElse(System.getenv("PADDLE_CHECKOUT_WAIT_TIME_MINUTES"), "1"));
+                    PaddleManager.waitForCheckoutAsync(transactionId).get(paddleCheckoutWaitTimeMinutes, TimeUnit.MINUTES);
+
+                    ConfirmationDialog confirmationDialog = new ConfirmationDialog();
+                    confirmationDialog.open(getTranslation("premium.buy.success.txt2img"), () -> {
+                    });
+                    add(confirmationDialog);
+                    tabs.setSelectedIndex(1);
+                } catch (ExecutionException | InterruptedException | TimeoutException e) {
+                    LOGGER.error("Could not load product", e);
+                    CustomNotification.showError(getTranslation("error"));
+                }
+            }
+
+            if (parametersMap.containsKey("tab")) {
                 String indexString = parametersMap.get("tab").get(0);
                 if (StringUtil.stringIsInt(indexString)) {
                     int index = Integer.parseInt(indexString);
-                    if (index >= 0 && index <= 2) {
+                    if (index >= 0 && index < 4 && (index < 2 || getSessionData().isLoggedIn())) {
                         tabs.setSelectedIndex(index);
                     }
                 }

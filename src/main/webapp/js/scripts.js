@@ -62,36 +62,97 @@ function scrollToTop() {
     window.scrollTo(0, 250);
 }
 
-function openPaddle(vendor, planId, quantity, locale, passthrough) {
-    Paddle.Setup({
-        vendor: vendor,
-        eventCallback: function(eventData) {
-            if (eventData.event === "Checkout.Complete") {
-                const checkoutId = eventData.eventData.checkout.id;
-                window.location.href = "https://lawlietbot.xyz/premium?paddle=" + checkoutId;
-            }
+function loadScript(url, callback)
+{
+    // Adding the script tag to the head as suggested before
+    var head = document.head;
+    var script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = url;
+
+    // Then bind the event to the callback function.
+    // There are several events for cross browser compatibility.
+    script.onreadystatechange = callback;
+    script.onload = callback;
+
+    // Fire the loading
+    head.appendChild(script);
+}
+
+function openPaddle(environment, vendor, planId, quantity, locale, passthrough) {
+    loadScript("https://cdn.paddle.com/paddle/paddle.js", () => {
+        if (environment === "sandbox") {
+            Paddle.Environment.set(environment);
         }
-    });
-    Paddle.Checkout.open({
-        product: planId,
-        quantity: quantity,
-        locale: locale,
-        passthrough: passthrough
+        Paddle.Setup({
+            vendor: vendor,
+            eventCallback: function(eventData) {
+                if (eventData.event === "Checkout.Complete") {
+                    const checkoutId = eventData.eventData.checkout.id;
+                    window.location.href = "https://" + window.location.hostname + "/premium?paddle=" + checkoutId;
+                }
+            }
+        });
+        Paddle.Checkout.open({
+            product: planId,
+            quantity: quantity,
+            locale: locale,
+            passthrough: passthrough
+        });
     });
 }
 
-function openPaddleCustom(vendor, id) {
-    Paddle.Setup({
-        vendor: vendor,
-        eventCallback: function(eventData) {
-            if (eventData.event === "Checkout.Complete") {
-                const checkoutId = eventData.eventData.checkout.id;
-                window.location.href = "https://lawlietbot.xyz/premium?paddle=" + checkoutId;
-            }
+function openPaddleBilling(environment, clientToken, priceId, locale, discordId, discordTag, discordAvatar) {
+    loadScript("https://cdn.paddle.com/paddle/v2/paddle.js", () => {
+        if (environment === "sandbox") {
+            Paddle.Environment.set(environment);
         }
+        Paddle.Setup({
+            token: clientToken,
+            checkout: {
+                settings: {
+                    locale: locale
+                }
+            },
+            eventCallback: function (eventData) {
+                if (eventData.name === "checkout.completed") {
+                    const transactionId = eventData.data.transaction_id;
+                    window.location.href = "https://" + window.location.hostname + "/premium?paddle_billing=" + transactionId;
+                }
+            }
+        });
+        Paddle.Checkout.open({
+            items: [{
+                priceId: priceId
+            }],
+            customData: {
+                discordId: discordId,
+                discordTag: discordTag,
+                discordAvatar: discordAvatar
+            }
+        });
     });
-    Paddle.Checkout.open({
-        override: 'https://create-checkout.paddle.com/checkout/custom/' + id
+}
+
+function openPaddleCustom(environment, vendor, id) {
+    loadScript("https://cdn.paddle.com/paddle/paddle.js", () => {
+        let subdomainPrefix = "";
+        if (environment === "sandbox") {
+            Paddle.Environment.set(environment);
+            subdomainPrefix = "sandbox-";
+        }
+        Paddle.Setup({
+            vendor: vendor,
+            eventCallback: function (eventData) {
+                if (eventData.event === "Checkout.Complete") {
+                    const checkoutId = eventData.eventData.checkout.id;
+                    window.location.href = "https://" + window.location.hostname + "/premium?paddle=" + checkoutId;
+                }
+            }
+        });
+        Paddle.Checkout.open({
+            override: 'https://' + subdomainPrefix + 'create-checkout.paddle.com/checkout/custom/' + id
+        });
     });
 }
 

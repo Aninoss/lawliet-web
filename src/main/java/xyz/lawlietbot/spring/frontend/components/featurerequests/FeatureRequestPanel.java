@@ -1,7 +1,5 @@
 package xyz.lawlietbot.spring.frontend.components.featurerequests;
 
-import java.util.ArrayList;
-import java.util.List;
 import com.github.appreciated.css.grid.GridLayoutComponent;
 import com.github.appreciated.css.grid.sizes.Flex;
 import com.github.appreciated.css.grid.sizes.Length;
@@ -17,6 +15,9 @@ import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.featurerequests.sort.FeatureRequestSort;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class FeatureRequestPanel extends Div {
 
@@ -48,7 +49,7 @@ public class FeatureRequestPanel extends Div {
         }
 
         removeAll();
-        if (entryList.size() > 0) {
+        if (!entryList.isEmpty()) {
             FlexibleGridLayout gridLayout = new FlexibleGridLayout()
                     .withColumns(Repeat.RepeatMode.AUTO_FILL, new MinMax(new Length("270px"), new Flex(1)))
                     .withItems(articles.toArray(new Article[0]))
