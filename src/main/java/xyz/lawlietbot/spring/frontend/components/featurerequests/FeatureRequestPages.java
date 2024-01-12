@@ -7,6 +7,11 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 public class FeatureRequestPages extends VerticalLayout {
 
     private final HorizontalLayout pageLayout = new HorizontalLayout();
@@ -31,18 +36,48 @@ public class FeatureRequestPages extends VerticalLayout {
 
     public void setPage(int page, int pageSize) {
         pageLayout.removeAll();
-        for(int i = 0; i < pageSize; i++) {
+
+        List<Integer> pages;
+        if (pageSize <= 9) {
+            pages = IntStream.range(0, pageSize).boxed().collect(Collectors.toList());
+        } else {
+            pages = new ArrayList<>();
+
+            if (page <= 4) {
+                pages.addAll(IntStream.rangeClosed(0, page).boxed().collect(Collectors.toList()));
+            } else {
+                pages.addAll(List.of(0, -1));
+                int minPage = Math.min(page - 2, pageSize - 7);
+                for (int i = minPage; i <= page; i++) {
+                    pages.add(i);
+                }
+            }
+
+            if (page >= pageSize - 5) {
+                pages.addAll(IntStream.range(page + 1, pageSize).boxed().collect(Collectors.toList()));
+            } else {
+                int maxPage = Math.max(page + 2, 6);
+                for (int i = page + 1; i <= maxPage; i++) {
+                    pages.add(i);
+                }
+                pages.addAll(List.of(-1, pageSize - 1));
+            }
+        }
+
+        for (int i : pages) {
             Button button = new Button(String.valueOf(i + 1));
             button.setDisableOnClick(true);
             button.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
-            if (page == i) {
+            if (i < 0) {
+                button.setText("…");
+                button.setEnabled(false);
+            } else if (page == i) {
                 button.setEnabled(false);
             } else {
-                int finalI = i;
                 button.addClickListener(click -> {
                     UI.getCurrent().getPage().executeJs("scrollToTop()");
-                    onPageChange.onPageChange(finalI);
+                    onPageChange.onPageChange(i);
                 });
             }
 
