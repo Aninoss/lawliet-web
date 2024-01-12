@@ -38,25 +38,25 @@ public class FeatureRequestPages extends VerticalLayout {
         pageLayout.removeAll();
 
         List<Integer> pages;
-        if (pageSize <= 9) {
+        if (pageSize <= 7) {
             pages = IntStream.range(0, pageSize).boxed().collect(Collectors.toList());
         } else {
             pages = new ArrayList<>();
 
-            if (page <= 4) {
+            if (page <= 3) {
                 pages.addAll(IntStream.rangeClosed(0, page).boxed().collect(Collectors.toList()));
             } else {
                 pages.addAll(List.of(0, -1));
-                int minPage = Math.min(page - 2, pageSize - 7);
+                int minPage = Math.min(page - 1, pageSize - 5);
                 for (int i = minPage; i <= page; i++) {
                     pages.add(i);
                 }
             }
 
-            if (page >= pageSize - 5) {
+            if (page >= pageSize - 4) {
                 pages.addAll(IntStream.range(page + 1, pageSize).boxed().collect(Collectors.toList()));
             } else {
-                int maxPage = Math.max(page + 2, 6);
+                int maxPage = Math.max(page + 1, 4);
                 for (int i = page + 1; i <= maxPage; i++) {
                     pages.add(i);
                 }
