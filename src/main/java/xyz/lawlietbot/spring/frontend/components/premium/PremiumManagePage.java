@@ -60,6 +60,8 @@ public class PremiumManagePage extends PremiumPage {
             grid.setItems(subscriptionList);
             grid.setSelectionMode(Grid.SelectionMode.NONE);
 
+            grid.addComponentColumn(sub -> generateActionComponent(sub, user))
+                    .setAutoWidth(true);
             grid.addColumn(sub -> getTranslation("premium.tier." + PaddleManager.getSubLevelType(sub.getPlanId()).name()))
                     .setHeader(getTranslation("manage.grid.header.level"))
                     .setAutoWidth(true);
@@ -74,8 +76,6 @@ public class PremiumManagePage extends PremiumPage {
                     .setAutoWidth(true);
             grid.addColumn(Subscription::getNextPayment)
                     .setHeader(getTranslation("manage.grid.header.nextpayment"))
-                    .setAutoWidth(true);
-            grid.addComponentColumn(sub -> generateActionComponent(sub, user))
                     .setAutoWidth(true);
             return grid;
         } else {
