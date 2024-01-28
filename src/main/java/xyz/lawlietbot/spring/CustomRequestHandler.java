@@ -78,14 +78,14 @@ public class CustomRequestHandler implements RequestHandler {
                         "script-src 'unsafe-inline' 'unsafe-eval' 'self' ajax.cloudflare.com https://cdn.jsdelivr.net https://www.paypal.com https://*.paddle.com https://*.profitwell.com https://polyfill.io https://*.googleapis.com https://*.sentry-cdn.com; " +
                         "style-src https://*.paddle.com https://*.profitwell.com 'unsafe-inline' 'self'; " +
                         "frame-src https://*.paddle.com; " +
-                        "frame-ancestors https://top.gg https://discords.com; " +
+                        "frame-ancestors https://top.gg https://discords.com https://wumpus.store; " +
                         "base-uri 'self'"
         );
-        response.setHeader("X-Frame-Options", "allow-from https://top.gg/ https://discords.com/");
+        response.setHeader("X-Frame-Options", "allow-from https://top.gg/ https://discords.com/ https://wumpus.store/");
         response.setHeader("X-Content-Type-Options", "nosniff");
         response.setHeader("Referrer-Policy", "same-origin");
         response.setHeader("Feature-Policy", "microphone 'none'; geolocation 'none'");
-        response.setHeader("Access-Control-Allow-Origin", "https://top.gg https://discords.com");
+        response.setHeader("Access-Control-Allow-Origin", "https://top.gg https://discords.com https://wumpus.store");
         response.setHeader("X-XSS-Protection", "1; mode=block");
         response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubdomains");
     }
