@@ -8,6 +8,7 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.dom.Style;
 import dashboard.DashboardComponent;
 import dashboard.component.*;
+import dashboard.container.ExpandableContainer;
 import dashboard.container.HorizontalContainer;
 import dashboard.container.HorizontalPusher;
 import dashboard.container.VerticalContainer;
@@ -25,6 +26,10 @@ public class DashboardComponentConverter {
 
             case VerticalContainer.TYPE:
                 component = new VerticalContainerAdapter((VerticalContainer) dashboardComponent, guildId, userId, dialog);
+                break;
+
+            case ExpandableContainer.TYPE:
+                component = new ExpandableContainerAdapter((ExpandableContainer) dashboardComponent, guildId, userId, dialog);
                 break;
 
             case DashboardButton.TYPE:

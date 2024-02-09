@@ -74,7 +74,7 @@ public class FeatureRequestCard extends Div {
     }
 
     private void addTitle() {
-        if (frEntry.getTitle().length() > 0) {
+        if (!frEntry.getTitle().isEmpty()) {
             H3 title = new H3((frEntry.getTitle()));
             title.setWidthFull();
             content.add(title);

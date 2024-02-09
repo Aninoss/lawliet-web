@@ -16,6 +16,10 @@ public class DashboardButtonAdapter extends Button {
                 addThemeVariants(ButtonVariant.LUMO_ERROR);
                 break;
 
+            case TERTIARY:
+                addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+                break;
+
             default:
         }
 
