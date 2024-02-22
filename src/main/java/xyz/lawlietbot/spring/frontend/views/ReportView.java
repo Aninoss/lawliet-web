@@ -175,7 +175,7 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
         submitButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         submitButton.addClickShortcut(Key.ENTER);
         submitButton.addClickListener(e -> {
-            if (reason.getValue().replaceAll("\\s", "").length() > 0) {
+            if (!reason.getValue().replaceAll("\\s", "").isEmpty()) {
                 reason.setInvalid(false);
                 try {
                     JSONObject json = new JSONObject();

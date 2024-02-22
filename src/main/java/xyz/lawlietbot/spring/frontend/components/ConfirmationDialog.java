@@ -1,8 +1,5 @@
 package xyz.lawlietbot.spring.frontend.components;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
@@ -14,6 +11,10 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import xyz.lawlietbot.spring.frontend.Styles;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 public class ConfirmationDialog extends Div {
 
     private final static ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
@@ -23,6 +24,7 @@ public class ConfirmationDialog extends Div {
     private final VerticalLayout dialogLayout = new VerticalLayout();
     private boolean opened = false;
     private boolean canInteract = true;
+    private boolean triggerConfirmListenerOnClose = false;
 
     public ConfirmationDialog() {
         setSizeFull();
@@ -125,6 +127,8 @@ public class ConfirmationDialog extends Div {
             } else {
                 if (cancelListener != null) {
                     cancelListener.onCancel();
+                } else if (triggerConfirmListenerOnClose) {
+                    confirmListener.onConfirm();
                 }
             }
         }
@@ -134,6 +138,9 @@ public class ConfirmationDialog extends Div {
         return opened;
     }
 
+    public void setTriggerConfirmListenerOnClose(boolean triggerConfirmListenerOnClose) {
+        this.triggerConfirmListenerOnClose = triggerConfirmListenerOnClose;
+    }
 
     public interface ConfirmationDialogConfirmListener {
 
