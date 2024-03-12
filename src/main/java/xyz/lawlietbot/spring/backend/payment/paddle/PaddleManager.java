@@ -147,7 +147,7 @@ public class PaddleManager {
                 priceId,
                 locale.getLanguage(),
                 String.valueOf(discordUser.getId()),
-                discordUser.getUsername() + "#" + discordUser.getDiscriminator(),
+                discordUser.getUsername(),
                 discordUser.getUserAvatar()
         );
     }
@@ -349,11 +349,9 @@ public class PaddleManager {
     }
 
     private static String generatePassthrough(DiscordUser discordUser, List<Long> presetGuildIds) {
-        String discordTag = discordUser.getUsername() + "#" + discordUser.getDiscriminator();
-
         JSONObject json = new JSONObject();
         json.put("discord_id", discordUser.getId());
-        json.put("discord_tag", Base64.getEncoder().encodeToString(discordTag.getBytes(StandardCharsets.UTF_8)));
+        json.put("discord_tag", Base64.getEncoder().encodeToString(discordUser.getUsername().getBytes(StandardCharsets.UTF_8)));
         json.put("discord_avatar", discordUser.getUserAvatar());
 
         JSONArray presetGuildsArray = new JSONArray();
