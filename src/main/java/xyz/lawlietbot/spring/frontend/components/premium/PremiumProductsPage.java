@@ -132,7 +132,7 @@ public class PremiumProductsPage extends PremiumPage {
             button = new Button(getTranslation("premium.products.buy"));
             button.setIcon(VaadinIcon.CART.create());
         } else {
-            button = new Button(getTranslation("premium.buylogin"));
+            button = new Button(getTranslation("login"));
         }
         button.addClickListener(e -> {
             DiscordUser discordUser = sessionData.getDiscordUser().orElse(null);

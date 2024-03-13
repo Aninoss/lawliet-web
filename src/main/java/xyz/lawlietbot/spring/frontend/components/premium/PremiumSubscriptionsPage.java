@@ -39,13 +39,16 @@ import xyz.lawlietbot.spring.frontend.components.GuildComboBox;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class PremiumSubscriptionsPage extends PremiumPage {
 
+    public final static boolean PRICE_TESTING = System.getenv("PADDLE_SUBSCRIPTION_IDS_1") != null;
     private final static Logger LOGGER = LoggerFactory.getLogger(PremiumSubscriptionsPage.class);
+    private final static HashSet<Long> visitedUserIds = new HashSet<>(); //TODO: remove after A/B test
 
     private final SessionData sessionData;
     private final ConfirmationDialog dialog;
@@ -55,12 +58,20 @@ public class PremiumSubscriptionsPage extends PremiumPage {
     private final Map<SubLevel, Span> pricePeriodTextMap = new HashMap<>();
     private VerticalLayout preselectGuildsLayout;
     private HorizontalLayout yearlySuggestionField;
+    private int group = 0;
 
     public PremiumSubscriptionsPage(SessionData sessionData, ConfirmationDialog dialog) {
         this.sessionData = sessionData;
         this.dialog = dialog;
-
         setPadding(true);
+
+        if (PRICE_TESTING && sessionData.isLoggedIn()) {
+            long userId = sessionData.getDiscordUser().get().getId();
+            group = (int) ((userId >> 22) % 2);
+            if (visitedUserIds.add(userId)) {
+                LOGGER.info("First premium page visit of an user (group {})", group);
+            }
+        }
     }
 
     @Override
@@ -70,7 +81,10 @@ public class PremiumSubscriptionsPage extends PremiumPage {
         } else {
             add(generateYearlySuggestionField());
         }
-        add(generateTiersCurrencyDurationField(), generateTiersTiers());
+        if (!PRICE_TESTING || sessionData.isLoggedIn()) {
+            add(generateTiersCurrencyDurationField());
+        }
+        add(generateTiersTiers());
         refreshPremiumTiers();
     }
 
@@ -209,17 +223,20 @@ public class PremiumSubscriptionsPage extends PremiumPage {
                 .set("margin-top", "24px");
         content.add(icon);
 
-        H2 price = new H2("");
-        price.getStyle().set("margin", "0")
-                .set("font-size", "225%");
-        priceTextMap.put(level, price);
-        content.add(price);
+        if (!PRICE_TESTING || sessionData.isLoggedIn()) {
+            H2 price = new H2("");
+            price.getStyle().set("margin", "0")
+                    .set("font-size", "225%");
+            priceTextMap.put(level, price);
+            content.add(price);
 
-        Span period = new Span("");
-        period.getStyle().set("margin", "0")
-                .set("color", "var(--secondary-text-color)");
-        pricePeriodTextMap.put(level, period);
-        content.add(period, generateBuyButton(level));
+            Span period = new Span("");
+            period.getStyle().set("margin", "0")
+                    .set("color", "var(--secondary-text-color)");
+            pricePeriodTextMap.put(level, period);
+            content.add(period);
+        }
+        content.add(generateBuyButton(level));
 
         Span desc = new Span(getTranslation("premium.desc." + level.name()));
         desc.getStyle().set("text-align", "center");
@@ -290,7 +307,7 @@ public class PremiumSubscriptionsPage extends PremiumPage {
 
         if (level.buyDirectly()) {
             if (!loggedIn) {
-                buyButton.setText(getTranslation("premium.buylogin"));
+                buyButton.setText(getTranslation(PRICE_TESTING ? "premium.buylogin.testing" : "premium.buylogin"));
             }
             buyButton.addClickListener(e -> {
                 DiscordUser discordUser = sessionData.getDiscordUser().orElse(null);
@@ -303,7 +320,7 @@ public class PremiumSubscriptionsPage extends PremiumPage {
                                 .map(g -> g.getValue().getId())
                                 .collect(Collectors.toList());
 
-                        PaddleManager.openPopup(durationSelect.getValue(), level, discordUser, value, presetGuildIds, getLocale());
+                        PaddleManager.openPopup(durationSelect.getValue(), level, discordUser, value, presetGuildIds, getLocale(), group);
                         UICache.put(discordUser.getId(), UI.getCurrent());
                     } catch (Exception ex) {
                         LOGGER.error("Exception", ex);
@@ -389,13 +406,13 @@ public class PremiumSubscriptionsPage extends PremiumPage {
 
     private void refreshPremiumTiers() {
         SubDuration duration = durationSelect.getValue();
-        PaddleSubscriptionPrices paddleSubscriptionPrices = PaddleManager.retrieveSubscriptionPrices(VaadinRequest.getCurrent().getHeader("CF-Connecting-IP"));
+        PaddleSubscriptionPrices paddleSubscriptionPrices = PaddleManager.retrieveSubscriptionPrices(VaadinRequest.getCurrent().getHeader("CF-Connecting-IP"), group);
         Currency currency = paddleSubscriptionPrices.getCurrency();
         Map<Long, Double> priceMap = paddleSubscriptionPrices.getPrices();
         boolean includesVat = paddleSubscriptionPrices.getIncludesVat();
 
         for (SubLevel subLevel : priceTextMap.keySet()) {
-            long planId = PaddleManager.getPlanId(duration, subLevel);
+            long planId = PaddleManager.getPlanId(duration, subLevel, group);
 
             double price = priceMap.get(planId);
             if (subLevel == SubLevel.PRO && quantityNumberField != null) {

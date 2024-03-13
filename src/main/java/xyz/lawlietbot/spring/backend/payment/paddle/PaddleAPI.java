@@ -39,14 +39,14 @@ public class PaddleAPI {
         return run(request);
     }
 
-    public static JSONObject retrieveSubscriptionPrices(String customerIpAddress) throws IOException {
+    public static JSONObject retrieveSubscriptionPrices(String customerIpAddress, int group) throws IOException {
         StringBuilder productIds = new StringBuilder();
         for (SubDuration duration : SubDuration.values()) {
             for (SubLevel level : SubLevel.values()) {
                 if (productIds.length() > 0) {
                     productIds.append(",");
                 }
-                productIds.append(PaddleManager.getPlanId(duration, level));
+                productIds.append(PaddleManager.getPlanId(duration, level, group));
             }
         }
 

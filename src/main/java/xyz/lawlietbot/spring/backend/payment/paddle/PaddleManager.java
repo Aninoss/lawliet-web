@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.lawlietbot.spring.ExternalLinks;
 import xyz.lawlietbot.spring.backend.FileString;
+import xyz.lawlietbot.spring.backend.Pair;
 import xyz.lawlietbot.spring.backend.UICache;
 import xyz.lawlietbot.spring.backend.payment.Currency;
 import xyz.lawlietbot.spring.backend.payment.*;
@@ -42,13 +43,13 @@ public class PaddleManager {
                     return new CompletableFuture<>();
                 }
             });
-    private final static LoadingCache<String, JSONObject> subscriptionPricesCache = CacheBuilder.newBuilder()
+    private final static LoadingCache<Pair<String, Integer>, JSONObject> subscriptionPricesCache = CacheBuilder.newBuilder()
             .expireAfterWrite(Duration.ofMinutes(5))
             .build(new CacheLoader<>() {
                 @NotNull
                 @Override
-                public JSONObject load(@NotNull String ip) throws Exception {
-                    return PaddleAPI.retrieveSubscriptionPrices(ip);
+                public JSONObject load(@NotNull Pair<String, Integer> pair) throws Exception {
+                    return PaddleAPI.retrieveSubscriptionPrices(pair.getKey(), pair.getValue());
                 }
             });
     private final static LoadingCache<String, JSONObject> productPricesCache = CacheBuilder.newBuilder()
@@ -74,12 +75,12 @@ public class PaddleManager {
         paddleBillingWebhookVerifier = new PaddleBillingWebhookVerifier(System.getenv("PADDLE_BILLING_WEBHOOK_KEY"));
     }
 
-    public static PaddleSubscriptionPrices retrieveSubscriptionPrices(String customerIpAddress) {
+    public static PaddleSubscriptionPrices retrieveSubscriptionPrices(String customerIpAddress, int group) {
         customerIpAddress = Objects.requireNonNullElse(customerIpAddress, System.getenv("PADDLE_DEFAULT_IP"));
 
         JSONObject json;
         try {
-            json = subscriptionPricesCache.get(customerIpAddress);
+            json = subscriptionPricesCache.get(new Pair<>(customerIpAddress, group));
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }
@@ -129,11 +130,11 @@ public class PaddleManager {
         return productPriceMap;
     }
 
-    public static void openPopup(SubDuration duration, SubLevel level, DiscordUser discordUser, int quantity, List<Long> presetGuildIds, Locale locale) {
+    public static void openPopup(SubDuration duration, SubLevel level, DiscordUser discordUser, int quantity, List<Long> presetGuildIds, Locale locale, int group) {
         UI.getCurrent().getPage().executeJs("openPaddle($0, $1, $2, $3, $4, $5)",
                 System.getenv("PADDLE_ENVIRONMENT"),
                 Integer.parseInt(System.getenv("PADDLE_VENDOR_ID")),
-                (int) PaddleManager.getPlanId(duration, level),
+                (int) PaddleManager.getPlanId(duration, level, group),
                 quantity,
                 locale.getLanguage(),
                 generatePassthrough(discordUser, presetGuildIds)
@@ -291,7 +292,7 @@ public class PaddleManager {
         parameterMap.forEach((k, v) -> LOGGER.info("{}: {}", k, v[0]));
     }
 
-    public static long getPlanId(SubDuration duration, SubLevel level) {
+    public static long getPlanId(SubDuration duration, SubLevel level, int group) {
         int i;
         if (duration == SubDuration.MONTHLY) {
             switch (level) {
@@ -329,21 +330,28 @@ public class PaddleManager {
             }
         }
 
-        return Long.parseLong(System.getenv("PADDLE_SUBSCRIPTION_IDS").split(",")[i]);
+        return Long.parseLong(System.getenv("PADDLE_SUBSCRIPTION_IDS_" + group).split(",")[i]);
     }
 
     public static SubLevel getSubLevelType(long planIdLong) {
-        String[] subIds = System.getenv("PADDLE_SUBSCRIPTION_IDS").split(",");
-        String planId = String.valueOf(planIdLong);
+        for (int i = 0; i < 2; i++) {
+            String subString = System.getenv("PADDLE_SUBSCRIPTION_IDS_" + i);
+            if (subString == null) {
+                continue;
+            }
 
-        if (List.of(subIds[0], subIds[3]).contains(planId)) {
-            return SubLevel.BASIC;
-        }
-        if (List.of(subIds[1], subIds[4]).contains(planId)) {
-            return SubLevel.PRO;
-        }
-        if (List.of(subIds[2], subIds[5]).contains(planId)) {
-            return SubLevel.ULTIMATE;
+            String[] subIds = subString.split(",");
+            String planId = String.valueOf(planIdLong);
+
+            if (List.of(subIds[0], subIds[3]).contains(planId)) {
+                return SubLevel.BASIC;
+            }
+            if (List.of(subIds[1], subIds[4]).contains(planId)) {
+                return SubLevel.PRO;
+            }
+            if (List.of(subIds[2], subIds[5]).contains(planId)) {
+                return SubLevel.ULTIMATE;
+            }
         }
         return null;
     }

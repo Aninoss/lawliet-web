@@ -44,4 +44,5 @@ public enum SubLevel {
     public VaadinIcon getVaadinIcon() {
         return vaadinIcon;
     }
+
 }
