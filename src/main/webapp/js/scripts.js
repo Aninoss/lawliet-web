@@ -35,7 +35,7 @@ function onLoad() {
 function closeCookieConsent(name, value) {
     var cookieDialog = document.getElementById("cookie-consent");
     cookieDialog.style.transform = "translateY(calc(100% + 32px))";
-    createCookie(name, value, 30);
+    createCookie(name, value, 400);
 }
 
 function createCookie(name, value, days) {

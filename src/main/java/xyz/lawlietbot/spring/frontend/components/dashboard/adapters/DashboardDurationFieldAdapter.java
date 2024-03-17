@@ -103,7 +103,8 @@ public class DashboardDurationFieldAdapter extends FlexLayout {
     }
 
     private boolean checkNumberField(NumberField numberField, int max) {
-        return numberField.getValue() <= max &&
+        return numberField.getValue() != null &&
+                numberField.getValue() <= max &&
                 numberField.getValue() >= 0 &&
                 numberField.getValue() == Math.floor(numberField.getValue());
     }
