@@ -1,7 +1,5 @@
 package xyz.lawlietbot.spring.frontend.views;
 
-import java.util.*;
-import java.util.concurrent.ExecutionException;
 import bell.oauth.discord.domain.Guild;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
@@ -26,6 +24,8 @@ import dashboard.DashboardComponent;
 import dashboard.container.DashboardContainer;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import xyz.lawlietbot.spring.LoginAccess;
 import xyz.lawlietbot.spring.NavBarSolid;
@@ -45,12 +45,17 @@ import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+
 @Route(value = "dashboard", layout = MainLayout.class)
 @CssImport("./styles/dashboard.css")
 @NoLiteAccess
 @LoginAccess
 @NavBarSolid
 public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(DashboardView.class);
 
     private final VerticalLayout mainLayout = new VerticalLayout();
     private final VerticalLayout tabsLayout = new VerticalLayout();
@@ -502,7 +507,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                         }
                     }).get();
         } catch (ExecutionException | InterruptedException e) {
-            //Ignore
+            LOGGER.error("Dashboard error", e);
             return null;
         }
     }
