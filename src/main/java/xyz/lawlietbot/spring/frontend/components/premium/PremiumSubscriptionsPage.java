@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 
 public class PremiumSubscriptionsPage extends PremiumPage {
 
-    public final static boolean PRICE_TESTING = System.getenv("PADDLE_SUBSCRIPTION_IDS_1") != null;
+    public final static boolean PRICE_TESTING = Boolean.parseBoolean(System.getenv("PADDLE_PRICE_TESTING"));
     private final static Logger LOGGER = LoggerFactory.getLogger(PremiumSubscriptionsPage.class);
     private final static HashSet<Long> visitedUserIds = new HashSet<>(); //TODO: remove after A/B test
 
