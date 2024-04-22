@@ -132,6 +132,23 @@ html {
     color: var(--lumo-error-color)
 }
 
+.dashboard-image-cell {
+    border-radius: 8px;
+    background: var(--lumo-tint-5pct);
+    position: relative;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+
+.dashboard-image-cell-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    border-top-right-radius: 8px;
+}
+
 @media (min-width: 700px) {
 
     html {
