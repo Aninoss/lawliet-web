@@ -47,17 +47,19 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
 
     private final static Logger LOGGER = LoggerFactory.getLogger(MainLayout.class);
 
-    private SessionData sessionData;
-    private UIData uiData;
+    private final SessionData sessionData;
+    private final UIData uiData;
     private String target;
     private final Div divStretch = new Div();
     private HeaderComponent headerComponent;
 
     public MainLayout(@Autowired SessionData sessionData, @Autowired UIData uiData) {
-        if (VaadinSession.getCurrent().getBrowser().isIE()) return;
-
         this.sessionData = sessionData;
         this.uiData = uiData;
+
+        if (VaadinSession.getCurrent().getBrowser().isIE()) {
+            return;
+        }
 
         setMinHeight("100vh");
         setWidthFull();
@@ -100,11 +102,10 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         divStretch.getStyle().set("background", "var(--lumo-base-color)");
-
         Class<?> cTemp = event.getNavigationTarget();
 
         if (PageLayout.class.isAssignableFrom(cTemp)) {
-            Class<? extends PageLayout> c = (Class<? extends PageLayout>)cTemp;
+            Class<? extends PageLayout> c = (Class<? extends PageLayout>) cTemp;
 
             if (c.isAnnotationPresent(SetDivStretchBackground.class)) {
                 final String background = c.getAnnotation(SetDivStretchBackground.class).background();
@@ -134,7 +135,7 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
 
         //Favicons
         settings.addLink("/apple-touch-icon.png", Map.of(
-                "rel",  "apple-touch-icon",
+                "rel", "apple-touch-icon",
                 "sizes", "180x180"
         ));
         settings.addLink("manifest", "/site.webmanifest");
@@ -172,13 +173,11 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
             return;
         }
 
-        if (sessionData != null) {
-            if ((sessionData.isLoggedIn() && !uiData.getUserId().isPresent()) ||
-                    (!sessionData.isLoggedIn() && uiData.getUserId().isPresent()) ||
-                    (sessionData.isLoggedIn() && !uiData.getUserId().get().equals(sessionData.getDiscordUser().get().getId()))
-            ) {
-                UI.getCurrent().getPage().reload();
-            }
+        if ((sessionData.isLoggedIn() && !uiData.getUserId().isPresent()) ||
+                (!sessionData.isLoggedIn() && uiData.getUserId().isPresent()) ||
+                (sessionData.isLoggedIn() && !uiData.getUserId().get().equals(sessionData.getDiscordUser().get().getId()))
+        ) {
+            UI.getCurrent().getPage().reload();
         }
     }
 

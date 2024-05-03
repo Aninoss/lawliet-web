@@ -1,8 +1,8 @@
-li:not(:first-child) {
+li:not(:first-child).premium-entry {
     margin-top: 16px;
 }
 
-li {
+li.premium-entry {
     color: var(--lumo-body-text-color);
 }
 

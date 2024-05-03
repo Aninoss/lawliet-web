@@ -1,12 +1,11 @@
 package xyz.lawlietbot.spring.frontend.components.dashboard.adapters;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.*;
 import dashboard.component.DashboardText;
 import xyz.lawlietbot.spring.RegexPatterns;
 import xyz.lawlietbot.spring.backend.util.VaadinUtil;
-import xyz.lawlietbot.spring.frontend.components.SpanWithLinebreaks;
+import xyz.lawlietbot.spring.frontend.components.LineBreak;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -17,29 +16,38 @@ import java.util.regex.Matcher;
 
 public class DashboardTextAdapter extends Div {
 
-    public DashboardTextAdapter(DashboardText dashboardText) {
+    public DashboardTextAdapter(DashboardText dashboardText, boolean titleText) {
         switch (dashboardText.getStyle()) {
             case ERROR:
-                getStyle().set("color", "var(--lumo-error-text-color)");
+                addClassName("dashboard-text-error");
                 break;
 
             case SUCCESS:
-                getStyle().set("color", "--lumo-success-text-color");
+                addClassName("dashboard-text-success");
                 break;
 
             case WARNING:
-                getStyle().set("color", "rgb(var(--warning-color-rgb))");
+                addClassName("dashboard-text-warning");
                 break;
 
             case SECONDARY:
-                getStyle().set("color", "var(--secondary-text-color)");
+                addClassName("dashboard-text-secondary");
                 break;
 
             case BOLD:
-                getStyle().set("font-weight", "bold");
+                addClassName("dashboard-text-bold");
+                break;
+
+            case HINT:
+                addClassName("dashboard-text-hint");
+                getStyle().set("margin-top", "0.5rem");
                 break;
 
             default:
+        }
+
+        if (titleText) {
+            addClassName("dashboard-subheader-description");
         }
 
         String text = dashboardText.getText();
@@ -48,7 +56,7 @@ public class DashboardTextAdapter extends Div {
         }
 
         if (dashboardText.getUrl() == null) {
-            add(new SpanWithLinebreaks(text));
+            add(generateText(text));
         } else {
             Anchor a = new Anchor(dashboardText.getUrl(), text);
             a.setTarget("_blank");
@@ -81,6 +89,61 @@ public class DashboardTextAdapter extends Div {
         } while (matches);
 
         return text;
+    }
+
+    private Span generateText(String text) {
+        Span span = new Span();
+
+        String[] lines = text.split("\n");
+        UnorderedList ul = null;
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i];
+
+            if (line.startsWith("- ")) {
+                line = line.substring(2);
+                if (ul == null) {
+                    ul = new UnorderedList();
+                }
+                ul.add(new ListItem(generateTextLine(line)));
+            } else {
+                if (ul != null) {
+                    span.add(ul);
+                    ul = null;
+                }
+
+                if (i > 0) {
+                    span.add(new LineBreak());
+                }
+                span.add(generateTextLine(line));
+            }
+        }
+
+        if (ul != null) {
+            span.add(ul);
+        }
+
+        return span;
+    }
+
+    private Span generateTextLine(String text) {
+        Span span = new Span();
+
+        Matcher matcher = RegexPatterns.URL_PATTERN.matcher(text);
+        int index = 0;
+        while(matcher.find()) {
+            span.add(new Span(text.substring(index, matcher.start())));
+
+            Anchor a = new Anchor(matcher.group(), matcher.group());
+            a.setTarget("_blank");
+            span.add(a);
+
+            index = matcher.end();
+        }
+
+        if (index <= text.length()) {
+            span.add(new Span(text.substring(index)));
+        }
+        return span;
     }
 
 }

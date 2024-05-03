@@ -485,7 +485,9 @@ public class PremiumSubscriptionsPage extends PremiumPage {
             if (subTexts != null) {
                 UnorderedList unorderedList = new UnorderedList();
                 for (String subText : subTexts) {
-                    unorderedList.add(new ListItem(subText));
+                    ListItem item = new ListItem(subText);
+                    item.addClassName("premium-entry");
+                    unorderedList.add(item);
                 }
 
                 AccordionPanel accordionPanel = new AccordionPanel(content, unorderedList);

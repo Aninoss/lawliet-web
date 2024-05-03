@@ -1,8 +1,5 @@
 package xyz.lawlietbot.spring.frontend.components.dashboard.adapters;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
@@ -16,6 +13,10 @@ import org.vaadin.gatanaso.MultiselectComboBox;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+
 public class DashboardComboBoxAdapter extends Div {
 
     public DashboardComboBoxAdapter(long guildId, long userId, DashboardComboBox dashboardComboBox) {
@@ -23,7 +24,7 @@ public class DashboardComboBoxAdapter extends Div {
             MultiselectComboBox<DiscordEntity> multiselectComboBox = new MultiselectComboBox<>();
             multiselectComboBox.setWidthFull();
             multiselectComboBox.getStyle().set("padding-top", "0");
-            multiselectComboBox.setPlaceholder(getTranslation("dash.select." + dashboardComboBox.getDataType().name(), true));
+            multiselectComboBox.setPlaceholder(dashboardComboBox.getPlaceholder() != null ? dashboardComboBox.getPlaceholder() : getTranslation("dash.select." + dashboardComboBox.getDataType().name(), true));
             multiselectComboBox.setLabel(dashboardComboBox.getLabel());
             multiselectComboBox.setItemLabelGenerator(DiscordEntity::getName);
             multiselectComboBox.setRenderer(new ComponentRenderer<>(discordEntity -> new Text(discordEntity.getName())));

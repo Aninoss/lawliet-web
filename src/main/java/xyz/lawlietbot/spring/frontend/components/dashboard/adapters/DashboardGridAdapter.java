@@ -4,6 +4,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import dashboard.component.DashboardGrid;
 import dashboard.data.GridRow;
@@ -12,7 +13,13 @@ public class DashboardGridAdapter extends FlexLayout {
 
     public DashboardGridAdapter(DashboardGrid dashboardGrid) {
         setFlexDirection(FlexDirection.COLUMN);
-        add(generateGrid(dashboardGrid));
+        if (dashboardGrid.getRows().isEmpty()) {
+            Span span = new Span(getTranslation("dash.norows"));
+            span.getStyle().set("text-align", "center");
+            add(span);
+        } else {
+            add(generateGrid(dashboardGrid));
+        }
     }
 
     private Component generateGrid(DashboardGrid dashboardGrid) {

@@ -5,6 +5,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import dashboard.DashboardComponent;
+import dashboard.component.DashboardTitle;
 import dashboard.container.VerticalContainer;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardComponentConverter;
@@ -17,8 +18,9 @@ public class VerticalContainerAdapter extends FlexLayout {
             addClassName("dashboard-card");
         }
 
+        DashboardComponent lastComponent = null;
         for (DashboardComponent dashboardComponent : verticalContainer.getChildren()) {
-            Component component = DashboardComponentConverter.convert(guildId, userId, dashboardComponent, dialog);
+            Component component = DashboardComponentConverter.convert(guildId, userId, dashboardComponent, dialog, lastComponent instanceof DashboardTitle);
             if (component != null) {
                 if (component instanceof HasSize) {
                     ((HasSize) component).setWidthFull();
@@ -28,6 +30,7 @@ public class VerticalContainerAdapter extends FlexLayout {
                 }
                 add(component);
             }
+            lastComponent = dashboardComponent;
         }
     }
 

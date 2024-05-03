@@ -24,10 +24,12 @@ public class DashboardInitData {
 
         private final String id;
         private final String title;
+        private final String description;
 
-        public Category(String id, String title) {
+        public Category(String id, String title, String description) {
             this.id = id;
             this.title = title;
+            this.description = description;
         }
 
         public String getId() {
@@ -38,6 +40,9 @@ public class DashboardInitData {
             return title;
         }
 
+        public String getDescription() {
+            return description;
+        }
     }
 
 }

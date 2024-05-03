@@ -40,7 +40,7 @@ public class HorizontalContainerAdapter extends FlexLayout {
 
         boolean noPusher = horizontalContainer.getChildren().stream().noneMatch(c -> c instanceof HorizontalPusher);
         for (DashboardComponent dashboardComponent : horizontalContainer.getChildren()) {
-            Component component = DashboardComponentConverter.convert(guildId, userId, dashboardComponent, dialog);
+            Component component = DashboardComponentConverter.convert(guildId, userId, dashboardComponent, dialog, false);
             if (component != null) {
                 add(component);
                 if ((dashboardComponent instanceof HorizontalPusher || noPusher) &&

@@ -39,6 +39,7 @@ import xyz.lawlietbot.spring.frontend.Styles;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.frontend.components.GuildComboBox;
+import xyz.lawlietbot.spring.frontend.components.SpanWithLinebreaks;
 import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardComponentConverter;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
@@ -251,11 +252,14 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         H2 pageTitle = new H2();
         pageTitle.getStyle().set("margin-top", "0");
 
+        Div pageDescription = new Div();
+        pageDescription.addClassName("dashboard-description");
+
         titleLayout.add(backButton, pageTitle);
-        mainLayout.add(titleLayout);
+        mainLayout.add(titleLayout, pageDescription);
 
         if (category != null) {
-            mainLayout.add(generateMainWithCategory(pageTitle, category, createNew));
+            mainLayout.add(generateMainWithCategory(pageTitle, pageDescription, category, createNew));
         } else {
             pageTitle.setText(getTranslation("dash.invalidserver.title"));
             Text invalidServerText = new Text(getTranslation("dash.invalidserver.desc"));
@@ -288,7 +292,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         }
     }
 
-    private Component generateMainWithCategory(H2 pageTitle, DashboardInitData.Category category, boolean createNew) {
+    private Component generateMainWithCategory(H2 pageTitle, Div pageDescription, DashboardInitData.Category category, boolean createNew) {
         Guild guild = guildComboBox.getValue();
         DiscordUser discordUser = getSessionData().getDiscordUser().get();
 
@@ -304,7 +308,13 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         if (data != null) {
             updatePremiumUnlocked(data.isPremiumUnlocked());
             if (data.getMissingUserPermissions().isEmpty() && data.getMissingBotPermissions().isEmpty()) {
-                Component component = DashboardComponentConverter.convert(guild.getId(), discordUser.getId(), data.getComponents(), confirmationDialog);
+                pageDescription.removeAll();
+                if (category.getDescription() != null) {
+                    pageDescription.add(new SpanWithLinebreaks(category.getDescription()));
+                }
+                pageDescription.setVisible(category.getDescription() != null);
+
+                Component component = DashboardComponentConverter.convert(guild.getId(), discordUser.getId(), data.getComponents(), confirmationDialog, false);
                 ((HasSize) component).setWidthFull();
                 data.getComponents().setActionSendListener((json, confirmationMessage) -> {
                     if (confirmationMessage != null) {
@@ -459,7 +469,8 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                                 JSONObject data = titlesJson.getJSONObject(i);
                                 DashboardInitData.Category category = new DashboardInitData.Category(
                                         data.getString("id"),
-                                        data.getString("title")
+                                        data.getString("title"),
+                                        data.has("description") ? data.getString("description") : null
                                 );
                                 categories.add(category);
                             }

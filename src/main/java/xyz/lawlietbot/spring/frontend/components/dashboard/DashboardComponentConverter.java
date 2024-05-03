@@ -8,16 +8,13 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.dom.Style;
 import dashboard.DashboardComponent;
 import dashboard.component.*;
-import dashboard.container.ExpandableContainer;
-import dashboard.container.HorizontalContainer;
-import dashboard.container.HorizontalPusher;
-import dashboard.container.VerticalContainer;
+import dashboard.container.*;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.dashboard.adapters.*;
 
 public class DashboardComponentConverter {
 
-    public static Component convert(long guildId, long userId, DashboardComponent dashboardComponent, ConfirmationDialog dialog) {
+    public static Component convert(long guildId, long userId, DashboardComponent dashboardComponent, ConfirmationDialog dialog, boolean titleText) {
         Component component;
         switch (dashboardComponent.getType()) {
             case HorizontalContainer.TYPE:
@@ -32,16 +29,24 @@ public class DashboardComponentConverter {
                 component = new ExpandableContainerAdapter((ExpandableContainer) dashboardComponent, guildId, userId, dialog);
                 break;
 
+            case DashboardListContainer.TYPE:
+                component = new DashboardListContainerAdapter((DashboardListContainer) dashboardComponent, guildId, userId, dialog);
+                break;
+
             case DashboardButton.TYPE:
                 component = new DashboardButtonAdapter((DashboardButton) dashboardComponent);
                 break;
 
             case DashboardSeparator.TYPE:
-                component = new Hr();
+                Hr hr = new Hr();
+                if (((DashboardSeparator) dashboardComponent).getLargeGap()) {
+                    hr.getStyle().set("margin", "2em 0 0.75em 0");
+                }
+                component = hr;
                 break;
 
             case DashboardText.TYPE:
-                component = new DashboardTextAdapter((DashboardText) dashboardComponent);
+                component = new DashboardTextAdapter((DashboardText) dashboardComponent, titleText);
                 break;
 
             case DashboardTitle.TYPE:
@@ -64,7 +69,7 @@ public class DashboardComponentConverter {
                 break;
 
             case DashboardSwitch.TYPE:
-                component = new DashboardSwitchAdapter((DashboardSwitch) dashboardComponent, dialog);
+                component = new DashboardSwitchAdapter((DashboardSwitch) dashboardComponent);
                 break;
 
             case DashboardTextField.TYPE:
