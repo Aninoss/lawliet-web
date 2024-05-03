@@ -55,6 +55,7 @@ public class DashboardTextFieldAdapter extends FlexLayout {
             }
             return true;
         } else {
+            textField.setValue(defaultValue);
             return false;
         }
     }

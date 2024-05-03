@@ -55,6 +55,7 @@ public class DashboardMultiLineTextFieldAdapter extends FlexLayout {
             }
             return true;
         } else {
+            textArea.setValue(defaultValue);
             return false;
         }
     }
