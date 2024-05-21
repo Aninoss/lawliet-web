@@ -31,7 +31,7 @@ public class HeaderComponent extends Header {
         HorizontalLayout content = new HorizontalLayout();
         content.setId("header-content");
         content.setPadding(false);
-        content.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
+        content.setAlignItems(FlexComponent.Alignment.CENTER);
         content.addClassNames(Styles.FADE_IN);
 
         //Show Menu Button
@@ -53,10 +53,10 @@ public class HeaderComponent extends Header {
         //Navigation Bar
         NavigationBar navigationBar = new NavigationBar(uiData);
         navigationBar.setOrientation(Tabs.Orientation.HORIZONTAL);
-        navigationBar.addClassName(Styles.VISIBLE_NOT_SMALL);
 
         Nav nav = new Nav(navigationBar);
         nav.setMinWidth("0px");
+        nav.addClassName(Styles.VISIBLE_NOT_SMALL);
         content.add(nav);
 
         //Login Elements
