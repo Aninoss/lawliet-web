@@ -1,10 +1,5 @@
 package xyz.lawlietbot.spring.frontend.components.commands;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.accordion.AccordionPanel;
@@ -18,6 +13,12 @@ import xyz.lawlietbot.spring.backend.commandlist.CommandListSlot;
 import xyz.lawlietbot.spring.frontend.Styles;
 import xyz.lawlietbot.spring.frontend.components.Card;
 import xyz.lawlietbot.spring.frontend.components.LoadingIndicator;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class CommandCategoryLayout extends VerticalLayout {
 
@@ -89,13 +90,14 @@ public class CommandCategoryLayout extends VerticalLayout {
                     spec.setPadding(false);
 
                     H5 specTitle = new H5(getTranslation("commands.specs" + i));
+                    specTitle.getStyle().set("margin-top", "0");
                     spec.add(specTitle);
 
                     UnorderedList ul = new UnorderedList();
                     Arrays.stream(specContent[i].split("\n")).forEach(entry -> ul.add(new ListItem(entry)));
                     spec.add(ul);
 
-                    spec.setMinWidth("300px");
+                    spec.addClassName("command-field");
                     spec.setWidth((100 / n) + "%");
                     spec.getStyle().set("display", "inline-block")
                             .set("vertical-align", "top");
