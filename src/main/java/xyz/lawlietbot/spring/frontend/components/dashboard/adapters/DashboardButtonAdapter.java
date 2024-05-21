@@ -2,6 +2,8 @@ package xyz.lawlietbot.spring.frontend.components.dashboard.adapters;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import dashboard.component.DashboardButton;
 
 public class DashboardButtonAdapter extends Button {
@@ -23,9 +25,28 @@ public class DashboardButtonAdapter extends Button {
             default:
         }
 
-        setText(dashboardButton.getText());
+        Icon icon = extractIcon(dashboardButton);
+        if (icon != null) {
+            setIcon(icon);
+        } else {
+            setText(dashboardButton.getText());
+        }
+
         setEnabled(dashboardButton.isEnabled());
         addClickListener(e -> dashboardButton.trigger());
+    }
+
+    private Icon extractIcon(DashboardButton dashboardButton) {
+        switch (dashboardButton.getText()) {
+            case "🡑":
+                return VaadinIcon.CHEVRON_UP.create();
+            case "🡓":
+                return VaadinIcon.CHEVRON_DOWN.create();
+            case "🖊️":
+                return VaadinIcon.PENCIL.create();
+            default:
+                return null;
+        }
     }
 
 }
