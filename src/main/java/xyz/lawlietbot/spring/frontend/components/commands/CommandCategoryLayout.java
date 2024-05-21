@@ -81,6 +81,7 @@ public class CommandCategoryLayout extends VerticalLayout {
 
             Div specs = new Div();
             specs.setWidthFull();
+            specs.getStyle().set("margin-top", "0");
 
             boolean moreInfo = false;
             for (int i = 0; i < 3; i++) {
@@ -89,13 +90,9 @@ public class CommandCategoryLayout extends VerticalLayout {
                     VerticalLayout spec = new VerticalLayout();
                     spec.setPadding(false);
 
-                    H5 specTitle = new H5(getTranslation("commands.specs" + i));
-                    specTitle.getStyle().set("margin-top", "0");
-                    spec.add(specTitle);
-
                     UnorderedList ul = new UnorderedList();
                     Arrays.stream(specContent[i].split("\n")).forEach(entry -> ul.add(new ListItem(entry)));
-                    spec.add(ul);
+                    spec.add(new H5(getTranslation("commands.specs" + i)), ul);
 
                     spec.addClassName("command-field");
                     spec.setWidth((100 / n) + "%");
