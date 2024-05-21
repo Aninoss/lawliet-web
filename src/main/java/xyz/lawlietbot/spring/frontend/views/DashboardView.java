@@ -110,6 +110,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                 DashboardInitData.Category category = categoryList.get(categoryTabs.getSelectedIndex());
                 updateMainContentCategory(category, true);
                 pushNewUri();
+                UI.getCurrent().getPage().executeJs("window.scrollTo(0, 0)");
             }
         });
 
@@ -367,6 +368,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
             guildComboBox.setValue(null);
         }
         pushNewUri();
+        UI.getCurrent().getPage().executeJs("window.scrollTo(0, 0)");
     }
 
     private Component generateMissingPermissions(List<String> missingUserPermissions, List<String> missingBotPermissions) {
