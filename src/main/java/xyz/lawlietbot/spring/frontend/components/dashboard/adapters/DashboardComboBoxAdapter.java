@@ -1,8 +1,12 @@
 package xyz.lawlietbot.spring.frontend.components.dashboard.adapters;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import dashboard.component.DashboardComboBox;
@@ -17,9 +21,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
-public class DashboardComboBoxAdapter extends Div {
+public class DashboardComboBoxAdapter extends FlexLayout {
 
     public DashboardComboBoxAdapter(long guildId, long userId, DashboardComboBox dashboardComboBox) {
+        setFlexDirection(FlexDirection.ROW);
+        setAlignItems(Alignment.END);
+
         if (dashboardComboBox.getMax() > 1) {
             MultiselectComboBox<DiscordEntity> multiselectComboBox = new MultiselectComboBox<>();
             multiselectComboBox.setWidthFull();
@@ -63,14 +70,39 @@ public class DashboardComboBoxAdapter extends Div {
             }
             add(multiselectComboBox);
         } else {
+            Div iconDiv = new Div();
+            iconDiv.setVisible(dashboardComboBox.getDataType() == DashboardComboBox.DataType.EMOJI);
+            iconDiv.addClassName("dashboard-emoji-field");
+            if (!dashboardComboBox.getSelectedValues().isEmpty() && dashboardComboBox.getSelectedValues().get(0).getIconUrl() != null) {
+                iconDiv.add(generateEmojiPreview(dashboardComboBox.getSelectedValues().get(0).getIconUrl()));
+            }
+
             ComboBox<DiscordEntity> comboBox = new ComboBox<>();
             comboBox.setWidthFull();
             comboBox.getStyle().set("margin-top", "-1em");
-            comboBox.setPlaceholder(getTranslation("dash.select." + dashboardComboBox.getDataType().name(), false));
+            comboBox.setPlaceholder(dashboardComboBox.getPlaceholder() != null ? dashboardComboBox.getPlaceholder() : getTranslation("dash.select." + dashboardComboBox.getDataType().name(), false));
             comboBox.setLabel(dashboardComboBox.getLabel());
             comboBox.setClearButtonVisible(dashboardComboBox.getCanBeEmpty());
             comboBox.setItemLabelGenerator(DiscordEntity::getName);
-            comboBox.setRenderer(new ComponentRenderer<>(discordEntity -> new Text(discordEntity.getName())));
+            comboBox.setRenderer(new ComponentRenderer<>(discordEntity -> {
+                if (discordEntity.getIconUrl() != null) {
+                    Span span = new Span();
+                    if (discordEntity.getIconUrl().startsWith("http")) {
+                        Image icon = new Image(discordEntity.getIconUrl(), "");
+                        icon.getStyle().set("height", "1em")
+                                .set("margin-right", "8px");
+                        span.add(icon);
+                    } else {
+                        Span innerSpan = new Span(discordEntity.getIconUrl());
+                        innerSpan.getStyle().set("margin-right", "8px");
+                        span.add(innerSpan);
+                    }
+                    span.add(new Text(discordEntity.getName()));
+                    return span;
+                } else {
+                    return new Text(discordEntity.getName());
+                }
+            }));
             comboBox.setAllowCustomValue(dashboardComboBox.getAllowCustomValues());
             comboBox.setEnabled(dashboardComboBox.isEnabled());
             if (dashboardComboBox.getDataType() == DashboardComboBox.DataType.CUSTOM) {
@@ -78,10 +110,15 @@ public class DashboardComboBoxAdapter extends Div {
             } else {
                 comboBox.setDataProvider(generateDataProvider(guildId, userId, dashboardComboBox));
             }
-            if (dashboardComboBox.getSelectedValues().size() > 0) {
+            if (!dashboardComboBox.getSelectedValues().isEmpty()) {
                 comboBox.setValue(new ArrayList<>(dashboardComboBox.getSelectedValues()).get(0));
             }
             comboBox.addValueChangeListener(e -> {
+                iconDiv.removeAll();
+                if (e.getValue() != null && e.getValue().getIconUrl() != null) {
+                    iconDiv.add(generateEmojiPreview(e.getValue().getIconUrl()));
+                }
+
                 if (e.getValue() != null) {
                     dashboardComboBox.triggerSet(e.getValue().getId());
                 } else if (dashboardComboBox.getCanBeEmpty()) {
@@ -90,7 +127,8 @@ public class DashboardComboBoxAdapter extends Div {
                     comboBox.setValue(e.getOldValue());
                 }
             });
-            add(comboBox);
+
+            add(iconDiv, comboBox);
         }
 
     }
@@ -121,6 +159,18 @@ public class DashboardComboBoxAdapter extends Div {
             return SendEvent.sendToGuild(EventOut.DASH_COUNT_DISCORD_ENTITIES, json, guildId)
                     .thenApply(r -> r.getLong("count")).join().intValue();
         });
+    }
+
+    private Component generateEmojiPreview(String imageUrl) {
+        if (imageUrl.startsWith("http")) {
+            Image icon = new Image(imageUrl, "");
+            icon.setHeight("2.5rem");
+            return icon;
+        } else {
+            Span span = new Span(imageUrl);
+            span.getStyle().set("font-size", "2rem");
+            return span;
+        }
     }
 
 }

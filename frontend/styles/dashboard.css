@@ -208,6 +208,18 @@ ul {
     margin-top: 0.5em;
 }
 
+.dashboard-emoji-field {
+    min-width: 3.5rem;
+    min-height: 3.5rem;
+    border-radius: 4px;
+    margin-right: 8px;
+    margin-bottom: 4px;
+    background: var(--lumo-contrast-10pct);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 @media (min-width: 700px) {
 
     html {

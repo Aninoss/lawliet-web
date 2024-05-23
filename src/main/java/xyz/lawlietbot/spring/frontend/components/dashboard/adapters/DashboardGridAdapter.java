@@ -36,7 +36,7 @@ public class DashboardGridAdapter extends FlexLayout {
                     .setAutoWidth(true);
         }
         String rowButton = dashboardGrid.getRowButton();
-        if (rowButton.length() > 0) {
+        if (!rowButton.isEmpty()) {
             grid.addComponentColumn(gridRow -> generateRowButton(dashboardGrid, gridRow, rowButton))
                     .setTextAlign(ColumnTextAlign.END)
                     .setAutoWidth(true);
