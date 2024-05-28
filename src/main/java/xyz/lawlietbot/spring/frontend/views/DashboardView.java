@@ -40,6 +40,7 @@ import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.frontend.components.GuildComboBox;
 import xyz.lawlietbot.spring.frontend.components.SpanWithLinebreaks;
+import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardAdapter;
 import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardComponentConverter;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
@@ -66,6 +67,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
     private final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
     private List<DashboardInitData.Category> categoryList;
     private String autoCategoryId = null;
+    private Component contentComponent;
 
     public DashboardView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         super(sessionData, uiData);
@@ -108,7 +110,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         categoryTabs.addSelectedChangeListener(e -> {
             if (categoryTabs.getSelectedIndex() >= 0) {
                 DashboardInitData.Category category = categoryList.get(categoryTabs.getSelectedIndex());
-                updateMainContentCategory(category, true);
+                updateMainContent(category);
                 pushNewUri();
                 UI.getCurrent().getPage().executeJs("window.scrollTo(0, 0)");
             }
@@ -184,7 +186,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                     }
                 } else {
                     categoryList = Collections.emptyList();
-                    updateMainContentCategory(null, true);
+                    updateMainContent(null);
                     pushNewUri();
                 }
 
@@ -234,7 +236,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         mainLayout.add(layout);
     }
 
-    private void updateMainContentCategory(DashboardInitData.Category category, boolean createNew) {
+    private void updateMainContent(DashboardInitData.Category category) {
         mainLayout.removeAll();
         mainLayout.setClassName(Styles.VISIBLE_LARGE, false);
         tabsLayout.setClassName(Styles.VISIBLE_LARGE, true);
@@ -260,7 +262,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         mainLayout.add(titleLayout, pageDescription);
 
         if (category != null) {
-            mainLayout.add(generateMainWithCategory(pageTitle, pageDescription, category, createNew));
+            mainLayout.add(generateMainWithCategory(pageTitle, pageDescription, category));
         } else {
             pageTitle.setText(getTranslation("dash.invalidserver.title"));
             Text invalidServerText = new Text(getTranslation("dash.invalidserver.desc"));
@@ -293,7 +295,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         }
     }
 
-    private Component generateMainWithCategory(H2 pageTitle, Div pageDescription, DashboardInitData.Category category, boolean createNew) {
+    private Component generateMainWithCategory(H2 pageTitle, Div pageDescription, DashboardInitData.Category category) {
         Guild guild = guildComboBox.getValue();
         DiscordUser discordUser = getSessionData().getDiscordUser().get();
 
@@ -303,37 +305,63 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                 guild.getId(),
                 discordUser.getId(),
                 getLocale(),
-                createNew
+                true
         );
 
-        if (data != null) {
-            updatePremiumUnlocked(data.isPremiumUnlocked());
-            if (data.getMissingUserPermissions().isEmpty() && data.getMissingBotPermissions().isEmpty()) {
-                pageDescription.removeAll();
-                if (category.getDescription() != null) {
-                    pageDescription.add(new SpanWithLinebreaks(category.getDescription()));
-                }
-                pageDescription.setVisible(category.getDescription() != null);
-
-                Component component = DashboardComponentConverter.convert(guild.getId(), discordUser.getId(), data.getComponents(), confirmationDialog, false);
-                ((HasSize) component).setWidthFull();
-                data.getComponents().setActionSendListener((json, confirmationMessage) -> {
-                    if (confirmationMessage != null) {
-                        Span confirmationMessageSpan = new Span(confirmationMessage);
-                        confirmationMessageSpan.getStyle().set("color", "var(--lumo-error-text-color)");
-                        confirmationDialog.open(confirmationMessageSpan, () -> sendAction(category, json), () -> updateMainContentCategory(category, false));
-                    } else {
-                        sendAction(category, json);
-                    }
-                });
-                return component;
-            } else {
-                return generateMissingPermissions(data.getMissingUserPermissions(), data.getMissingBotPermissions());
-            }
-        } else {
+        if (data == null) {
             confirmationDialog.open(getTranslation("error"), () -> updateMainContentBack(false));
             return new Div();
         }
+
+        updatePremiumUnlocked(data.isPremiumUnlocked());
+        if (!data.getMissingUserPermissions().isEmpty() || !data.getMissingBotPermissions().isEmpty()) {
+            return generateMissingPermissions(data.getMissingUserPermissions(), data.getMissingBotPermissions());
+        }
+
+        pageDescription.removeAll();
+        if (category.getDescription() != null) {
+            pageDescription.add(new SpanWithLinebreaks(category.getDescription()));
+        }
+        pageDescription.setVisible(category.getDescription() != null);
+
+        contentComponent = DashboardComponentConverter.convert(guild.getId(), discordUser.getId(), data.getComponents(), confirmationDialog);
+        ((HasSize) contentComponent).setWidthFull();
+        addActionListener(data.getComponents(), category);
+        return contentComponent;
+    }
+
+    private void updateCategory(DashboardInitData.Category category) {
+        Guild guild = guildComboBox.getValue();
+        DiscordUser discordUser = getSessionData().getDiscordUser().get();
+
+        DashboardCategoryInitData data = sendDashboardCategoryInit(
+                category.getId(),
+                guild.getId(),
+                discordUser.getId(),
+                getLocale(),
+                false
+        );
+
+        if (data == null || !data.getMissingUserPermissions().isEmpty() || !data.getMissingBotPermissions().isEmpty()) {
+            updateMainContent(category);
+            return;
+        }
+
+        updatePremiumUnlocked(data.isPremiumUnlocked());
+        ((DashboardAdapter) contentComponent).update(data.getComponents());
+        addActionListener(data.getComponents(), category);
+    }
+
+    private void addActionListener(DashboardContainer dashboardContainer, DashboardInitData.Category category) {
+        dashboardContainer.setActionSendListener((json, confirmationMessage) -> {
+            if (confirmationMessage != null) {
+                Span confirmationMessageSpan = new Span(confirmationMessage);
+                confirmationMessageSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+                confirmationDialog.open(confirmationMessageSpan, () -> sendAction(category, json), () -> updateCategory(category));
+            } else {
+                sendAction(category, json);
+            }
+        });
     }
 
     private void sendAction(DashboardInitData.Category category, JSONObject json) {
@@ -351,12 +379,13 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
                 });
             }
             if (actionResult.getRedraw()) {
-                updateMainContentCategory(category, false);
+                updateCategory(category);
             }
             if (actionResult.getScrollToTop()) {
                 UI.getCurrent().getPage().executeJs("window.scrollTo(0, 0);");
             }
         } catch (Throwable e) {
+            LOGGER.error("Send action exception", e);
             confirmationDialog.open(getTranslation("error"), () -> UI.getCurrent().getPage().reload());
         }
     }
@@ -381,7 +410,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         content.add(lockIcon);
 
         List<List<String>> missingPermissionsLists = List.of(missingUserPermissions, missingBotPermissions);
-        String[] missingPermissionsTexts = new String[] {
+        String[] missingPermissionsTexts = new String[]{
                 getTranslation("dash.missingpermissions.you"),
                 getTranslation("dash.missingpermissions.bot")
         };

@@ -155,11 +155,6 @@ ul {
     margin-bottom: 0.75rem;
 }
 
-.dashboard-subheader-description {
-    margin-top: 0.75rem !important;
-    margin-bottom: 0.5rem;
-}
-
 .dashboard-text-error {
     color: var(--lumo-error-text-color);
 }
@@ -188,6 +183,11 @@ ul {
     color: var(--secondary-text-color);
     font-size: var(--lumo-font-size-s);
     margin-top: 0;
+}
+
+h3 + div > .dashboard-text {
+    margin-top: -0.5rem;
+    margin-bottom: 0.5rem;
 }
 
 .dashboard-list {

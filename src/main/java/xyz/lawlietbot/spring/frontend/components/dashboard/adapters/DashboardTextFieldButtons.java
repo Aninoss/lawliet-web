@@ -1,12 +1,13 @@
 package xyz.lawlietbot.spring.frontend.components.dashboard.adapters;
 
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
+
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class DashboardTextFieldButtons extends FlexLayout {
 

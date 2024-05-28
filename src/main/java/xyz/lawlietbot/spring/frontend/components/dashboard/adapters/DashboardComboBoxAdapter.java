@@ -9,56 +9,54 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import dashboard.DashboardComponent;
 import dashboard.component.DashboardComboBox;
 import dashboard.data.DiscordEntity;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.vaadin.gatanaso.MultiselectComboBox;
+import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardAdapter;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.*;
 
-public class DashboardComboBoxAdapter extends FlexLayout {
+public class DashboardComboBoxAdapter extends FlexLayout implements DashboardAdapter<DashboardComboBox> {
+
+    private DashboardComboBox dashboardComboBox;
+    private MultiselectComboBox<DiscordEntity> multiselectComboBox;
+    private Div iconDiv;
+    private ComboBox<DiscordEntity> comboBox;
 
     public DashboardComboBoxAdapter(long guildId, long userId, DashboardComboBox dashboardComboBox) {
         setFlexDirection(FlexDirection.ROW);
         setAlignItems(Alignment.END);
 
         if (dashboardComboBox.getMax() > 1) {
-            MultiselectComboBox<DiscordEntity> multiselectComboBox = new MultiselectComboBox<>();
+            multiselectComboBox = new MultiselectComboBox<>();
             multiselectComboBox.setWidthFull();
             multiselectComboBox.getStyle().set("padding-top", "0");
-            multiselectComboBox.setPlaceholder(dashboardComboBox.getPlaceholder() != null ? dashboardComboBox.getPlaceholder() : getTranslation("dash.select." + dashboardComboBox.getDataType().name(), true));
             multiselectComboBox.setLabel(dashboardComboBox.getLabel());
             multiselectComboBox.setItemLabelGenerator(DiscordEntity::getName);
             multiselectComboBox.setRenderer(new ComponentRenderer<>(discordEntity -> new Text(discordEntity.getName())));
             multiselectComboBox.setOrdered(true);
             multiselectComboBox.setAllowCustomValues(dashboardComboBox.getAllowCustomValues());
-            multiselectComboBox.setEnabled(dashboardComboBox.isEnabled());
-            if (dashboardComboBox.getDataType() == DashboardComboBox.DataType.CUSTOM) {
-                multiselectComboBox.setItems(dashboardComboBox.getValues());
-            } else {
+            if (dashboardComboBox.getDataType() != DashboardComboBox.DataType.CUSTOM) {
                 multiselectComboBox.setDataProvider(generateDataProvider(guildId, userId, dashboardComboBox));
-            }
-            if (!dashboardComboBox.getSelectedValues().isEmpty()) {
-                multiselectComboBox.setValue(new HashSet<>(dashboardComboBox.getSelectedValues()));
             }
             multiselectComboBox.addValueChangeListener(e -> {
                 if (e.getValue().size() > e.getOldValue().size()) {
-                    if (e.getValue().size() > dashboardComboBox.getMax()) {
+                    if (e.getValue().size() > this.dashboardComboBox.getMax()) {
                         multiselectComboBox.setValue(e.getOldValue());
                     } else {
                         ArrayList<DiscordEntity> tempEntityList = new ArrayList<>(e.getValue());
                         tempEntityList.removeAll(e.getOldValue());
-                        dashboardComboBox.triggerAdd(tempEntityList.get(0).getId());
+                        this.dashboardComboBox.triggerAdd(tempEntityList.get(0).getId());
                     }
                 } else if (e.getValue().size() < e.getOldValue().size()) {
                     ArrayList<DiscordEntity> tempEntityList = new ArrayList<>(e.getOldValue());
                     tempEntityList.removeAll(e.getValue());
-                    dashboardComboBox.triggerRemove(tempEntityList.get(0).getId());
+                    this.dashboardComboBox.triggerRemove(tempEntityList.get(0).getId());
                 }
             });
             if (dashboardComboBox.getAllowCustomValues()) {
@@ -70,19 +68,14 @@ public class DashboardComboBoxAdapter extends FlexLayout {
             }
             add(multiselectComboBox);
         } else {
-            Div iconDiv = new Div();
+            iconDiv = new Div();
             iconDiv.setVisible(dashboardComboBox.getDataType() == DashboardComboBox.DataType.EMOJI);
             iconDiv.addClassName("dashboard-emoji-field");
-            if (!dashboardComboBox.getSelectedValues().isEmpty() && dashboardComboBox.getSelectedValues().get(0).getIconUrl() != null) {
-                iconDiv.add(generateEmojiPreview(dashboardComboBox.getSelectedValues().get(0).getIconUrl()));
-            }
 
-            ComboBox<DiscordEntity> comboBox = new ComboBox<>();
+            comboBox = new ComboBox<>();
             comboBox.setWidthFull();
             comboBox.getStyle().set("margin-top", "-1em");
-            comboBox.setPlaceholder(dashboardComboBox.getPlaceholder() != null ? dashboardComboBox.getPlaceholder() : getTranslation("dash.select." + dashboardComboBox.getDataType().name(), false));
             comboBox.setLabel(dashboardComboBox.getLabel());
-            comboBox.setClearButtonVisible(dashboardComboBox.getCanBeEmpty());
             comboBox.setItemLabelGenerator(DiscordEntity::getName);
             comboBox.setRenderer(new ComponentRenderer<>(discordEntity -> {
                 if (discordEntity.getIconUrl() != null) {
@@ -104,14 +97,8 @@ public class DashboardComboBoxAdapter extends FlexLayout {
                 }
             }));
             comboBox.setAllowCustomValue(dashboardComboBox.getAllowCustomValues());
-            comboBox.setEnabled(dashboardComboBox.isEnabled());
-            if (dashboardComboBox.getDataType() == DashboardComboBox.DataType.CUSTOM) {
-                comboBox.setItems(dashboardComboBox.getValues());
-            } else {
+            if (dashboardComboBox.getDataType() != DashboardComboBox.DataType.CUSTOM) {
                 comboBox.setDataProvider(generateDataProvider(guildId, userId, dashboardComboBox));
-            }
-            if (!dashboardComboBox.getSelectedValues().isEmpty()) {
-                comboBox.setValue(new ArrayList<>(dashboardComboBox.getSelectedValues()).get(0));
             }
             comboBox.addValueChangeListener(e -> {
                 iconDiv.removeAll();
@@ -120,9 +107,9 @@ public class DashboardComboBoxAdapter extends FlexLayout {
                 }
 
                 if (e.getValue() != null) {
-                    dashboardComboBox.triggerSet(e.getValue().getId());
+                    this.dashboardComboBox.triggerSet(e.getValue().getId());
                 } else if (dashboardComboBox.getCanBeEmpty()) {
-                    dashboardComboBox.triggerSet(null);
+                    this.dashboardComboBox.triggerSet(null);
                 } else {
                     comboBox.setValue(e.getOldValue());
                 }
@@ -131,6 +118,7 @@ public class DashboardComboBoxAdapter extends FlexLayout {
             add(iconDiv, comboBox);
         }
 
+        update(dashboardComboBox);
     }
 
     private DataProvider<DiscordEntity, String> generateDataProvider(long guildId, long userId, DashboardComboBox dashboardComboBox) {
@@ -170,6 +158,68 @@ public class DashboardComboBoxAdapter extends FlexLayout {
             Span span = new Span(imageUrl);
             span.getStyle().set("font-size", "2rem");
             return span;
+        }
+    }
+
+    @Override
+    public void update(DashboardComboBox dashboardComboBox) {
+        DashboardComboBox previousDashboardComboBox = this.dashboardComboBox;
+        this.dashboardComboBox = dashboardComboBox;
+        if (dashboardComponentsAreEqual(previousDashboardComboBox, dashboardComboBox) && getSelectedValues(dashboardComboBox).equals(new HashSet<>(previousDashboardComboBox.getSelectedValues()))) {
+            return;
+        }
+
+        if (dashboardComboBox.getMax() > 1) {
+            multiselectComboBox.setPlaceholder(dashboardComboBox.getPlaceholder() != null ? dashboardComboBox.getPlaceholder() : getTranslation("dash.select." + dashboardComboBox.getDataType().name(), true));
+            if (dashboardComboBox.getDataType() == DashboardComboBox.DataType.CUSTOM) {
+                multiselectComboBox.setItems(dashboardComboBox.getValues());
+            }
+            if (dashboardComboBox.getSelectedValues().isEmpty()) {
+                multiselectComboBox.setValue(Collections.emptySet());
+            } else  {
+                multiselectComboBox.setValue(new HashSet<>(dashboardComboBox.getSelectedValues()));
+            }
+        } else {
+            iconDiv.removeAll();
+            if (!dashboardComboBox.getSelectedValues().isEmpty() && dashboardComboBox.getSelectedValues().get(0).getIconUrl() != null) {
+                iconDiv.add(generateEmojiPreview(dashboardComboBox.getSelectedValues().get(0).getIconUrl()));
+            }
+
+            comboBox.setPlaceholder(dashboardComboBox.getPlaceholder() != null ? dashboardComboBox.getPlaceholder() : getTranslation("dash.select." + dashboardComboBox.getDataType().name(), false));
+            comboBox.setClearButtonVisible(dashboardComboBox.getCanBeEmpty());
+            if (dashboardComboBox.getDataType() == DashboardComboBox.DataType.CUSTOM) {
+                comboBox.setItems(dashboardComboBox.getValues());
+            }
+            if (dashboardComboBox.getSelectedValues().isEmpty()) {
+                comboBox.setValue(null);
+            } else {
+                comboBox.setValue(new ArrayList<>(dashboardComboBox.getSelectedValues()).get(0));
+            }
+        }
+    }
+
+    @Override
+    public boolean equalsType(DashboardComponent dashboardComponent) {
+        if (!(dashboardComponent instanceof DashboardComboBox)) {
+            return false;
+        }
+
+        DashboardComboBox dashboardComboBox = (DashboardComboBox) dashboardComponent;
+        return Objects.equals(this.dashboardComboBox.getLabel(), dashboardComboBox.getLabel()) &&
+                Objects.equals(this.dashboardComboBox.getMax(), dashboardComboBox.getMax()) &&
+                Objects.equals(this.dashboardComboBox.getDataType(), dashboardComboBox.getDataType()) &&
+                Objects.equals(this.dashboardComboBox.getAllowCustomValues(), dashboardComboBox.getAllowCustomValues());
+    }
+
+    private Set<DiscordEntity> getSelectedValues(DashboardComboBox dashboardComboBox) {
+        if (dashboardComboBox.getMax() > 1) {
+            return multiselectComboBox.getSelectedItems();
+        } else {
+            if (comboBox.getValue() != null) {
+                return Set.of(comboBox.getValue());
+            } else {
+                return Collections.emptySet();
+            }
         }
     }
 

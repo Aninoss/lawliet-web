@@ -2,52 +2,67 @@ package xyz.lawlietbot.spring.frontend.components.dashboard.adapters;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.*;
+import dashboard.DashboardComponent;
 import dashboard.component.DashboardText;
 import xyz.lawlietbot.spring.RegexPatterns;
 import xyz.lawlietbot.spring.backend.util.VaadinUtil;
 import xyz.lawlietbot.spring.frontend.components.LineBreak;
+import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardAdapter;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.Objects;
 import java.util.regex.Matcher;
 
-public class DashboardTextAdapter extends Div {
+public class DashboardTextAdapter extends Div implements DashboardAdapter<DashboardText> {
 
-    public DashboardTextAdapter(DashboardText dashboardText, boolean titleText) {
+    private DashboardText dashboardText;
+    private final Div innerDiv = new Div();
+
+    public DashboardTextAdapter(DashboardText dashboardText) {
+        innerDiv.addClassName("dashboard-text");
         switch (dashboardText.getStyle()) {
             case ERROR:
-                addClassName("dashboard-text-error");
+                innerDiv.addClassName("dashboard-text-error");
                 break;
 
             case SUCCESS:
-                addClassName("dashboard-text-success");
+                innerDiv.addClassName("dashboard-text-success");
                 break;
 
             case WARNING:
-                addClassName("dashboard-text-warning");
+                innerDiv.addClassName("dashboard-text-warning");
                 break;
 
             case SECONDARY:
-                addClassName("dashboard-text-secondary");
+                innerDiv.addClassName("dashboard-text-secondary");
                 break;
 
             case BOLD:
-                addClassName("dashboard-text-bold");
+                innerDiv.addClassName("dashboard-text-bold");
                 break;
 
             case HINT:
-                addClassName("dashboard-text-hint");
-                getStyle().set("margin-top", "0.5rem");
+                innerDiv.addClassName("dashboard-text-hint");
+                innerDiv.getStyle().set("margin-top", "-0.75rem");
                 break;
 
             default:
         }
 
-        if (titleText) {
-            addClassName("dashboard-subheader-description");
+        add(innerDiv);
+        update(dashboardText);
+    }
+
+    @Override
+    public void update(DashboardText dashboardText) {
+        DashboardComponent previousDashboardComponent = this.dashboardText;
+        this.dashboardText = dashboardText;
+        if (dashboardComponentsAreEqual(previousDashboardComponent, dashboardText)) {
+            return;
         }
 
         String text = dashboardText.getText();
@@ -55,12 +70,13 @@ public class DashboardTextAdapter extends Div {
             text = rewriteTimestamp(text);
         }
 
+        innerDiv.removeAll();
         if (dashboardText.getUrl() == null) {
-            add(generateText(text));
+            innerDiv.add(generateText(text));
         } else {
             Anchor a = new Anchor(dashboardText.getUrl(), text);
             a.setTarget("_blank");
-            add(a);
+            innerDiv.add(a);
         }
     }
 
@@ -130,7 +146,7 @@ public class DashboardTextAdapter extends Div {
 
         Matcher matcher = RegexPatterns.URL_PATTERN.matcher(text);
         int index = 0;
-        while(matcher.find()) {
+        while (matcher.find()) {
             span.add(new Span(text.substring(index, matcher.start())));
 
             Anchor a = new Anchor(matcher.group(), matcher.group());
@@ -144,6 +160,16 @@ public class DashboardTextAdapter extends Div {
             span.add(new Span(text.substring(index)));
         }
         return span;
+    }
+
+    @Override
+    public boolean equalsType(DashboardComponent dashboardComponent) {
+        if (!(dashboardComponent instanceof DashboardText)) {
+            return false;
+        }
+
+        DashboardText dashboardText = (DashboardText) dashboardComponent;
+        return Objects.equals(this.dashboardText.getStyle(), dashboardText.getStyle());
     }
 
 }

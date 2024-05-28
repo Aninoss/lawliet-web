@@ -3,39 +3,39 @@ package xyz.lawlietbot.spring.frontend.components.dashboard.adapters;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import dashboard.DashboardComponent;
 import dashboard.component.DashboardDurationField;
+import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardAdapter;
 
-public class DashboardDurationFieldAdapter extends FlexLayout {
+import java.util.Objects;
 
+public class DashboardDurationFieldAdapter extends FlexLayout implements DashboardAdapter<DashboardDurationField> {
+
+    private DashboardDurationField dashboardDurationField;
     private long defaultValue;
+    private final NumberField daysField;
+    private final NumberField hoursField;
+    private final NumberField minutesField;
 
     public DashboardDurationFieldAdapter(DashboardDurationField dashboardDurationField) {
-        defaultValue = dashboardDurationField.getValue();
         setFlexDirection(FlexDirection.ROW);
 
-        NumberField daysField = generateNumberField(
+        daysField = generateNumberField(
                 getTranslation("dash.duration.days"),
-                dashboardDurationField.isEnabled(),
                 999,
-                extractValueDays(defaultValue),
                 false,
                 dashboardDurationField.getEditButton()
         );
-        NumberField hoursField = generateNumberField(
+        hoursField = generateNumberField(
                 getTranslation("dash.duration.hours"),
-                dashboardDurationField.isEnabled(),
                 23,
-                extractValueHours(defaultValue),
                 true,
                 dashboardDurationField.getEditButton()
         );
-        NumberField minutesField;
         if (dashboardDurationField.getIncludeMinutes()) {
             minutesField = generateNumberField(
                     getTranslation("dash.duration.minutes"),
-                    dashboardDurationField.isEnabled(),
                     59,
-                    extractValueMinutes(defaultValue),
                     true,
                     dashboardDurationField.getEditButton()
             );
@@ -43,39 +43,39 @@ public class DashboardDurationFieldAdapter extends FlexLayout {
             minutesField = null;
         }
 
-        if (dashboardDurationField.isEnabled()) {
-            if (dashboardDurationField.getEditButton()) {
-                DashboardTextFieldButtons dashboardTextFieldButtons = new DashboardTextFieldButtons(true);
-                dashboardTextFieldButtons.setModeChangeListener(editMode -> {
-                    daysField.setReadOnly(!editMode);
-                    hoursField.setReadOnly(!editMode);
-                    if (minutesField != null) {
-                        minutesField.setReadOnly(!editMode);
-                    }
-                });
-                dashboardTextFieldButtons.setCancelListener(() -> {
-                    daysField.setValue((double) extractValueDays(defaultValue));
-                    hoursField.setValue((double) extractValueHours(defaultValue));
-                    if (minutesField != null) {
-                        minutesField.setValue((double) extractValueMinutes(defaultValue));
-                    }
-                });
-                dashboardTextFieldButtons.setConfirmListener(() -> trigger(dashboardDurationField, daysField, hoursField, minutesField));
-                add(dashboardTextFieldButtons);
-            } else {
-                daysField.setValueChangeMode(ValueChangeMode.ON_BLUR);
-                hoursField.setValueChangeMode(ValueChangeMode.ON_BLUR);
-                daysField.addValueChangeListener(event -> trigger(dashboardDurationField, daysField, hoursField, minutesField));
-                hoursField.addValueChangeListener(event -> trigger(dashboardDurationField, daysField, hoursField, minutesField));
+        if (dashboardDurationField.getEditButton()) {
+            DashboardTextFieldButtons dashboardTextFieldButtons = new DashboardTextFieldButtons(true);
+            dashboardTextFieldButtons.setModeChangeListener(editMode -> {
+                daysField.setReadOnly(!editMode);
+                hoursField.setReadOnly(!editMode);
                 if (minutesField != null) {
-                    minutesField.setValueChangeMode(ValueChangeMode.ON_BLUR);
-                    minutesField.addValueChangeListener(event -> trigger(dashboardDurationField, daysField, hoursField, minutesField));
+                    minutesField.setReadOnly(!editMode);
                 }
+            });
+            dashboardTextFieldButtons.setCancelListener(() -> {
+                daysField.setValue((double) extractValueDays(defaultValue));
+                hoursField.setValue((double) extractValueHours(defaultValue));
+                if (minutesField != null) {
+                    minutesField.setValue((double) extractValueMinutes(defaultValue));
+                }
+            });
+            dashboardTextFieldButtons.setConfirmListener(this::trigger);
+            add(dashboardTextFieldButtons);
+        } else {
+            daysField.setValueChangeMode(ValueChangeMode.ON_BLUR);
+            hoursField.setValueChangeMode(ValueChangeMode.ON_BLUR);
+            daysField.addValueChangeListener(event -> trigger());
+            hoursField.addValueChangeListener(event -> trigger());
+            if (minutesField != null) {
+                minutesField.setValueChangeMode(ValueChangeMode.ON_BLUR);
+                minutesField.addValueChangeListener(event -> trigger());
             }
         }
+
+        update(dashboardDurationField);
     }
 
-    private boolean trigger(DashboardDurationField dashboardDurationField, NumberField daysField, NumberField hoursField, NumberField minutesField) {
+    private boolean trigger() {
         if (dashboardDurationField.isEnabled() &&
                 checkNumberField(daysField, 999) &&
                 checkNumberField(hoursField, 23) &&
@@ -109,18 +109,16 @@ public class DashboardDurationFieldAdapter extends FlexLayout {
                 numberField.getValue() == Math.floor(numberField.getValue());
     }
 
-    private NumberField generateNumberField(String label, boolean enabled, int max, int value, boolean marginLeft, boolean readOnly) {
+    private NumberField generateNumberField(String label, int max, boolean marginLeft, boolean readOnly) {
         NumberField numberField = new NumberField();
         numberField.getStyle().set("margin-top", "-16px");
         numberField.setHasControls(false);
         numberField.setStep(1.0);
         numberField.setLabel(label);
         numberField.setReadOnly(readOnly);
-        numberField.setEnabled(enabled);
         numberField.setMin(0);
         numberField.setMax(max);
         numberField.setErrorMessage(getTranslation("dash.numberfield.minmax", 0, max));
-        numberField.setValue((double) value);
         numberField.setMinWidth("50px");
         if (marginLeft) {
             numberField.getStyle().set("margin-left", "8px");
@@ -141,6 +139,34 @@ public class DashboardDurationFieldAdapter extends FlexLayout {
 
     private int extractValueDays(long value) {
         return (int) (value / 1440);
+    }
+
+    @Override
+    public void update(DashboardDurationField dashboardDurationField) {
+        DashboardComponent previousDashboardComponent = this.dashboardDurationField;
+        this.dashboardDurationField = dashboardDurationField;
+        if (dashboardComponentsAreEqual(previousDashboardComponent, dashboardDurationField) && defaultValue == dashboardDurationField.getValue()) {
+            return;
+        }
+
+        defaultValue = dashboardDurationField.getValue();
+        daysField.setValue((double) extractValueDays(dashboardDurationField.getValue()));
+        hoursField.setValue((double) extractValueHours(dashboardDurationField.getValue()));
+        if (minutesField != null) {
+            minutesField.setValue((double) extractValueMinutes(dashboardDurationField.getValue()));
+        }
+    }
+
+    @Override
+    public boolean equalsType(DashboardComponent dashboardComponent) {
+        if (!(dashboardComponent instanceof DashboardDurationField)) {
+            return false;
+        }
+
+        DashboardDurationField dashboardDurationField = (DashboardDurationField) dashboardComponent;
+        return Objects.equals(this.dashboardDurationField.getLabel(), dashboardDurationField.getLabel()) &&
+                Objects.equals(this.dashboardDurationField.getEditButton(), dashboardDurationField.getEditButton()) &&
+                Objects.equals(this.dashboardDurationField.getIncludeMinutes(), dashboardDurationField.getIncludeMinutes());
     }
 
 }

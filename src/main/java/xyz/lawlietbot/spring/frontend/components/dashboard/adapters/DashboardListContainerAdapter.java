@@ -6,16 +6,34 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import dashboard.DashboardComponent;
 import dashboard.container.DashboardListContainer;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
+import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardAdapter;
 import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardComponentConverter;
 
-public class DashboardListContainerAdapter extends Scroller {
+public class DashboardListContainerAdapter extends Scroller implements DashboardAdapter<DashboardListContainer> {
+
+    private final long guildId;
+    private final long userId;
+    private final ConfirmationDialog dialog;
+    private final Div content = new Div();
 
     public DashboardListContainerAdapter(DashboardListContainer listContainer, long guildId, long userId, ConfirmationDialog dialog) {
-        Div content = new Div();
-        content.addClassName("dashboard-list");
+        this.guildId = guildId;
+        this.userId = userId;
+        this.dialog = dialog;
 
+        content.addClassName("dashboard-list");
+        setContent(content);
+        setWidthFull();
+        setScrollDirection(ScrollDirection.VERTICAL);
+
+        update(listContainer);
+    }
+
+    @Override
+    public void update(DashboardListContainer listContainer) {
+        content.removeAll();
         for (DashboardComponent dashboardComponent : listContainer.getChildren()) {
-            Component component = DashboardComponentConverter.convert(guildId, userId, dashboardComponent, dialog, false);
+            Component component = DashboardComponentConverter.convert(guildId, userId, dashboardComponent, dialog);
             if (component != null) {
                 Div div = new Div(component);
                 div.setWidthFull();
@@ -23,10 +41,11 @@ public class DashboardListContainerAdapter extends Scroller {
                 content.add(div);
             }
         }
+    }
 
-        setContent(content);
-        setWidthFull();
-        setScrollDirection(ScrollDirection.VERTICAL);
+    @Override
+    public boolean equalsType(DashboardComponent dashboardComponent) {
+        return dashboardComponent instanceof DashboardListContainer;
     }
 
 }

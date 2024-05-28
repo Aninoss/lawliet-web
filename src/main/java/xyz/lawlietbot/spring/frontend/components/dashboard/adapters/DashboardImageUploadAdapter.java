@@ -14,23 +14,51 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
+import dashboard.DashboardComponent;
 import dashboard.component.DashboardImageUpload;
 import xyz.lawlietbot.spring.backend.util.FileUtil;
 import xyz.lawlietbot.spring.backend.util.RandomUtil;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
+import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardAdapter;
 
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Objects;
 
-public class DashboardImageUploadAdapter extends VerticalLayout {
+public class DashboardImageUploadAdapter extends VerticalLayout implements DashboardAdapter<DashboardImageUpload> {
+
+    private DashboardImageUpload dashboardImageUpload;
+    private Upload upload;
+    private Div div = null;
+    private final FlexibleGridLayout flexibleGridLayout = new FlexibleGridLayout();
 
     public DashboardImageUploadAdapter(DashboardImageUpload dashboardImageUpload) {
         setPadding(false);
 
-        MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
-        Upload upload = new Upload(buffer);
+        flexibleGridLayout.setVisible(false);
+        add(flexibleGridLayout);
+
+        this.dashboardImageUpload = dashboardImageUpload;
+        resetUpload();
+        update(dashboardImageUpload);
+    }
+
+    @Override
+    public void update(DashboardImageUpload dashboardImageUpload) {
+        DashboardComponent previousDashboardComponent = this.dashboardImageUpload;
+        this.dashboardImageUpload = dashboardImageUpload;
+        if (dashboardComponentsAreEqual(previousDashboardComponent, dashboardImageUpload)) {
+            return;
+        }
+
         upload.setMaxFiles(dashboardImageUpload.getMax());
+        updateValuesField();
+    }
+
+    private void resetUpload() {
+        MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
+        upload = new Upload(buffer);
         upload.setMaxFileSize(100_000_000);
         upload.setAcceptedFileTypes("image/png", "image/jpeg", "image/bmp", "image/gif", ".png", ".jpg", ".jpeg", ".bmp", ".gif");
         upload.setWidth("calc(100% - 32px)");
@@ -42,7 +70,7 @@ public class DashboardImageUploadAdapter extends VerticalLayout {
 
         ArrayList<String> uploads = new ArrayList<>();
         upload.addSucceededListener(event -> {
-            String dir = dashboardImageUpload.getDir();
+            String dir = this.dashboardImageUpload.getDir();
             InputStream inputStream = buffer.getInputStream(event.getFileName());
 
             String[] fileParts = event.getFileName().split("\\.");
@@ -56,19 +84,20 @@ public class DashboardImageUploadAdapter extends VerticalLayout {
                 CustomNotification.showError(getTranslation("error"));
             }
         });
-        upload.addAllFinishedListener(event -> dashboardImageUpload.triggerAdd(uploads));
+        upload.addAllFinishedListener(event -> {
+            this.dashboardImageUpload.triggerAdd(uploads);
+            resetUpload();
+        });
 
-        Label label = new Label(dashboardImageUpload.getLabel());
-        Div div = new Div(label, upload);
-        div.setWidthFull();
-
-        add(div);
-        if (!dashboardImageUpload.getValues().isEmpty()) {
-            add(generateValuesField(dashboardImageUpload));
+        if (div != null) {
+            remove(div);
         }
+        div = new Div(new Label(dashboardImageUpload.getLabel()), upload);
+        div.setWidthFull();
+        addComponentAsFirst(div);
     }
 
-    private FlexibleGridLayout generateValuesField(DashboardImageUpload dashboardImageUpload) {
+    private void updateValuesField() {
         ArrayList<Div> items = new ArrayList<>();
         for (String value : dashboardImageUpload.getValues()) {
             Div div = new Div();
@@ -85,7 +114,8 @@ public class DashboardImageUploadAdapter extends VerticalLayout {
             items.add(div);
         }
 
-        FlexibleGridLayout flexibleGridLayout = new FlexibleGridLayout()
+        flexibleGridLayout.removeAll();
+        flexibleGridLayout
                 .withColumns(Repeat.RepeatMode.AUTO_FILL, new MinMax(new Length("200px"), new Flex(1)))
                 .withItems(items.toArray(new Div[0]))
                 .withPadding(false)
@@ -93,7 +123,17 @@ public class DashboardImageUploadAdapter extends VerticalLayout {
                 .withAutoFlow(GridLayoutComponent.AutoFlow.ROW_DENSE)
                 .withOverflow(GridLayoutComponent.Overflow.AUTO);
         flexibleGridLayout.setWidthFull();
-        return flexibleGridLayout;
+        flexibleGridLayout.setVisible(!dashboardImageUpload.getValues().isEmpty());
+    }
+
+    @Override
+    public boolean equalsType(DashboardComponent dashboardComponent) {
+        if (!(dashboardComponent instanceof DashboardImageUpload)) {
+            return false;
+        }
+
+        DashboardImageUpload dashboardImageUpload = (DashboardImageUpload) dashboardComponent;
+        return Objects.equals(this.dashboardImageUpload.getLabel(), dashboardImageUpload.getLabel());
     }
 
 }

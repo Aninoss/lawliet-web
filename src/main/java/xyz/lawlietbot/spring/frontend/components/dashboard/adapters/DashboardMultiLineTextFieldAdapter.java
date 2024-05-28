@@ -3,61 +3,86 @@ package xyz.lawlietbot.spring.frontend.components.dashboard.adapters;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import dashboard.DashboardComponent;
 import dashboard.component.DashboardMultiLineTextField;
+import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardAdapter;
 
-public class DashboardMultiLineTextFieldAdapter extends FlexLayout {
+import java.util.Objects;
 
+public class DashboardMultiLineTextFieldAdapter extends FlexLayout implements DashboardAdapter<DashboardMultiLineTextField> {
+
+    private DashboardMultiLineTextField dashboardMultiLineTextField;
     private String defaultValue;
+    private final TextArea textArea = new TextArea();
 
-    public DashboardMultiLineTextFieldAdapter(DashboardMultiLineTextField dashboardTextField) {
-        defaultValue = dashboardTextField.getValue();
+    public DashboardMultiLineTextFieldAdapter(DashboardMultiLineTextField dashboardMultiLineTextField) {
         setFlexDirection(FlexDirection.ROW);
 
-        TextArea textArea = new TextArea();
         textArea.getStyle().set("margin-top", "-16px");
-        textArea.setLabel(dashboardTextField.getLabel());
-        textArea.setPlaceholder(dashboardTextField.getPlaceholder());
-        textArea.setReadOnly(dashboardTextField.getEditButton());
-        textArea.setEnabled(dashboardTextField.isEnabled());
-        textArea.setMinLength((int) dashboardTextField.getMin());
-        textArea.setMaxLength((int) dashboardTextField.getMax());
-        textArea.setValue(dashboardTextField.getValue());
-        if (dashboardTextField.getMin() <= 0) {
-            textArea.setErrorMessage(getTranslation("dash.textfield.max", dashboardTextField.getMax()));
-        } else {
-            textArea.setErrorMessage(getTranslation("dash.textfield.minmax", dashboardTextField.getMin(), dashboardTextField.getMax()));
-        }
+        textArea.setLabel(dashboardMultiLineTextField.getLabel());
+        textArea.setReadOnly(dashboardMultiLineTextField.getEditButton());
         add(textArea);
         setFlexGrow(1, textArea);
 
-        if (dashboardTextField.isEnabled()) {
-            if (dashboardTextField.getEditButton()) {
-                DashboardTextFieldButtons dashboardTextFieldButtons = new DashboardTextFieldButtons(false);
-                dashboardTextFieldButtons.setModeChangeListener(editMode -> textArea.setReadOnly(!editMode));
-                dashboardTextFieldButtons.setCancelListener(() -> textArea.setValue(defaultValue));
-                dashboardTextFieldButtons.setConfirmListener(() -> trigger(dashboardTextField, textArea));
-                add(dashboardTextFieldButtons);
-            } else {
-                textArea.setValueChangeMode(ValueChangeMode.ON_BLUR);
-                textArea.addValueChangeListener(event -> trigger(dashboardTextField, textArea));
-            }
+        if (dashboardMultiLineTextField.getEditButton()) {
+            DashboardTextFieldButtons dashboardTextFieldButtons = new DashboardTextFieldButtons(false);
+            dashboardTextFieldButtons.setModeChangeListener(editMode -> textArea.setReadOnly(!editMode));
+            dashboardTextFieldButtons.setCancelListener(() -> textArea.setValue(defaultValue));
+            dashboardTextFieldButtons.setConfirmListener(this::trigger);
+            add(dashboardTextFieldButtons);
+        } else {
+            textArea.setValueChangeMode(ValueChangeMode.ON_BLUR);
+            textArea.addValueChangeListener(event -> trigger());
         }
+
+        update(dashboardMultiLineTextField);
     }
 
-    private boolean trigger(DashboardMultiLineTextField dashboardTextField, TextArea textArea) {
-        if (dashboardTextField.isEnabled() &&
-                textArea.getValue().length() >= dashboardTextField.getMin() &&
-                textArea.getValue().length() <= dashboardTextField.getMax()
+    private boolean trigger() {
+        if (dashboardMultiLineTextField.isEnabled() &&
+                textArea.getValue().length() >= dashboardMultiLineTextField.getMin() &&
+                textArea.getValue().length() <= dashboardMultiLineTextField.getMax()
         ) {
             if (!defaultValue.equals(textArea.getValue())) {
                 defaultValue = textArea.getValue();
-                dashboardTextField.trigger(textArea.getValue());
+                dashboardMultiLineTextField.trigger(textArea.getValue());
             }
             return true;
         } else {
             textArea.setValue(defaultValue);
             return false;
         }
+    }
+
+    @Override
+    public void update(DashboardMultiLineTextField dashboardMultiLineTextField) {
+        DashboardComponent previousDashboardComponent = this.dashboardMultiLineTextField;
+        this.dashboardMultiLineTextField = dashboardMultiLineTextField;
+        if (dashboardComponentsAreEqual(previousDashboardComponent, dashboardMultiLineTextField) && Objects.equals(defaultValue, dashboardMultiLineTextField.getValue())) {
+            return;
+        }
+
+        defaultValue = dashboardMultiLineTextField.getValue();
+        textArea.setPlaceholder(dashboardMultiLineTextField.getPlaceholder());
+        textArea.setMinLength((int) dashboardMultiLineTextField.getMin());
+        textArea.setMaxLength((int) dashboardMultiLineTextField.getMax());
+        textArea.setValue(dashboardMultiLineTextField.getValue());
+        if (dashboardMultiLineTextField.getMin() <= 0) {
+            textArea.setErrorMessage(getTranslation("dash.textfield.max", dashboardMultiLineTextField.getMax()));
+        } else {
+            textArea.setErrorMessage(getTranslation("dash.textfield.minmax", dashboardMultiLineTextField.getMin(), dashboardMultiLineTextField.getMax()));
+        }
+    }
+
+    @Override
+    public boolean equalsType(DashboardComponent dashboardComponent) {
+        if (!(dashboardComponent instanceof DashboardMultiLineTextField)) {
+            return false;
+        }
+
+        DashboardMultiLineTextField dashboardMultiLineTextField = (DashboardMultiLineTextField) dashboardComponent;
+        return Objects.equals(this.dashboardMultiLineTextField.getLabel(), dashboardMultiLineTextField.getLabel()) &&
+                Objects.equals(this.dashboardMultiLineTextField.getEditButton(), dashboardMultiLineTextField.getEditButton());
     }
 
 }

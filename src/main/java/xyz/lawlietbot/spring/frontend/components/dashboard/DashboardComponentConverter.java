@@ -1,10 +1,9 @@
 package xyz.lawlietbot.spring.frontend.components.dashboard;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasEnabled;
+import com.vaadin.flow.component.HasOrderedComponents;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.dom.Style;
 import dashboard.DashboardComponent;
 import dashboard.component.*;
@@ -12,9 +11,12 @@ import dashboard.container.*;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.dashboard.adapters.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class DashboardComponentConverter {
 
-    public static Component convert(long guildId, long userId, DashboardComponent dashboardComponent, ConfirmationDialog dialog, boolean titleText) {
+    public static Component convert(long guildId, long userId, DashboardComponent dashboardComponent, ConfirmationDialog dialog) {
         Component component;
         switch (dashboardComponent.getType()) {
             case HorizontalContainer.TYPE:
@@ -38,26 +40,19 @@ public class DashboardComponentConverter {
                 break;
 
             case DashboardSeparator.TYPE:
-                Hr hr = new Hr();
-                if (((DashboardSeparator) dashboardComponent).getLargeGap()) {
-                    hr.getStyle().set("margin", "2em 0 0.75em 0");
-                }
-                component = hr;
+                component = new DashboardSeparatorAdapter((DashboardSeparator) dashboardComponent);
                 break;
 
             case DashboardText.TYPE:
-                component = new DashboardTextAdapter((DashboardText) dashboardComponent, titleText);
+                component = new DashboardTextAdapter((DashboardText) dashboardComponent);
                 break;
 
             case DashboardTitle.TYPE:
-                DashboardTitle dashboardTitle = (DashboardTitle) dashboardComponent;
-                H3 h3 = new H3(dashboardTitle.getText());
-                h3.setClassName("dashboard-header");
-                component = h3;
+                component = new DashboardTitleAdapter((DashboardTitle) dashboardComponent);
                 break;
 
             case HorizontalPusher.TYPE:
-                component = new Div();
+                component = new HorizontalPusherAdapter();
                 break;
 
             case DashboardImage.TYPE:
@@ -108,13 +103,66 @@ public class DashboardComponentConverter {
                 return null;
         }
 
-        if (component instanceof HasStyle) {
-            Style style = ((HasStyle) component).getStyle();
-            dashboardComponent.getCssProperties().forEach(style::set);
+        component.setVisible(dashboardComponent.isVisible());
+        if (component instanceof HasEnabled && dashboardComponent instanceof ActionComponent) {
+            ((HasEnabled) component).setEnabled(((ActionComponent<?>) dashboardComponent).isEnabled());
         }
 
-        component.setVisible(dashboardComponent.isVisible());
+        Style style = ((HasStyle) component).getStyle();
+        dashboardComponent.getCssProperties().forEach(style::set);
         return component;
+    }
+
+    public static void addAndRemove(HasOrderedComponents<?> layout, DashboardContainer dashboardContainer, long guildId, long userId, ConfirmationDialog dialog) {
+        /* removed components */
+        List<Component> componentChildren = layout.getChildren().collect(Collectors.toList());
+        for (int i = 0; i < componentChildren.size(); i++) {
+            Component component = componentChildren.get(i);
+            DashboardAdapter<?> dashboardAdapter = (DashboardAdapter<?>) component;
+
+            if (i < dashboardContainer.getChildren().size()) {
+                DashboardComponent dashboardComponent = dashboardContainer.getChildren().get(i);
+                if (!dashboardAdapter.equalsType(dashboardComponent)) {
+                    layout.remove(component);
+                }
+            } else {
+                layout.remove(component);
+            }
+        }
+
+        /* added components */
+        for (int i = 0; i < dashboardContainer.getChildren().size(); i++) {
+            DashboardComponent dashboardComponent = dashboardContainer.getChildren().get(i);
+
+            if (i < layout.getComponentCount()) {
+                DashboardAdapter<?> dashboardAdapter = (DashboardAdapter<?>) layout.getComponentAt(i);
+                if (!dashboardAdapter.equalsType(dashboardComponent)) {
+                    Component newComponent = convert(guildId, userId, dashboardComponent, dialog);
+                    layout.addComponentAtIndex(i, newComponent);
+                }
+            } else {
+                Component newComponent = convert(guildId, userId, dashboardComponent, dialog);
+                layout.add(newComponent);
+            }
+        }
+
+        /* adjust general properties */
+        for (int i = 0; i < layout.getComponentCount(); i++) {
+            Component component = layout.getComponentAt(i);
+            DashboardComponent dashboardComponent = dashboardContainer.getChildren().get(i);
+
+            component.setVisible(dashboardComponent.isVisible());
+            if (component instanceof HasEnabled && dashboardComponent instanceof ActionComponent) {
+                ((HasEnabled) component).setEnabled(((ActionComponent<?>) dashboardComponent).isEnabled());
+            }
+
+            Style style = ((HasStyle) component).getStyle();
+            style.remove("margin-left");
+            style.remove("margin-top");
+            style.remove("margin-right");
+            style.remove("margin-bottom");
+            dashboardComponent.getCssProperties().forEach(style::set);
+        }
     }
 
 }
