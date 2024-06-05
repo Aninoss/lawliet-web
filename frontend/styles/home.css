@@ -28,19 +28,13 @@ html {
     border-radius: 3%;
 }
 
-#bot-info-video {
+#bot-info-carousel {
     position: relative;
-    background: rgb(21, 33, 42);
+    background: var(--lumo-shade);
     overflow: hidden;
 }
 
-#bot-video {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-}
-
-.videofade {
+.carousel-fade {
     position: absolute;
     top: 0;
     left: 0;
@@ -48,6 +42,37 @@ html {
     height: 80%;
     z-index: 1;
     background: linear-gradient(0deg, rgba(0,0,0,0) 0%, #1f2c3e 100%);
+}
+
+.carousel {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+}
+
+.carousel-slide {
+    height: 100%;
+}
+
+paper-slide {
+    position: relative;
+    overflow: hidden;
+}
+
+paper-slide > img {
+    display: block;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    transform: scale(0.5) translate(calc(-50% + 64px), calc(-150% - 178px));
+}
+
+paper-slide > div {
+    position: absolute;
+    bottom: 5%;
+    left: 42px;
+    height: 32px;
 }
 
 #prop-list {
@@ -87,12 +112,20 @@ html {
         border-radius: 3%;
     }
 
-    #bot-info-video {
+    #bot-info-carousel {
         height: 350px;
         overflow: visible;
     }
 
-    .videofade {
+    .carousel {
+        height: 600px;
+    }
+
+    .carousel-slide {
+        height: 600px;
+    }
+
+    .carousel-fade {
         margin-top: -240px;
         height: 150%;
         background: linear-gradient(0deg, rgba(0,0,0,0) 0%, #1f2c3e 80%);

@@ -16,7 +16,7 @@ public class BotInfoLayout extends Div {
         FlexLayout parts = new FlexLayout();
         parts.addClassNames(Styles.APP_WIDTH, Styles.FLEX_NOT_LARGE_SWITCH_COLUMN_REVERSE);
 
-        parts.add(new BotInfoVideoLayout());
+        parts.add(new BotInfoCarouselLayout());
         parts.add(new BotInfoDetailsLayout(uiData));
 
         add(new HeaderDummy(uiData), parts);
