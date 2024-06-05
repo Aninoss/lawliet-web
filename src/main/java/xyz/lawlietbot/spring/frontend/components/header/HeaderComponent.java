@@ -17,6 +17,7 @@ import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.frontend.Styles;
 import xyz.lawlietbot.spring.frontend.components.DiscordIcon;
 import xyz.lawlietbot.spring.frontend.components.LawlietBotLogo;
+import xyz.lawlietbot.spring.frontend.components.LocaleSelect;
 import xyz.lawlietbot.spring.frontend.views.DiscordLogout;
 import xyz.lawlietbot.spring.frontend.views.HomeView;
 
@@ -98,6 +99,10 @@ public class HeaderComponent extends Header {
                 loginAnchor.addClassName(Styles.VISIBLE_NOT_SMALL);
                 content.add(loginAnchor);
             }
+
+            LocaleSelect localeSelect = new LocaleSelect();
+            localeSelect.addClassNames(Styles.VISIBLE_NOT_SMALL);
+            content.add(localeSelect);
         }
 
         content.setFlexGrow(1, nav);

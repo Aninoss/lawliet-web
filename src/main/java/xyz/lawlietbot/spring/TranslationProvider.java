@@ -19,13 +19,12 @@ public class TranslationProvider implements I18NProvider {
 
     public static final String BUNDLE_PREFIX = "translate";
 
-    public final Locale LOCALE_EN = new Locale("en");
-    public final Locale LOCALE_DE = new Locale("de");
-    public final Locale LOCALE_ES = new Locale("es");
-    public final Locale LOCALE_RU = new Locale("ru");
+    public static final Locale LOCALE_EN = new Locale("en");
+    public static final Locale LOCALE_DE = new Locale("de");
+    public static final Locale LOCALE_ES = new Locale("es");
+    public static final Locale LOCALE_RU = new Locale("ru");
 
-    private final List<Locale> locales = Collections
-            .unmodifiableList(Arrays.asList(LOCALE_EN, LOCALE_RU, LOCALE_ES, LOCALE_DE));
+    public static final List<Locale> PROVIDED_LOCALES = List.of(LOCALE_EN, LOCALE_DE, LOCALE_ES, LOCALE_RU);
 
     private static final LoadingCache<Locale, ResourceBundle> bundleCache = CacheBuilder
             .newBuilder().expireAfterWrite(1, TimeUnit.DAYS)
@@ -38,12 +37,7 @@ public class TranslationProvider implements I18NProvider {
 
     @Override
     public List<Locale> getProvidedLocales() {
-        String forceLocale = System.getenv("FORCE_LOCALE");
-        if (forceLocale != null) {
-            return List.of(new Locale(forceLocale));
-        }
-
-        return locales;
+        return PROVIDED_LOCALES;
     }
 
     @Override

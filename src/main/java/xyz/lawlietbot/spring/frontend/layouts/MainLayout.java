@@ -8,16 +8,14 @@ import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.InitialPageSettings;
 import com.vaadin.flow.server.PageConfigurator;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import xyz.lawlietbot.spring.LoginAccess;
-import xyz.lawlietbot.spring.NavBarSolid;
-import xyz.lawlietbot.spring.NoLiteAccess;
-import xyz.lawlietbot.spring.SetDivStretchBackground;
+import xyz.lawlietbot.spring.*;
 import xyz.lawlietbot.spring.backend.Redirector;
 import xyz.lawlietbot.spring.backend.language.PageTitleGen;
 import xyz.lawlietbot.spring.backend.payment.Subscription;
@@ -28,13 +26,16 @@ import xyz.lawlietbot.spring.frontend.Styles;
 import xyz.lawlietbot.spring.frontend.components.CookieConsent;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.frontend.components.FooterArea;
+import xyz.lawlietbot.spring.frontend.components.LocaleSelect;
 import xyz.lawlietbot.spring.frontend.components.header.HeaderComponent;
 import xyz.lawlietbot.spring.frontend.components.header.VerticalMenuBarComponent;
 import xyz.lawlietbot.spring.frontend.views.ExceptionView;
 import xyz.lawlietbot.spring.frontend.views.IEView;
 import xyz.lawlietbot.spring.syncserver.SyncUtil;
 
+import javax.servlet.http.Cookie;
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.Map;
 
 @CssImport("./styles/styles.css")
@@ -56,6 +57,14 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
     public MainLayout(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         this.sessionData = sessionData;
         this.uiData = uiData;
+        if (VaadinService.getCurrentRequest().getCookies() != null) {
+            for (Cookie cookie : VaadinService.getCurrentRequest().getCookies()) {
+                if (cookie.getName().equals(LocaleSelect.LOCALE_COOKIE_NAME)) {
+                    UI.getCurrent().setLocale(new Locale(cookie.getValue()));
+                    break;
+                }
+            }
+        }
 
         if (VaadinSession.getCurrent().getBrowser().isIE()) {
             return;
