@@ -1,5 +1,6 @@
 package xyz.lawlietbot.spring.frontend.components.header;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -29,38 +30,17 @@ public class HeaderComponent extends Header {
             addClassName("lite");
         }
 
-        HorizontalLayout content = new HorizontalLayout();
+        HorizontalLayout content = new HorizontalLayout(generateMenuButton(), generateLogo(), generateNavigationBar(uiData));
         content.setId("header-content");
         content.setPadding(false);
         content.setAlignItems(FlexComponent.Alignment.CENTER);
         content.addClassNames(Styles.FADE_IN);
 
-        //Show Menu Button
-        Button showMenu = new Button("");
-        showMenu.getElement().setAttribute("onclick", "verticalBarSwitch()");
-        showMenu.addClassName(Styles.VISIBLE_SMALL);
-        showMenu.setId("menu-toggle");
-        showMenu.setIcon(VaadinIcon.MENU.create());
-        content.add(showMenu);
+        Div stretcher = new Div();
+        stretcher.getStyle().set("margin", "0");
+        content.add(stretcher);
+        content.setFlexGrow(1, stretcher);
 
-        //Logo
-        Button logo = new Button(new LawlietBotLogo());
-        logo.setMinWidth("200px");
-        logo.getStyle().set("margin-left", "8px");
-        logo.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        logo.addClickListener(click -> UI.getCurrent().navigate(HomeView.class));
-        content.add(logo);
-
-        //Navigation Bar
-        NavigationBar navigationBar = new NavigationBar(uiData);
-        navigationBar.setOrientation(Tabs.Orientation.HORIZONTAL);
-
-        Nav nav = new Nav(navigationBar);
-        nav.setMinWidth("0px");
-        nav.addClassName(Styles.VISIBLE_NOT_SMALL);
-        content.add(nav);
-
-        //Login Elements
         if (!uiData.isLite()) {
             if (sessionData.isLoggedIn()) {
                 DiscordUser discordUser = sessionData.getDiscordUser().get();
@@ -105,8 +85,35 @@ public class HeaderComponent extends Header {
             content.add(localeSelect);
         }
 
-        content.setFlexGrow(1, nav);
         add(content);
+    }
+
+    private Component generateMenuButton() {
+        Button showMenu = new Button("");
+        showMenu.getElement().setAttribute("onclick", "verticalBarSwitch()");
+        showMenu.addClassName(Styles.VISIBLE_SMALL);
+        showMenu.setId("menu-toggle");
+        showMenu.setIcon(VaadinIcon.MENU.create());
+        return showMenu;
+    }
+
+    private Component generateLogo() {
+        Button logo = new Button(new LawlietBotLogo());
+        logo.setMinWidth("200px");
+        logo.getStyle().set("margin-left", "8px");
+        logo.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        logo.addClickListener(click -> UI.getCurrent().navigate(HomeView.class));
+        return logo;
+    }
+
+    private Component generateNavigationBar(UIData uiData) {
+        NavigationBar navigationBar = new NavigationBar(uiData);
+        navigationBar.setOrientation(Tabs.Orientation.HORIZONTAL);
+
+        Nav nav = new Nav(navigationBar);
+        nav.setMinWidth("0px");
+        nav.addClassName(Styles.VISIBLE_NOT_SMALL);
+        return nav;
     }
 
     public void setNavBarSolid(boolean solid) {
