@@ -1,12 +1,13 @@
 package xyz.lawlietbot.spring.syncserver;
 
+import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import okhttp3.*;
-import org.jetbrains.annotations.NotNull;
-import org.json.JSONObject;
 
 public class SendEvent {
 

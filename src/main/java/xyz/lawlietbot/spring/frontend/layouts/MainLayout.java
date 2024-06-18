@@ -37,6 +37,7 @@ import javax.servlet.http.Cookie;
 import java.util.Comparator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 @CssImport("./styles/styles.css")
 @CssImport("./styles/styles-reversed.css")
@@ -215,13 +216,17 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
     private void startProfitWell(Long userId) {
         String email = null;
         if (userId != null) {
-            Subscription subscription = SyncUtil.retrievePaddleSubscriptions(userId, 0).join()
-                    .stream()
-                    .max(Comparator.comparingLong(Subscription::getPlanId))
-                    .orElse(null);
-
-            if (subscription != null) {
-                email = subscription.getEmail();
+            try {
+                Subscription subscription = SyncUtil.retrievePaddleSubscriptions(userId, 0).get()
+                        .stream()
+                        .max(Comparator.comparingLong(Subscription::getPlanId))
+                        .orElse(null);
+                if (subscription != null) {
+                    email = subscription.getEmail();
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                LOGGER.error("Profit well exception", e);
+                return;
             }
         }
 

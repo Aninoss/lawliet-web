@@ -1,7 +1,5 @@
 package xyz.lawlietbot.spring.backend.userdata;
 
-import java.util.*;
-import java.util.concurrent.ExecutionException;
 import bell.oauth.discord.domain.Guild;
 import bell.oauth.discord.main.OAuthBuilder;
 import bell.oauth.discord.main.Response;
@@ -16,6 +14,9 @@ import org.springframework.stereotype.Component;
 import xyz.lawlietbot.spring.backend.util.StringUtil;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
+
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 @Component
 @VaadinSessionScope
@@ -46,24 +47,33 @@ public class SessionData {
     }
 
     public boolean login(String code, String state) {
-        if (state.equals(id)) {
-            Response response = builder.exchange(code);
-            try {
-                if (response == Response.OK &&
-                        (!Boolean.parseBoolean(System.getenv("CHECK_LOGIN")) || !SendEvent.sendToAnyCluster(EventOut.USER_CHECK_BANNED, Map.of("user_id", builder.getUser().getId())).get().getBoolean("banned"))
-                ) {
-                    List<Guild> guilds = builder.getScopes().contains("guilds") ? builder.getGuilds() : null;
-                    discordUser = new DiscordUser(builder.getUser(), guilds);
-                    return true;
-                } else {
-                    pushErrorMessage("login.banned");
-                }
-            } catch (InterruptedException | ExecutionException | JSONException e) {
-                LOGGER.error("Login error", e);
-                pushErrorMessage("login.error");
-            }
+        if (!state.equals(id)) {
+            pushErrorMessage("login.error");
+            return false;
         }
-        return false;
+
+        Response response = builder.exchange(code);
+        if (response != Response.OK) {
+            pushErrorMessage("login.error");
+            return false;
+        }
+
+        try {
+            if (Boolean.parseBoolean(System.getenv("CHECK_LOGIN")) &&
+                    SendEvent.sendToAnyCluster(EventOut.USER_CHECK_BANNED, Map.of("user_id", builder.getUser().getId())).get().getBoolean("banned")
+            ) {
+                pushErrorMessage("login.banned");
+                return false;
+            }
+
+            List<Guild> guilds = builder.getScopes().contains("guilds") ? builder.getGuilds() : null;
+            discordUser = new DiscordUser(builder.getUser(), guilds);
+            return true;
+        } catch (InterruptedException | ExecutionException | JSONException e) {
+            LOGGER.error("Login error", e);
+            pushErrorMessage("login.error");
+            return false;
+        }
     }
 
     public void logout(UIData uiData) {
