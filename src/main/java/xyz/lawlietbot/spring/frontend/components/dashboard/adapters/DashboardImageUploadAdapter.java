@@ -40,8 +40,8 @@ public class DashboardImageUploadAdapter extends VerticalLayout implements Dashb
         add(flexibleGridLayout);
 
         this.dashboardImageUpload = dashboardImageUpload;
-        resetUpload();
-        update(dashboardImageUpload);
+        resetUpload(dashboardImageUpload.getMax());
+        updateValuesField();
     }
 
     @Override
@@ -56,12 +56,13 @@ public class DashboardImageUploadAdapter extends VerticalLayout implements Dashb
         updateValuesField();
     }
 
-    private void resetUpload() {
+    private void resetUpload(int maxFiles) {
         MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
         upload = new Upload(buffer);
         upload.setMaxFileSize(100_000_000);
         upload.setAcceptedFileTypes("image/png", "image/jpeg", "image/bmp", "image/gif", ".png", ".jpg", ".jpeg", ".bmp", ".gif");
         upload.setWidth("calc(100% - 32px)");
+        upload.setMaxFiles(maxFiles);
 
         upload.addFileRejectedListener(event -> {
             String errorMessage = event.getErrorMessage();
@@ -86,7 +87,7 @@ public class DashboardImageUploadAdapter extends VerticalLayout implements Dashb
         });
         upload.addAllFinishedListener(event -> {
             this.dashboardImageUpload.triggerAdd(uploads);
-            resetUpload();
+            resetUpload(upload.getMaxFiles());
         });
 
         if (div != null) {
