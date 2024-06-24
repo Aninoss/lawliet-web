@@ -16,6 +16,7 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import dashboard.DashboardComponent;
 import dashboard.component.DashboardImageUpload;
+import xyz.lawlietbot.spring.backend.FileCache;
 import xyz.lawlietbot.spring.backend.util.FileUtil;
 import xyz.lawlietbot.spring.backend.util.RandomUtil;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
@@ -32,8 +33,10 @@ public class DashboardImageUploadAdapter extends VerticalLayout implements Dashb
     private Upload upload;
     private Div div = null;
     private final FlexibleGridLayout flexibleGridLayout = new FlexibleGridLayout();
+    private final FileCache fileCache;
 
-    public DashboardImageUploadAdapter(DashboardImageUpload dashboardImageUpload) {
+    public DashboardImageUploadAdapter(DashboardImageUpload dashboardImageUpload, FileCache fileCache) {
+        this.fileCache = fileCache;
         setPadding(false);
 
         flexibleGridLayout.setVisible(false);
@@ -79,7 +82,9 @@ public class DashboardImageUploadAdapter extends VerticalLayout implements Dashb
             String fileName = RandomUtil.generateRandomString(30) + "." + fileExt;
             String fileNameFull = System.getenv("DASHBOARD_IMAGE_PATH") + "/" + dir + "/" + fileName;
 
-            if (FileUtil.writeInputStreamToFile(inputStream, new File(fileNameFull))) {
+            File file = new File(fileNameFull);
+            if (FileUtil.writeInputStreamToFile(inputStream, file)) {
+                fileCache.addFile(file);
                 uploads.add("https://lawlietbot.xyz/cdn/" + dir + "/" + fileName);
             } else {
                 CustomNotification.showError(getTranslation("error"));

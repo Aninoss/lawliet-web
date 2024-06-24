@@ -8,6 +8,7 @@ import dashboard.DashboardComponent;
 import dashboard.component.DashboardText;
 import dashboard.container.HorizontalContainer;
 import dashboard.container.HorizontalPusher;
+import xyz.lawlietbot.spring.backend.FileCache;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardAdapter;
 import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardComponentConverter;
@@ -20,12 +21,14 @@ public class HorizontalContainerAdapter extends FlexLayout implements DashboardA
     private final long guildId;
     private final long userId;
     private final ConfirmationDialog dialog;
+    private final FileCache fileCache;
 
-    public HorizontalContainerAdapter(HorizontalContainer horizontalContainer, long guildId, long userId, ConfirmationDialog dialog) {
+    public HorizontalContainerAdapter(HorizontalContainer horizontalContainer, long guildId, long userId, ConfirmationDialog dialog, FileCache fileCache) {
         this.horizontalContainer = horizontalContainer;
         this.guildId = guildId;
         this.userId = userId;
         this.dialog = dialog;
+        this.fileCache = fileCache;
 
         addClassName("dashboard-horizontal");
         if (horizontalContainer.isCard()) {
@@ -53,7 +56,7 @@ public class HorizontalContainerAdapter extends FlexLayout implements DashboardA
 
         boolean noPusher = horizontalContainer.getChildren().stream().noneMatch(c -> c instanceof HorizontalPusher);
         for (DashboardComponent dashboardComponent : horizontalContainer.getChildren()) {
-            Component component = DashboardComponentConverter.convert(guildId, userId, dashboardComponent, dialog);
+            Component component = DashboardComponentConverter.convert(guildId, userId, dashboardComponent, dialog, fileCache);
             if (component == null) {
                 continue;
             }
@@ -78,7 +81,7 @@ public class HorizontalContainerAdapter extends FlexLayout implements DashboardA
     @Override
     public void update(HorizontalContainer horizontalContainer) {
         this.horizontalContainer = horizontalContainer;
-        DashboardComponentConverter.addAndRemove(this, horizontalContainer, guildId, userId, dialog);
+        DashboardComponentConverter.addAndRemove(this, horizontalContainer, guildId, userId, dialog, fileCache);
 
         boolean noPusher = horizontalContainer.getChildren().stream().noneMatch(c -> c instanceof HorizontalPusher);
         for (int i = 0; i < getComponentCount(); i++) {

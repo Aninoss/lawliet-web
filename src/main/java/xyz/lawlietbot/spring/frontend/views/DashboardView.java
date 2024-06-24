@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import xyz.lawlietbot.spring.LoginAccess;
 import xyz.lawlietbot.spring.NavBarSolid;
 import xyz.lawlietbot.spring.NoLiteAccess;
+import xyz.lawlietbot.spring.backend.FileCache;
 import xyz.lawlietbot.spring.backend.dashboard.DashboardCategoryInitData;
 import xyz.lawlietbot.spring.backend.dashboard.DashboardInitData;
 import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
@@ -68,6 +69,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
     private List<DashboardInitData.Category> categoryList;
     private String autoCategoryId = null;
     private Component contentComponent;
+    private FileCache fileCache = new FileCache();
 
     public DashboardView(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         super(sessionData, uiData);
@@ -324,7 +326,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         }
         pageDescription.setVisible(category.getDescription() != null);
 
-        contentComponent = DashboardComponentConverter.convert(guild.getId(), discordUser.getId(), data.getComponents(), confirmationDialog);
+        contentComponent = DashboardComponentConverter.convert(guild.getId(), discordUser.getId(), data.getComponents(), confirmationDialog, fileCache);
         ((HasSize) contentComponent).setWidthFull();
         addActionListener(data.getComponents(), category);
         return contentComponent;
@@ -357,8 +359,15 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
             if (confirmationMessage != null) {
                 Span confirmationMessageSpan = new Span(confirmationMessage);
                 confirmationMessageSpan.getStyle().set("color", "var(--lumo-error-text-color)");
-                confirmationDialog.open(confirmationMessageSpan, () -> sendAction(category, json), () -> updateCategory(category));
+                confirmationDialog.open(confirmationMessageSpan, () -> {
+                    fileCache.flush();
+                    sendAction(category, json);
+                }, () -> {
+                    fileCache.delete();
+                    updateCategory(category);
+                });
             } else {
+                fileCache.flush();
                 sendAction(category, json);
             }
         });

@@ -6,6 +6,7 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import dashboard.DashboardComponent;
 import dashboard.container.VerticalContainer;
+import xyz.lawlietbot.spring.backend.FileCache;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardAdapter;
 import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardComponentConverter;
@@ -18,12 +19,14 @@ public class VerticalContainerAdapter extends FlexLayout implements DashboardAda
     private final long guildId;
     private final long userId;
     private final ConfirmationDialog dialog;
+    private final FileCache fileCache;
 
-    public VerticalContainerAdapter(VerticalContainer verticalContainer, long guildId, long userId, ConfirmationDialog dialog) {
+    public VerticalContainerAdapter(VerticalContainer verticalContainer, long guildId, long userId, ConfirmationDialog dialog, FileCache fileCache) {
         this.verticalContainer = verticalContainer;
         this.guildId = guildId;
         this.userId = userId;
         this.dialog = dialog;
+        this.fileCache = fileCache;
 
         addClassName("dashboard-vertical");
         if (verticalContainer.isCard()) {
@@ -31,7 +34,7 @@ public class VerticalContainerAdapter extends FlexLayout implements DashboardAda
         }
 
         for (DashboardComponent dashboardComponent : verticalContainer.getChildren()) {
-            Component component = DashboardComponentConverter.convert(guildId, userId, dashboardComponent, dialog);
+            Component component = DashboardComponentConverter.convert(guildId, userId, dashboardComponent, dialog, fileCache);
             if (component == null) {
                 continue;
             }
@@ -49,7 +52,7 @@ public class VerticalContainerAdapter extends FlexLayout implements DashboardAda
     @Override
     public void update(VerticalContainer verticalContainer) {
         this.verticalContainer = verticalContainer;
-        DashboardComponentConverter.addAndRemove(this, verticalContainer, guildId, userId, dialog);
+        DashboardComponentConverter.addAndRemove(this, verticalContainer, guildId, userId, dialog, fileCache);
 
         for (int i = 0; i < getComponentCount(); i++) {
             Component component = getComponentAt(i);

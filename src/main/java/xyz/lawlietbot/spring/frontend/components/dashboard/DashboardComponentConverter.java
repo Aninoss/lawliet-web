@@ -8,6 +8,7 @@ import com.vaadin.flow.dom.Style;
 import dashboard.DashboardComponent;
 import dashboard.component.*;
 import dashboard.container.*;
+import xyz.lawlietbot.spring.backend.FileCache;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.dashboard.adapters.*;
 
@@ -16,23 +17,23 @@ import java.util.stream.Collectors;
 
 public class DashboardComponentConverter {
 
-    public static Component convert(long guildId, long userId, DashboardComponent dashboardComponent, ConfirmationDialog dialog) {
+    public static Component convert(long guildId, long userId, DashboardComponent dashboardComponent, ConfirmationDialog dialog, FileCache fileCache) {
         Component component;
         switch (dashboardComponent.getType()) {
             case HorizontalContainer.TYPE:
-                component = new HorizontalContainerAdapter((HorizontalContainer) dashboardComponent, guildId, userId, dialog);
+                component = new HorizontalContainerAdapter((HorizontalContainer) dashboardComponent, guildId, userId, dialog, fileCache);
                 break;
 
             case VerticalContainer.TYPE:
-                component = new VerticalContainerAdapter((VerticalContainer) dashboardComponent, guildId, userId, dialog);
+                component = new VerticalContainerAdapter((VerticalContainer) dashboardComponent, guildId, userId, dialog, fileCache);
                 break;
 
             case ExpandableContainer.TYPE:
-                component = new ExpandableContainerAdapter((ExpandableContainer) dashboardComponent, guildId, userId, dialog);
+                component = new ExpandableContainerAdapter((ExpandableContainer) dashboardComponent, guildId, userId, dialog, fileCache);
                 break;
 
             case DashboardListContainer.TYPE:
-                component = new DashboardListContainerAdapter((DashboardListContainer) dashboardComponent, guildId, userId, dialog);
+                component = new DashboardListContainerAdapter((DashboardListContainer) dashboardComponent, guildId, userId, dialog, fileCache);
                 break;
 
             case DashboardButton.TYPE:
@@ -60,7 +61,7 @@ public class DashboardComponentConverter {
                 break;
 
             case DashboardImageUpload.TYPE:
-                component = new DashboardImageUploadAdapter((DashboardImageUpload) dashboardComponent);
+                component = new DashboardImageUploadAdapter((DashboardImageUpload) dashboardComponent, fileCache);
                 break;
 
             case DashboardSwitch.TYPE:
@@ -113,7 +114,7 @@ public class DashboardComponentConverter {
         return component;
     }
 
-    public static void addAndRemove(HasOrderedComponents<?> layout, DashboardContainer dashboardContainer, long guildId, long userId, ConfirmationDialog dialog) {
+    public static void addAndRemove(HasOrderedComponents<?> layout, DashboardContainer dashboardContainer, long guildId, long userId, ConfirmationDialog dialog, FileCache fileCache) {
         /* removed components */
         List<Component> componentChildren = layout.getChildren().collect(Collectors.toList());
         for (int i = 0; i < componentChildren.size(); i++) {
@@ -137,11 +138,11 @@ public class DashboardComponentConverter {
             if (i < layout.getComponentCount()) {
                 DashboardAdapter<?> dashboardAdapter = (DashboardAdapter<?>) layout.getComponentAt(i);
                 if (!dashboardAdapter.equalsType(dashboardComponent)) {
-                    Component newComponent = convert(guildId, userId, dashboardComponent, dialog);
+                    Component newComponent = convert(guildId, userId, dashboardComponent, dialog, fileCache);
                     layout.addComponentAtIndex(i, newComponent);
                 }
             } else {
-                Component newComponent = convert(guildId, userId, dashboardComponent, dialog);
+                Component newComponent = convert(guildId, userId, dashboardComponent, dialog, fileCache);
                 layout.add(newComponent);
             }
         }
