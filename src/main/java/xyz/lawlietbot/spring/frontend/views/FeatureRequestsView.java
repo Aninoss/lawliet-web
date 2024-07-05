@@ -1,11 +1,5 @@
 package xyz.lawlietbot.spring.frontend.views;
 
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
@@ -17,6 +11,7 @@ import xyz.lawlietbot.spring.backend.featurerequests.FRDynamicBean;
 import xyz.lawlietbot.spring.backend.featurerequests.FRPanelType;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
+import xyz.lawlietbot.spring.backend.util.StringUtil;
 import xyz.lawlietbot.spring.frontend.components.PageHeader;
 import xyz.lawlietbot.spring.frontend.components.featurerequests.FeatureRequestMain;
 import xyz.lawlietbot.spring.frontend.components.featurerequests.FeatureRequestUserHeader;
@@ -25,6 +20,13 @@ import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
+
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 @Route(value = "featurerequests", layout = MainLayout.class)
 @CssImport("./styles/featurerequests.css")
@@ -51,38 +53,34 @@ public class FeatureRequestsView extends PageLayout implements HasUrlParameter<S
             jsonObject.put("user_id", sessionData.getDiscordUser().get().getId());
         }
 
-        frDynamicBean = SendEvent.send(EventOut.FR_FETCH, jsonObject)
-                        .thenApply(responseJson -> {
-                            int boostsTotal = responseJson.getInt("boosts_total");
-                            int boostsRemaining = responseJson.getInt("boosts_remaining");
+        JSONObject responseJson = SendEvent.send(EventOut.FR_FETCH, jsonObject).get();
+        int boostsTotal = responseJson.getInt("boosts_total");
+        int boostsRemaining = responseJson.getInt("boosts_remaining");
+        int completed = responseJson.has("completed") ? responseJson.getInt("completed") : 0;
 
-                            FRDynamicBean frDynamicBean = new FRDynamicBean(boostsRemaining, boostsTotal);
-
-                            JSONArray jsonEntriesArray = responseJson.getJSONArray("data");
-                            for (int j = 0; j < jsonEntriesArray.length(); j++) {
-                                JSONObject jsonEntry = jsonEntriesArray.getJSONObject(j);
-                                FRPanelType type = FRPanelType.valueOf(jsonEntry.getString("type"));
-                                boolean pub = jsonEntry.getBoolean("public");
-                                frDynamicBean.addEntry(
-                                        jsonEntry.getInt("id"),
-                                        jsonEntry.getString("title"),
-                                        jsonEntry.getString("description"),
-                                        type == FRPanelType.PENDING && pub ? jsonEntry.getInt("boosts") : null,
-                                        type == FRPanelType.PENDING && pub ? jsonEntry.getInt("recent_boosts") : null,
-                                        pub,
-                                        type,
-                                        LocalDate.ofEpochDay(jsonEntry.getLong("date"))
-                                );
-                            }
-
-                            return frDynamicBean;
-                        }).get();
+        frDynamicBean = new FRDynamicBean(boostsRemaining, boostsTotal);
+        JSONArray jsonEntriesArray = responseJson.getJSONArray("data");
+        for (int j = 0; j < jsonEntriesArray.length(); j++) {
+            JSONObject jsonEntry = jsonEntriesArray.getJSONObject(j);
+            FRPanelType type = FRPanelType.valueOf(jsonEntry.getString("type"));
+            boolean pub = jsonEntry.getBoolean("public");
+            frDynamicBean.addEntry(
+                    jsonEntry.getInt("id"),
+                    jsonEntry.getString("title"),
+                    jsonEntry.getString("description"),
+                    type == FRPanelType.PENDING && pub ? jsonEntry.getInt("boosts") : null,
+                    type == FRPanelType.PENDING && pub ? jsonEntry.getInt("recent_boosts") : null,
+                    pub,
+                    type,
+                    LocalDate.ofEpochDay(jsonEntry.getLong("date"))
+            );
+        }
 
         mainContent.setWidthFull();
         mainContent.setPadding(false);
 
         add(
-                new PageHeader(getUiData(), getTitleText(), getTranslation("fr.desc"), uiData.isLite() ? null : new FeatureRequestUserHeader(getSessionData(), frDynamicBean)),
+                new PageHeader(getUiData(), getTitleText(), getTranslation("fr.desc", StringUtil.numToString(completed)), uiData.isLite() ? null : new FeatureRequestUserHeader(getSessionData(), frDynamicBean)),
                 mainContent
         );
     }
