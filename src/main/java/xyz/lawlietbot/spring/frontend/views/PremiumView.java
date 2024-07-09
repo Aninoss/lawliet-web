@@ -138,15 +138,18 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                 }
             }
 
-            if (parametersMap.containsKey("paddle_billing")) {
+            if (parametersMap.containsKey("paddle_billing") && parametersMap.containsKey("type")) {
                 String transactionId = parametersMap.get("paddle_billing").get(0);
                 UI.getCurrent().getPage().getHistory().replaceState(null, getRoute());
                 try {
                     int paddleCheckoutWaitTimeMinutes = Integer.parseInt(Objects.requireNonNullElse(System.getenv("PADDLE_CHECKOUT_WAIT_TIME_MINUTES"), "1"));
                     PaddleManager.waitForCheckoutAsync(transactionId).get(paddleCheckoutWaitTimeMinutes, TimeUnit.MINUTES);
 
+                    String messageKey = parametersMap.get("type").get(0).equals("txt2img")
+                            ? "premium.buy.success.txt2img"
+                            : "premium.buy.success.premium";
                     ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-                    confirmationDialog.open(getTranslation("premium.buy.success.txt2img"), () -> {
+                    confirmationDialog.open(getTranslation(messageKey), () -> {
                     });
                     add(confirmationDialog);
                     tabs.setSelectedIndex(1);

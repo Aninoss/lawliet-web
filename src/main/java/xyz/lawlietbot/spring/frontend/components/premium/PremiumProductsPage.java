@@ -20,6 +20,7 @@ import com.vaadin.flow.server.VaadinRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.lawlietbot.spring.backend.Redirector;
+import xyz.lawlietbot.spring.backend.payment.ProductPremium;
 import xyz.lawlietbot.spring.backend.payment.ProductTxt2Img;
 import xyz.lawlietbot.spring.backend.payment.paddle.PaddleManager;
 import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
@@ -46,38 +47,11 @@ public class PremiumProductsPage extends PremiumPage {
 
     @Override
     public void build() {
-        H2 header = new H2(getTranslation("premium.products.txt2img"));
-        header.getStyle().set("margin-top", "16px");
-        add(header);
-
-        Paragraph p = new Paragraph(getTranslation("premium.products.txt2img.desc"));
-        add(p);
-
-        if (sessionData.isLoggedIn()) {
-            HorizontalLayout remainingLayout = new HorizontalLayout();
-            remainingLayout.setWidthFull();
-            remainingLayout.setAlignItems(Alignment.CENTER);
-            remainingLayout.getStyle().set("margin", "0");
-
-            remainingLayout.add(new Paragraph(getTranslation("premium.products.txt2img.remaining")));
-
-            remainingParagraph = new Paragraph("???");
-            remainingParagraph.setId("txt2img-remaining");
-            remainingLayout.add(remainingParagraph);
-
-            add(remainingLayout);
-        }
-
-        FlexibleGridLayout gridLayout = new FlexibleGridLayout()
-                .withColumns(Repeat.RepeatMode.AUTO_FILL, new MinMax(new Length("270px"), new Flex(1)))
-                .withItems(generateTxt2ImgArticles())
-                .withPadding(false)
-                .withSpacing(true)
-                .withAutoFlow(GridLayoutComponent.AutoFlow.ROW_DENSE)
-                .withOverflow(GridLayoutComponent.Overflow.AUTO);
-        gridLayout.setWidthFull();
-        gridLayout.getStyle().set("margin-top", "24px");
-        add(gridLayout);
+        Map<String, String> productPriceMap = PaddleManager.retrieveProductPrices(VaadinRequest.getCurrent().getHeader("CF-Connecting-IP"), " + " + getTranslation("premium.products.vat"));
+        add(
+                createPremiumField(productPriceMap),
+                createTxt2ImgField(productPriceMap)
+        );
     }
 
     @Override
@@ -96,9 +70,69 @@ public class PremiumProductsPage extends PremiumPage {
         }
     }
 
-    private Article[] generateTxt2ImgArticles() {
-        Map<ProductTxt2Img, String> productPriceMap = PaddleManager.retrieveProductPrices(VaadinRequest.getCurrent().getHeader("CF-Connecting-IP"));
+    private Component createPremiumField(Map<String, String> productPriceMap) {
+        VerticalLayout mainLayout = new VerticalLayout();
+        mainLayout.setPadding(false);
 
+        H2 header = new H2(getTranslation("premium.products.premium"));
+        header.getStyle().set("margin-top", "16px");
+        mainLayout.add(header);
+
+        Paragraph p = new Paragraph(getTranslation("premium.products.premium.desc"));
+        mainLayout.add(p);
+
+        FlexibleGridLayout gridLayout = new FlexibleGridLayout()
+                .withColumns(Repeat.RepeatMode.AUTO_FILL, new MinMax(new Length("270px"), new Flex(1)))
+                .withItems(generatePremiumArticles(productPriceMap))
+                .withPadding(false)
+                .withSpacing(true)
+                .withAutoFlow(GridLayoutComponent.AutoFlow.ROW_DENSE)
+                .withOverflow(GridLayoutComponent.Overflow.AUTO);
+        gridLayout.setWidthFull();
+        gridLayout.getStyle().set("margin-top", "24px");
+        mainLayout.add(gridLayout);
+        return mainLayout;
+    }
+
+    private Component createTxt2ImgField(Map<String, String> productPriceMap) {
+        VerticalLayout mainLayout = new VerticalLayout();
+        mainLayout.setPadding(false);
+
+        H2 header = new H2(getTranslation("premium.products.txt2img"));
+        mainLayout.add(header);
+
+        Paragraph p = new Paragraph(getTranslation("premium.products.txt2img.desc"));
+        mainLayout.add(p);
+
+        if (sessionData.isLoggedIn()) {
+            HorizontalLayout remainingLayout = new HorizontalLayout();
+            remainingLayout.setWidthFull();
+            remainingLayout.setAlignItems(Alignment.CENTER);
+            remainingLayout.getStyle().set("margin", "0");
+
+            remainingLayout.add(new Paragraph(getTranslation("premium.products.txt2img.remaining")));
+
+            remainingParagraph = new Paragraph("???");
+            remainingParagraph.setId("txt2img-remaining");
+            remainingLayout.add(remainingParagraph);
+
+            mainLayout.add(remainingLayout);
+        }
+
+        FlexibleGridLayout gridLayout = new FlexibleGridLayout()
+                .withColumns(Repeat.RepeatMode.AUTO_FILL, new MinMax(new Length("270px"), new Flex(1)))
+                .withItems(generateTxt2ImgArticles(productPriceMap))
+                .withPadding(false)
+                .withSpacing(true)
+                .withAutoFlow(GridLayoutComponent.AutoFlow.ROW_DENSE)
+                .withOverflow(GridLayoutComponent.Overflow.AUTO);
+        gridLayout.setWidthFull();
+        gridLayout.getStyle().set("margin-top", "24px");
+        mainLayout.add(gridLayout);
+        return mainLayout;
+    }
+
+    private Article[] generateTxt2ImgArticles(Map<String, String> productPriceMap) {
         Article[] articles = new Article[ProductTxt2Img.values().length];
         for (int i = 0; i < ProductTxt2Img.values().length; i++) {
             ProductTxt2Img product = ProductTxt2Img.values()[i];
@@ -117,8 +151,8 @@ public class PremiumProductsPage extends PremiumPage {
             buyLayout.setJustifyContentMode(JustifyContentMode.END);
             buyLayout.setAlignItems(Alignment.CENTER);
 
-            buyLayout.add(new Label(productPriceMap.get(product)));
-            buyLayout.add(generateBuyButton(product.getPriceId()));
+            buyLayout.add(new Label(productPriceMap.get(product.getPriceId())));
+            buyLayout.add(generateBuyButton(product.getPriceId(), "txt2img"));
             content.add(buyLayout);
 
             articles[i] = new Article(content);
@@ -126,7 +160,35 @@ public class PremiumProductsPage extends PremiumPage {
         return articles;
     }
 
-    private Component generateBuyButton(String priceId) {
+    private Article[] generatePremiumArticles(Map<String, String> productPriceMap) {
+        Article[] articles = new Article[ProductPremium.values().length];
+        for (int i = 0; i < ProductPremium.values().length; i++) {
+            ProductPremium product = ProductPremium.values()[i];
+
+            VerticalLayout content = new VerticalLayout();
+            content.setSpacing(false);
+            content.addClassNames("tier-card2");
+
+            Paragraph p = new Paragraph(getTranslation("premium.products." + product.name()));
+            p.getStyle().set("margin-top", "0");
+            content.add(p);
+
+            HorizontalLayout buyLayout = new HorizontalLayout();
+            buyLayout.setWidthFull();
+            buyLayout.setPadding(false);
+            buyLayout.setJustifyContentMode(JustifyContentMode.END);
+            buyLayout.setAlignItems(Alignment.CENTER);
+
+            buyLayout.add(new Label(productPriceMap.get(product.getPriceId())));
+            buyLayout.add(generateBuyButton(product.getPriceId(), "premium"));
+            content.add(buyLayout);
+
+            articles[i] = new Article(content);
+        }
+        return articles;
+    }
+
+    private Component generateBuyButton(String priceId, String type) {
         Button button;
         if (sessionData.isLoggedIn()) {
             button = new Button(getTranslation("premium.products.buy"));
@@ -138,7 +200,7 @@ public class PremiumProductsPage extends PremiumPage {
             DiscordUser discordUser = sessionData.getDiscordUser().orElse(null);
             if (discordUser != null) {
                 try {
-                    PaddleManager.openPopupBilling(priceId, discordUser, getLocale());
+                    PaddleManager.openPopupBilling(priceId, discordUser, getLocale(), type);
                 } catch (Exception ex) {
                     LOGGER.error("Exception", ex);
                     CustomNotification.showError(getTranslation("error"));

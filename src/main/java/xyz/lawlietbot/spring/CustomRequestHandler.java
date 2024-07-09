@@ -238,7 +238,7 @@ public class CustomRequestHandler implements RequestHandler {
         try (BufferedReader br = request.getReader()) {
             String body = br.lines().collect(Collectors.joining("\n"));
             if (PaddleManager.verifyBillingWebhookData(body, request.getHeader("Paddle-Signature"))) {
-                PaddleManager.registerTxt2img(new JSONObject(body));
+                PaddleManager.registerBilling(new JSONObject(body));
             } else {
                 response.setStatus(403);
             }

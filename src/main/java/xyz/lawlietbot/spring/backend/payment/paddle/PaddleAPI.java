@@ -3,6 +3,7 @@ package xyz.lawlietbot.spring.backend.payment.paddle;
 import okhttp3.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import xyz.lawlietbot.spring.backend.payment.ProductPremium;
 import xyz.lawlietbot.spring.backend.payment.ProductTxt2Img;
 import xyz.lawlietbot.spring.backend.payment.SubDuration;
 import xyz.lawlietbot.spring.backend.payment.SubLevel;
@@ -64,6 +65,12 @@ public class PaddleAPI {
 
         JSONArray itemsArray = new JSONArray();
         for (ProductTxt2Img product : ProductTxt2Img.values()) {
+            JSONObject itemJson = new JSONObject();
+            itemJson.put("price_id", product.getPriceId());
+            itemJson.put("quantity", 1);
+            itemsArray.put(itemJson);
+        }
+        for (ProductPremium product : ProductPremium.values()) {
             JSONObject itemJson = new JSONObject();
             itemJson.put("price_id", product.getPriceId());
             itemJson.put("quantity", 1);

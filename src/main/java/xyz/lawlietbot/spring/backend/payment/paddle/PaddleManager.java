@@ -97,7 +97,7 @@ public class PaddleManager {
 
             long productId = productJson.getLong("product_id");
             double price = productJson.getJSONObject("price").getDouble(includesVat ? "gross" : "net");
-            subscriptionPriceMap.put(productId,price);
+            subscriptionPriceMap.put(productId, price);
         }
 
         return new PaddleSubscriptionPrices(
@@ -107,7 +107,7 @@ public class PaddleManager {
         );
     }
 
-    public static Map<ProductTxt2Img, String> retrieveProductPrices(String customerIpAddress) {
+    public static Map<String, String> retrieveProductPrices(String customerIpAddress, String vatString) {
         customerIpAddress = Objects.requireNonNullElse(customerIpAddress, System.getenv("PADDLE_DEFAULT_IP"));
 
         JSONObject json;
@@ -118,13 +118,20 @@ public class PaddleManager {
         }
 
         JSONArray itemsJson = json.getJSONObject("data").getJSONObject("details").getJSONArray("line_items");
-        HashMap<ProductTxt2Img, String> productPriceMap = new HashMap<>();
+        HashMap<String, String> productPriceMap = new HashMap<>();
 
         for (int i = 0; i < itemsJson.length(); i++) {
             JSONObject itemJson = itemsJson.getJSONObject(i);
-            String priceId = itemJson.getJSONObject("price").getString("id");
-            String price = itemJson.getJSONObject("formatted_totals").getString("total");
-            productPriceMap.put(ProductTxt2Img.fromPriceId(priceId), price);
+            JSONObject priceJson = itemJson.getJSONObject("price");
+            String priceId = priceJson.getString("id");
+
+            String price;
+            if (priceJson.getString("tax_mode").equals("external")) {
+                price = itemJson.getJSONObject("formatted_totals").getString("subtotal") + vatString;
+            } else {
+                price = itemJson.getJSONObject("formatted_totals").getString("total");
+            }
+            productPriceMap.put(priceId, price);
         }
 
         return productPriceMap;
@@ -141,15 +148,16 @@ public class PaddleManager {
         );
     }
 
-    public static void openPopupBilling(String priceId, DiscordUser discordUser, Locale locale) {
-        UI.getCurrent().getPage().executeJs("openPaddleBilling($0, $1, $2, $3, $4, $5, $6)",
+    public static void openPopupBilling(String priceId, DiscordUser discordUser, Locale locale, String type) {
+        UI.getCurrent().getPage().executeJs("openPaddleBilling($0, $1, $2, $3, $4, $5, $6, $7)",
                 System.getenv("PADDLE_ENVIRONMENT"),
                 System.getenv("PADDLE_CLIENT_TOKEN"),
                 priceId,
                 locale.getLanguage(),
                 String.valueOf(discordUser.getId()),
                 discordUser.getUsername(),
-                discordUser.getUserAvatar()
+                discordUser.getUserAvatar(),
+                type
         );
     }
 
@@ -209,7 +217,7 @@ public class PaddleManager {
             JSONObject json = new JSONObject();
             json.put("user_id", discordId);
             json.put("title", ui != null ? ui.getTranslation("premium.usermessage.title") : null);
-            json.put("desc",  ui != null ? ui.getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE, ExternalLinks.LAWLIET_DEVELOPMENT_VOTES) : null);
+            json.put("desc", ui != null ? ui.getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE, ExternalLinks.LAWLIET_DEVELOPMENT_VOTES) : null);
             json.put("sub_id", subscriptionId);
             json.put("unlocks_server", PaddleManager.getSubLevelType(planId) == SubLevel.PRO);
             json.put("preset_guilds", passthroughJson.has("preset_guilds") ? passthroughJson.getJSONArray("preset_guilds") : new JSONArray());
@@ -239,7 +247,7 @@ public class PaddleManager {
         }
     }
 
-    public static void registerTxt2img(JSONObject json) {
+    public static void registerBilling(JSONObject json) {
         LOGGER.info("--- NEW PAYMENT RECEIVED ---\n{}", json);
 
         JSONObject data = json.getJSONObject("data");
@@ -251,40 +259,71 @@ public class PaddleManager {
         String transactionId = data.getString("id");
         CompletableFuture<Void> future = waitForCheckoutAsync(transactionId);
 
+        long userId = Long.parseLong(customData.getString("discordId"));
+        int quantity = itemData.getInt("quantity");
+        String priceId = priceData.getString("id");
+
         try {
-            long userId = Long.parseLong(customData.getString("discordId"));
-            int quantity = itemData.getInt("quantity");
-            int n = priceData.getJSONObject("custom_data").getInt("n") * quantity;
-
-            JSONObject requestJson = new JSONObject();
-            requestJson.put("user_id", userId);
-            requestJson.put("n", n);
-
-            JSONObject responseJson = SendEvent.sendToAnyCluster(EventOut.PADDLE_TXT2IMG, requestJson).join();
-            if (!responseJson.has("ok")) {
-                throw new RuntimeException("Paddle txt2img error");
+            if (ProductTxt2Img.fromPriceId(priceId) != null) {
+                registerTxt2Img(priceData, quantity, userId, detailsTotalData, customData);
+            } else {
+                registerPremiumCode(priceId, userId, detailsTotalData, customData, priceData, quantity);
             }
-
-            Currency currency = Currency.valueOf(detailsTotalData.getString("currency_code"));
-            int total = detailsTotalData.getInt("grand_total");
-            String priceString = NumberFormat.getCurrencyInstance(Locale.ENGLISH)
-                    .format((double) total / Math.pow(10, currency.getDecimalPlaces()))
-                    .replace("¤", currency.getSymbol());
-
-            WebhookNotifier.newSub(
-                    customData.getString("discordTag"),
-                    userId,
-                    customData.getString("discordAvatar"),
-                    priceData.getString("description"),
-                    quantity,
-                    priceString
-            );
-            LOGGER.info("Txt2img notification sent");
         } catch (Throwable e) {
-            LOGGER.error("Error in new Paddle Txt2img payment", e);
+            LOGGER.error("Error in new paddle billing payment", e);
         } finally {
             future.complete(null);
         }
+    }
+
+    private static void registerTxt2Img(JSONObject priceData, int quantity, long userId, JSONObject detailsTotalData, JSONObject customData) {
+        int n = priceData.getJSONObject("custom_data").getInt("n") * quantity;
+
+        JSONObject requestJson = new JSONObject();
+        requestJson.put("user_id", userId);
+        requestJson.put("n", n);
+
+        JSONObject responseJson = SendEvent.sendToAnyCluster(EventOut.PADDLE_TXT2IMG, requestJson).join();
+        if (!responseJson.has("ok")) {
+            throw new RuntimeException("Paddle txt2img error");
+        }
+
+        sendNotification(detailsTotalData, customData, userId, priceData, quantity);
+        LOGGER.info("Txt2img notification sent");
+    }
+
+    private static void registerPremiumCode(String priceId, long userId, JSONObject detailsTotalData, JSONObject customData, JSONObject priceData, int quantity) {
+        ProductPremium product = ProductPremium.fromPriceId(priceId);
+
+        JSONObject requestJson = new JSONObject();
+        requestJson.put("user_id", userId);
+        requestJson.put("plan", product.getPlan());
+        requestJson.put("days", product.getDays());
+
+        JSONObject responseJson = SendEvent.sendToAnyCluster(EventOut.PADDLE_PREMIUM_CODES, requestJson).join();
+        if (!responseJson.has("ok")) {
+            throw new RuntimeException("Paddle premium codes error");
+        }
+
+        sendNotification(detailsTotalData, customData, userId, priceData, quantity);
+        LOGGER.info("Premium code notification sent");
+    }
+
+    private static void sendNotification(JSONObject detailsTotalData, JSONObject customData, long userId, JSONObject priceData, int quantity) {
+        Currency currency = Currency.valueOf(detailsTotalData.getString("currency_code"));
+        int total = detailsTotalData.getInt("grand_total");
+        String priceString = NumberFormat.getCurrencyInstance(Locale.ENGLISH)
+                .format((double) total / Math.pow(10, currency.getDecimalPlaces()))
+                .replace("¤", currency.getSymbol());
+
+        WebhookNotifier.newSub(
+                customData.getString("discordTag"),
+                userId,
+                customData.getString("discordAvatar"),
+                priceData.getString("description"),
+                quantity,
+                priceString
+        );
     }
 
     private static void printParameterMap(Map<String, String[]> parameterMap) {

@@ -1,7 +1,5 @@
 package xyz.lawlietbot.spring.backend.payment;
 
-import java.util.NoSuchElementException;
-
 public enum ProductTxt2Img {
 
     IMAGES_50(50),
@@ -29,7 +27,7 @@ public enum ProductTxt2Img {
                 return value;
             }
         }
-        throw new NoSuchElementException("No product with priceId " + priceId + " found!");
+        return null;
     }
 
 }

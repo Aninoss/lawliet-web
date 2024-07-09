@@ -102,7 +102,7 @@ function openPaddle(environment, vendor, planId, quantity, locale, passthrough) 
     });
 }
 
-function openPaddleBilling(environment, clientToken, priceId, locale, discordId, discordTag, discordAvatar) {
+function openPaddleBilling(environment, clientToken, priceId, locale, discordId, discordTag, discordAvatar, type) {
     loadScript("https://cdn.paddle.com/paddle/v2/paddle.js", () => {
         if (environment === "sandbox") {
             Paddle.Environment.set(environment);
@@ -117,7 +117,7 @@ function openPaddleBilling(environment, clientToken, priceId, locale, discordId,
             eventCallback: function (eventData) {
                 if (eventData.name === "checkout.completed") {
                     const transactionId = eventData.data.transaction_id;
-                    window.location.href = "https://" + window.location.hostname + "/premium?paddle_billing=" + transactionId;
+                    window.location.href = "https://" + window.location.hostname + "/premium?paddle_billing=" + transactionId + "&type=" + type;
                 }
             }
         });
