@@ -299,6 +299,7 @@ public class PaddleManager {
         requestJson.put("user_id", userId);
         requestJson.put("plan", product.getPlan());
         requestJson.put("days", product.getDays());
+        requestJson.put("quantity", quantity);
 
         JSONObject responseJson = SendEvent.sendToAnyCluster(EventOut.PADDLE_PREMIUM_CODES, requestJson).join();
         if (!responseJson.has("ok")) {
