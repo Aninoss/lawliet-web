@@ -9,5 +9,6 @@ public interface ExternalLinks {
     String LAWLIET_PREMIUM_COMMANDS = "https://lawlietbot.xyz/commands?c=patreon_only";
     String LAWLIET_DEVELOPMENT_VOTES = "https://lawlietbot.xyz/developmentvotes";
     String LAWLIET_FEATURE_REQUESTS = "https://lawlietbot.xyz/featurerequests";
+    String LAWLIET_GIFT = "https://lawlietbot.xyz/gift/";
 
 }

@@ -9,16 +9,16 @@ import com.github.appreciated.layout.FlexibleGridLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Article;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.server.VaadinRequest;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.lawlietbot.spring.ExternalLinks;
 import xyz.lawlietbot.spring.backend.Redirector;
 import xyz.lawlietbot.spring.backend.payment.ProductPremium;
 import xyz.lawlietbot.spring.backend.payment.ProductTxt2Img;
@@ -26,6 +26,7 @@ import xyz.lawlietbot.spring.backend.payment.paddle.PaddleManager;
 import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.util.StringUtil;
+import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
@@ -81,6 +82,36 @@ public class PremiumProductsPage extends PremiumPage {
         Paragraph p = new Paragraph(getTranslation("premium.products.premium.desc"));
         mainLayout.add(p);
 
+        if (sessionData.isLoggedIn()) {
+            ConfirmationDialog dialog = new ConfirmationDialog();
+            add(dialog);
+
+            Button revealButton = new Button(getTranslation("premium.products.revealcodes"));
+            revealButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            revealButton.getStyle().set("margin-top", "0.5rem")
+                    .set("margin-bottom", "1rem");
+            revealButton.addClickListener(e -> {
+                JSONObject responseJson = SendEvent.sendToAnyCluster(EventOut.USER_PREMIUM_CODES, Map.of("user_id", sessionData.getDiscordUser().get().getId())).join();
+                JSONArray codesJson = responseJson.getJSONArray("codes");
+
+                if (codesJson.isEmpty()) {
+                    dialog.open(getTranslation("premium.products.nocodes"), () -> {});
+                } else {
+                    VerticalLayout linksLayout = new VerticalLayout();
+                    linksLayout.setPadding(false);
+                    linksLayout.setSpacing(false);
+                    for (int i = 0; i < codesJson.length(); i++) {
+                        String url = ExternalLinks.LAWLIET_GIFT + codesJson.getString(i);
+                        Anchor a = new Anchor(url, url);
+                        a.setTarget("_blank");
+                        linksLayout.add(a);
+                    }
+                    dialog.open(linksLayout, () -> {});
+                }
+            });
+            mainLayout.add(revealButton);
+        }
+
         FlexibleGridLayout gridLayout = new FlexibleGridLayout()
                 .withColumns(Repeat.RepeatMode.AUTO_FILL, new MinMax(new Length("270px"), new Flex(1)))
                 .withItems(generatePremiumArticles(productPriceMap))
@@ -132,34 +163,6 @@ public class PremiumProductsPage extends PremiumPage {
         return mainLayout;
     }
 
-    private Article[] generateTxt2ImgArticles(Map<String, String> productPriceMap) {
-        Article[] articles = new Article[ProductTxt2Img.values().length];
-        for (int i = 0; i < ProductTxt2Img.values().length; i++) {
-            ProductTxt2Img product = ProductTxt2Img.values()[i];
-
-            VerticalLayout content = new VerticalLayout();
-            content.setSpacing(false);
-            content.addClassNames("tier-card2");
-
-            Paragraph p = new Paragraph(getTranslation("premium.products.title", String.valueOf(product.getNumber())));
-            p.getStyle().set("margin-top", "0");
-            content.add(p);
-
-            HorizontalLayout buyLayout = new HorizontalLayout();
-            buyLayout.setWidthFull();
-            buyLayout.setPadding(false);
-            buyLayout.setJustifyContentMode(JustifyContentMode.END);
-            buyLayout.setAlignItems(Alignment.CENTER);
-
-            buyLayout.add(new Label(productPriceMap.get(product.getPriceId())));
-            buyLayout.add(generateBuyButton(product.getPriceId(), "txt2img"));
-            content.add(buyLayout);
-
-            articles[i] = new Article(content);
-        }
-        return articles;
-    }
-
     private Article[] generatePremiumArticles(Map<String, String> productPriceMap) {
         Article[] articles = new Article[ProductPremium.values().length];
         for (int i = 0; i < ProductPremium.values().length; i++) {
@@ -181,6 +184,34 @@ public class PremiumProductsPage extends PremiumPage {
 
             buyLayout.add(new Label(productPriceMap.get(product.getPriceId())));
             buyLayout.add(generateBuyButton(product.getPriceId(), "premium"));
+            content.add(buyLayout);
+
+            articles[i] = new Article(content);
+        }
+        return articles;
+    }
+
+    private Article[] generateTxt2ImgArticles(Map<String, String> productPriceMap) {
+        Article[] articles = new Article[ProductTxt2Img.values().length];
+        for (int i = 0; i < ProductTxt2Img.values().length; i++) {
+            ProductTxt2Img product = ProductTxt2Img.values()[i];
+
+            VerticalLayout content = new VerticalLayout();
+            content.setSpacing(false);
+            content.addClassNames("tier-card2");
+
+            Paragraph p = new Paragraph(getTranslation("premium.products.title", String.valueOf(product.getNumber())));
+            p.getStyle().set("margin-top", "0");
+            content.add(p);
+
+            HorizontalLayout buyLayout = new HorizontalLayout();
+            buyLayout.setWidthFull();
+            buyLayout.setPadding(false);
+            buyLayout.setJustifyContentMode(JustifyContentMode.END);
+            buyLayout.setAlignItems(Alignment.CENTER);
+
+            buyLayout.add(new Label(productPriceMap.get(product.getPriceId())));
+            buyLayout.add(generateBuyButton(product.getPriceId(), "txt2img"));
             content.add(buyLayout);
 
             articles[i] = new Article(content);

@@ -47,6 +47,7 @@ public class ConfirmationDialog extends Div {
                 .set("z-index", "8")
                 .set("border-radius", "5px")
                 .set("padding", "32px");
+        dialogLayout.getElement().addEventListener("click", ignore -> {}).addEventData("event.stopPropagation()");
         add(dialogLayout);
     }
 
