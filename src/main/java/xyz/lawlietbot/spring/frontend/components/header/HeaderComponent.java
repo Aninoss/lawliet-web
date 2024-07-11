@@ -45,10 +45,12 @@ public class HeaderComponent extends Header {
             if (sessionData.isLoggedIn()) {
                 DiscordUser discordUser = sessionData.getDiscordUser().get();
 
-                Image userIcon = new Image(discordUser.getUserAvatar(), "");
-                userIcon.setHeight("48px");
-                userIcon.addClassName(Styles.ROUND);
-                content.add(userIcon);
+                if (discordUser.hasAvatar()) {
+                    Image userIcon = new Image(discordUser.getUserAvatar(), "");
+                    userIcon.setHeight("48px");
+                    userIcon.addClassName(Styles.ROUND);
+                    content.add(userIcon);
+                }
 
                 VerticalLayout accountName = new VerticalLayout();
                 accountName.setSpacing(false);

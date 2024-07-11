@@ -301,7 +301,7 @@ public class PaddleManager {
         requestJson.put("days", product.getDays());
         requestJson.put("quantity", quantity);
 
-        JSONObject responseJson = SendEvent.sendToAnyCluster(EventOut.PADDLE_PREMIUM_CODES, requestJson).join();
+        JSONObject responseJson = SendEvent.send(EventOut.CREATE_PREMIUM_CODE, requestJson).join();
         if (!responseJson.has("ok")) {
             throw new RuntimeException("Paddle premium codes error");
         }

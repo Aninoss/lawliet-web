@@ -1,11 +1,12 @@
 package xyz.lawlietbot.spring.backend.userdata;
 
+import bell.oauth.discord.domain.Guild;
+import bell.oauth.discord.domain.User;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-import bell.oauth.discord.domain.Guild;
-import bell.oauth.discord.domain.User;
 
 public class DiscordUser {
 
@@ -31,6 +32,10 @@ public class DiscordUser {
 
     public String getUserAvatar() {
         return "https://cdn.discordapp.com/avatars/" + discordUser.getId() + "/" + discordUser.getAvatar() + ".png";
+    }
+
+    public boolean hasAvatar() {
+        return discordUser.getAvatar() != null;
     }
 
     public boolean hasGuilds() {

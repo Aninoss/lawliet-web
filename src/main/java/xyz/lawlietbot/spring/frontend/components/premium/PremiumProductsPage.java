@@ -91,7 +91,7 @@ public class PremiumProductsPage extends PremiumPage {
             revealButton.getStyle().set("margin-top", "0.5rem")
                     .set("margin-bottom", "1rem");
             revealButton.addClickListener(e -> {
-                JSONObject responseJson = SendEvent.sendToAnyCluster(EventOut.USER_PREMIUM_CODES, Map.of("user_id", sessionData.getDiscordUser().get().getId())).join();
+                JSONObject responseJson = SendEvent.send(EventOut.BOUGHT_PREMIUM_CODES, Map.of("user_id", sessionData.getDiscordUser().get().getId())).join();
                 JSONArray codesJson = responseJson.getJSONArray("codes");
 
                 if (codesJson.isEmpty()) {
