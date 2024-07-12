@@ -7,11 +7,11 @@ public enum ProductPremium {
     BASIC_YEAR("BASIC", 365),
     MONTH_YEAR("PRO", 365);
 
-    private final String plan;
+    private final String level;
     private final int days;
 
-    ProductPremium(String plan, int days) {
-        this.plan = plan;
+    ProductPremium(String level, int days) {
+        this.level = level;
         this.days = days;
     }
 
@@ -19,8 +19,8 @@ public enum ProductPremium {
         return System.getenv("PADDLE_PREMIUM_IDS").split(",")[ordinal()];
     }
 
-    public String getPlan() {
-        return plan;
+    public String getLevel() {
+        return level;
     }
 
     public int getDays() {

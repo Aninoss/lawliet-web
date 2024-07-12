@@ -1,14 +1,17 @@
 package xyz.lawlietbot.spring.syncserver;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+import xyz.lawlietbot.spring.backend.payment.PremiumCode;
+import xyz.lawlietbot.spring.backend.payment.Subscription;
+
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import xyz.lawlietbot.spring.backend.payment.Subscription;
 
 public class SyncUtil {
 
@@ -41,6 +44,23 @@ public class SyncUtil {
                         ));
                     }
                     return Collections.unmodifiableList(subscriptions);
+                });
+    }
+
+    public static CompletableFuture<List<PremiumCode>> retrieveRedeemedPremiumCodes(long userId) {
+        return SendEvent.send(EventOut.REDEEMED_PREMIUM_CODES, Map.of("user_id", userId))
+                .thenApply(r -> {
+                    JSONArray codesJson = r.getJSONArray("codes");
+                    ArrayList<PremiumCode> premiumCodes = new ArrayList<>();
+                    for (int i = 0; i < codesJson.length(); i++) {
+                        JSONObject code = codesJson.getJSONObject(i);
+                        premiumCodes.add(new PremiumCode(
+                                code.getString("code"),
+                                code.getString("level"),
+                                Instant.parse(code.getString("expiration"))
+                        ));
+                    }
+                    return Collections.unmodifiableList(premiumCodes);
                 });
     }
 

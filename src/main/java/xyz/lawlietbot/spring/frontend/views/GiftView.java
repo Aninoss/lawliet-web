@@ -61,11 +61,11 @@ public class GiftView extends PageLayout implements HasUrlParameter<String> {
 
         JSONObject responseJson = SendEvent.send(EventOut.GET_PREMIUM_CODE, Map.of("code", parameter)).join();
         if (responseJson.has("found")) {
-            String plan = responseJson.getString("plan");
+            String level = responseJson.getString("level");
             int durationDays = responseJson.getInt("durationDays");
 
 
-            String contentString = getTranslation("gift.content", getTranslation("premium.tier." + plan), StringUtil.numToString(durationDays));
+            String contentString = getTranslation("gift.content", getTranslation("premium.tier." + level), StringUtil.numToString(durationDays));
             SpanWithLinebreaks content = new SpanWithLinebreaks(contentString);
             mainContent.add(content);
 
@@ -89,7 +89,7 @@ public class GiftView extends PageLayout implements HasUrlParameter<String> {
                     JSONObject redeemResponseJson = SendEvent.send(EventOut.REDEEM_PREMIUM_CODE, params).join();
 
                     if (redeemResponseJson.has("ok")) {
-                        if (plan.equals("PRO")) {
+                        if (level.equals("PRO")) {
                             dialog.open(getTranslation("gift.sucessful.PRO"), () -> {
                                 QueryParameters queryParameters = new QueryParameters(Map.of("tab", List.of("2")));
                                 UI.getCurrent().navigate(FeatureRequestsView.getRouteStatic(PremiumView.class), queryParameters);

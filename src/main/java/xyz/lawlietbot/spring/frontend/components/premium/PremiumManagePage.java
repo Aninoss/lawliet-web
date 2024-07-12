@@ -5,12 +5,14 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.QueryParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.lawlietbot.spring.backend.Redirector;
+import xyz.lawlietbot.spring.backend.payment.PremiumCode;
 import xyz.lawlietbot.spring.backend.payment.Subscription;
 import xyz.lawlietbot.spring.backend.payment.paddle.PaddleAPI;
 import xyz.lawlietbot.spring.backend.payment.paddle.PaddleManager;
@@ -29,6 +31,7 @@ public class PremiumManagePage extends PremiumPage {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PremiumManagePage.class);
 
+    private final Div subscriptionsGridLayout = new Div();
     private final SessionData sessionData;
     private final ConfirmationDialog dialog;
     private final PremiumUnlockPage premiumUnlockPage;
@@ -37,22 +40,26 @@ public class PremiumManagePage extends PremiumPage {
         this.sessionData = sessionData;
         this.dialog = dialog;
         this.premiumUnlockPage = premiumUnlockPage;
-
         setPadding(true);
+
+        subscriptionsGridLayout.setWidthFull();
+        add(new H2(getTranslation("manage.title.subscriptions")), subscriptionsGridLayout);
     }
 
     @Override
     public void build() {
-        sessionData.getDiscordUser().ifPresent(user -> updateMainContent(user, 0));
+        sessionData.getDiscordUser().ifPresent(user -> {
+            updateSubscriptionsContent(user, 0);
+            add(new H2(getTranslation("manage.title.redeemedcodes")), generateCodesGrid(user.getId()));
+        });
     }
 
-    private void updateMainContent(DiscordUser user, long reloadSubId) {
-        removeAll();
-        Component grid = generateGrid(user, reloadSubId);
-        add(grid);
+    private void updateSubscriptionsContent(DiscordUser user, long reloadSubId) {
+        subscriptionsGridLayout.removeAll();
+        subscriptionsGridLayout.add(generateSubscriptionsGrid(user, reloadSubId));
     }
 
-    private Component generateGrid(DiscordUser user, long reloadSubId) {
+    private Component generateSubscriptionsGrid(DiscordUser user, long reloadSubId) {
         List<Subscription> subscriptionList = SyncUtil.retrievePaddleSubscriptions(user.getId(), reloadSubId).join();
         if (!subscriptionList.isEmpty()) {
             Grid<Subscription> grid = new Grid<>(Subscription.class, false);
@@ -80,6 +87,33 @@ public class PremiumManagePage extends PremiumPage {
             return grid;
         } else {
             Div textDiv = new Div(new Text(getTranslation("manage.nosubs")));
+            textDiv.setWidthFull();
+            textDiv.getStyle().set("text-align", "center");
+            return textDiv;
+        }
+    }
+
+    private Component generateCodesGrid(long userId) {
+        List<PremiumCode> premiumCodes = SyncUtil.retrieveRedeemedPremiumCodes(userId).join();
+
+        if (!premiumCodes.isEmpty()) {
+            Grid<PremiumCode> grid = new Grid<>(PremiumCode.class, false);
+            grid.setHeightByRows(true);
+            grid.setItems(premiumCodes);
+            grid.setSelectionMode(Grid.SelectionMode.NONE);
+
+            grid.addColumn(PremiumCode::getCode)
+                    .setHeader(getTranslation("manage.grid.header.code"))
+                    .setAutoWidth(true);
+            grid.addColumn(code -> getTranslation("premium.tier." + code.getLevel()))
+                    .setHeader(getTranslation("manage.grid.header.level"))
+                    .setAutoWidth(true);
+            grid.addColumn(code -> code.getExpiration().toString().split("T")[0])
+                    .setHeader(getTranslation("manage.grid.header.expires"))
+                    .setAutoWidth(true);
+            return grid;
+        } else {
+            Div textDiv = new Div(new Text(getTranslation("manage.nocodes")));
             textDiv.setWidthFull();
             textDiv.getStyle().set("text-align", "center");
             return textDiv;
@@ -135,7 +169,7 @@ public class PremiumManagePage extends PremiumPage {
                             LOGGER.error("Exception on sub update", ioException);
                         }
                         if (success) {
-                            updateMainContent(user, sub.getSubId());
+                            updateSubscriptionsContent(user, sub.getSubId());
                             CustomNotification.showSuccess(getTranslation("manage.success"));
                             if (navigateToFeedbackPage) {
                                 QueryParameters queryParameters = new QueryParameters(Map.of("id", List.of(SubscriptionFeedbackIdManager.generateId())));

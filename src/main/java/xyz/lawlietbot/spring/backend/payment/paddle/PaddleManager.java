@@ -242,6 +242,7 @@ public class PaddleManager {
             LOGGER.info("Subscription notification sent");
         } catch (Throwable e) {
             LOGGER.error("Error in new Paddle sub", e);
+            throw e;
         } finally {
             future.complete(null);
         }
@@ -271,6 +272,7 @@ public class PaddleManager {
             }
         } catch (Throwable e) {
             LOGGER.error("Error in new paddle billing payment", e);
+            throw e;
         } finally {
             future.complete(null);
         }
@@ -297,7 +299,7 @@ public class PaddleManager {
 
         JSONObject requestJson = new JSONObject();
         requestJson.put("user_id", userId);
-        requestJson.put("plan", product.getPlan());
+        requestJson.put("level", product.getLevel());
         requestJson.put("days", product.getDays());
         requestJson.put("quantity", quantity);
 
