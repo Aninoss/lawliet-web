@@ -81,7 +81,7 @@ public class SubscriptionFeedbackView extends PageLayout implements HasUrlParame
     }
 
     private void navigateBack() {
-        QueryParameters queryParameters = new QueryParameters(Map.of("tab", List.of("2")));
+        QueryParameters queryParameters = new QueryParameters(Map.of("tab", List.of("3")));
         UI.getCurrent().navigate("/premium", queryParameters);
     }
 
