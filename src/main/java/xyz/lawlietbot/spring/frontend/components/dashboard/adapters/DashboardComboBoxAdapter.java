@@ -110,7 +110,7 @@ public class DashboardComboBoxAdapter extends FlexLayout implements DashboardAda
                     this.dashboardComboBox.triggerSet(e.getValue().getId());
                 } else if (dashboardComboBox.getCanBeEmpty()) {
                     this.dashboardComboBox.triggerSet(null);
-                } else {
+                } else if (e.isFromClient()) {
                     comboBox.setValue(e.getOldValue());
                 }
             });
