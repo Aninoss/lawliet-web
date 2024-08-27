@@ -76,10 +76,10 @@ public class BotProsPanelsLayout extends VerticalLayout {
                 new BotProPanelInfo("autoroles", true, VaadinIcon.AUTOMATION.create()),
                 new BotProPanelInfo("welcome", true, VaadinIcon.HAND.create()),
                 new BotProPanelInfo("tickets", true, VaadinIcon.TICKET.create()),
-                new BotProPanelInfo("sugg", true, VaadinIcon.COMMENT_ELLIPSIS_O.create()),
+                new BotProPanelInfo("birthday", true, VaadinIcon.STAR.create()),
+                new BotProPanelInfo("sugg", true, VaadinIcon.COMMENT_ELLIPSIS.create()),
                 new BotProPanelInfo("autochannel", true, VaadinIcon.VOLUME.create()),
                 new BotProPanelInfo("roleplay", true, VaadinIcon.GROUP.create()),
-                new BotProPanelInfo("vote", true, VaadinIcon.BULLETS.create()),
                 new BotProPanelInfo("reminders", true, VaadinIcon.CLOCK.create()),
                 new BotProPanelInfo("mcdisplays", false, VaadinIcon.TRENDING_UP.create()),
                 new BotProPanelInfo("allfeatures", false, VaadinIcon.LINK.create(), allFeaturesButton)
