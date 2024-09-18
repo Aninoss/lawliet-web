@@ -32,7 +32,6 @@ public class DashboardGridAdapter extends FlexLayout implements DashboardAdapter
             return;
         }
 
-        grid.setHeightByRows(dashboardGrid.getRows().size() <= 10);
         grid.setItems(dashboardGrid.getRows());
 
         removeAll();

@@ -4,20 +4,18 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
-import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.server.InitialPageSettings;
-import com.vaadin.flow.server.PageConfigurator;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
+import jakarta.servlet.http.Cookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import xyz.lawlietbot.spring.*;
+import xyz.lawlietbot.spring.LoginAccess;
+import xyz.lawlietbot.spring.NavBarSolid;
+import xyz.lawlietbot.spring.NoLiteAccess;
+import xyz.lawlietbot.spring.SetDivStretchBackground;
 import xyz.lawlietbot.spring.backend.Redirector;
-import xyz.lawlietbot.spring.backend.language.PageTitleGen;
 import xyz.lawlietbot.spring.backend.payment.Subscription;
 import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
@@ -33,25 +31,20 @@ import xyz.lawlietbot.spring.frontend.views.ExceptionView;
 import xyz.lawlietbot.spring.frontend.views.IEView;
 import xyz.lawlietbot.spring.syncserver.SyncUtil;
 
-import javax.servlet.http.Cookie;
 import java.util.Comparator;
 import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 @CssImport("./styles/styles.css")
 @CssImport("./styles/styles-reversed.css")
 @CssImport("./styles/bootstrap.css")
 @CssImport("./styles/main.css")
-@Theme(value = Lumo.class, variant = Lumo.DARK)
-@BodySize(width = "100%", height = "100%")
-public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterObserver, PageConfigurator, HasErrorParameter<Exception>, BeforeLeaveObserver {
+public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterObserver, HasErrorParameter<Exception>, BeforeLeaveObserver {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(MainLayout.class);
 
     private final SessionData sessionData;
     private final UIData uiData;
-    private String target;
     private final Div divStretch = new Div();
     private HeaderComponent headerComponent;
 
@@ -125,7 +118,6 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
             if (checkLiteModeAccess(event)) {
                 return;
             }
-            target = PageLayout.getRouteStatic(c);
             if (checkBrowserIE(event)) {
                 return;
             }
@@ -133,23 +125,6 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
             checkLoginStatusChanged(event);
             headerComponent.setNavBarSolid(event.getNavigationTarget().isAnnotationPresent(NavBarSolid.class));
         }
-    }
-
-    @Override
-    public void configurePage(InitialPageSettings settings) {
-        settings.addMetaTag("og:type", "website");
-        settings.addMetaTag("og:site_name", getTranslation("bot.name"));
-        settings.addMetaTag("og:title", PageTitleGen.getPageTitle(target));
-        settings.addMetaTag("og:description", getTranslation("bot.desc.nonsfw"));
-        settings.addMetaTag("og:image", "http://lawlietbot.xyz/styles/img/bot_icon.webp");
-
-        //Favicons
-        settings.addLink("/apple-touch-icon.png", Map.of(
-                "rel", "apple-touch-icon",
-                "sizes", "180x180"
-        ));
-        settings.addLink("manifest", "/site.webmanifest");
-        settings.addMetaTag("theme-color", "#ffffff");
     }
 
     @Override

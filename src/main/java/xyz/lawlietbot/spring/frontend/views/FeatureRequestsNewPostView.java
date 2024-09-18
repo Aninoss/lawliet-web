@@ -1,7 +1,5 @@
 package xyz.lawlietbot.spring.frontend.views;
 
-import java.util.Arrays;
-import java.util.concurrent.ExecutionException;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -18,6 +16,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RoutePrefix;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +34,9 @@ import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 import xyz.lawlietbot.spring.syncserver.SyncUtil;
+
+import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
 
 @Route(value = "new", layout = MainLayout.class)
 @RoutePrefix("featurerequests")
@@ -111,7 +113,7 @@ public class FeatureRequestsNewPostView extends PageLayout {
                     SendEvent.send(EventOut.FR_POST, jsonObject).get();
                     CustomNotification.showSuccess(getTranslation("fr.new.success"));
                     exit();
-                } catch (InterruptedException | ExecutionException e) {
+                } catch (InterruptedException | ExecutionException | JSONException e) {
                     CustomNotification.showError(getTranslation("err.exception.des"));
                     LOGGER.error("Error on request submit", e);
                 }

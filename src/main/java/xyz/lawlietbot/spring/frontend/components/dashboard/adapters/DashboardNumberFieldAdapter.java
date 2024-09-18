@@ -19,7 +19,7 @@ public class DashboardNumberFieldAdapter extends FlexLayout implements Dashboard
         setFlexDirection(FlexDirection.ROW);
 
         numberField.getStyle().set("margin-top", "-16px");
-        numberField.setHasControls(true);
+        numberField.setStepButtonsVisible(true);
         numberField.setStep(1.0);
         numberField.setLabel(dashboardNumberField.getLabel());
         numberField.setReadOnly(dashboardNumberField.getEditButton());

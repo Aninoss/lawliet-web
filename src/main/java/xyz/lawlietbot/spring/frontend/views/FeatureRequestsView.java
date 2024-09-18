@@ -4,6 +4,7 @@ import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import xyz.lawlietbot.spring.NoLiteAccess;
@@ -44,7 +45,7 @@ public class FeatureRequestsView extends PageLayout implements HasUrlParameter<S
             new FeatureRequestSortByTitle()
     };
 
-    public FeatureRequestsView(@Autowired SessionData sessionData, @Autowired UIData uiData) throws ExecutionException, InterruptedException {
+    public FeatureRequestsView(@Autowired SessionData sessionData, @Autowired UIData uiData) throws ExecutionException, InterruptedException, JSONException {
         super(sessionData, uiData);
         getStyle().set("margin-bottom", "48px");
 

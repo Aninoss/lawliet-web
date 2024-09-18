@@ -20,7 +20,7 @@ public class DashboardFloatingNumberFieldAdapter extends FlexLayout implements D
         setFlexDirection(FlexDirection.ROW);
 
         numberField.getStyle().set("margin-top", "-16px");
-        numberField.setHasControls(true);
+        numberField.setStepButtonsVisible(true);
         numberField.setStep(0.01);
         numberField.setLabel(dashboardFloatingNumberField.getLabel());
         numberField.setReadOnly(dashboardFloatingNumberField.getEditButton());

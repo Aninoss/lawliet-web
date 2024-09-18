@@ -1,14 +1,16 @@
 package xyz.lawlietbot.spring.backend.featurerequests;
 
-import java.time.LocalDate;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
+
+import java.time.LocalDate;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public class FREntry {
 
@@ -66,17 +68,17 @@ public class FREntry {
 
     public boolean boost(long userId) {
         if (boosts != null && recentBoosts != null && frDynamicBean.getBoostsRemaining() > 0) {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("entry_id", getId());
-            jsonObject.put("user_id", userId);
-            CompletableFuture<JSONObject> responseJsonFuture = SendEvent.send(EventOut.FR_BOOST, jsonObject);
             try {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("entry_id", getId());
+                jsonObject.put("user_id", userId);
+                CompletableFuture<JSONObject> responseJsonFuture = SendEvent.send(EventOut.FR_BOOST, jsonObject);
                 if (checkBoost(responseJsonFuture.get())) {
                     boosts++;
                     recentBoosts++;
                     return true;
                 }
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (InterruptedException | ExecutionException | JSONException e) {
                 LOGGER.error("Error when submitting boost", e);
             }
         }
@@ -89,11 +91,15 @@ public class FREntry {
     }
 
     private boolean checkBoost(JSONObject responseJson) {
-        int boostsTotal = responseJson.getInt("boosts_total");
-        int boostsRemaining = responseJson.getInt("boosts_remaining");
-        frDynamicBean.update(boostsRemaining, boostsTotal);
+        try {
+            int boostsTotal = responseJson.getInt("boosts_total");
+            int boostsRemaining = responseJson.getInt("boosts_remaining");
+            frDynamicBean.update(boostsRemaining, boostsTotal);
 
-        return responseJson.getBoolean("success");
+            return responseJson.getBoolean("success");
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

@@ -1,16 +1,16 @@
 package xyz.lawlietbot.spring.frontend.components.home.botpros;
 
-import com.github.appreciated.css.grid.GridLayoutComponent;
-import com.github.appreciated.css.grid.sizes.Flex;
-import com.github.appreciated.css.grid.sizes.Length;
-import com.github.appreciated.css.grid.sizes.MinMax;
-import com.github.appreciated.css.grid.sizes.Repeat;
-import com.github.appreciated.layout.FlexibleGridLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Article;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import org.vaadin.addons.componentfactory.css.grid.GridLayoutComponent;
+import org.vaadin.addons.componentfactory.css.grid.sizes.Flex;
+import org.vaadin.addons.componentfactory.css.grid.sizes.Length;
+import org.vaadin.addons.componentfactory.css.grid.sizes.MinMax;
+import org.vaadin.addons.componentfactory.css.grid.sizes.Repeat;
+import org.vaadin.addons.componentfactory.layout.FlexibleGridLayout;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.frontend.views.CommandsView;
 

@@ -1,17 +1,26 @@
 package xyz.lawlietbot.spring;
 
 import com.stripe.Stripe;
+import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.component.page.BodySize;
+import com.vaadin.flow.server.AppShellSettings;
+import com.vaadin.flow.theme.Theme;
+import com.vaadin.flow.theme.lumo.Lumo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+
+import java.util.Arrays;
+import java.util.Map;
 
 /**
  * The entry point of the Spring Boot application.
  */
 @SpringBootApplication
-public class Application extends SpringBootServletInitializer {
+@Theme(themeClass = Lumo.class, variant = Lumo.DARK)
+@BodySize(width = "100%", height = "100%")
+public class Application implements AppShellConfigurator {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
@@ -20,6 +29,41 @@ public class Application extends SpringBootServletInitializer {
         SpringApplication.run(Application.class, args);
         LOGGER.info("###########################");
         Console.getInstance().start();
+    }
+
+    @Override
+    public void configurePage(AppShellSettings settings) {
+        TranslationProvider translationProvider = new TranslationProvider();
+
+        String target = settings.getRequest().getPathInfo().substring(1);
+        if (target.contains("/")) {
+            target = Arrays.stream(target.split("/"))
+                    .map(subTarget -> subTarget.replaceAll("[^a-zA-Z].*", ""))
+                    .filter(subTarget -> translationProvider.keyExists("category." + subTarget, settings.getRequest().getLocale()))
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        String pageTitle;
+        if (translationProvider.keyExists("category." + target, settings.getRequest().getLocale())) {
+            pageTitle = new TranslationProvider().getTranslation("category." + target, settings.getRequest().getLocale());
+        } else {
+            pageTitle = new TranslationProvider().getTranslation("category.notfound", settings.getRequest().getLocale());
+        }
+
+        settings.addMetaTag("og:type", "website");
+        settings.addMetaTag("og:site_name", new TranslationProvider().getTranslation("bot.name", settings.getRequest().getLocale()));
+        settings.addMetaTag("og:title", new TranslationProvider().getTranslation("pagetitle", settings.getRequest().getLocale(), pageTitle));
+        settings.addMetaTag("og:description", new TranslationProvider().getTranslation("bot.desc.nonsfw", settings.getRequest().getLocale()));
+        settings.addMetaTag("og:image", "http://lawlietbot.xyz/styles/img/bot_icon.webp");
+
+        //Favicons
+        settings.addLink("/apple-touch-icon.png", Map.of(
+                "rel", "apple-touch-icon",
+                "sizes", "180x180"
+        ));
+        settings.addLink("manifest", "/site.webmanifest");
+        settings.addMetaTag("theme-color", "#ffffff");
     }
 
 }

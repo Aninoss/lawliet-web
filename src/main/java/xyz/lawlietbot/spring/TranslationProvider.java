@@ -28,7 +28,7 @@ public class TranslationProvider implements I18NProvider {
 
     private static final LoadingCache<Locale, ResourceBundle> bundleCache = CacheBuilder
             .newBuilder().expireAfterWrite(1, TimeUnit.DAYS)
-            .build(new CacheLoader<Locale, ResourceBundle>() {
+            .build(new CacheLoader<>() {
                 @Override
                 public ResourceBundle load(final Locale key) throws Exception {
                     return initializeBundle(key);
@@ -49,7 +49,6 @@ public class TranslationProvider implements I18NProvider {
         }
 
         final ResourceBundle bundle = bundleCache.getUnchecked(locale);
-        if (bundle == null) return "!" + key + "!";
 
         String value;
         try {
@@ -70,6 +69,20 @@ public class TranslationProvider implements I18NProvider {
             value = MessageFormat.format(value, params);
         }
         return value;
+    }
+
+    public boolean keyExists(String key, Locale locale) {
+        if (key == null) {
+            return false;
+        }
+
+        final ResourceBundle bundle = bundleCache.getUnchecked(locale);
+        try {
+            String value = bundle.getString(key);
+            return !value.isEmpty();
+        } catch (final MissingResourceException e) {
+            return false;
+        }
     }
 
     private static ResourceBundle initializeBundle(final Locale locale) {

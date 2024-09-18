@@ -1,6 +1,5 @@
 package xyz.lawlietbot.spring.frontend.components.featurerequests;
 
-import java.util.concurrent.ExecutionException;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -24,6 +23,8 @@ import xyz.lawlietbot.spring.frontend.components.Card;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.frontend.views.FeatureRequestsNewPostView;
 import xyz.lawlietbot.spring.syncserver.SyncUtil;
+
+import java.util.concurrent.ExecutionException;
 
 public class FeatureRequestUserHeader extends Card {
 
@@ -113,7 +114,7 @@ public class FeatureRequestUserHeader extends Card {
         for(int i = 0; i < frDynamicBean.getBoostsTotal(); i++) {
             Icon icon = VaadinIcon.FIRE.create();
             if (i < frDynamicBean.getBoostsRemaining())
-                icon.setColor("var(--lumo-error-text-color)");
+                icon.setColor("var(--error-color)");
             else
                 icon.setColor("var(--lumo-disabled-text-color)");
             icon.getStyle().set("margin-left", "8px");

@@ -3,12 +3,13 @@ package xyz.lawlietbot.spring.backend.userdata;
 import bell.oauth.discord.domain.Guild;
 import bell.oauth.discord.domain.User;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DiscordUser {
+public class DiscordUser implements Serializable {
 
     private final User discordUser;
     private final List<Guild> guilds;

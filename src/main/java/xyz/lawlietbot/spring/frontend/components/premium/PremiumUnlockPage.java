@@ -9,6 +9,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,12 +64,16 @@ public class PremiumUnlockPage extends PremiumPage {
                 UserPremium userPremium = SendEvent.send(EventOut.PREMIUM, Map.of("user_id", discordUser.getId()))
                         .thenApply(jsonResponse -> {
                             ArrayList<Long> slots = new ArrayList<>();
-                            JSONArray jsonSlots = jsonResponse.getJSONArray("slots");
-                            for (int i = 0; i < jsonSlots.length(); i++) {
-                                slots.add(jsonSlots.getLong(i));
-                            }
+                            try {
+                                JSONArray jsonSlots = jsonResponse.getJSONArray("slots");
+                                for (int i = 0; i < jsonSlots.length(); i++) {
+                                    slots.add(jsonSlots.getLong(i));
+                                }
 
-                            return new UserPremium(discordUser.getId(), slots);
+                                return new UserPremium(discordUser.getId(), slots);
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
+                            }
                         })
                         .get(5, TimeUnit.SECONDS);
                 this.userPremium = userPremium;
@@ -264,7 +269,13 @@ public class PremiumUnlockPage extends PremiumPage {
             json.put("guild_id", guildId);
 
             boolean success = SendEvent.send(EventOut.PREMIUM_MODIFY, json)
-                    .thenApply(r -> r.getBoolean("success"))
+                    .thenApply(r -> {
+                        try {
+                            return r.getBoolean("success");
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
                     .get();
             if (success) {
                 if (guildId != 0) {

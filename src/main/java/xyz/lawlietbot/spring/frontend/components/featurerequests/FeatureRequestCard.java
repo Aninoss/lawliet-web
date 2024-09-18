@@ -1,7 +1,5 @@
 package xyz.lawlietbot.spring.frontend.components.featurerequests;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
@@ -18,9 +16,12 @@ import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.backend.util.StringUtil;
 import xyz.lawlietbot.spring.frontend.Styles;
-import xyz.lawlietbot.spring.frontend.components.LineBreak;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
+import xyz.lawlietbot.spring.frontend.components.LineBreak;
+
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 public class FeatureRequestCard extends Div {
 
@@ -136,7 +137,7 @@ public class FeatureRequestCard extends Div {
             notPublicText.getStyle().set("color", "var(--lumo-disabled-text-color)");
         } else {
             notPublicText = new Div(new Text(getTranslation("fr.notpublic.rejected")));
-            notPublicText.getStyle().set("color", "var(--lumo-error-color)");
+            notPublicText.getStyle().set("color", "var(--lumo-error-text-color)");
         }
         notPublicText.setWidthFull();
         notPublicText.addClassName(Styles.CENTER_TEXT);

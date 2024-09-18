@@ -3,6 +3,7 @@ package xyz.lawlietbot.spring.frontend.components.dashboard.adapters;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
@@ -13,8 +14,8 @@ import dashboard.DashboardComponent;
 import dashboard.component.DashboardComboBox;
 import dashboard.data.DiscordEntity;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
-import org.vaadin.gatanaso.MultiselectComboBox;
 import xyz.lawlietbot.spring.frontend.components.dashboard.DashboardAdapter;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
@@ -24,7 +25,7 @@ import java.util.*;
 public class DashboardComboBoxAdapter extends FlexLayout implements DashboardAdapter<DashboardComboBox> {
 
     private DashboardComboBox dashboardComboBox;
-    private MultiselectComboBox<DiscordEntity> multiselectComboBox;
+    private MultiSelectComboBox<DiscordEntity> multiselectComboBox;
     private Div iconDiv;
     private ComboBox<DiscordEntity> comboBox;
 
@@ -33,15 +34,15 @@ public class DashboardComboBoxAdapter extends FlexLayout implements DashboardAda
         setAlignItems(Alignment.END);
 
         if (dashboardComboBox.getMax() > 1) {
-            multiselectComboBox = new MultiselectComboBox<>();
+            multiselectComboBox = new MultiSelectComboBox<>();
             multiselectComboBox.setWidthFull();
             multiselectComboBox.getStyle().set("padding-top", "0");
             multiselectComboBox.setLabel(dashboardComboBox.getLabel());
             multiselectComboBox.setItemLabelGenerator(DiscordEntity::getName);
             multiselectComboBox.setRenderer(new ComponentRenderer<>(discordEntity -> new Text(discordEntity.getName())));
-            multiselectComboBox.setAllowCustomValues(dashboardComboBox.getAllowCustomValues());
+            multiselectComboBox.setAllowCustomValue(dashboardComboBox.getAllowCustomValues());
             if (dashboardComboBox.getDataType() != DashboardComboBox.DataType.CUSTOM) {
-                multiselectComboBox.setDataProvider(generateDataProvider(guildId, userId, dashboardComboBox));
+                multiselectComboBox.setDataProvider(generateDataProvider(guildId, userId, dashboardComboBox), str -> str);
             }
             multiselectComboBox.addValueChangeListener(e -> {
                 if (e.getValue().size() > e.getOldValue().size()) {
@@ -59,7 +60,7 @@ public class DashboardComboBoxAdapter extends FlexLayout implements DashboardAda
                 }
             });
             if (dashboardComboBox.getAllowCustomValues()) {
-                multiselectComboBox.addCustomValuesSetListener(e -> {
+                multiselectComboBox.addCustomValueSetListener(e -> {
                     if (multiselectComboBox.getSelectedItems().size() < dashboardComboBox.getMax()) {
                         multiselectComboBox.select(new DiscordEntity(e.getDetail(), e.getDetail()));
                     }
@@ -97,7 +98,7 @@ public class DashboardComboBoxAdapter extends FlexLayout implements DashboardAda
             }));
             comboBox.setAllowCustomValue(dashboardComboBox.getAllowCustomValues());
             if (dashboardComboBox.getDataType() != DashboardComboBox.DataType.CUSTOM) {
-                comboBox.setDataProvider(generateDataProvider(guildId, userId, dashboardComboBox));
+                comboBox.setDataProvider(generateDataProvider(guildId, userId, dashboardComboBox), str -> str);
             }
             comboBox.addValueChangeListener(e -> {
                 iconDiv.removeAll();
@@ -123,28 +124,46 @@ public class DashboardComboBoxAdapter extends FlexLayout implements DashboardAda
     private DataProvider<DiscordEntity, String> generateDataProvider(long guildId, long userId, DashboardComboBox dashboardComboBox) {
         return DataProvider.fromFilteringCallbacks(query -> {
             JSONObject json = new JSONObject();
-            json.put("type", dashboardComboBox.getDataType());
-            json.put("user_id", userId);
-            json.put("offset", query.getOffset());
-            json.put("limit", query.getLimit());
-            json.put("filter_text", query.getFilter().orElse(""));
-            return SendEvent.sendToGuild(EventOut.DASH_LIST_DISCORD_ENTITIES, json, guildId)
-                    .thenApply(r -> {
-                        ArrayList<DiscordEntity> discordEntities = new ArrayList<>();
-                        JSONArray entitiesJson = r.getJSONArray("entities");
-                        for (int i = 0; i < entitiesJson.length(); i++) {
-                            JSONObject entityJson = entitiesJson.getJSONObject(i);
-                            discordEntities.add(DiscordEntity.fromJson(entityJson));
-                        }
-                        return Collections.unmodifiableList(discordEntities);
-                    }).join().stream();
+            try {
+                json.put("type", dashboardComboBox.getDataType());
+                json.put("user_id", userId);
+                json.put("offset", query.getOffset());
+                json.put("limit", query.getLimit());
+                json.put("filter_text", query.getFilter().orElse(""));
+                return SendEvent.sendToGuild(EventOut.DASH_LIST_DISCORD_ENTITIES, json, guildId)
+                        .thenApply(r -> {
+                            try {
+                                ArrayList<DiscordEntity> discordEntities = new ArrayList<>();
+                                JSONArray entitiesJson = r.getJSONArray("entities");
+                                for (int i = 0; i < entitiesJson.length(); i++) {
+                                    JSONObject entityJson = entitiesJson.getJSONObject(i);
+                                    discordEntities.add(DiscordEntity.fromJson(entityJson));
+                                }
+                                return Collections.unmodifiableList(discordEntities);
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }).join().stream();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
         }, query -> {
-            JSONObject json = new JSONObject();
-            json.put("type", dashboardComboBox.getDataType());
-            json.put("user_id", userId);
-            json.put("filter_text", query.getFilter().orElse(""));
-            return SendEvent.sendToGuild(EventOut.DASH_COUNT_DISCORD_ENTITIES, json, guildId)
-                    .thenApply(r -> r.getLong("count")).join().intValue();
+            try {
+                JSONObject json = new JSONObject();
+                    json.put("type", dashboardComboBox.getDataType());
+                    json.put("user_id", userId);
+                    json.put("filter_text", query.getFilter().orElse(""));
+                    return SendEvent.sendToGuild(EventOut.DASH_COUNT_DISCORD_ENTITIES, json, guildId)
+                            .thenApply(r -> {
+                                try {
+                                    return r.getLong("count");
+                                } catch (JSONException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }).join().intValue();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
         });
     }
 

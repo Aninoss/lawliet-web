@@ -1,14 +1,14 @@
 package xyz.lawlietbot.spring.frontend.components.featurerequests;
 
-import com.github.appreciated.css.grid.GridLayoutComponent;
-import com.github.appreciated.css.grid.sizes.Flex;
-import com.github.appreciated.css.grid.sizes.Length;
-import com.github.appreciated.css.grid.sizes.MinMax;
-import com.github.appreciated.css.grid.sizes.Repeat;
-import com.github.appreciated.layout.FlexibleGridLayout;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Article;
 import com.vaadin.flow.component.html.Div;
+import org.vaadin.addons.componentfactory.css.grid.GridLayoutComponent;
+import org.vaadin.addons.componentfactory.css.grid.sizes.Flex;
+import org.vaadin.addons.componentfactory.css.grid.sizes.Length;
+import org.vaadin.addons.componentfactory.css.grid.sizes.MinMax;
+import org.vaadin.addons.componentfactory.css.grid.sizes.Repeat;
+import org.vaadin.addons.componentfactory.layout.FlexibleGridLayout;
 import xyz.lawlietbot.spring.backend.featurerequests.FRDynamicBean;
 import xyz.lawlietbot.spring.backend.featurerequests.FREntry;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;

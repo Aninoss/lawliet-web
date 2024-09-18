@@ -10,6 +10,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.*;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -186,7 +187,7 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
 
                     CustomNotification.showSuccess(getTranslation("report.success"));
                     UI.getCurrent().navigate(HomeView.class);
-                } catch (InterruptedException | ExecutionException | TimeoutException ex) {
+                } catch (InterruptedException | ExecutionException | TimeoutException | JSONException ex) {
                     LOGGER.error("Exception", ex);
                     CustomNotification.showError(getTranslation("error"));
                 }
@@ -211,7 +212,7 @@ public class ReportView extends PageLayout implements HasUrlParameter<String> {
         mainLayout.add(loginAnchor);
 
         Span loginText = new Span(getTranslation("report.notloggedin"));
-        loginText.getStyle().set("color", "var(--lumo-error-color)");
+        loginText.getStyle().set("color", "var(--lumo-error-text-color)");
         mainLayout.add(loginText);
 
         return mainLayout;

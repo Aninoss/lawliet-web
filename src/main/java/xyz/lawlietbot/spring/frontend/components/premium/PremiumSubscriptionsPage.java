@@ -362,7 +362,7 @@ public class PremiumSubscriptionsPage extends PremiumPage {
         quantityNumberField = new NumberField();
         quantityNumberField.getStyle().set("margin-top", "-6px");
         quantityNumberField.setValue(1d);
-        quantityNumberField.setHasControls(true);
+        quantityNumberField.setStepButtonsVisible(true);
         quantityNumberField.setMin(1);
         quantityNumberField.setMax(99);
         quantityNumberField.setStep(1);

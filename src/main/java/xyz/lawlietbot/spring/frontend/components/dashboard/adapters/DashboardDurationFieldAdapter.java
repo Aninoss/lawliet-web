@@ -112,7 +112,7 @@ public class DashboardDurationFieldAdapter extends FlexLayout implements Dashboa
     private NumberField generateNumberField(String label, int max, boolean marginLeft, boolean readOnly) {
         NumberField numberField = new NumberField();
         numberField.getStyle().set("margin-top", "-16px");
-        numberField.setHasControls(false);
+        numberField.setStepButtonsVisible(false);
         numberField.setStep(1.0);
         numberField.setLabel(label);
         numberField.setReadOnly(readOnly);

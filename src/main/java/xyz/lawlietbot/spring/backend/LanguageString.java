@@ -1,11 +1,9 @@
 package xyz.lawlietbot.spring.backend;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public class LanguageString {
 
@@ -16,8 +14,13 @@ public class LanguageString {
     }
 
     public void set(JSONObject languagePack) {
-        for(String key: languagePack.keySet()) {
-            set(new Locale(key), languagePack.getString(key));
+        for (Iterator it = languagePack.keys(); it.hasNext(); ) {
+            String key = (String) it.next();
+            try {
+                set(new Locale(key), languagePack.getString(key));
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

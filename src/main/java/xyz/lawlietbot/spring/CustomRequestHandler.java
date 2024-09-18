@@ -4,6 +4,7 @@ import com.vaadin.flow.server.RequestHandler;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinSession;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,7 +132,7 @@ public class CustomRequestHandler implements RequestHandler {
         if (System.getenv("TOPGG_AUTH").equals(auth)) {
             try (BufferedReader br = request.getReader()) {
                 String body = br.lines().collect(Collectors.joining("\n"));
-                if (body.length() > 0) {
+                if (!body.isEmpty()) {
                     JSONObject jsonObject = new JSONObject(body);
                     LOGGER.info("UPVOTE | {}", jsonObject.getLong("user"));
                     JSONObject responseJson = SendEvent.send(EventOut.TOPGG, jsonObject).get(5, TimeUnit.SECONDS);
@@ -242,7 +243,7 @@ public class CustomRequestHandler implements RequestHandler {
             } else {
                 response.setStatus(403);
             }
-        } catch (IOException e) {
+        } catch (IOException | JSONException e) {
             LOGGER.error("Error while handling Paddle Billing", e);
             response.setStatus(500);
         }

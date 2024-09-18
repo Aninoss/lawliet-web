@@ -1,11 +1,5 @@
 package xyz.lawlietbot.spring.frontend.components.dashboard.adapters;
 
-import com.github.appreciated.css.grid.GridLayoutComponent;
-import com.github.appreciated.css.grid.sizes.Flex;
-import com.github.appreciated.css.grid.sizes.Length;
-import com.github.appreciated.css.grid.sizes.MinMax;
-import com.github.appreciated.css.grid.sizes.Repeat;
-import com.github.appreciated.layout.FlexibleGridLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
@@ -16,6 +10,12 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import dashboard.DashboardComponent;
 import dashboard.component.DashboardImageUpload;
+import org.vaadin.addons.componentfactory.css.grid.GridLayoutComponent;
+import org.vaadin.addons.componentfactory.css.grid.sizes.Flex;
+import org.vaadin.addons.componentfactory.css.grid.sizes.Length;
+import org.vaadin.addons.componentfactory.css.grid.sizes.MinMax;
+import org.vaadin.addons.componentfactory.css.grid.sizes.Repeat;
+import org.vaadin.addons.componentfactory.layout.FlexibleGridLayout;
 import xyz.lawlietbot.spring.backend.FileCache;
 import xyz.lawlietbot.spring.backend.util.FileUtil;
 import xyz.lawlietbot.spring.backend.util.RandomUtil;

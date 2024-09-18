@@ -1,17 +1,19 @@
 package xyz.lawlietbot.spring.backend.faq;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.NoSuchElementException;
-import java.util.concurrent.CompletableFuture;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.lawlietbot.spring.ExceptionLogger;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.NoSuchElementException;
+import java.util.concurrent.CompletableFuture;
 
 public class FAQListContainer {
 
@@ -39,7 +41,7 @@ public class FAQListContainer {
     }
 
     private synchronized void loadIfEmpty() {
-        if (entries.size() == 0) {
+        if (entries.isEmpty()) {
             LOGGER.info("Loading FAQ list");
             entries = fetch().join();
             setNextUpdate();
@@ -63,23 +65,27 @@ public class FAQListContainer {
                     return null;
                 })
                 .thenAccept(responseJson -> {
-                    if (responseJson.has("slots")) {
-                        JSONArray arrayJSON = responseJson.getJSONArray("slots");
+                    try {
+                        if (responseJson.has("slots")) {
+                            JSONArray arrayJSON = responseJson.getJSONArray("slots");
 
-                        ArrayList<FAQListSlot> entries = new ArrayList<>();
-                        for (int i = 0; i < arrayJSON.length(); i++) {
-                            JSONObject slot = arrayJSON.getJSONObject(i);
+                            ArrayList<FAQListSlot> entries = new ArrayList<>();
+                            for (int i = 0; i < arrayJSON.length(); i++) {
+                                JSONObject slot = arrayJSON.getJSONObject(i);
 
-                            FAQListSlot faqListSlot = new FAQListSlot();
-                            faqListSlot.getQuestion().set(slot.getJSONObject("question"));
-                            faqListSlot.getAnswer().set(slot.getJSONObject("answer"));
+                                FAQListSlot faqListSlot = new FAQListSlot();
+                                faqListSlot.getQuestion().set(slot.getJSONObject("question"));
+                                faqListSlot.getAnswer().set(slot.getJSONObject("answer"));
 
-                            entries.add(faqListSlot);
+                                entries.add(faqListSlot);
+                            }
+
+                            future.complete(entries);
+                        } else {
+                            future.completeExceptionally(new NoSuchElementException("No entries"));
                         }
-
-                        future.complete(entries);
-                    } else {
-                        future.completeExceptionally(new NoSuchElementException("No entries"));
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
                     }
                 });
 

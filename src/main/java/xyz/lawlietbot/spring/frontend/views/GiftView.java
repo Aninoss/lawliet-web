@@ -9,6 +9,7 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import xyz.lawlietbot.spring.NoLiteAccess;
@@ -61,52 +62,55 @@ public class GiftView extends PageLayout implements HasUrlParameter<String> {
 
         JSONObject responseJson = SendEvent.send(EventOut.GET_PREMIUM_CODE, Map.of("code", parameter)).join();
         if (responseJson.has("found")) {
-            String level = responseJson.getString("level");
-            int durationDays = responseJson.getInt("durationDays");
+            try {
+                String level = responseJson.getString("level");
+                int durationDays = responseJson.getInt("durationDays");
 
+                String contentString = getTranslation("gift.content", getTranslation("premium.tier." + level), StringUtil.numToString(durationDays));
+                SpanWithLinebreaks content = new SpanWithLinebreaks(contentString);
+                mainContent.add(content);
 
-            String contentString = getTranslation("gift.content", getTranslation("premium.tier." + level), StringUtil.numToString(durationDays));
-            SpanWithLinebreaks content = new SpanWithLinebreaks(contentString);
-            mainContent.add(content);
+                Span disclaimer = new Span(getTranslation("gift.disclaimer"));
+                disclaimer.addClassName("gift-disclaimer");
+                mainContent.add(disclaimer);
 
-            Span disclaimer = new Span(getTranslation("gift.disclaimer"));
-            disclaimer.addClassName("gift-disclaimer");
-            mainContent.add(disclaimer);
+                Hr hr = new Hr();
+                hr.getStyle().set("margin-top", "1.5rem");
+                mainContent.add(hr);
 
-            Hr hr = new Hr();
-            hr.getStyle().set("margin-top", "1.5rem");
-            mainContent.add(hr);
+                if (getSessionData().isLoggedIn()) {
+                    Button redeemButton = new Button(getTranslation("gift.redeem"));
+                    redeemButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+                    redeemButton.addClickListener(e -> {
+                        Map<String, Object> params = Map.of(
+                                "user_id", getSessionData().getDiscordUser().get().getId(),
+                                "code", parameter,
+                                "duration_days", durationDays
+                        );
+                        JSONObject redeemResponseJson = SendEvent.send(EventOut.REDEEM_PREMIUM_CODE, params).join();
 
-            if (getSessionData().isLoggedIn()) {
-                Button redeemButton = new Button(getTranslation("gift.redeem"));
-                redeemButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-                redeemButton.addClickListener(e -> {
-                    Map<String, Object> params = Map.of(
-                            "user_id", getSessionData().getDiscordUser().get().getId(),
-                            "code", parameter,
-                            "duration_days", durationDays
-                    );
-                    JSONObject redeemResponseJson = SendEvent.send(EventOut.REDEEM_PREMIUM_CODE, params).join();
-
-                    if (redeemResponseJson.has("ok")) {
-                        if (level.equals("PRO")) {
-                            dialog.open(getTranslation("gift.sucessful.PRO"), () -> {
-                                QueryParameters queryParameters = new QueryParameters(Map.of("tab", List.of("2")));
-                                UI.getCurrent().navigate(FeatureRequestsView.getRouteStatic(PremiumView.class), queryParameters);
-                            }, () -> UI.getCurrent().navigate(HomeView.class));
+                        if (redeemResponseJson.has("ok")) {
+                            if (level.equals("PRO")) {
+                                dialog.open(getTranslation("gift.sucessful.PRO"), () -> {
+                                    QueryParameters queryParameters = new QueryParameters(Map.of("tab", List.of("2")));
+                                    UI.getCurrent().navigate(FeatureRequestsView.getRouteStatic(PremiumView.class), queryParameters);
+                                }, () -> UI.getCurrent().navigate(HomeView.class));
+                            } else {
+                                dialog.setTriggerConfirmListenerOnClose(true);
+                                dialog.open(getTranslation("gift.sucessful.BASIC"), () -> UI.getCurrent().navigate(HomeView.class));
+                            }
                         } else {
-                            dialog.setTriggerConfirmListenerOnClose(true);
-                            dialog.open(getTranslation("gift.sucessful.BASIC"), () -> UI.getCurrent().navigate(HomeView.class));
+                            CustomNotification.showError(getTranslation("error"));
                         }
-                    } else {
-                        CustomNotification.showError(getTranslation("error"));
-                    }
-                });
-                mainContent.add(redeemButton);
-            } else {
-                Button loginButton = new Button(getTranslation("gift.logintoredeem"));
-                loginButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-                mainContent.add(new Anchor(getSessionData().getLoginUrl(), loginButton));
+                    });
+                    mainContent.add(redeemButton);
+                } else {
+                    Button loginButton = new Button(getTranslation("gift.logintoredeem"));
+                    loginButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+                    mainContent.add(new Anchor(getSessionData().getLoginUrl(), loginButton));
+                }
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
             }
         } else {
             mainContent.add(getTranslation("gift.notfound"));

@@ -1,0 +1,159 @@
+html {
+    --bot-info-width: 250px;
+}
+
+#bot-info { background: var(--lumo-secondary); }
+
+.lite-class#bot-info { margin-top: -16px; }
+
+#bot-info-details {
+    max-width: calc(var(--bot-info-width) + 32px);
+    z-index: 2;
+}
+
+.lite-class#bot-info-details { margin-top: -8px; }
+
+.bot-info-details-width {
+    max-width: var(--bot-info-width);
+}
+
+#bot-info-details-title {
+    font-size: 150%;
+    font-weight: bold;
+}
+
+#bot-info-details-icon {
+    width: var(--bot-info-width);
+    height: var(--bot-info-width);
+    border-radius: 3%;
+}
+
+#bot-info-carousel {
+    position: relative;
+    background: var(--lumo-shade);
+    overflow: hidden;
+}
+
+.carousel-fade {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 80%;
+    z-index: 1;
+    background: linear-gradient(0deg, rgba(0,0,0,0) 0%, #1f2c3e 100%);
+}
+
+.carousel {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+}
+
+.carousel-slide {
+    height: 100%;
+}
+
+paper-slide {
+    position: relative;
+    overflow: hidden;
+}
+
+paper-slide > img {
+    display: block;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    transform: scale(0.5) translate(calc(-50% + 64px), calc(-150% - 178px));
+}
+
+paper-slide > div {
+    position: absolute;
+    bottom: 5%;
+    left: 42px;
+    height: 32px;
+}
+
+#prop-list {
+    width: 100%;
+    margin-top: 3em;
+    margin-bottom: 2em;
+}
+
+.prop-check {
+    color: var(--lumo-success-color);
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+#prop-button {
+    margin-top: 2em;
+    width: 300px;
+}
+
+
+
+/* Tablet */
+@media (max-width: 1000px) {
+
+    .tablet-switch#bot-info { background: #14212a; }
+
+    #bot-info-details {
+        margin-top: 16px;
+        max-width: 100%;
+    }
+
+    .bot-info-details-width { max-width: 100%; }
+
+    #bot-info-details-icon {
+        width: 125px;
+        height: 125px;
+        border-radius: 3%;
+    }
+
+    #bot-info-carousel {
+        height: 350px;
+        overflow: visible;
+    }
+
+    .carousel {
+        height: 600px;
+    }
+
+    .carousel-slide {
+        height: 600px;
+    }
+
+    .carousel-fade {
+        margin-top: -240px;
+        height: 150%;
+        background: linear-gradient(0deg, rgba(0,0,0,0) 0%, #1f2c3e 80%);
+    }
+
+}
+
+
+
+/* Mobile */
+@media (max-width: 700px) {
+
+    #bot-info { background: var(--lumo-secondary); }
+
+    .tablet-switch#bot-info { background: var(--lumo-secondary); }
+
+    #bot-info-details {
+        margin-top: 32px;
+        margin-bottom: 28px;
+    }
+
+    #bot-info-details-icon {
+        width: 100px;
+        height: 100px;
+    }
+
+    #prop-button {
+        width: 100%;
+    }
+
+}

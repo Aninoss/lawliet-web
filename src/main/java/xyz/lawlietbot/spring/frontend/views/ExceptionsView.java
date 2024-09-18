@@ -15,6 +15,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.Route;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import xyz.lawlietbot.spring.LoginAccess;
@@ -44,7 +45,7 @@ public class ExceptionsView extends PageLayout {
 
     private final VerticalLayout mainLayout = new VerticalLayout();
 
-    public ExceptionsView(@Autowired SessionData sessionData, @Autowired UIData uiData) throws ExecutionException, InterruptedException {
+    public ExceptionsView(@Autowired SessionData sessionData, @Autowired UIData uiData) throws ExecutionException, InterruptedException, JSONException {
         super(sessionData, uiData);
         getStyle().set("margin-bottom", "48px");
 
@@ -62,7 +63,7 @@ public class ExceptionsView extends PageLayout {
         );
     }
 
-    private Component generateHeaderMenu(SessionData sessionData) throws ExecutionException, InterruptedException {
+    private Component generateHeaderMenu(SessionData sessionData) throws ExecutionException, InterruptedException, JSONException {
         VerticalLayout mainLayout = new VerticalLayout();
         mainLayout.setWidthFull();
         mainLayout.setPadding(false);
@@ -116,7 +117,7 @@ public class ExceptionsView extends PageLayout {
         dirSelect.addValueChangeListener(e -> {
             try {
                 setTextAreaValues(sessionData.getDiscordUser().get().getId(), e.getValue(), textAreaHide, textAreaGroup);
-            } catch (ExecutionException | InterruptedException ex) {
+            } catch (ExecutionException | InterruptedException | JSONException ex) {
                 throw new RuntimeException(ex);
             }
         });
@@ -151,7 +152,7 @@ public class ExceptionsView extends PageLayout {
         return mainLayout;
     }
 
-    private void setTextAreaValues(long userId, String dir, TextArea textAreaHide, TextArea textAreaGroup) throws ExecutionException, InterruptedException {
+    private void setTextAreaValues(long userId, String dir, TextArea textAreaHide, TextArea textAreaGroup) throws ExecutionException, InterruptedException, JSONException {
         Map<String, Object> map = Map.of(
                 "user_id", userId,
                 "dir", dir

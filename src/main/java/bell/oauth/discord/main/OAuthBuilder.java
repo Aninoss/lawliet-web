@@ -1,18 +1,20 @@
 package bell.oauth.discord.main;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import bell.oauth.discord.domain.Connection;
 import bell.oauth.discord.domain.Guild;
 import bell.oauth.discord.domain.User;
 import bell.oauth.discord.req.Post;
 import okhttp3.OkHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public class OAuthBuilder {
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+public class OAuthBuilder implements Serializable {
 	
 	private static final String BASEURI = "https://discordapp.com/api/";
 	private static final String TOKENURI = "oauth2/token";
@@ -22,17 +24,13 @@ public class OAuthBuilder {
 	private static final String MEURI = "users/@me";
 	private static final String GUILDURI = "users/@me/guilds";
 	
-	//private static final String INVITEURI = "invites/{invite.id}";
-	
-	private OkHttpClient client;
-	
+	private static final  OkHttpClient CLIENT = new OkHttpClient();;
+
 	private String id, secret, redirect, scopes, access_token, refresh_token;
 	
 	public OAuthBuilder(String clientID, String clientSecret) {
 		this.id = clientID;
 		this.secret = clientSecret;
-		
-		this.client = new OkHttpClient();
 	}
 	
 	public OAuthBuilder setRedirectURI(String url) {
@@ -69,10 +67,10 @@ public class OAuthBuilder {
 	
 	public Response exchange(String code) {
 		try {
-			String json = Post.exchangePost(client, BASEURI + TOKENURI, this.id, this.secret, code, this.redirect);
+			String json = Post.exchangePost(CLIENT, BASEURI + TOKENURI, this.id, this.secret, code, this.redirect);
 			
 			JSONObject js = new JSONObject(json);
-			
+
 			try {
 				this.access_token = js.getString("access_token");
 				this.refresh_token = js.getString("refresh_token");
@@ -82,17 +80,17 @@ public class OAuthBuilder {
 				return Response.ERROR;
 			}
 			
-		} catch (IOException e) {
+		} catch (IOException | JSONException e) {
 			return Response.ERROR;
 		}
 	}
 	
 	public Response refresh() {
 		try {
-			String json = Post.refreshPost(client, BASEURI + TOKENURI, this.id, this.secret, this.refresh_token, this.redirect);
+			String json = Post.refreshPost(CLIENT, BASEURI + TOKENURI, this.id, this.secret, this.refresh_token, this.redirect);
 			
 			JSONObject js = new JSONObject(json);
-			
+
 			try {
 				this.access_token = js.getString("access_token");
 				this.refresh_token = js.getString("refresh_token");
@@ -102,14 +100,14 @@ public class OAuthBuilder {
 				return Response.ERROR;
 			}
 			
-		} catch (IOException e) {
+		} catch (IOException | JSONException e) {
 			return Response.ERROR;
 		}
 	}
 	
 	public Response revoke() {
 		try {
-			Post.revokePost(client, BASEURI + REVOCATIONURI, access_token);
+			Post.revokePost(CLIENT, BASEURI + REVOCATIONURI, access_token);
 			return Response.OK;
 		} catch (IOException e) {
 			return Response.ERROR;
@@ -120,7 +118,7 @@ public class OAuthBuilder {
 		User user = new User();
 		
 		try {
-			String json = Post.get(client, BASEURI + MEURI, access_token);
+			String json = Post.get(CLIENT, BASEURI + MEURI, access_token);
       
       JSONObject js = new JSONObject(json);
       try {
@@ -140,10 +138,10 @@ public class OAuthBuilder {
         user.setUsername(js.getString("username"));
       }
 			
-		} catch (IOException e) {
+		} catch (IOException | JSONException e) {
 			return null;
 		}
-		
+
 		return user;
 	}
 	
@@ -151,24 +149,24 @@ public class OAuthBuilder {
 		List<Guild> guilds = new ArrayList<>();
 		
 		try {
-			String json = Post.get(client, BASEURI + GUILDURI, access_token);
+			String json = Post.get(CLIENT, BASEURI + GUILDURI, access_token);
 			
 			JSONArray arrJs = new JSONArray(json);
-			
-			for (Object guild: arrJs) {
+
+			for (int i = 0; i < arrJs.length(); i++) {
 				Guild g = new Guild();
-				JSONObject obj = (JSONObject) guild;
+				JSONObject obj = arrJs.getJSONObject(i);
 
 				g.setIcon(obj.isNull("icon") ? null : obj.getString("icon"));
 				g.setId(Long.parseLong(obj.getString("id")));
 				g.setName(obj.getString("name"));
 				g.setOwner(obj.getBoolean("owner"));
 				g.setPermissions(obj.getInt("permissions"));
-				
+
 				guilds.add(g);
-			}				
+			}
 			
-		} catch (IOException e) {
+		} catch (IOException | JSONException e) {
 			return null;
 		}
 		
@@ -179,25 +177,25 @@ public class OAuthBuilder {
 		List<Connection> connections = new ArrayList<>();
 		
 		try {
-			String json = Post.get(client, BASEURI + CONNECTIONSURI, access_token);
+			String json = Post.get(CLIENT, BASEURI + CONNECTIONSURI, access_token);
 			
 			JSONArray arrJs = new JSONArray(json);
-			
-			for (Object connection: arrJs) {
+
+			for (int i = 0; i < arrJs.length(); i++) {
 				Connection c = new Connection();
-				JSONObject obj = (JSONObject) connection;
-				
+				JSONObject obj = arrJs.getJSONObject(i);
+
 				c.setFriend_sync(obj.getBoolean("friend_sync"));
 				c.setId(obj.getString("id"));
 				c.setName(obj.getString("name"));
 				c.setType(obj.getString("type"));
 				c.setVerified(obj.getBoolean("verified"));
 				c.setVisibility(obj.getInt("visibility"));
-				
+
 				connections.add(c);
-			}				
+			}
 			
-		} catch (IOException e) {
+		} catch (IOException | JSONException e) {
 			return null;
 		}
 		

@@ -12,6 +12,7 @@ import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.Route;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import xyz.lawlietbot.spring.LoginAccess;
@@ -100,57 +101,67 @@ public class BanAppealView extends PageLayout implements HasUrlParameter<String>
     }
 
     private void handleJson(JSONObject json, long userId, String username, String avatar, long guildId) {
-        Response response = Response.valueOf(json.getString("response"));
-        String guildName = json.has("guild_name") ? json.getString("guild_name") : null;
-        String guildIcon = json.has("guild_icon") ? json.getString("guild_icon") : null;
+        try {
+            Response response = Response.valueOf(json.getString("response"));
+            String guildName = json.has("guild_name") ? json.getString("guild_name") : null;
+            String guildIcon = json.has("guild_icon") ? json.getString("guild_icon") : null;
 
-        if (guildName != null && guildIcon != null) {
-            HorizontalLayout guildLayout = new HorizontalLayout();
-            guildLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-            guildLayout.setWidthFull();
-            guildLayout.setPadding(true);
-            guildLayout.setSpacing(true);
-            guildLayout.getStyle()
-                    .set("border-radius", "8px")
-                    .set("background", "var(--lumo-tint-5pct)")
-                    .set("margin-top", "32px");
+            if (guildName != null && guildIcon != null) {
+                HorizontalLayout guildLayout = new HorizontalLayout();
+                guildLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+                guildLayout.setWidthFull();
+                guildLayout.setPadding(true);
+                guildLayout.setSpacing(true);
+                guildLayout.getStyle()
+                        .set("border-radius", "8px")
+                        .set("background", "var(--lumo-tint-5pct)")
+                        .set("margin-top", "32px");
 
-            Image image = new Image(guildIcon, "");
-            image.setHeight("32px");
-            image.addClassName(Styles.ROUND);
-            image.getStyle().set("margin-right", "12px");
-            guildLayout.add(image);
+                Image image = new Image(guildIcon, "");
+                image.setHeight("32px");
+                image.addClassName(Styles.ROUND);
+                image.getStyle().set("margin-right", "12px");
+                guildLayout.add(image);
 
-            guildLayout.add(guildName);
-            guildHeaderDiv.add(guildLayout);
-        }
+                guildLayout.add(guildName);
+                guildHeaderDiv.add(guildLayout);
+            }
 
-        if (response == Response.OK) {
-            TextArea message = new TextArea(getTranslation("banappeal.textfield"));
-            message.setWidthFull();
-            message.setMaxLength(1024);
-            message.getStyle().set("margin-top", "0");
-            mainContent.add(message);
+            if (response == Response.OK) {
+                TextArea message = new TextArea(getTranslation("banappeal.textfield"));
+                message.setWidthFull();
+                message.setMaxLength(1024);
+                message.getStyle().set("margin-top", "0");
+                mainContent.add(message);
 
-            Button submit = new Button(getTranslation("banappeal.button"));
-            submit.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            submit.addClickListener(e -> {
-                Map<String, Object> parameters = Map.of(
-                        "user_id", userId,
-                        "username", username,
-                        "avatar", avatar,
-                        "guild_id", guildId,
-                        "message", message.getValue()
-                );
-                JSONObject submitResponse = SendEvent.sendToGuild(EventOut.BAN_APPEAL, parameters, guildId).join();
-                boolean ok = submitResponse.has("ok") && submitResponse.getBoolean("ok");
-                String text = getTranslation(ok ? "banappeal.success" : "banappeal.error");
-                update(guildId);
-                confirmationDialog.open(text, () -> {});
-            });
-            mainContent.add(submit);
-        } else {
-            mainContent.add(getTranslation("banappeal.response." + response.name()));
+                Button submit = new Button(getTranslation("banappeal.button"));
+                submit.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+                submit.addClickListener(e -> {
+                    Map<String, Object> parameters = Map.of(
+                            "user_id", userId,
+                            "username", username,
+                            "avatar", avatar,
+                            "guild_id", guildId,
+                            "message", message.getValue()
+                    );
+                    JSONObject submitResponse = SendEvent.sendToGuild(EventOut.BAN_APPEAL, parameters, guildId).join();
+                    boolean ok = false;
+                    try {
+                        ok = submitResponse.has("ok") && submitResponse.getBoolean("ok");
+                    } catch (JSONException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    String text = getTranslation(ok ? "banappeal.success" : "banappeal.error");
+                    update(guildId);
+                    confirmationDialog.open(text, () -> {
+                    });
+                });
+                mainContent.add(submit);
+            } else {
+                mainContent.add(getTranslation("banappeal.response." + response.name()));
+            }
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
     }
 

@@ -15,12 +15,13 @@ import xyz.lawlietbot.spring.backend.util.StringUtil;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 @Component
 @VaadinSessionScope
-public class SessionData {
+public class SessionData implements Serializable {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(SessionData.class);
 

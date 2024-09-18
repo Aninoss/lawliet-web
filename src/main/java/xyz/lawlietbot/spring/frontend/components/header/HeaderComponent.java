@@ -101,8 +101,7 @@ public class HeaderComponent extends Header {
 
     private Component generateLogo() {
         Button logo = new Button(new LawlietBotLogo());
-        logo.setMinWidth("200px");
-        logo.getStyle().set("margin-left", "8px");
+        logo.setId("logo");
         logo.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         logo.addClickListener(click -> UI.getCurrent().navigate(HomeView.class));
         return logo;

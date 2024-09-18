@@ -7,7 +7,7 @@ public class ApplicationServiceInitListener implements VaadinServiceInitListener
 
     @Override
     public void serviceInit(ServiceInitEvent event) {
-        event.addBootstrapListener(new CustomBootstrap());
+        event.addIndexHtmlRequestListener(new CustomIndexHtmlRequestListener());
         event.addRequestHandler(new CustomRequestHandler());
     }
 

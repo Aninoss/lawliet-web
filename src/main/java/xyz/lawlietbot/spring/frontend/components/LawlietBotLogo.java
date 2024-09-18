@@ -4,7 +4,6 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.server.VaadinServletService;
-import com.vaadin.flow.server.VaadinSession;
 
 public class LawlietBotLogo extends HorizontalLayout {
 
@@ -21,8 +20,7 @@ public class LawlietBotLogo extends HorizontalLayout {
 
     private void addLogoImage() {
         String logoString = VaadinServletService.getCurrent()
-                .resolveResource("/styles/img/bot_icon_small.webp",
-                        VaadinSession.getCurrent().getBrowser());
+                .resolveResource("/styles/img/bot_icon_small.webp");
 
         Image logoImage = new Image(logoString, "");
         logoImage.setHeight("48px");

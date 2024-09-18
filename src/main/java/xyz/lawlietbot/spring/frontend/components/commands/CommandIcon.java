@@ -1,12 +1,10 @@
 package xyz.lawlietbot.spring.frontend.components.commands;
 
-import xyz.lawlietbot.spring.frontend.Styles;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.server.VaadinServletService;
-import com.vaadin.flow.server.VaadinSession;
-
-import javax.validation.constraints.NotNull;
+import org.jetbrains.annotations.NotNull;
+import xyz.lawlietbot.spring.frontend.Styles;
 
 public class CommandIcon extends Div {
 
@@ -42,8 +40,7 @@ public class CommandIcon extends Div {
         }
 
         String IconStr = VaadinServletService.getCurrent()
-                .resolveResource("/styles/img/" + fileStr,
-                        VaadinSession.getCurrent().getBrowser());
+                .resolveResource("/styles/img/" + fileStr);
 
         Image image = new Image(IconStr, "");
         image.addClassName(Styles.ROUND);

@@ -30,6 +30,11 @@ public class BotProsInfoCard extends Card {
         VerticalLayout content = new VerticalLayout();
         content.setAlignItems(FlexComponent.Alignment.CENTER);
 
+        VerticalLayout headerContent = new VerticalLayout();
+        headerContent.setPadding(false);
+        headerContent.setSpacing(false);
+        headerContent.setAlignItems(FlexComponent.Alignment.CENTER);
+
         Div titleLabel = new Div(new Text(title));
         titleLabel.getElement().getStyle()
                 .set("font-size", "120%")
@@ -57,7 +62,8 @@ public class BotProsInfoCard extends Card {
                 .set("margin-top", "12px")
                 .set("margin-bottom", "-4px");
 
-        content.add(icon, titleLabel, subtitleLabel, seperator, descLabel);
+        headerContent.add(icon, titleLabel, subtitleLabel, seperator);
+        content.add(headerContent, descLabel);
         Stream.of(components).filter(Objects::nonNull).forEach(content::add);
 
         if (shortText.length() < longText.length()) {

@@ -50,7 +50,9 @@ public class PremiumManagePage extends PremiumPage {
     public void build() {
         sessionData.getDiscordUser().ifPresent(user -> {
             updateSubscriptionsContent(user, 0);
-            add(new H2(getTranslation("manage.title.redeemedcodes")), generateCodesGrid(user.getId()));
+            H2 h2 = new H2(getTranslation("manage.title.redeemedcodes"));
+            h2.getStyle().set("margin-top", "2em");
+            add(h2, generateCodesGrid(user.getId()));
         });
     }
 
@@ -63,7 +65,6 @@ public class PremiumManagePage extends PremiumPage {
         List<Subscription> subscriptionList = SyncUtil.retrievePaddleSubscriptions(user.getId(), reloadSubId).join();
         if (!subscriptionList.isEmpty()) {
             Grid<Subscription> grid = new Grid<>(Subscription.class, false);
-            grid.setHeightByRows(true);
             grid.setItems(subscriptionList);
             grid.setSelectionMode(Grid.SelectionMode.NONE);
 
@@ -86,10 +87,7 @@ public class PremiumManagePage extends PremiumPage {
                     .setAutoWidth(true);
             return grid;
         } else {
-            Div textDiv = new Div(new Text(getTranslation("manage.nosubs")));
-            textDiv.setWidthFull();
-            textDiv.getStyle().set("text-align", "center");
-            return textDiv;
+            return new Div(new Text(getTranslation("manage.nosubs")));
         }
     }
 
@@ -98,7 +96,6 @@ public class PremiumManagePage extends PremiumPage {
 
         if (!premiumCodes.isEmpty()) {
             Grid<PremiumCode> grid = new Grid<>(PremiumCode.class, false);
-            grid.setHeightByRows(true);
             grid.setItems(premiumCodes);
             grid.setSelectionMode(Grid.SelectionMode.NONE);
 
@@ -113,10 +110,7 @@ public class PremiumManagePage extends PremiumPage {
                     .setAutoWidth(true);
             return grid;
         } else {
-            Div textDiv = new Div(new Text(getTranslation("manage.nocodes")));
-            textDiv.setWidthFull();
-            textDiv.getStyle().set("text-align", "center");
-            return textDiv;
+            return new Div(new Text(getTranslation("manage.nocodes")));
         }
     }
 

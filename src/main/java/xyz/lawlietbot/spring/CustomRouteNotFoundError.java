@@ -1,12 +1,11 @@
 package xyz.lawlietbot.spring;
 
-import xyz.lawlietbot.spring.frontend.views.PageNotFoundView;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.ErrorParameter;
 import com.vaadin.flow.router.NotFoundException;
 import com.vaadin.flow.router.RouteNotFoundError;
-
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
+import xyz.lawlietbot.spring.frontend.views.PageNotFoundView;
 
 public class CustomRouteNotFoundError extends RouteNotFoundError {
 

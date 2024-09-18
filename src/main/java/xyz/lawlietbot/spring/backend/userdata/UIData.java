@@ -1,18 +1,20 @@
 package xyz.lawlietbot.spring.backend.userdata;
 
-import java.util.Map;
-import java.util.Optional;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.stereotype.Component;
 
+import java.io.Serializable;
+import java.util.Map;
+import java.util.Optional;
+
 @Component
 @UIScope
-public class UIData {
+public class UIData implements Serializable {
 
     private final boolean lite;
     private final boolean noNSFW;
-    private Optional<Long> userId = Optional.empty();
+    private Long userId = null;
 
     public UIData() {
         Map<String, String[]> parametersMap = VaadinService.getCurrentRequest().getParameterMap();
@@ -35,15 +37,15 @@ public class UIData {
     }
 
     public void login(long userId) {
-        this.userId = Optional.of(userId);
+        this.userId = userId;
     }
 
     public void logout() {
-        this.userId = Optional.empty();
+        this.userId = null;
     }
 
     public Optional<Long> getUserId() {
-        return userId;
+        return Optional.ofNullable(userId);
     }
 
     public String getBotInviteUrl() {

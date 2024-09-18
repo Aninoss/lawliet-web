@@ -1,17 +1,19 @@
 package xyz.lawlietbot.spring.backend.serverstats;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
+
+import javax.annotation.Nonnull;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class ServerStatsContainer {
 
@@ -35,18 +37,22 @@ public class ServerStatsContainer {
                     LOGGER.info("Updating server stats");
                     return SendEvent.send(EventOut.SERVER_STATS)
                             .thenApply(responseJson -> {
-                                JSONArray statsDataJson = responseJson.getJSONArray("data");
+                                try {
+                                    JSONArray statsDataJson = responseJson.getJSONArray("data");
 
-                                ServerStatsSlot[] slots = new ServerStatsSlot[statsDataJson.length()];
-                                for (int i = 0; i < statsDataJson.length(); i++) {
-                                    JSONObject statsSlotJson = statsDataJson.getJSONObject(i);
-                                    slots[i] = new ServerStatsSlot(statsSlotJson.getInt("month"), statsSlotJson.getInt("year"), statsSlotJson.getInt("value"));
+                                    ServerStatsSlot[] slots = new ServerStatsSlot[statsDataJson.length()];
+                                    for (int i = 0; i < statsDataJson.length(); i++) {
+                                        JSONObject statsSlotJson = statsDataJson.getJSONObject(i);
+                                        slots[i] = new ServerStatsSlot(statsSlotJson.getInt("month"), statsSlotJson.getInt("year"), statsSlotJson.getInt("value"));
+                                    }
+
+                                    return new ServerStatsBean(
+                                            responseJson.isNull("servers") ? null : responseJson.getLong("servers"),
+                                            slots
+                                    );
+                                } catch (JSONException e) {
+                                    throw new RuntimeException(e);
                                 }
-
-                                return new ServerStatsBean(
-                                        responseJson.isNull("servers") ? null : responseJson.getLong("servers"),
-                                        slots
-                                );
                             }).get();
                 }
             });

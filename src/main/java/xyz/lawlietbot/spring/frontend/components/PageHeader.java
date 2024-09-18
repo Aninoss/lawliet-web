@@ -1,7 +1,5 @@
 package xyz.lawlietbot.spring.frontend.components;
 
-import java.util.Arrays;
-import javax.annotation.Nonnull;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.UI;
@@ -14,10 +12,12 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.server.VaadinServletService;
-import com.vaadin.flow.server.VaadinSession;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.frontend.Styles;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
+
+import javax.annotation.Nonnull;
+import java.util.Arrays;
 
 public class PageHeader extends Div {
 
@@ -44,6 +44,7 @@ public class PageHeader extends Div {
         outerLayout.addClassName(Styles.APP_WIDTH);
         outerLayout.setPadding(true);
         innerLayout.setPadding(false);
+        innerLayout.setSpacing(false);
         titleLayout.setPadding(false);
         titleLayout.setWidthFull();
 
@@ -75,8 +76,7 @@ public class PageHeader extends Div {
 
     private void addPageIcon(@Nonnull String route) {
         String pageIconUrl = VaadinServletService.getCurrent()
-                .resolveResource("/styles/img/headers/" + route + ".svg",
-                        VaadinSession.getCurrent().getBrowser());
+                .resolveResource("/styles/img/headers/" + route + ".svg");
 
         Image pageIcon = new Image(pageIconUrl, "");
         pageIcon.setId("page-icon");

@@ -2,6 +2,7 @@ package xyz.lawlietbot.spring.backend.payment.paddle;
 
 import okhttp3.*;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import xyz.lawlietbot.spring.backend.payment.ProductPremium;
 import xyz.lawlietbot.spring.backend.payment.ProductTxt2Img;
@@ -60,32 +61,36 @@ public class PaddleAPI {
     }
 
     public static JSONObject retrieveProductPrices(String customerIpAddress) throws IOException {
-        JSONObject requestJson = new JSONObject();
-        requestJson.put("customer_ip_address", customerIpAddress);
+        try {
+            JSONObject requestJson = new JSONObject();
+            requestJson.put("customer_ip_address", customerIpAddress);
 
-        JSONArray itemsArray = new JSONArray();
-        for (ProductTxt2Img product : ProductTxt2Img.values()) {
-            JSONObject itemJson = new JSONObject();
-            itemJson.put("price_id", product.getPriceId());
-            itemJson.put("quantity", 1);
-            itemsArray.put(itemJson);
+            JSONArray itemsArray = new JSONArray();
+            for (ProductTxt2Img product : ProductTxt2Img.values()) {
+                JSONObject itemJson = new JSONObject();
+                itemJson.put("price_id", product.getPriceId());
+                itemJson.put("quantity", 1);
+                itemsArray.put(itemJson);
+            }
+            for (ProductPremium product : ProductPremium.values()) {
+                JSONObject itemJson = new JSONObject();
+                itemJson.put("price_id", product.getPriceId());
+                itemJson.put("quantity", 1);
+                itemsArray.put(itemJson);
+            }
+            requestJson.put("items", itemsArray);
+
+            Request request = new Request.Builder()
+                    .url("https://" + System.getenv("PADDLE_SUBDOMAIN_BILLING") + ".paddle.com/pricing-preview")
+                    .post(RequestBody.create(requestJson.toString(), MediaType.get("application/json")))
+                    .addHeader("User-Agent", USER_AGENT)
+                    .addHeader("Authorization", "Bearer " + System.getenv("PADDLE_AUTH"))
+                    .build();
+
+            return run(request);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
-        for (ProductPremium product : ProductPremium.values()) {
-            JSONObject itemJson = new JSONObject();
-            itemJson.put("price_id", product.getPriceId());
-            itemJson.put("quantity", 1);
-            itemsArray.put(itemJson);
-        }
-        requestJson.put("items", itemsArray);
-
-        Request request = new Request.Builder()
-                .url("https://" + System.getenv("PADDLE_SUBDOMAIN_BILLING") + ".paddle.com/pricing-preview")
-                .post(RequestBody.create(requestJson.toString(), MediaType.get("application/json")))
-                .addHeader("User-Agent", USER_AGENT)
-                .addHeader("Authorization", "Bearer " + System.getenv("PADDLE_AUTH"))
-                .build();
-
-        return run(request);
     }
 
     public static boolean subscriptionSetPaused(long subId, boolean paused) throws IOException {
@@ -103,7 +108,11 @@ public class PaddleAPI {
                 .build();
 
         JSONObject responseJson = run(request);
-        return responseJson.getBoolean("success");
+        try {
+            return responseJson.getBoolean("success");
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static boolean subscriptionCancel(long subId) throws IOException {
@@ -120,12 +129,18 @@ public class PaddleAPI {
                 .build();
 
         JSONObject responseJson = run(request);
-        return responseJson.getBoolean("success");
+        try {
+            return responseJson.getBoolean("success");
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static JSONObject run(Request request) throws IOException {
         try (Response response = client.newCall(request).execute()) {
             return new JSONObject(response.body().string());
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
     }
 

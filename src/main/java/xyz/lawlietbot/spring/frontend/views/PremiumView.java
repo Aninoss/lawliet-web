@@ -7,6 +7,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.*;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,7 +133,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                         SendEvent.send(EventOut.DEV_VOTES_UPDATE_REMINDER, map)
                                 .exceptionally(ExceptionLogger.get());
                     }
-                } catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
+                } catch (IOException | InterruptedException | ExecutionException | TimeoutException | JSONException e) {
                     LOGGER.error("Could not load subscription", e);
                     CustomNotification.showError(getTranslation("error"));
                 }

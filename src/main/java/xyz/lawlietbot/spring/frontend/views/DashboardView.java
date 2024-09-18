@@ -23,6 +23,7 @@ import dashboard.ActionResult;
 import dashboard.DashboardComponent;
 import dashboard.container.DashboardContainer;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -358,7 +359,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
         dashboardContainer.setActionSendListener((json, confirmationMessage) -> {
             if (confirmationMessage != null) {
                 Span confirmationMessageSpan = new Span(confirmationMessage);
-                confirmationMessageSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+                confirmationMessageSpan.getStyle().set("color", "var(--lumo-error-color)");
                 confirmationDialog.open(confirmationMessageSpan, () -> {
                     fileCache.flush();
                     sendAction(category, json);
@@ -495,101 +496,117 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
     }
 
     private DashboardInitData sendDashboardInit(long guildId, long userId, Locale locale) {
-        JSONObject json = new JSONObject();
-        json.put("user_id", userId);
-        json.put("locale", locale);
-
         try {
+            JSONObject json = new JSONObject();
+            json.put("user_id", userId);
+            json.put("locale", locale);
+
             return SendEvent.sendToGuild(EventOut.DASH_INIT, json, guildId)
                     .thenApply(r -> {
-                        if (r.getBoolean("ok")) {
-                            ArrayList<DashboardInitData.Category> categories = new ArrayList<>();
-                            JSONArray titlesJson = r.getJSONArray("titles");
-                            for (int i = 0; i < titlesJson.length(); i++) {
-                                JSONObject data = titlesJson.getJSONObject(i);
-                                DashboardInitData.Category category = new DashboardInitData.Category(
-                                        data.getString("id"),
-                                        data.getString("title"),
-                                        data.has("description") ? data.getString("description") : null
-                                );
-                                categories.add(category);
+                        try {
+                            if (r.getBoolean("ok")) {
+                                ArrayList<DashboardInitData.Category> categories = new ArrayList<>();
+                                JSONArray titlesJson = r.getJSONArray("titles");
+                                for (int i = 0; i < titlesJson.length(); i++) {
+                                    JSONObject data = titlesJson.getJSONObject(i);
+                                    DashboardInitData.Category category = new DashboardInitData.Category(
+                                            data.getString("id"),
+                                            data.getString("title"),
+                                            data.has("description") ? data.getString("description") : null
+                                    );
+                                    categories.add(category);
+                                }
+                                return new DashboardInitData(categories, r.getBoolean("premium"));
+                            } else {
+                                return null;
                             }
-                            return new DashboardInitData(categories, r.getBoolean("premium"));
-                        } else {
-                            return null;
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
                         }
                     }).get();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException | ExecutionException | JSONException e) {
             throw new RuntimeException(e);
         }
     }
 
     private DashboardCategoryInitData sendDashboardCategoryInit(String categoryId, long guildId, long userId, Locale locale, boolean createNew) {
-        JSONObject json = new JSONObject();
-        json.put("category", categoryId);
-        json.put("user_id", userId);
-        json.put("locale", locale);
-        json.put("create_new", createNew);
-
         try {
+            JSONObject json = new JSONObject();
+            json.put("category", categoryId);
+            json.put("user_id", userId);
+            json.put("locale", locale);
+            json.put("create_new", createNew);
+
             return SendEvent.sendToGuild(EventOut.DASH_CAT_INIT, json, guildId)
                     .thenApply(r -> {
-                        if (r.getBoolean("ok")) {
-                            ArrayList<String> missingBotPermissions = new ArrayList<>();
-                            JSONArray missingBotPermissionsJson = r.getJSONArray("missing_bot_permissions");
-                            for (int i = 0; i < missingBotPermissionsJson.length(); i++) {
-                                missingBotPermissions.add(missingBotPermissionsJson.getString(i));
-                            }
+                        try {
+                            if (r.getBoolean("ok")) {
+                                ArrayList<String> missingBotPermissions = new ArrayList<>();
+                                JSONArray missingBotPermissionsJson = r.getJSONArray("missing_bot_permissions");
+                                for (int i = 0; i < missingBotPermissionsJson.length(); i++) {
+                                    missingBotPermissions.add(missingBotPermissionsJson.getString(i));
+                                }
 
-                            ArrayList<String> missingUserPermissions = new ArrayList<>();
-                            JSONArray missingUserPermissionsJson = r.getJSONArray("missing_user_permissions");
-                            for (int i = 0; i < missingUserPermissionsJson.length(); i++) {
-                                missingUserPermissions.add(missingUserPermissionsJson.getString(i));
-                            }
+                                ArrayList<String> missingUserPermissions = new ArrayList<>();
+                                JSONArray missingUserPermissionsJson = r.getJSONArray("missing_user_permissions");
+                                for (int i = 0; i < missingUserPermissionsJson.length(); i++) {
+                                    missingUserPermissions.add(missingUserPermissionsJson.getString(i));
+                                }
 
-                            DashboardContainer components = null;
-                            if (missingBotPermissions.isEmpty() && missingUserPermissions.isEmpty()) {
-                                components = (DashboardContainer) DashboardComponent.generate(r.getJSONObject("components"));
-                            }
+                                DashboardContainer components = null;
+                                if (missingBotPermissions.isEmpty() && missingUserPermissions.isEmpty()) {
+                                    components = (DashboardContainer) DashboardComponent.generate(r.getJSONObject("components"));
+                                }
 
-                            return new DashboardCategoryInitData(missingBotPermissions, missingUserPermissions, components, r.getBoolean("premium"));
-                        } else {
-                            return null;
+                                return new DashboardCategoryInitData(missingBotPermissions, missingUserPermissions, components, r.getBoolean("premium"));
+                            } else {
+                                return null;
+                            }
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
                         }
                     }).get();
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (ExecutionException | InterruptedException | JSONException e) {
             LOGGER.error("Dashboard error", e);
             return null;
         }
     }
 
     private ActionResult sendDashboardAction(long guildId, long userId, JSONObject actionJson) throws ExecutionException, InterruptedException {
-        JSONObject json = new JSONObject();
-        json.put("user_id", userId);
-        json.put("action", actionJson);
+        try {
+            JSONObject json = new JSONObject();
+            json.put("user_id", userId);
+            json.put("action", actionJson);
 
-        return SendEvent.sendToGuild(EventOut.DASH_ACTION, json, guildId)
-                .thenApply(r -> {
-                    if (r.getBoolean("ok")) {
-                        ActionResult actionResult = new ActionResult();
-                        if (r.getBoolean("redraw")) {
-                            if (r.has("scroll_to_top") && r.getBoolean("scroll_to_top")) {
-                                actionResult = actionResult.withRedrawScrollToTop();
+            return SendEvent.sendToGuild(EventOut.DASH_ACTION, json, guildId)
+                    .thenApply(r -> {
+                        try {
+                            if (r.getBoolean("ok")) {
+                                ActionResult actionResult = new ActionResult();
+                                if (r.getBoolean("redraw")) {
+                                    if (r.has("scroll_to_top") && r.getBoolean("scroll_to_top")) {
+                                        actionResult = actionResult.withRedrawScrollToTop();
+                                    } else {
+                                        actionResult = actionResult.withRedraw();
+                                    }
+                                }
+                                if (r.has("success_message")) {
+                                    actionResult = actionResult.withSuccessMessage(r.getString("success_message"));
+                                }
+                                if (r.has("error_message")) {
+                                    actionResult = actionResult.withErrorMessage(r.getString("error_message"));
+                                }
+                                return actionResult;
                             } else {
-                                actionResult = actionResult.withRedraw();
+                                throw new RuntimeException();
                             }
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
                         }
-                        if (r.has("success_message")) {
-                            actionResult = actionResult.withSuccessMessage(r.getString("success_message"));
-                        }
-                        if (r.has("error_message")) {
-                            actionResult = actionResult.withErrorMessage(r.getString("error_message"));
-                        }
-                        return actionResult;
-                    } else {
-                        throw new RuntimeException();
-                    }
-                }).get();
+                    }).get();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

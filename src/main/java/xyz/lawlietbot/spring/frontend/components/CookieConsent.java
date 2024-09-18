@@ -1,6 +1,5 @@
 package xyz.lawlietbot.spring.frontend.components;
 
-import javax.servlet.http.Cookie;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Anchor;
@@ -8,6 +7,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.server.VaadinService;
+import jakarta.servlet.http.Cookie;
 
 public class CookieConsent extends VerticalLayout {
 

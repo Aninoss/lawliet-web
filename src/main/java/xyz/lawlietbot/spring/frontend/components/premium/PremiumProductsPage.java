@@ -1,11 +1,5 @@
 package xyz.lawlietbot.spring.frontend.components.premium;
 
-import com.github.appreciated.css.grid.GridLayoutComponent;
-import com.github.appreciated.css.grid.sizes.Flex;
-import com.github.appreciated.css.grid.sizes.Length;
-import com.github.appreciated.css.grid.sizes.MinMax;
-import com.github.appreciated.css.grid.sizes.Repeat;
-import com.github.appreciated.layout.FlexibleGridLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -15,9 +9,16 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.server.VaadinRequest;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vaadin.addons.componentfactory.css.grid.GridLayoutComponent;
+import org.vaadin.addons.componentfactory.css.grid.sizes.Flex;
+import org.vaadin.addons.componentfactory.css.grid.sizes.Length;
+import org.vaadin.addons.componentfactory.css.grid.sizes.MinMax;
+import org.vaadin.addons.componentfactory.css.grid.sizes.Repeat;
+import org.vaadin.addons.componentfactory.layout.FlexibleGridLayout;
 import xyz.lawlietbot.spring.ExternalLinks;
 import xyz.lawlietbot.spring.backend.Redirector;
 import xyz.lawlietbot.spring.backend.payment.ProductPremium;
@@ -65,7 +66,7 @@ public class PremiumProductsPage extends PremiumPage {
             int remaining = SendEvent.sendToAnyCluster(EventOut.TXT2IMG_BOUGHT_IMAGES, Map.of("user_id", sessionData.getDiscordUser().get().getId())).get()
                     .getInt("remaining");
             remainingParagraph.setText(StringUtil.numToString(remaining));
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException | ExecutionException | JSONException e) {
             LOGGER.error("Could not retrieve remaining images", e);
             remainingParagraph.setText("???");
         }
@@ -91,22 +92,28 @@ public class PremiumProductsPage extends PremiumPage {
             revealButton.getStyle().set("margin-top", "0.5rem")
                     .set("margin-bottom", "1rem");
             revealButton.addClickListener(e -> {
-                JSONObject responseJson = SendEvent.send(EventOut.BOUGHT_PREMIUM_CODES, Map.of("user_id", sessionData.getDiscordUser().get().getId())).join();
-                JSONArray codesJson = responseJson.getJSONArray("codes");
+                try {
+                    JSONObject responseJson = SendEvent.send(EventOut.BOUGHT_PREMIUM_CODES, Map.of("user_id", sessionData.getDiscordUser().get().getId())).join();
+                    JSONArray codesJson = responseJson.getJSONArray("codes");
 
-                if (codesJson.isEmpty()) {
-                    dialog.open(getTranslation("premium.products.nocodes"), () -> {});
-                } else {
-                    VerticalLayout linksLayout = new VerticalLayout();
-                    linksLayout.setPadding(false);
-                    linksLayout.setSpacing(false);
-                    for (int i = 0; i < codesJson.length(); i++) {
-                        String url = ExternalLinks.LAWLIET_GIFT + codesJson.getString(i);
-                        Anchor a = new Anchor(url, url);
-                        a.setTarget("_blank");
-                        linksLayout.add(a);
+                    if (codesJson.length() == 0) {
+                        dialog.open(getTranslation("premium.products.nocodes"), () -> {
+                        });
+                    } else {
+                        VerticalLayout linksLayout = new VerticalLayout();
+                        linksLayout.setPadding(false);
+                        linksLayout.setSpacing(false);
+                        for (int i = 0; i < codesJson.length(); i++) {
+                            String url = ExternalLinks.LAWLIET_GIFT + codesJson.getString(i);
+                            Anchor a = new Anchor(url, url);
+                            a.setTarget("_blank");
+                            linksLayout.add(a);
+                        }
+                        dialog.open(linksLayout, () -> {
+                        });
                     }
-                    dialog.open(linksLayout, () -> {});
+                } catch (JSONException ex) {
+                    throw new RuntimeException(ex);
                 }
             });
             mainLayout.add(revealButton);

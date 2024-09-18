@@ -114,7 +114,7 @@ public class DashboardComponentConverter {
         return component;
     }
 
-    public static void addAndRemove(HasOrderedComponents<?> layout, DashboardContainer dashboardContainer, long guildId, long userId, ConfirmationDialog dialog, FileCache fileCache) {
+    public static void addAndRemove(HasOrderedComponents layout, DashboardContainer dashboardContainer, long guildId, long userId, ConfirmationDialog dialog, FileCache fileCache) {
         /* removed components */
         List<Component> componentChildren = layout.getChildren().collect(Collectors.toList());
         for (int i = 0; i < componentChildren.size(); i++) {

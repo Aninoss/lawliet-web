@@ -1,14 +1,5 @@
 package xyz.lawlietbot.spring.frontend.views;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
@@ -24,6 +15,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.router.Route;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import xyz.lawlietbot.spring.NoLiteAccess;
@@ -39,6 +31,16 @@ import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
 @Route(value = "developmentvotes", layout = MainLayout.class)
 @NoLiteAccess
 public class DevelopmentVotesView extends PageLayout {
@@ -46,7 +48,7 @@ public class DevelopmentVotesView extends PageLayout {
     private final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
     private final HashSet<String> selectedVotes = new HashSet<>();
 
-    public DevelopmentVotesView(@Autowired SessionData sessionData, @Autowired UIData uiData) throws IOException, ExecutionException, InterruptedException {
+    public DevelopmentVotesView(@Autowired SessionData sessionData, @Autowired UIData uiData) throws IOException, ExecutionException, InterruptedException, JSONException {
         super(sessionData, uiData);
         getStyle().set("margin-bottom", "48px");
         boolean loggedIn = getSessionData().isLoggedIn();
@@ -107,7 +109,13 @@ public class DevelopmentVotesView extends PageLayout {
         if (votesOpen) {
             Button sendButton = new Button(getTranslation("devvotes.submit"));
             sendButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            sendButton.addClickListener(e -> onButtonClick(year, month));
+            sendButton.addClickListener(e -> {
+                try {
+                    onButtonClick(year, month);
+                } catch (JSONException ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
             mainContent.add(sendButton);
         }
 
@@ -141,7 +149,7 @@ public class DevelopmentVotesView extends PageLayout {
         return layout;
     }
 
-    private void onButtonClick(int year, int month) {
+    private void onButtonClick(int year, int month) throws JSONException {
         JSONObject requestJson = new JSONObject();
         requestJson.put("user_id", getSessionData().getDiscordUser().get().getId());
         requestJson.put("year", year);
@@ -165,7 +173,7 @@ public class DevelopmentVotesView extends PageLayout {
         return errorSpan;
     }
 
-    private Component generateVotes(int month, int year, JSONObject dataJson, boolean votesOpen, int totalVotes) throws IOException {
+    private Component generateVotes(int month, int year, JSONObject dataJson, boolean votesOpen, int totalVotes) throws IOException, JSONException {
         VerticalLayout mainLayout = new VerticalLayout();
         mainLayout.setPadding(true);
         mainLayout.getStyle().set("margin-top", "32px")

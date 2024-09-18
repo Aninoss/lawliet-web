@@ -7,6 +7,7 @@ import com.jamiussiam.paddle.verifier.Verifier;
 import com.vaadin.flow.component.UI;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,30 +82,30 @@ public class PaddleManager {
         JSONObject json;
         try {
             json = subscriptionPricesCache.get(new Pair<>(customerIpAddress, group));
-        } catch (ExecutionException e) {
+
+            JSONArray productsJson = json.getJSONObject("response").getJSONArray("products");
+            HashMap<Long, Double> subscriptionPriceMap = new HashMap<>();
+
+            Currency currency = null;
+            boolean includesVat = false;
+            for (int i = 0; i < productsJson.length(); i++) {
+                JSONObject productJson = productsJson.getJSONObject(i);
+                currency = Currency.valueOf(productJson.getString("currency"));
+                includesVat = productJson.getBoolean("vendor_set_prices_included_tax");
+
+                long productId = productJson.getLong("product_id");
+                double price = productJson.getJSONObject("price").getDouble(includesVat ? "gross" : "net");
+                subscriptionPriceMap.put(productId, price);
+            }
+
+            return new PaddleSubscriptionPrices(
+                    currency,
+                    subscriptionPriceMap,
+                    includesVat
+            );
+        } catch (ExecutionException | JSONException e) {
             throw new RuntimeException(e);
         }
-
-        JSONArray productsJson = json.getJSONObject("response").getJSONArray("products");
-        HashMap<Long, Double> subscriptionPriceMap = new HashMap<>();
-
-        Currency currency = null;
-        boolean includesVat = false;
-        for (int i = 0; i < productsJson.length(); i++) {
-            JSONObject productJson = productsJson.getJSONObject(i);
-            currency = Currency.valueOf(productJson.getString("currency"));
-            includesVat = productJson.getBoolean("vendor_set_prices_included_tax");
-
-            long productId = productJson.getLong("product_id");
-            double price = productJson.getJSONObject("price").getDouble(includesVat ? "gross" : "net");
-            subscriptionPriceMap.put(productId, price);
-        }
-
-        return new PaddleSubscriptionPrices(
-                currency,
-                subscriptionPriceMap,
-                includesVat
-        );
     }
 
     public static Map<String, String> retrieveProductPrices(String customerIpAddress, String vatString) {
@@ -113,28 +114,28 @@ public class PaddleManager {
         JSONObject json;
         try {
             json = productPricesCache.get(customerIpAddress);
-        } catch (ExecutionException e) {
+
+            JSONArray itemsJson = json.getJSONObject("data").getJSONObject("details").getJSONArray("line_items");
+            HashMap<String, String> productPriceMap = new HashMap<>();
+
+            for (int i = 0; i < itemsJson.length(); i++) {
+                JSONObject itemJson = itemsJson.getJSONObject(i);
+                JSONObject priceJson = itemJson.getJSONObject("price");
+                String priceId = priceJson.getString("id");
+
+                String price;
+                if (priceJson.getString("tax_mode").equals("external")) {
+                    price = itemJson.getJSONObject("formatted_totals").getString("subtotal") + vatString;
+                } else {
+                    price = itemJson.getJSONObject("formatted_totals").getString("total");
+                }
+                productPriceMap.put(priceId, price);
+            }
+
+            return productPriceMap;
+        } catch (ExecutionException | JSONException e) {
             throw new RuntimeException(e);
         }
-
-        JSONArray itemsJson = json.getJSONObject("data").getJSONObject("details").getJSONArray("line_items");
-        HashMap<String, String> productPriceMap = new HashMap<>();
-
-        for (int i = 0; i < itemsJson.length(); i++) {
-            JSONObject itemJson = itemsJson.getJSONObject(i);
-            JSONObject priceJson = itemJson.getJSONObject("price");
-            String priceId = priceJson.getString("id");
-
-            String price;
-            if (priceJson.getString("tax_mode").equals("external")) {
-                price = itemJson.getJSONObject("formatted_totals").getString("subtotal") + vatString;
-            } else {
-                price = itemJson.getJSONObject("formatted_totals").getString("total");
-            }
-            productPriceMap.put(priceId, price);
-        }
-
-        return productPriceMap;
     }
 
     public static void openPopup(SubDuration duration, SubLevel level, DiscordUser discordUser, int quantity, List<Long> presetGuildIds, Locale locale, int group) {
@@ -240,6 +241,8 @@ public class PaddleManager {
                     checkoutJson.getJSONObject("order").getString("formatted_total")
             );
             LOGGER.info("Subscription notification sent");
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         } catch (Throwable e) {
             LOGGER.error("Error in new Paddle sub", e);
             throw e;
@@ -249,84 +252,100 @@ public class PaddleManager {
     }
 
     public static void registerBilling(JSONObject json) {
-        LOGGER.info("--- NEW PAYMENT RECEIVED ---\n{}", json);
-
-        JSONObject data = json.getJSONObject("data");
-        JSONObject itemData = data.getJSONArray("items").getJSONObject(0);
-        JSONObject priceData = itemData.getJSONObject("price");
-        JSONObject customData = data.getJSONObject("custom_data");
-        JSONObject detailsTotalData = data.getJSONObject("details").getJSONObject("totals");
-
-        String transactionId = data.getString("id");
-        CompletableFuture<Void> future = waitForCheckoutAsync(transactionId);
-
-        long userId = Long.parseLong(customData.getString("discordId"));
-        int quantity = itemData.getInt("quantity");
-        String priceId = priceData.getString("id");
-
         try {
-            if (ProductTxt2Img.fromPriceId(priceId) != null) {
-                registerTxt2Img(priceData, quantity, userId, detailsTotalData, customData);
-            } else {
-                registerPremiumCode(priceId, userId, detailsTotalData, customData, priceData, quantity);
+            LOGGER.info("--- NEW PAYMENT RECEIVED ---\n{}", json);
+
+            JSONObject data = json.getJSONObject("data");
+            JSONObject itemData = data.getJSONArray("items").getJSONObject(0);
+            JSONObject priceData = itemData.getJSONObject("price");
+            JSONObject customData = data.getJSONObject("custom_data");
+            JSONObject detailsTotalData = data.getJSONObject("details").getJSONObject("totals");
+
+            String transactionId = data.getString("id");
+            CompletableFuture<Void> future = waitForCheckoutAsync(transactionId);
+
+            long userId = Long.parseLong(customData.getString("discordId"));
+            int quantity = itemData.getInt("quantity");
+            String priceId = priceData.getString("id");
+
+            try {
+                if (ProductTxt2Img.fromPriceId(priceId) != null) {
+                    registerTxt2Img(priceData, quantity, userId, detailsTotalData, customData);
+                } else {
+                    registerPremiumCode(priceId, userId, detailsTotalData, customData, priceData, quantity);
+                }
+            } catch (Throwable e) {
+                LOGGER.error("Error in new paddle billing payment", e);
+                throw e;
+            } finally {
+                future.complete(null);
             }
-        } catch (Throwable e) {
-            LOGGER.error("Error in new paddle billing payment", e);
-            throw e;
-        } finally {
-            future.complete(null);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
     }
 
     private static void registerTxt2Img(JSONObject priceData, int quantity, long userId, JSONObject detailsTotalData, JSONObject customData) {
-        int n = priceData.getJSONObject("custom_data").getInt("n") * quantity;
+        try {
+            int n = priceData.getJSONObject("custom_data").getInt("n") * quantity;
 
-        JSONObject requestJson = new JSONObject();
-        requestJson.put("user_id", userId);
-        requestJson.put("n", n);
+            JSONObject requestJson = new JSONObject();
+            requestJson.put("user_id", userId);
+            requestJson.put("n", n);
 
-        JSONObject responseJson = SendEvent.sendToAnyCluster(EventOut.PADDLE_TXT2IMG, requestJson).join();
-        if (!responseJson.has("ok")) {
-            throw new RuntimeException("Paddle txt2img error");
+            JSONObject responseJson = SendEvent.sendToAnyCluster(EventOut.PADDLE_TXT2IMG, requestJson).join();
+            if (!responseJson.has("ok")) {
+                throw new RuntimeException("Paddle txt2img error");
+            }
+
+            sendNotification(detailsTotalData, customData, userId, priceData, quantity);
+            LOGGER.info("Txt2img notification sent");
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
-
-        sendNotification(detailsTotalData, customData, userId, priceData, quantity);
-        LOGGER.info("Txt2img notification sent");
     }
 
     private static void registerPremiumCode(String priceId, long userId, JSONObject detailsTotalData, JSONObject customData, JSONObject priceData, int quantity) {
-        ProductPremium product = ProductPremium.fromPriceId(priceId);
+        try {
+            ProductPremium product = ProductPremium.fromPriceId(priceId);
 
-        JSONObject requestJson = new JSONObject();
-        requestJson.put("user_id", userId);
-        requestJson.put("level", product.getLevel());
-        requestJson.put("days", product.getDays());
-        requestJson.put("quantity", quantity);
+            JSONObject requestJson = new JSONObject();
+            requestJson.put("user_id", userId);
+            requestJson.put("level", product.getLevel());
+            requestJson.put("days", product.getDays());
+            requestJson.put("quantity", quantity);
 
-        JSONObject responseJson = SendEvent.send(EventOut.CREATE_PREMIUM_CODE, requestJson).join();
-        if (!responseJson.has("ok")) {
-            throw new RuntimeException("Paddle premium codes error");
+            JSONObject responseJson = SendEvent.send(EventOut.CREATE_PREMIUM_CODE, requestJson).join();
+            if (!responseJson.has("ok")) {
+                throw new RuntimeException("Paddle premium codes error");
+            }
+
+            sendNotification(detailsTotalData, customData, userId, priceData, quantity);
+            LOGGER.info("Premium code notification sent");
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
-
-        sendNotification(detailsTotalData, customData, userId, priceData, quantity);
-        LOGGER.info("Premium code notification sent");
     }
 
     private static void sendNotification(JSONObject detailsTotalData, JSONObject customData, long userId, JSONObject priceData, int quantity) {
-        Currency currency = Currency.valueOf(detailsTotalData.getString("currency_code"));
-        int total = detailsTotalData.getInt("grand_total");
-        String priceString = NumberFormat.getCurrencyInstance(Locale.ENGLISH)
-                .format((double) total / Math.pow(10, currency.getDecimalPlaces()))
-                .replace("¤", currency.getSymbol());
+        try {
+            Currency currency = Currency.valueOf(detailsTotalData.getString("currency_code"));
+            int total = detailsTotalData.getInt("grand_total");
+            String priceString = NumberFormat.getCurrencyInstance(Locale.ENGLISH)
+                    .format((double) total / Math.pow(10, currency.getDecimalPlaces()))
+                    .replace("¤", currency.getSymbol());
 
-        WebhookNotifier.newSub(
-                customData.getString("discordTag"),
-                userId,
-                customData.getString("discordAvatar"),
-                priceData.getString("description"),
-                quantity,
-                priceString
-        );
+            WebhookNotifier.newSub(
+                    customData.getString("discordTag"),
+                    userId,
+                    customData.getString("discordAvatar"),
+                    priceData.getString("description"),
+                    quantity,
+                    priceString
+            );
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static void printParameterMap(Map<String, String[]> parameterMap) {
@@ -399,18 +418,22 @@ public class PaddleManager {
     }
 
     private static String generatePassthrough(DiscordUser discordUser, List<Long> presetGuildIds) {
-        JSONObject json = new JSONObject();
-        json.put("discord_id", discordUser.getId());
-        json.put("discord_tag", Base64.getEncoder().encodeToString(discordUser.getUsername().getBytes(StandardCharsets.UTF_8)));
-        json.put("discord_avatar", discordUser.getUserAvatar());
+        try {
+            JSONObject json = new JSONObject();
+            json.put("discord_id", discordUser.getId());
+            json.put("discord_tag", Base64.getEncoder().encodeToString(discordUser.getUsername().getBytes(StandardCharsets.UTF_8)));
+            json.put("discord_avatar", discordUser.getUserAvatar());
 
-        JSONArray presetGuildsArray = new JSONArray();
-        for (long presetGuildId : presetGuildIds) {
-            presetGuildsArray.put(presetGuildId);
+            JSONArray presetGuildsArray = new JSONArray();
+            for (long presetGuildId : presetGuildIds) {
+                presetGuildsArray.put(presetGuildId);
+            }
+            json.put("preset_guilds", presetGuildsArray);
+
+            return json.toString();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
-        json.put("preset_guilds", presetGuildsArray);
-
-        return json.toString();
     }
 
 }

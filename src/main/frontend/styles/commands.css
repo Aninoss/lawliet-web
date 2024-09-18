@@ -1,0 +1,17 @@
+#commands-resultslabel {
+    margin-top: 0;
+    margin-bottom: -4px;
+}
+
+.command-field {
+    margin-top: 8px;
+}
+
+
+@media (max-width: 700px) {
+
+    .command-field {
+        min-width: 100%;
+    }
+
+}

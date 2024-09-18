@@ -1,7 +1,7 @@
 package xyz.lawlietbot.spring.frontend.views;
 
-import java.io.IOException;
 import com.vaadin.flow.component.Html;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
@@ -14,7 +14,10 @@ import xyz.lawlietbot.spring.frontend.components.PageHeader;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
 import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
 
+import java.io.IOException;
+
 @Route(value = "privacy", layout = MainLayout.class)
+@CssImport("./styles/htmldocument.css")
 public class PrivacyView extends PageLayout {
 
     public PrivacyView(@Autowired SessionData sessionData, @Autowired UIData uiData) throws IOException {

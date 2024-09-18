@@ -2,6 +2,7 @@ package xyz.lawlietbot.spring.syncserver;
 
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -25,14 +26,24 @@ public class SendEvent {
 
     public static void sendToAllClusters(EventOut eventOut, Map<String, Object> requestMap) {
         JSONObject requestJson = new JSONObject();
-        requestMap.forEach(requestJson::put);
+        requestMap.forEach((k, v) -> {
+            try {
+                requestJson.put(k, v);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        });
         sendToAllClusters(eventOut, requestJson);
     }
 
     public static void sendToAllClusters(EventOut eventOut, JSONObject requestJson) {
-        requestJson.put("forward_type", ForwardType.ALL_CLUSTERS);
-        requestJson.put("event", eventOut.name());
-        send(EventOut.FORWARD, requestJson);
+        try {
+            requestJson.put("forward_type", ForwardType.ALL_CLUSTERS);
+            requestJson.put("event", eventOut.name());
+            send(EventOut.FORWARD, requestJson);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static CompletableFuture<JSONObject> sendToAnyCluster(EventOut eventOut) {
@@ -41,13 +52,23 @@ public class SendEvent {
 
     public static CompletableFuture<JSONObject> sendToAnyCluster(EventOut eventOut, Map<String, Object> requestMap) {
         JSONObject requestJson = new JSONObject();
-        requestMap.forEach(requestJson::put);
+        requestMap.forEach((k, v) -> {
+            try {
+                requestJson.put(k, v);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        });
         return sendToAnyCluster(eventOut, requestJson);
     }
 
     public static CompletableFuture<JSONObject> sendToAnyCluster(EventOut eventOut, JSONObject requestJson) {
-        requestJson.put("forward_type", ForwardType.ANY_CLUSTER);
-        requestJson.put("event", eventOut.name());
+        try {
+            requestJson.put("forward_type", ForwardType.ANY_CLUSTER);
+            requestJson.put("event", eventOut.name());
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
         return send(EventOut.FORWARD, requestJson);
     }
 
@@ -57,14 +78,24 @@ public class SendEvent {
 
     public static CompletableFuture<JSONObject> sendToCluster(EventOut eventOut, Map<String, Object> requestMap, int clusterId) {
         JSONObject requestJson = new JSONObject();
-        requestMap.forEach(requestJson::put);
+        requestMap.forEach((k, v) -> {
+            try {
+                requestJson.put(k, v);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        });
         return sendToCluster(eventOut, requestJson, clusterId);
     }
 
     public static CompletableFuture<JSONObject> sendToCluster(EventOut eventOut, JSONObject requestJson, int clusterId) {
-        requestJson.put("forward_type", ForwardType.SPECIFIC_CLUSTER);
-        requestJson.put("event", eventOut.name());
-        requestJson.put("cluster_id", clusterId);
+        try {
+            requestJson.put("forward_type", ForwardType.SPECIFIC_CLUSTER);
+            requestJson.put("event", eventOut.name());
+            requestJson.put("cluster_id", clusterId);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
         return send(EventOut.FORWARD, requestJson);
     }
 
@@ -74,14 +105,24 @@ public class SendEvent {
 
     public static CompletableFuture<JSONObject> sendToGuild(EventOut eventOut, Map<String, Object> requestMap, long guildId) {
         JSONObject requestJson = new JSONObject();
-        requestMap.forEach(requestJson::put);
+        requestMap.forEach((k, v) -> {
+            try {
+                requestJson.put(k, v);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        });
         return sendToGuild(eventOut, requestJson, guildId);
     }
 
     public static CompletableFuture<JSONObject> sendToGuild(EventOut eventOut, JSONObject requestJson, long guildId) {
-        requestJson.put("forward_type", ForwardType.SPECIFIC_GUILD);
-        requestJson.put("event", eventOut.name());
-        requestJson.put("guild_id", guildId);
+        try {
+            requestJson.put("forward_type", ForwardType.SPECIFIC_GUILD);
+            requestJson.put("event", eventOut.name());
+            requestJson.put("guild_id", guildId);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
         return send(EventOut.FORWARD, requestJson);
     }
 
@@ -91,7 +132,13 @@ public class SendEvent {
 
     public static CompletableFuture<JSONObject> send(EventOut eventOut, Map<String, Object> requestMap) {
         JSONObject requestJson = new JSONObject();
-        requestMap.forEach(requestJson::put);
+        requestMap.forEach((k, v) -> {
+            try {
+                requestJson.put(k, v);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        });
         return send(eventOut, requestJson);
     }
 

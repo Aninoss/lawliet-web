@@ -89,6 +89,7 @@ public class CommandCategoryLayout extends VerticalLayout {
                     moreInfo = true;
                     VerticalLayout spec = new VerticalLayout();
                     spec.setPadding(false);
+                    spec.setSpacing(false);
 
                     UnorderedList ul = new UnorderedList();
                     Arrays.stream(specContent[i].split("\n")).forEach(entry -> ul.add(new ListItem(entry)));

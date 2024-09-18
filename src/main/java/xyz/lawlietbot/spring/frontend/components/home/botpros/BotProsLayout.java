@@ -13,7 +13,8 @@ public class BotProsLayout extends VerticalLayout {
         getStyle().set("margin-bottom", "42px");
 
         H2 title = new H2(getTranslation("bot.card.title"));
-        title.getStyle().set("margin-top", "2em");
+        title.getStyle().set("margin-top", "2em")
+                .set("margin-bottom", "0.5em");
         title.setWidthFull();
         title.addClassName(Styles.CENTER_TEXT);
 

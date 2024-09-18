@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <!-- Vaadin project from https://github.com/vaadin/skeleton-starter-flow-spring -->
     <groupId>xyz.lawlietbot.web</groupId>
@@ -10,28 +10,17 @@
     <packaging>jar</packaging>
 
     <properties>
-        <java.version>11</java.version>
-        <vaadin.version>14.11.7</vaadin.version>
+        <java.version>17</java.version>
+        <vaadin.version>24.4.12</vaadin.version>
     </properties>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.7</version>
+        <version>3.2.9</version>
     </parent>
 
     <repositories>
-        <!-- The order of definitions matters. Explicitly defining central here to make sure it has the highest priority. -->
-
-        <!-- Main Maven repository -->
-        <repository>
-            <id>central</id>
-            <url>https://repo.maven.apache.org/maven2</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <!-- Repository used by many Vaadin add-ons -->
         <repository>
             <id>Vaadin Directory</id>
             <url>https://maven.vaadin.com/vaadin-addons</url>
@@ -41,21 +30,17 @@
         </repository>
 
         <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
-
-    <pluginRepositories>
-        <!-- Main Maven repository -->
-        <pluginRepository>
             <id>central</id>
             <url>https://repo.maven.apache.org/maven2</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
+        </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 
     <dependencyManagement>
         <dependencies>
@@ -74,42 +59,14 @@
             <groupId>com.vaadin</groupId>
             <!-- Replace artifactId with vaadin-core to use only free components -->
             <artifactId>vaadin</artifactId>
-            <exclusions>
-                <!-- Webjars are only needed when running in Vaadin 13 compatibility mode -->
-                <exclusion>
-                    <groupId>com.vaadin.webjar</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.webjars.bowergithub.insites</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.webjars.bowergithub.polymer</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.webjars.bowergithub.vaadin</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.webjars.bowergithub.webcomponents</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring-boot-starter</artifactId>
             <exclusions>
-                <!-- Excluding so that webjars are not included. -->
                 <exclusion>
-                    <groupId>com.vaadin</groupId>
-                    <artifactId>vaadin-core</artifactId>
+                    <groupId>com.vaadin.external.google</groupId>
+                    <artifactId>android-json</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -117,7 +74,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
@@ -130,62 +86,24 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-testbench</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <!-- Include JUnit 4 support for TestBench and others -->
-        <dependency>
-            <groupId>org.junit.vintage</groupId>
-            <artifactId>junit-vintage-engine</artifactId>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.hamcrest</groupId>
-                    <artifactId>hamcrest-core</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>io.github.bonigarcia</groupId>
-            <artifactId>webdrivermanager</artifactId>
-            <version>5.0.3</version>
+            <artifactId>vaadin-testbench-junit5</artifactId>
             <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.2.6</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-to-slf4j</artifactId>
-            <version>2.14.1</version>
-        </dependency>
-        <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20230227</version>
+            <version>20210307</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>31.0.1-jre</version>
+            <version>33.3.0-jre</version>
         </dependency>
         <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>4.9.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.appreciated</groupId>
-            <artifactId>vaadin-css-grid</artifactId>
-            <version>2.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-charts-flow</artifactId>
-            <version>21.0.3</version>
+            <groupId>org.vaadin.addons.componentfactory</groupId>
+            <artifactId>vaadin-css-grid-layout</artifactId>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.stripe</groupId>
@@ -195,12 +113,7 @@
         <dependency>
             <groupId>com.vaadin.componentfactory</groupId>
             <artifactId>togglebutton</artifactId>
-            <version>1.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.vaadin.gatanaso</groupId>
-            <artifactId>multiselect-combo-box-flow</artifactId>
-            <version>2.5.0</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.Aninoss</groupId>
@@ -230,19 +143,8 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <!-- Clean build and startup time for Vaadin apps sometimes may exceed
-                     the default Spring Boot's 30sec timeout.  -->
-                <configuration>
-                    <wait>500</wait>
-                    <maxAttempts>240</maxAttempts>
-                </configuration>
             </plugin>
 
-            <!--
-                Take care of synchronizing java dependencies and imports in
-                package.json and main.js files.
-                It also creates webpack.config.js if not exists yet.
-            -->
             <plugin>
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-maven-plugin</artifactId>
@@ -262,6 +164,19 @@
         <profile>
             <!-- Production mode is activated using -Pproduction -->
             <id>production</id>
+            <dependencies>
+                <!-- Exclude development dependencies from production -->
+                <dependency>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>vaadin-core</artifactId>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>com.vaadin</groupId>
+                            <artifactId>vaadin-dev</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+            </dependencies>
             <build>
                 <plugins>
                     <plugin>
@@ -276,9 +191,6 @@
                                 <phase>compile</phase>
                             </execution>
                         </executions>
-                        <configuration>
-                            <productionMode>true</productionMode>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>
