@@ -40,6 +40,8 @@ ul {
     width: calc(auto + 32px) !important;
     background: var(--lumo-tint-5pct);
     border-radius: 8px;
+    padding-top: 3em;
+    padding-bottom: 3em;
 }
 
 #dashboard-lock-h3 {
@@ -50,8 +52,7 @@ ul {
 
 #dashboard-lock-icon {
     width: 48px;
-    height: auto;
-    margin-top: 32px;
+    height: 48px;
     margin-bottom: 24px;
 }
 
@@ -218,6 +219,14 @@ h3 + div > .dashboard-text {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+vaadin-multi-select-combo-box.hide-toggle-button::part(toggle-button) {
+    display: none;
+}
+
+.hide-overlay {
+    display: none;
 }
 
 @media (min-width: 700px) {

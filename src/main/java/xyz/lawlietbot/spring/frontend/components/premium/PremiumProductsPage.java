@@ -137,6 +137,7 @@ public class PremiumProductsPage extends PremiumPage {
         mainLayout.setPadding(false);
 
         H2 header = new H2(getTranslation("premium.products.txt2img"));
+        header.getStyle().set("margin-top", "2em");
         mainLayout.add(header);
 
         Paragraph p = new Paragraph(getTranslation("premium.products.txt2img.desc"));

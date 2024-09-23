@@ -217,6 +217,10 @@ vaadin-accordion-panel > div > .prop-check {
     }
 }
 
+.paddle-frame-overlay {
+    color-scheme: light dark;
+}
+
 
 @media (min-width: 700px) {
 

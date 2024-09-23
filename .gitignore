@@ -138,3 +138,4 @@ target
 pnpm-lock.yaml
 pnpmfile.js
 webpack.*.js
+src/main/frontend/generated

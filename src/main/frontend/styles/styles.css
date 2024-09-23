@@ -58,6 +58,10 @@ vaadin-tab {
     cursor: pointer;
 }
 
+vaadin-details-summary {
+    white-space: normal !important;
+}
+
 .pointer {
     cursor: pointer;
 }

@@ -135,7 +135,7 @@ public class PremiumManagePage extends PremiumPage {
                     outerSpan.getStyle().set("color", "black");
                     if (action.equals("cancel")) {
                         Span innerSpan = new Span(" " + getTranslation("manage.grid.action.dialog.cancel.warning"));
-                        innerSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+                        innerSpan.getStyle().set("color", "var(--lumo-error-color)");
                         outerSpan.add(innerSpan);
                     }
 

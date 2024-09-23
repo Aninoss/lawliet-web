@@ -44,7 +44,7 @@ public class DashboardTextFieldButtons extends FlexLayout {
         if (editMode) {
             Button saveButton = new Button(VaadinIcon.CHECK.create());
             saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            saveButton.setWidthFull();
+            saveButton.setWidth("0");
             if (useEnterShortcut) {
                 saveButton.addClickShortcut(Key.ENTER);
             }
@@ -56,12 +56,11 @@ public class DashboardTextFieldButtons extends FlexLayout {
 
             Button resetButton = new Button(VaadinIcon.CLOSE.create());
             resetButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-            resetButton.setWidthFull();
+            resetButton.setWidth("0");
             resetButton.addClickListener(e -> {
                 cancelListener.run();
                 changeMode(false);
             });
-            resetButton.setWidthFull();
 
             add(saveButton, resetButton);
         } else {
