@@ -13,6 +13,7 @@ public class IconLabel extends HorizontalLayout {
     public IconLabel(Icon icon, String string) {
         setSpacing(false);
         setAlignItems(FlexComponent.Alignment.CENTER);
+        getStyle().set("margin-top", "1em");
 
         icon.setSize("18px");
         icon.getStyle().set("margin-right", "6px");

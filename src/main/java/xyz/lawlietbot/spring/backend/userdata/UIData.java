@@ -1,35 +1,29 @@
 package xyz.lawlietbot.spring.backend.userdata;
 
-import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-import java.util.Map;
 import java.util.Optional;
 
 @Component
 @UIScope
 public class UIData implements Serializable {
 
-    private final boolean lite;
-    private final boolean noNSFW;
+    private boolean lite;
+    private boolean noNSFW;
     private Long userId = null;
 
-    public UIData() {
-        Map<String, String[]> parametersMap = VaadinService.getCurrentRequest().getParameterMap();
-        lite = parameterMapIsTrue(parametersMap, "lite");
-        noNSFW = parameterMapIsTrue(parametersMap, "nonsfw");
-    }
-
-    public boolean parameterMapIsTrue(Map<String, String[]> parametersMap, String key) {
-        return parametersMap != null && parametersMap.containsKey(key) &&
-                parametersMap.get(key).length > 0 &&
-                parametersMap.get(key)[0].equals("true");
+    public void setLite(boolean lite) {
+        this.lite = lite;
     }
 
     public boolean isLite() {
         return lite;
+    }
+
+    public void setNSFWDisabled(boolean noNSFW) {
+        this.noNSFW = noNSFW;
     }
 
     public boolean isNSFWDisabled() {

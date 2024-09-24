@@ -32,7 +32,9 @@ import xyz.lawlietbot.spring.frontend.views.IEView;
 import xyz.lawlietbot.spring.syncserver.SyncUtil;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 @CssImport("./styles/styles.css")
@@ -47,10 +49,84 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
     private final UIData uiData;
     private final Div divStretch = new Div();
     private HeaderComponent headerComponent;
+    private boolean built = false;
 
     public MainLayout(@Autowired SessionData sessionData, @Autowired UIData uiData) {
         this.sessionData = sessionData;
         this.uiData = uiData;
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (!built) {
+            built = true;
+            extractGeneralParameters(event);
+            build();
+        }
+
+        divStretch.getStyle().set("background", "var(--lumo-base-color)");
+        Class<?> cTemp = event.getNavigationTarget();
+
+        if (PageLayout.class.isAssignableFrom(cTemp)) {
+            Class<? extends PageLayout> c = (Class<? extends PageLayout>) cTemp;
+
+            if (c.isAnnotationPresent(SetDivStretchBackground.class)) {
+                final String background = c.getAnnotation(SetDivStretchBackground.class).background();
+                divStretch.getStyle().set("background", background);
+            }
+
+            if (checkLiteModeAccess(event)) {
+                return;
+            }
+            if (checkBrowserIE(event)) {
+                return;
+            }
+            sessionData.setCurrentTarget(event.getLocation());
+            checkLoginStatusChanged(event);
+            headerComponent.setNavBarSolid(event.getNavigationTarget().isAnnotationPresent(NavBarSolid.class));
+        }
+    }
+
+    @Override
+    public int setErrorParameter(BeforeEnterEvent beforeEnterEvent, ErrorParameter<Exception> errorParameter) {
+        LOGGER.error("Error in page initialization", errorParameter.getException());
+        beforeEnterEvent.rerouteTo(ExceptionView.class);
+        return 500;
+    }
+
+    @Override
+    public void beforeLeave(BeforeLeaveEvent event) {
+        Class<?> target = event.getNavigationTarget();
+
+        if (uiData.isLite() && target.isAnnotationPresent(NoLiteAccess.class)) {
+            event.postpone();
+            return;
+        }
+
+        LoginAccess loginAccess = target.getAnnotation(LoginAccess.class);
+        if (!sessionData.isLoggedIn() && loginAccess != null) {
+            sessionData.setCurrentTarget(event.getLocation());
+            new Redirector().redirect(sessionData.getLoginUrl());
+            event.postpone();
+        }
+    }
+
+    private void extractGeneralParameters(BeforeEnterEvent event) {
+        QueryParameters queryParameters = event.getLocation().getQueryParameters();
+        Map<String, List<String>> parameterMap = queryParameters.getParameters();
+
+        uiData.setLite(parameterMapIsTrue(parameterMap, "lite"));
+        uiData.setNSFWDisabled(parameterMapIsTrue(parameterMap, "nonsfw"));
+    }
+
+    private boolean parameterMapIsTrue(Map<String, List<String>> parametersMap, String key) {
+        return parametersMap != null &&
+                parametersMap.containsKey(key) &&
+                !parametersMap.get(key).isEmpty() &&
+                parametersMap.get(key).get(0).equals("true");
+    }
+
+    private void build() {
         if (VaadinService.getCurrentRequest().getCookies() != null) {
             for (Cookie cookie : VaadinService.getCurrentRequest().getCookies()) {
                 if (cookie.getName().equals(LocaleSelect.LOCALE_COOKIE_NAME)) {
@@ -100,55 +176,6 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
 
         Long userId = sessionData.getDiscordUser().map(DiscordUser::getId).orElse(null);
         startProfitWell(userId);
-    }
-
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        divStretch.getStyle().set("background", "var(--lumo-base-color)");
-        Class<?> cTemp = event.getNavigationTarget();
-
-        if (PageLayout.class.isAssignableFrom(cTemp)) {
-            Class<? extends PageLayout> c = (Class<? extends PageLayout>) cTemp;
-
-            if (c.isAnnotationPresent(SetDivStretchBackground.class)) {
-                final String background = c.getAnnotation(SetDivStretchBackground.class).background();
-                divStretch.getStyle().set("background", background);
-            }
-
-            if (checkLiteModeAccess(event)) {
-                return;
-            }
-            if (checkBrowserIE(event)) {
-                return;
-            }
-            sessionData.setCurrentTarget(event.getLocation());
-            checkLoginStatusChanged(event);
-            headerComponent.setNavBarSolid(event.getNavigationTarget().isAnnotationPresent(NavBarSolid.class));
-        }
-    }
-
-    @Override
-    public int setErrorParameter(BeforeEnterEvent beforeEnterEvent, ErrorParameter<Exception> errorParameter) {
-        LOGGER.error("Error in page initialization", errorParameter.getException());
-        beforeEnterEvent.rerouteTo(ExceptionView.class);
-        return 500;
-    }
-
-    @Override
-    public void beforeLeave(BeforeLeaveEvent event) {
-        Class<?> target = event.getNavigationTarget();
-
-        if (uiData.isLite() && target.isAnnotationPresent(NoLiteAccess.class)) {
-            event.postpone();
-            return;
-        }
-
-        LoginAccess loginAccess = target.getAnnotation(LoginAccess.class);
-        if (!sessionData.isLoggedIn() && loginAccess != null) {
-            sessionData.setCurrentTarget(event.getLocation());
-            new Redirector().redirect(sessionData.getLoginUrl());
-            event.postpone();
-        }
     }
 
     private void checkLoginStatusChanged(BeforeEnterEvent event) {
