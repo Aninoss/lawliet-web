@@ -33,7 +33,7 @@ public class DashboardNumberFieldAdapter extends FlexLayout implements Dashboard
             dashboardTextFieldButtons.setConfirmListener(this::trigger);
             add(dashboardTextFieldButtons);
         } else {
-            numberField.setValueChangeMode(ValueChangeMode.ON_BLUR);
+            numberField.setValueChangeMode(ValueChangeMode.ON_CHANGE);
             numberField.addValueChangeListener(event -> trigger());
         }
 

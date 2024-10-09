@@ -34,7 +34,7 @@ public class DashboardFloatingNumberFieldAdapter extends FlexLayout implements D
             dashboardTextFieldButtons.setConfirmListener(this::trigger);
             add(dashboardTextFieldButtons);
         } else {
-            numberField.setValueChangeMode(ValueChangeMode.ON_BLUR);
+            numberField.setValueChangeMode(ValueChangeMode.ON_CHANGE);
             numberField.addValueChangeListener(event -> trigger());
         }
 
