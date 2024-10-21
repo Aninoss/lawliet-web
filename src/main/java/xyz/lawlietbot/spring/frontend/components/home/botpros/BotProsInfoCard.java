@@ -35,7 +35,7 @@ public class BotProsInfoCard extends Card {
         headerContent.setSpacing(false);
         headerContent.setAlignItems(FlexComponent.Alignment.CENTER);
 
-        Div titleLabel = new Div(new Text(title));
+        H3 titleLabel = new H3(new Text(title));
         titleLabel.getElement().getStyle()
                 .set("font-size", "120%")
                 .set("width", "100%")

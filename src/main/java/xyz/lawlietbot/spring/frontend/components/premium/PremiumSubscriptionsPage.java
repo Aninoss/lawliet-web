@@ -197,9 +197,9 @@ public class PremiumSubscriptionsPage extends PremiumPage {
         titleLayout.setPadding(false);
         titleLayout.setAlignItems(FlexComponent.Alignment.CENTER);
 
-        Span title = new Span(getTranslation("premium.tier." + level.name()));
-        title.getStyle().set("margin-top", "0")
-                .set("margin-bottom", "0")
+        H2 title = new H2(getTranslation("premium.tier." + level.name()));
+        title.getStyle().set("margin-top", "4px")
+                .set("margin-bottom", "4px")
                 .set("font-size", "125%");
         titleLayout.add(title);
 
