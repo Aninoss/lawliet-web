@@ -51,7 +51,9 @@ public class Application implements AppShellConfigurator {
         }
 
         String pageTitle;
-        if (translationProvider.keyExists("category." + target, settings.getRequest().getLocale())) {
+        if (target != null && target.isEmpty()) {
+            pageTitle = new TranslationProvider().getTranslation("bot.title", settings.getRequest().getLocale());
+        } else if (translationProvider.keyExists("category." + target, settings.getRequest().getLocale())) {
             pageTitle = new TranslationProvider().getTranslation("category." + target, settings.getRequest().getLocale());
         } else {
             pageTitle = new TranslationProvider().getTranslation("category.notfound", settings.getRequest().getLocale());

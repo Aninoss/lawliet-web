@@ -26,4 +26,9 @@ public class HomeView extends PageLayout {
         );
     }
 
+    @Override
+    public String getPageTitle() {
+        return getTranslation("bot.title");
+    }
+
 }
