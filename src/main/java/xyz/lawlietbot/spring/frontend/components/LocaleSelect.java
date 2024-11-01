@@ -39,6 +39,15 @@ public class LocaleSelect extends Select<Locale> {
             case "ru":
                 emoji = "🇷🇺";
                 break;
+            case "fr":
+                emoji = "🇫🇷";
+                break;
+            case "pt":
+                emoji = "🇧🇷";
+                break;
+            case "tr":
+                emoji = "🇹🇷";
+                break;
         }
         return new Text(emoji + " " + locale.getLanguage().toUpperCase());
     }
