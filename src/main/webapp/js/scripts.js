@@ -47,7 +47,7 @@ function createCookie(name, value, days) {
     } else {
         expires = "";
     }
-    document.cookie = name+"="+value+expires+"; path=/; secure";
+    document.cookie = name+"="+value+expires+"; Path=/; Secure; SameSite=None; Partitioned";
 }
 
 function onScroll() {

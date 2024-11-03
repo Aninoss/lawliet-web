@@ -6,10 +6,16 @@ import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.server.AppShellSettings;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.tomcat.util.http.Rfc6265CookieProcessor;
+import org.apache.tomcat.util.http.SameSiteCookies;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.embedded.tomcat.TomcatContextCustomizer;
+import org.springframework.context.annotation.Bean;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -65,5 +71,26 @@ public class Application implements AppShellConfigurator {
         settings.addLink("manifest", "/site.webmanifest");
         settings.addMetaTag("theme-color", "#ffffff");
     }
+
+    @Bean
+    public TomcatContextCustomizer sessionCookieConfigForCors() {
+        return context -> {
+            final Rfc6265CookieProcessor cookieProcessor = new Rfc6265CookieProcessor() {
+                @Override
+                public String generateHeader(Cookie cookie, HttpServletRequest request) {
+                    // Needs to be secure
+                    if (cookie.getName().startsWith("JSESSIONID")) {
+                        cookie.setHttpOnly(true);
+                        cookie.setSecure(true);
+                        cookie.setAttribute("SameSite", SameSiteCookies.NONE.getValue());
+                        cookie.setAttribute("Partitioned", "true");
+                    }
+                    return super.generateHeader(cookie, request);
+                }
+            };
+            context.setCookieProcessor(cookieProcessor);
+        };
+    }
+
 
 }

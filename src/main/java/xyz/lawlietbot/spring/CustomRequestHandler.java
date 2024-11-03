@@ -28,7 +28,6 @@ public class CustomRequestHandler implements RequestHandler {
 
     @Override
     public boolean handleRequest(VaadinSession session, VaadinRequest request, VaadinResponse response) {
-        modifySessionCookie(request, response);
         addHeaders(response);
 
         String auth = request.getHeader("Authorization");
@@ -89,11 +88,6 @@ public class CustomRequestHandler implements RequestHandler {
         response.setHeader("Access-Control-Allow-Origin", "https://top.gg https://discords.com https://wumpus.store");
         response.setHeader("X-XSS-Protection", "1; mode=block");
         response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubdomains");
-    }
-
-    private void modifySessionCookie(VaadinRequest request, VaadinResponse response) {
-        String sessionId = request.getWrappedSession().getId();
-        response.setHeader("Set-Cookie", "JSESSIONID=" + sessionId + "; Path=/; HttpOnly; Secure; SameSite=None");
     }
 
     private boolean handleDiscordLogin(VaadinRequest request, VaadinResponse response) {
