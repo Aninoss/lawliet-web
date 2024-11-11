@@ -6,9 +6,9 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
-import xyz.lawlietbot.spring.backend.FileString;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
+import xyz.lawlietbot.spring.backend.util.FileUtil;
 import xyz.lawlietbot.spring.frontend.Styles;
 import xyz.lawlietbot.spring.frontend.components.PageHeader;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
@@ -23,9 +23,7 @@ public class TOSView extends PageLayout {
     public TOSView(@Autowired SessionData sessionData, @Autowired UIData uiData) throws IOException {
         super(sessionData, uiData);
         getStyle().set("margin-bottom", "48px");
-        String pageString = new FileString(
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("tos_en.html")
-        ).toString();
+        String pageString = FileUtil.readResource("tos_en.html");
 
         VerticalLayout mainContent = new VerticalLayout();
         mainContent.setSpacing(false);

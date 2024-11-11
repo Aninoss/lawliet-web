@@ -12,12 +12,12 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.lawlietbot.spring.ExternalLinks;
-import xyz.lawlietbot.spring.backend.FileString;
 import xyz.lawlietbot.spring.backend.Pair;
 import xyz.lawlietbot.spring.backend.UICache;
 import xyz.lawlietbot.spring.backend.payment.Currency;
 import xyz.lawlietbot.spring.backend.payment.*;
 import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
+import xyz.lawlietbot.spring.backend.util.FileUtil;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
@@ -66,9 +66,7 @@ public class PaddleManager {
     static {
         String publicKey = "";
         try {
-            publicKey = new FileString(
-                    Thread.currentThread().getContextClassLoader().getResourceAsStream("paddle_public_key_" + System.getenv("PADDLE_ENVIRONMENT") + ".txt")
-            ).toString();
+            publicKey = FileUtil.readResource("paddle_public_key_" + System.getenv("PADDLE_ENVIRONMENT") + ".txt");
         } catch (IOException e) {
             LOGGER.error("Error on public key read");
         }

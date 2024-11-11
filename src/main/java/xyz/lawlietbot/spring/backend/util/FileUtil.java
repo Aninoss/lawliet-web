@@ -1,11 +1,13 @@
 package xyz.lawlietbot.spring.backend.util;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import com.google.common.io.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 public class FileUtil {
 
@@ -21,6 +23,12 @@ public class FileUtil {
             LOGGER.error("File error", e);
         }
         return false;
+    }
+
+    public static String readResource(String name) throws IOException {
+        try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(name)) {
+            return new String(is.readAllBytes(), StandardCharsets.UTF_8);
+        }
     }
 
 }

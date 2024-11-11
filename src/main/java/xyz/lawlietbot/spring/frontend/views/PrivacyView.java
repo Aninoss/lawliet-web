@@ -6,9 +6,9 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
-import xyz.lawlietbot.spring.backend.FileString;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.userdata.UIData;
+import xyz.lawlietbot.spring.backend.util.FileUtil;
 import xyz.lawlietbot.spring.frontend.Styles;
 import xyz.lawlietbot.spring.frontend.components.PageHeader;
 import xyz.lawlietbot.spring.frontend.layouts.MainLayout;
@@ -24,9 +24,7 @@ public class PrivacyView extends PageLayout {
         super(sessionData, uiData);
         getStyle().set("margin-bottom", "48px");
         String name = String.format("privacy_%s.html", getLocale().getLanguage());
-        String pageString = new FileString(
-                Thread.currentThread().getContextClassLoader().getResourceAsStream(name)
-        ).toString();
+        String pageString = FileUtil.readResource(name);
 
         VerticalLayout mainContent = new VerticalLayout();
         mainContent.setSpacing(false);
