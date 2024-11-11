@@ -40,7 +40,7 @@ public class DashboardComboBoxAdapter extends FlexLayout implements DashboardAda
             multiselectComboBox.getStyle().set("padding-top", "0");
             multiselectComboBox.setLabel(dashboardComboBox.getLabel());
             multiselectComboBox.setItemLabelGenerator(DiscordEntity::getName);
-            multiselectComboBox.setRenderer(new ComponentRenderer<>(discordEntity -> new Text(discordEntity.getName())));
+            multiselectComboBox.setRenderer(new ComponentRenderer<>(discordEntity -> new Text(discordEntity != null ? discordEntity.getName() : "")));
             multiselectComboBox.setAllowCustomValue(dashboardComboBox.getAllowCustomValues());
             if (dashboardComboBox.getDataType() != DashboardComboBox.DataType.CUSTOM) {
                 multiselectComboBox.setDataProvider(generateDataProvider(guildId, userId, dashboardComboBox), str -> str);
