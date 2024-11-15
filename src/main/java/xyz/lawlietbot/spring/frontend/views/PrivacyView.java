@@ -23,7 +23,7 @@ public class PrivacyView extends PageLayout {
     public PrivacyView(@Autowired SessionData sessionData, @Autowired UIData uiData) throws IOException {
         super(sessionData, uiData);
         getStyle().set("margin-bottom", "48px");
-        String name = String.format("privacy_%s.html", getLocale().getLanguage());
+        String name = String.format("privacy_%s.html", getLanguage());
         String pageString = FileUtil.readResource(name);
 
         VerticalLayout mainContent = new VerticalLayout();
@@ -36,6 +36,15 @@ public class PrivacyView extends PageLayout {
 
         mainContent.add(div);
         add(new PageHeader(getUiData(), getTitleText(), null), mainContent);
+    }
+
+    private String getLanguage() {
+        String language = getLocale().getLanguage();
+        if (language.equals("en") || language.equals("de")) {
+            return language;
+        } else {
+            return "en";
+        }
     }
 
 }
