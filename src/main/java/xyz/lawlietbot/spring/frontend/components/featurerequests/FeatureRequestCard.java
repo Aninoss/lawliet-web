@@ -19,6 +19,7 @@ import xyz.lawlietbot.spring.frontend.Styles;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.frontend.components.LineBreak;
+import xyz.lawlietbot.spring.frontend.components.SpanWithLinebreaks;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -30,7 +31,7 @@ public class FeatureRequestCard extends Div {
     private final UIData uiData;
     private final VerticalLayout content = new VerticalLayout();
     private final VerticalLayout action = new VerticalLayout();
-    private Div description;
+    private SpanWithLinebreaks description;
     private Div popular;
     private Button boostButton = null;
     private ConfirmationDialog confirmationDialog = null;
@@ -125,7 +126,7 @@ public class FeatureRequestCard extends Div {
     }
 
     private void addDescription() {
-        description = new Div(new Text(frEntry.getDescription()));
+        description = new SpanWithLinebreaks(frEntry.getDescription());
         description.setWidthFull();
         content.add(description);
     }
