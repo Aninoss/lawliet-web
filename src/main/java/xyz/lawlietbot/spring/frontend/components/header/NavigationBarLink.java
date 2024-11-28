@@ -1,12 +1,13 @@
 package xyz.lawlietbot.spring.frontend.components.header;
 
-import xyz.lawlietbot.spring.backend.language.PageTitleGen;
-import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
-import xyz.lawlietbot.spring.NoLiteAccess;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.RouterLink;
+import xyz.lawlietbot.spring.NoLiteAccess;
+import xyz.lawlietbot.spring.backend.language.PageTitleGen;
+import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
 
 import java.util.Optional;
 
@@ -33,12 +34,12 @@ public class NavigationBarLink {
         hiddenInLiteVersion = page.isAnnotationPresent(NoLiteAccess.class);
     }
 
-    public NavigationBarLink standOut() {
-        Style style;
-        if (anchor != null) style = anchor.getStyle();
-        else style = routerLink.getStyle();
-
-        style.set("text-shadow", "0 0 10px var(--lumo-primary-color)");
+    public NavigationBarLink focus(boolean focus) {
+        if (focus && routerLink != null) {
+            Icon icon = VaadinIcon.EXCLAMATION_CIRCLE.create();
+            icon.addClassName("attention-circle");
+            routerLink.addComponentAsFirst(icon);
+        }
         return this;
     }
 

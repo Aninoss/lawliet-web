@@ -79,7 +79,7 @@ function loadScript(url, callback)
     head.appendChild(script);
 }
 
-function openPaddle(environment, vendor, planId, quantity, locale, passthrough) {
+function openPaddle(environment, vendor, planId, quantity, locale, coupon, passthrough) {
     loadScript("https://cdn.paddle.com/paddle/paddle.js", () => {
         if (environment === "sandbox") {
             Paddle.Environment.set(environment);
@@ -97,12 +97,13 @@ function openPaddle(environment, vendor, planId, quantity, locale, passthrough) 
             product: planId,
             quantity: quantity,
             locale: locale,
-            passthrough: passthrough
+            passthrough: passthrough,
+            coupon: coupon
         });
     });
 }
 
-function openPaddleBilling(environment, clientToken, priceId, locale, discordId, discordTag, discordAvatar, type) {
+function openPaddleBilling(environment, clientToken, priceId, locale, coupon, discordId, discordTag, discordAvatar, type) {
     loadScript("https://cdn.paddle.com/paddle/v2/paddle.js", () => {
         if (environment === "sandbox") {
             Paddle.Environment.set(environment);
@@ -129,7 +130,8 @@ function openPaddleBilling(environment, clientToken, priceId, locale, discordId,
                 discordId: discordId,
                 discordTag: discordTag,
                 discordAvatar: discordAvatar
-            }
+            },
+            discountCode: coupon
         });
     });
 }

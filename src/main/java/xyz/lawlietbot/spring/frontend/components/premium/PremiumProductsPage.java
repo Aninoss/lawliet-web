@@ -1,6 +1,7 @@
 package xyz.lawlietbot.spring.frontend.components.premium;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.*;
@@ -24,14 +25,17 @@ import xyz.lawlietbot.spring.backend.Redirector;
 import xyz.lawlietbot.spring.backend.payment.ProductPremium;
 import xyz.lawlietbot.spring.backend.payment.ProductTxt2Img;
 import xyz.lawlietbot.spring.backend.payment.paddle.PaddleManager;
+import xyz.lawlietbot.spring.backend.payment.paddle.PaddlePriceOverview;
 import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.util.StringUtil;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
+import xyz.lawlietbot.spring.frontend.views.PremiumView;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
+import java.text.NumberFormat;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -40,19 +44,25 @@ public class PremiumProductsPage extends PremiumPage {
     private final static Logger LOGGER = LoggerFactory.getLogger(PremiumProductsPage.class);
 
     private final SessionData sessionData;
+    private final PremiumView premiumView;
     private Paragraph remainingParagraph;
 
-    public PremiumProductsPage(SessionData sessionData) {
+    public PremiumProductsPage(SessionData sessionData, PremiumView premiumView) {
         this.sessionData = sessionData;
+        this.premiumView = premiumView;
         setPadding(true);
     }
 
     @Override
     public void build() {
-        Map<String, String> productPriceMap = PaddleManager.retrieveProductPrices(VaadinRequest.getCurrent().getHeader("CF-Connecting-IP"), " + " + getTranslation("premium.products.vat"));
+        if (System.getenv("PADDLE_SALE_CODE") != null) {
+            add(premiumView.generateCouponField());
+        }
+
+        PaddlePriceOverview paddlePriceOverview = PaddleManager.retrieveProductPrices(VaadinRequest.getCurrent().getHeader("CF-Connecting-IP"));
         add(
-                createPremiumField(productPriceMap),
-                createTxt2ImgField(productPriceMap)
+                createPremiumField(paddlePriceOverview),
+                createTxt2ImgField(paddlePriceOverview)
         );
     }
 
@@ -72,7 +82,7 @@ public class PremiumProductsPage extends PremiumPage {
         }
     }
 
-    private Component createPremiumField(Map<String, String> productPriceMap) {
+    private Component createPremiumField(PaddlePriceOverview paddlePriceOverview) {
         VerticalLayout mainLayout = new VerticalLayout();
         mainLayout.setPadding(false);
 
@@ -96,7 +106,7 @@ public class PremiumProductsPage extends PremiumPage {
                     JSONObject responseJson = SendEvent.send(EventOut.BOUGHT_PREMIUM_CODES, Map.of("user_id", sessionData.getDiscordUser().get().getId())).join();
                     JSONArray codesJson = responseJson.getJSONArray("codes");
 
-                    if (codesJson.length() == 0) {
+                    if (codesJson.isEmpty()) {
                         dialog.open(getTranslation("premium.products.nocodes"), () -> {
                         });
                     } else {
@@ -121,7 +131,7 @@ public class PremiumProductsPage extends PremiumPage {
 
         FlexibleGridLayout gridLayout = new FlexibleGridLayout()
                 .withColumns(Repeat.RepeatMode.AUTO_FILL, new MinMax(new Length("270px"), new Flex(1)))
-                .withItems(generatePremiumArticles(productPriceMap))
+                .withItems(generatePremiumArticles(paddlePriceOverview))
                 .withPadding(false)
                 .withSpacing(true)
                 .withAutoFlow(GridLayoutComponent.AutoFlow.ROW_DENSE)
@@ -132,7 +142,7 @@ public class PremiumProductsPage extends PremiumPage {
         return mainLayout;
     }
 
-    private Component createTxt2ImgField(Map<String, String> productPriceMap) {
+    private Component createTxt2ImgField(PaddlePriceOverview productPriceMap) {
         VerticalLayout mainLayout = new VerticalLayout();
         mainLayout.setPadding(false);
 
@@ -171,7 +181,7 @@ public class PremiumProductsPage extends PremiumPage {
         return mainLayout;
     }
 
-    private Article[] generatePremiumArticles(Map<String, String> productPriceMap) {
+    private Article[] generatePremiumArticles(PaddlePriceOverview paddlePriceOverview) {
         Article[] articles = new Article[ProductPremium.values().length];
         for (int i = 0; i < ProductPremium.values().length; i++) {
             ProductPremium product = ProductPremium.values()[i];
@@ -189,9 +199,7 @@ public class PremiumProductsPage extends PremiumPage {
             buyLayout.setPadding(false);
             buyLayout.setJustifyContentMode(JustifyContentMode.END);
             buyLayout.setAlignItems(Alignment.CENTER);
-
-            buyLayout.add(new Label(productPriceMap.get(product.getPriceId())));
-            buyLayout.add(generateBuyButton(product.getPriceId(), "premium"));
+            buyLayout.add(generatePriceSpan(paddlePriceOverview, product.getPriceId()), generateBuyButton(product.getPriceId(), "premium"));
             content.add(buyLayout);
 
             articles[i] = new Article(content);
@@ -199,7 +207,7 @@ public class PremiumProductsPage extends PremiumPage {
         return articles;
     }
 
-    private Article[] generateTxt2ImgArticles(Map<String, String> productPriceMap) {
+    private Article[] generateTxt2ImgArticles(PaddlePriceOverview paddlePriceOverview) {
         Article[] articles = new Article[ProductTxt2Img.values().length];
         for (int i = 0; i < ProductTxt2Img.values().length; i++) {
             ProductTxt2Img product = ProductTxt2Img.values()[i];
@@ -217,14 +225,34 @@ public class PremiumProductsPage extends PremiumPage {
             buyLayout.setPadding(false);
             buyLayout.setJustifyContentMode(JustifyContentMode.END);
             buyLayout.setAlignItems(Alignment.CENTER);
-
-            buyLayout.add(new Label(productPriceMap.get(product.getPriceId())));
-            buyLayout.add(generateBuyButton(product.getPriceId(), "txt2img"));
+            buyLayout.add(generatePriceSpan(paddlePriceOverview, product.getPriceId()), generateBuyButton(product.getPriceId(), "txt2img"));
             content.add(buyLayout);
 
             articles[i] = new Article(content);
         }
         return articles;
+    }
+
+    private Span generatePriceSpan(PaddlePriceOverview paddlePriceOverview, String priceId) {
+        PaddlePriceOverview.Price price = paddlePriceOverview.getPrices().get(priceId);
+        String currentPriceString = NumberFormat.getCurrencyInstance(getLocale())
+                .format(price.getCurrentPrice())
+                .replace("¤", paddlePriceOverview.getCurrency().getSymbol());
+        String previousPriceString = NumberFormat.getCurrencyInstance(getLocale())
+                .format(price.getPreviousPrice())
+                .replace("¤", paddlePriceOverview.getCurrency().getSymbol());
+
+        Span span = new Span();
+        if (!currentPriceString.equals(previousPriceString)) {
+            Span previousPriceSpan = new Span(previousPriceString);
+            previousPriceSpan.addClassName("previous-price");
+            span.add(previousPriceSpan, new Text(" "));
+        }
+        span.add(currentPriceString);
+        if (!price.getIncludesVat()) {
+            span.add(" " + getTranslation("premium.products.vat"));
+        }
+        return span;
     }
 
     private Component generateBuyButton(String priceId, String type) {

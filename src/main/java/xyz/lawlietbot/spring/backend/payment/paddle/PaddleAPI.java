@@ -45,7 +45,7 @@ public class PaddleAPI {
         StringBuilder productIds = new StringBuilder();
         for (SubDuration duration : SubDuration.values()) {
             for (SubLevel level : SubLevel.values()) {
-                if (productIds.length() > 0) {
+                if (!productIds.isEmpty()) {
                     productIds.append(",");
                 }
                 productIds.append(PaddleManager.getPlanId(duration, level, group));
@@ -60,10 +60,11 @@ public class PaddleAPI {
         return run(request);
     }
 
-    public static JSONObject retrieveProductPrices(String customerIpAddress) throws IOException {
+    public static JSONObject retrieveProductPrices(String customerIpAddress, String coupon) throws IOException {
         try {
             JSONObject requestJson = new JSONObject();
             requestJson.put("customer_ip_address", customerIpAddress);
+            requestJson.put("discount_id", coupon);
 
             JSONArray itemsArray = new JSONArray();
             for (ProductTxt2Img product : ProductTxt2Img.values()) {

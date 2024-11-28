@@ -53,13 +53,13 @@ public class PaddleManager {
                     return PaddleAPI.retrieveSubscriptionPrices(pair.getKey(), pair.getValue());
                 }
             });
-    private final static LoadingCache<String, JSONObject> productPricesCache = CacheBuilder.newBuilder()
+    private final static LoadingCache<IpAndCoupon, JSONObject> productPricesCache = CacheBuilder.newBuilder()
             .expireAfterWrite(Duration.ofMinutes(5))
             .build(new CacheLoader<>() {
                 @NotNull
                 @Override
-                public JSONObject load(@NotNull String ip) throws Exception {
-                    return PaddleAPI.retrieveProductPrices(ip);
+                public JSONObject load(@NotNull IpAndCoupon ipAndCoupon) throws Exception {
+                    return PaddleAPI.retrieveProductPrices(ipAndCoupon.ipAddress, ipAndCoupon.coupon);
                 }
             });
 
@@ -74,85 +74,102 @@ public class PaddleManager {
         paddleBillingWebhookVerifier = new PaddleBillingWebhookVerifier(System.getenv("PADDLE_BILLING_WEBHOOK_KEY"));
     }
 
-    public static PaddleSubscriptionPrices retrieveSubscriptionPrices(String customerIpAddress, int group) {
+    public static PaddlePriceOverview retrieveSubscriptionPrices(String customerIpAddress, int group) {
         customerIpAddress = Objects.requireNonNullElse(customerIpAddress, System.getenv("PADDLE_DEFAULT_IP"));
 
-        JSONObject json;
+        JSONObject pricesJson;
         try {
-            json = subscriptionPricesCache.get(new Pair<>(customerIpAddress, group));
-
-            JSONArray productsJson = json.getJSONObject("response").getJSONArray("products");
-            HashMap<Long, Double> subscriptionPriceMap = new HashMap<>();
+            pricesJson = subscriptionPricesCache.get(new Pair<>(customerIpAddress, group));
+            JSONArray productsJson = pricesJson.getJSONObject("response").getJSONArray("products");
+            HashMap<String, PaddlePriceOverview.Price> subscriptionPriceMap = new HashMap<>();
 
             Currency currency = null;
-            boolean includesVat = false;
             for (int i = 0; i < productsJson.length(); i++) {
                 JSONObject productJson = productsJson.getJSONObject(i);
                 currency = Currency.valueOf(productJson.getString("currency"));
-                includesVat = productJson.getBoolean("vendor_set_prices_included_tax");
+                boolean includesVat = productJson.getBoolean("vendor_set_prices_included_tax");
 
                 long productId = productJson.getLong("product_id");
-                double price = productJson.getJSONObject("price").getDouble(includesVat ? "gross" : "net");
-                subscriptionPriceMap.put(productId, price);
+                double currentPrice = productJson.getJSONObject("price").getDouble(includesVat ? "gross" : "net");
+                double previousPrice = currentPrice;
+                if (productIsInSale(String.valueOf(productId))) {
+                    currentPrice = currentPrice * (100 - Integer.parseInt(System.getenv("PADDLE_SALE_PERCENT"))) / 100.0;
+                }
+                subscriptionPriceMap.put(String.valueOf(productId), new PaddlePriceOverview.Price(currentPrice, previousPrice, includesVat));
             }
 
-            return new PaddleSubscriptionPrices(
+            return new PaddlePriceOverview(
                     currency,
-                    subscriptionPriceMap,
-                    includesVat
+                    subscriptionPriceMap
             );
         } catch (ExecutionException | JSONException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static Map<String, String> retrieveProductPrices(String customerIpAddress, String vatString) {
+    public static PaddlePriceOverview retrieveProductPrices(String customerIpAddress) {
         customerIpAddress = Objects.requireNonNullElse(customerIpAddress, System.getenv("PADDLE_DEFAULT_IP"));
 
-        JSONObject json;
+        JSONObject pricesJson;
         try {
-            json = productPricesCache.get(customerIpAddress);
+            pricesJson = productPricesCache.get(new IpAndCoupon(customerIpAddress, System.getenv("PADDLE_SALE_DISCOUNT_ID"))).getJSONObject("data");
 
-            JSONArray itemsJson = json.getJSONObject("data").getJSONObject("details").getJSONArray("line_items");
-            HashMap<String, String> productPriceMap = new HashMap<>();
+            JSONArray itemsJson = pricesJson.getJSONObject("details").getJSONArray("line_items");
+            HashMap<String, PaddlePriceOverview.Price> productPriceMap = new HashMap<>();
+            Currency currency = Currency.valueOf(pricesJson.getString("currency_code"));
 
             for (int i = 0; i < itemsJson.length(); i++) {
                 JSONObject itemJson = itemsJson.getJSONObject(i);
+                JSONObject totalsJson = itemJson.getJSONObject("totals");
                 JSONObject priceJson = itemJson.getJSONObject("price");
                 String priceId = priceJson.getString("id");
 
-                String price;
+                PaddlePriceOverview.Price price;
                 if (priceJson.getString("tax_mode").equals("external")) {
-                    price = itemJson.getJSONObject("formatted_totals").getString("subtotal") + vatString;
+                    price = new PaddlePriceOverview.Price(
+                            (Double.parseDouble(totalsJson.getString("subtotal")) - Double.parseDouble(totalsJson.getString("discount"))) / Math.pow(10, currency.getDecimalPlaces()),
+                            Double.parseDouble(totalsJson.getString("subtotal")) / Math.pow(10, currency.getDecimalPlaces()),
+                            false
+                    );
                 } else {
-                    price = itemJson.getJSONObject("formatted_totals").getString("total");
+                    price = new PaddlePriceOverview.Price(
+                            (Double.parseDouble(totalsJson.getString("total")) - Double.parseDouble(totalsJson.getString("discount"))) / Math.pow(10, currency.getDecimalPlaces()),
+                            Double.parseDouble(totalsJson.getString("total")) / Math.pow(10, currency.getDecimalPlaces()),
+                            true
+                    );
                 }
                 productPriceMap.put(priceId, price);
             }
 
-            return productPriceMap;
+            return new PaddlePriceOverview(
+                    Currency.valueOf(pricesJson.getString("currency_code")),
+                    productPriceMap
+                    );
         } catch (ExecutionException | JSONException e) {
             throw new RuntimeException(e);
         }
     }
 
     public static void openPopup(SubDuration duration, SubLevel level, DiscordUser discordUser, int quantity, List<Long> presetGuildIds, Locale locale, int group) {
-        UI.getCurrent().getPage().executeJs("openPaddle($0, $1, $2, $3, $4, $5)",
+        long planId = PaddleManager.getPlanId(duration, level, group);
+        UI.getCurrent().getPage().executeJs("openPaddle($0, $1, $2, $3, $4, $5, $6)",
                 System.getenv("PADDLE_ENVIRONMENT"),
                 Integer.parseInt(System.getenv("PADDLE_VENDOR_ID")),
-                (int) PaddleManager.getPlanId(duration, level, group),
+                (int) planId,
                 quantity,
                 locale.getLanguage(),
+                productIsInSale(String.valueOf(planId)) ? System.getenv("PADDLE_SALE_CODE") : null,
                 generatePassthrough(discordUser, presetGuildIds)
         );
     }
 
     public static void openPopupBilling(String priceId, DiscordUser discordUser, Locale locale, String type) {
-        UI.getCurrent().getPage().executeJs("openPaddleBilling($0, $1, $2, $3, $4, $5, $6, $7)",
+        UI.getCurrent().getPage().executeJs("openPaddleBilling($0, $1, $2, $3, $4, $5, $6, $7, $8)",
                 System.getenv("PADDLE_ENVIRONMENT"),
                 System.getenv("PADDLE_CLIENT_TOKEN"),
                 priceId,
                 locale.getLanguage(),
+                productIsInSale(priceId) ? System.getenv("PADDLE_SALE_CODE") : null,
                 String.valueOf(discordUser.getId()),
                 discordUser.getUsername(),
                 discordUser.getUserAvatar(),
@@ -432,6 +449,36 @@ public class PaddleManager {
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static boolean productIsInSale(String id) {
+        String saleProducts = System.getenv("PADDLE_SALE_PRODUCTS");
+        return saleProducts != null && Set.of(saleProducts.split(",")).contains(id);
+    }
+
+    private static class IpAndCoupon {
+
+        private final String ipAddress;
+        private final String coupon;
+
+        public IpAndCoupon(String ipAddress, String coupon) {
+            this.ipAddress = ipAddress;
+            this.coupon = coupon;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            IpAndCoupon that = (IpAndCoupon) o;
+            return Objects.equals(ipAddress, that.ipAddress) && Objects.equals(coupon, that.coupon);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(ipAddress, coupon);
+        }
+
     }
 
 }

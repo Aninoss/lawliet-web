@@ -72,6 +72,11 @@
     margin-top: var(--lumo-space-m);
 }
 
+.attention-circle {
+    margin-top: 4px;
+    color: var(--vaadin-user-color-3);
+    height: 1em;
+}
 
 
 /* Tablet */

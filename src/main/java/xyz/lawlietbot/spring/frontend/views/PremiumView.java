@@ -1,8 +1,13 @@
 package xyz.lawlietbot.spring.frontend.views;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
@@ -62,8 +67,8 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         Tab tabManage = new Tab(getTranslation("premium.tab.manage"));
         tabManage.setEnabled(sessionData.isLoggedIn());
         Map<Tab, PremiumPage> areaMap = Map.of(
-                tabSubscriptions, new PremiumSubscriptionsPage(sessionData, dialog),
-                tabProducts, new PremiumProductsPage(sessionData),
+                tabSubscriptions, new PremiumSubscriptionsPage(sessionData, dialog, this),
+                tabProducts, new PremiumProductsPage(sessionData, this),
                 tabUnlock, premiumUnlockPage,
                 tabManage, new PremiumManagePage(sessionData, dialog, premiumUnlockPage)
         );
@@ -170,6 +175,26 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                 }
             }
         }
+    }
+
+    public Component generateCouponField() {
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.setPadding(false);
+        layout.setId("notification-field");
+        layout.getStyle().set("border-color", "rgb(var(--warning-color-rgb))");
+
+        Icon icon = VaadinIcon.INFO_CIRCLE_O.create();
+        icon.setId("notification-icon");
+        icon.getStyle().set("color", "rgb(var(--warning-color-rgb))");
+        layout.add(icon);
+
+        VerticalLayout content = new VerticalLayout();
+        content.setPadding(false);
+
+        Span text = new Span(getTranslation("premium.sale.subscriptions"));
+        content.add(text);
+        layout.add(content);
+        return layout;
     }
 
 }

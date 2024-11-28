@@ -27,6 +27,7 @@ li.premium-entry {
     border-width: 2px;
     border-color: var(--lumo-contrast-10pct);
     width: 100%;
+    flex: 1 1 0;
     padding-top: 28px;
     padding-bottom: 8px;
 }
@@ -145,6 +146,11 @@ vaadin-accordion-panel > div > .prop-check {
     margin-left: 12px;
 }
 
+.previous-price {
+    text-decoration: line-through;
+    color: var(--lumo-disabled-text-color);
+}
+
 @keyframes background-fadein {
     from {
         background-color: rgba(0, 0, 0, 0);
@@ -242,6 +248,7 @@ vaadin-accordion-panel > div > .prop-check {
 
     .tier-card {
         max-width: 350px;
+        width: 0 !important;
     }
 
     .tier-card2 {

@@ -23,7 +23,7 @@ public class NavigationBar extends Tabs implements AfterNavigationObserver {
                 new NavigationBarLink(FAQView.class),
                 new NavigationBarLink(FeatureRequestsView.class),
                 new NavigationBarLink(DashboardView.class),
-                new NavigationBarLink(PremiumView.class),
+                new NavigationBarLink(PremiumView.class).focus(System.getenv("PADDLE_SALE_CODE") != null),
                 new NavigationBarLink(uiData.getBotInviteUrl(), "invite"),
                 new NavigationBarLink(ExternalLinks.SERVER_INVITE_URL, "server"),
         };

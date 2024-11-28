@@ -28,16 +28,16 @@ import xyz.lawlietbot.spring.backend.payment.Currency;
 import xyz.lawlietbot.spring.backend.payment.SubDuration;
 import xyz.lawlietbot.spring.backend.payment.SubLevel;
 import xyz.lawlietbot.spring.backend.payment.paddle.PaddleManager;
-import xyz.lawlietbot.spring.backend.payment.paddle.PaddleSubscriptionPrices;
+import xyz.lawlietbot.spring.backend.payment.paddle.PaddlePriceOverview;
 import xyz.lawlietbot.spring.backend.userdata.DiscordUser;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.backend.util.StringUtil;
 import xyz.lawlietbot.spring.frontend.components.ConfirmationDialog;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
 import xyz.lawlietbot.spring.frontend.components.GuildComboBox;
+import xyz.lawlietbot.spring.frontend.views.PremiumView;
 
 import java.text.NumberFormat;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -52,17 +52,20 @@ public class PremiumSubscriptionsPage extends PremiumPage {
 
     private final SessionData sessionData;
     private final ConfirmationDialog dialog;
+    private final PremiumView premiumView;
     private final Select<SubDuration> durationSelect = new Select<>();
     private NumberField quantityNumberField;
     private final Map<SubLevel, H2> priceTextMap = new HashMap<>();
+    private final Map<SubLevel, Span> previousPriceTextMap = new HashMap<>();
     private final Map<SubLevel, Span> pricePeriodTextMap = new HashMap<>();
     private VerticalLayout preselectGuildsLayout;
     private HorizontalLayout yearlySuggestionField;
     private int group = 0;
 
-    public PremiumSubscriptionsPage(SessionData sessionData, ConfirmationDialog dialog) {
+    public PremiumSubscriptionsPage(SessionData sessionData, ConfirmationDialog dialog, PremiumView premiumView) {
         this.sessionData = sessionData;
         this.dialog = dialog;
+        this.premiumView = premiumView;
         setPadding(true);
 
         if (PRICE_TESTING && sessionData.isLoggedIn()) {
@@ -76,8 +79,8 @@ public class PremiumSubscriptionsPage extends PremiumPage {
 
     @Override
     public void build() {
-        if (LocalDate.now().isBefore(LocalDate.of(2023, 12, 15))) {
-            add(generateYearlyCouponField());
+        if (System.getenv("PADDLE_SALE_CODE") != null) {
+            add(premiumView.generateCouponField());
         } else {
             add(generateYearlySuggestionField());
         }
@@ -125,33 +128,6 @@ public class PremiumSubscriptionsPage extends PremiumPage {
         }
 
         return yearlySuggestionField;
-    }
-
-    private Component generateYearlyCouponField() {
-        HorizontalLayout layout = new HorizontalLayout();
-        layout.setPadding(false);
-        layout.setId("notification-field");
-        layout.getStyle().set("border-color", "rgb(var(--warning-color-rgb))");
-
-        Icon icon = VaadinIcon.INFO_CIRCLE_O.create();
-        icon.setId("notification-icon");
-        icon.getStyle().set("color", "rgb(var(--warning-color-rgb))");
-        layout.add(icon);
-
-        VerticalLayout content = new VerticalLayout();
-        content.setPadding(false);
-
-        Span text = new Span(getTranslation("premium.suggestyearly.text.coupon"));
-        content.add(text);
-
-        Button switchButton = new Button(getTranslation("premium.suggestyearly.button"));
-        switchButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        switchButton.getStyle().set("margin-top", "8px");
-        switchButton.addClickListener(e -> durationSelect.setValue(SubDuration.YEARLY));
-        content.add(switchButton);
-
-        layout.add(content);
-        return layout;
     }
 
     private Component generateTiersTitleDuration() {
@@ -224,15 +200,34 @@ public class PremiumSubscriptionsPage extends PremiumPage {
         content.add(icon);
 
         if (!PRICE_TESTING || sessionData.isLoggedIn()) {
+            HorizontalLayout priceLayout = new HorizontalLayout();
+            priceLayout.setAlignItems(Alignment.END);
+            priceLayout.setPadding(false);
+            priceLayout.setSpacing(false);
+            priceLayout.getStyle().set("margin", "0");
+
             H2 price = new H2("");
             price.getStyle().set("margin", "0")
-                    .set("font-size", "225%");
+                    .set("font-size", "225%")
+                    .set("text-align", "center");
             priceTextMap.put(level, price);
-            content.add(price);
+            priceLayout.add(price);
+
+            Span previousPrice = new Span("");
+            previousPrice.addClassName("previous-price");
+            previousPrice.getStyle()
+                    .set("font-size", "150%")
+                    .setMarginLeft("8px")
+                    .set("text-align", "center");
+            previousPrice.setVisible(false);
+            previousPriceTextMap.put(level, previousPrice);
+            priceLayout.add(previousPrice);
+            content.add(priceLayout);
 
             Span period = new Span("");
             period.getStyle().set("margin", "0")
-                    .set("color", "var(--secondary-text-color)");
+                    .set("color", "var(--secondary-text-color)")
+                    .set("text-align", "center");
             pricePeriodTextMap.put(level, period);
             content.add(period);
         }
@@ -406,27 +401,45 @@ public class PremiumSubscriptionsPage extends PremiumPage {
 
     private void refreshPremiumTiers() {
         SubDuration duration = durationSelect.getValue();
-        PaddleSubscriptionPrices paddleSubscriptionPrices = PaddleManager.retrieveSubscriptionPrices(VaadinRequest.getCurrent().getHeader("CF-Connecting-IP"), group);
-        Currency currency = paddleSubscriptionPrices.getCurrency();
-        Map<Long, Double> priceMap = paddleSubscriptionPrices.getPrices();
-        boolean includesVat = paddleSubscriptionPrices.getIncludesVat();
+        PaddlePriceOverview paddlePriceOverview = PaddleManager.retrieveSubscriptionPrices(VaadinRequest.getCurrent().getHeader("CF-Connecting-IP"), group);
+        Currency currency = paddlePriceOverview.getCurrency();
+        Map<String, PaddlePriceOverview.Price> priceMap = paddlePriceOverview.getPrices();
 
         for (SubLevel subLevel : priceTextMap.keySet()) {
             long planId = PaddleManager.getPlanId(duration, subLevel, group);
 
-            double price = priceMap.get(planId);
+            PaddlePriceOverview.Price price = priceMap.get(String.valueOf(planId));
+            double currentPrice = price.getCurrentPrice();
+            double previousPrice = price.getPreviousPrice();
             if (subLevel == SubLevel.PRO && quantityNumberField != null) {
-                price *= quantityNumberField.getValue();
+                currentPrice *= quantityNumberField.getValue();
+                previousPrice *= quantityNumberField.getValue();
             }
 
-            String priceString = NumberFormat.getCurrencyInstance(getLocale())
-                    .format(price)
+            String currentPriceString = NumberFormat.getCurrencyInstance(getLocale())
+                    .format(currentPrice)
+                    .replace("¤", currency.getSymbol());
+            String previousPriceString = NumberFormat.getCurrencyInstance(getLocale())
+                    .format(previousPrice)
                     .replace("¤", currency.getSymbol());
 
-            priceTextMap.get(subLevel)
-                    .setText(subLevel == SubLevel.ULTIMATE ? getTranslation("premium.price.ultimate", priceString) : priceString);
-            pricePeriodTextMap.get(subLevel)
-                    .setText(getTranslation(includesVat ? "premium.priceperiod.includesvat" : "premium.priceperiod", duration == SubDuration.YEARLY));
+            if (currentPriceString.equals(previousPriceString)) {
+                priceTextMap.get(subLevel)
+                        .setText(subLevel == SubLevel.ULTIMATE ? getTranslation("premium.price.ultimate", currentPriceString) : currentPriceString);
+                previousPriceTextMap.get(subLevel)
+                        .setVisible(false);
+                pricePeriodTextMap.get(subLevel)
+                        .setText(getTranslation(price.getIncludesVat() ? "premium.priceperiod.includesvat" : "premium.priceperiod", duration == SubDuration.YEARLY));
+            } else {
+                priceTextMap.get(subLevel)
+                        .setText(subLevel == SubLevel.ULTIMATE ? getTranslation("premium.price.ultimate", currentPriceString) : currentPriceString);
+                pricePeriodTextMap.get(subLevel)
+                        .setText(getTranslation(price.getIncludesVat() ? "premium.priceperiod.sale.includesvat" : "premium.priceperiod.sale", duration == SubDuration.YEARLY, previousPriceString));
+
+                Span previousPriceText = previousPriceTextMap.get(subLevel);
+                previousPriceText.setVisible(true);
+                previousPriceText.setText(previousPriceString);
+            }
         }
 
         if (sessionData.isLoggedIn()) {
