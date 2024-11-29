@@ -74,7 +74,7 @@
 
 .attention-circle {
     margin-top: 4px;
-    color: var(--vaadin-user-color-3);
+    color: rgb(var(--warning-color-rgb));
     height: 1em;
 }
 
