@@ -250,7 +250,7 @@ public class PaddleManager {
             WebhookNotifier.newSub(
                     discordTag,
                     discordId,
-                    passthroughJson.getString("discord_avatar"),
+                    passthroughJson.has("discord_avatar") ? passthroughJson.getString("discord_avatar") : null,
                     checkoutJson.getJSONObject("checkout").getString("title"),
                     quantity,
                     checkoutJson.getJSONObject("order").getString("formatted_total")
