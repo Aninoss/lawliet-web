@@ -77,8 +77,10 @@ public class DevelopmentVotesView extends PageLayout {
         }
 
         Calendar calendar = Calendar.getInstance();
-        int month = calendar.get(Calendar.MONTH) + 1;
-        int year = calendar.get(Calendar.YEAR);
+        int tempMonth = calendar.get(Calendar.MONTH) + 1;
+        int tempYear = calendar.get(Calendar.YEAR);
+        int month = tempMonth == 1 ? 12 : tempMonth;
+        int year = tempMonth == 1 ? tempYear - 1 : tempYear;
 
         Map<String, Object> requestMap = Map.of(
                 "user_id", getSessionData().getDiscordUser().get().getId(),
