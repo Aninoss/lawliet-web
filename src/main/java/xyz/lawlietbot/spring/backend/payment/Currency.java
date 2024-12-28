@@ -31,6 +31,7 @@ public enum Currency {
     TWD("NT$", 2),
     UAH("₴", 2),
     CNY("¥", 2),
+    VND("₫", 0),
     ZAR("R", 2);
 
 
