@@ -17,6 +17,7 @@ import org.vaadin.addons.componentfactory.css.grid.sizes.MinMax;
 import org.vaadin.addons.componentfactory.css.grid.sizes.Repeat;
 import org.vaadin.addons.componentfactory.layout.FlexibleGridLayout;
 import xyz.lawlietbot.spring.backend.FileCache;
+import xyz.lawlietbot.spring.backend.report.ContentType;
 import xyz.lawlietbot.spring.backend.util.FileUtil;
 import xyz.lawlietbot.spring.backend.util.RandomUtil;
 import xyz.lawlietbot.spring.frontend.components.CustomNotification;
@@ -74,6 +75,11 @@ public class DashboardImageUploadAdapter extends VerticalLayout implements Dashb
 
         ArrayList<String> uploads = new ArrayList<>();
         upload.addSucceededListener(event -> {
+            ContentType contentType = ContentType.parseFromUrl(event.getFileName());
+            if (contentType == null || contentType.isVideo()) {
+                return;
+            }
+
             String dir = this.dashboardImageUpload.getDir();
             InputStream inputStream = buffer.getInputStream(event.getFileName());
 
