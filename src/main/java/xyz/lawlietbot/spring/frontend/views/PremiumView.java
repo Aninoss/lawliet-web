@@ -12,7 +12,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.*;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,13 +34,10 @@ import xyz.lawlietbot.spring.frontend.layouts.PageLayout;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 @Route(value = "premium", layout = MainLayout.class)
 @CssImport("./styles/premium.css")
@@ -94,9 +90,6 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
         content.add(premiumPage);
         premiumPage.initialize();
         premiumPage.open();
-
-        String uri = FeatureRequestsView.getRouteStatic(PremiumView.class) + "?tab=" + i;
-        getSessionData().pushUri(uri);
     }
 
     @Override
@@ -138,7 +131,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                         SendEvent.send(EventOut.DEV_VOTES_UPDATE_REMINDER, map)
                                 .exceptionally(ExceptionLogger.get());
                     }
-                } catch (IOException | InterruptedException | ExecutionException | TimeoutException | JSONException e) {
+                } catch (Throwable e) {
                     LOGGER.error("Could not load subscription", e);
                     CustomNotification.showError(getTranslation("error"));
                 }
@@ -159,7 +152,7 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                     });
                     add(confirmationDialog);
                     tabs.setSelectedIndex(1);
-                } catch (ExecutionException | InterruptedException | TimeoutException e) {
+                } catch (Throwable e) {
                     LOGGER.error("Could not load product", e);
                     CustomNotification.showError(getTranslation("error"));
                 }

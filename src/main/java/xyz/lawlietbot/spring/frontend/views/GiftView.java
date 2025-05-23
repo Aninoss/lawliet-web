@@ -11,6 +11,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import xyz.lawlietbot.spring.NoLiteAccess;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
@@ -33,6 +35,8 @@ import java.util.Map;
 @CssImport("./styles/gift.css")
 @NoLiteAccess
 public class GiftView extends PageLayout implements HasUrlParameter<String> {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(GiftView.class);
 
     private final VerticalLayout mainContent = new VerticalLayout();
     private final ConfirmationDialog dialog = new ConfirmationDialog();
@@ -93,13 +97,14 @@ public class GiftView extends PageLayout implements HasUrlParameter<String> {
                             if (level.equals("PRO")) {
                                 dialog.open(getTranslation("gift.sucessful.PRO"), () -> {
                                     QueryParameters queryParameters = new QueryParameters(Map.of("tab", List.of("2")));
-                                    UI.getCurrent().navigate(FeatureRequestsView.getRouteStatic(PremiumView.class), queryParameters);
-                                }, () -> UI.getCurrent().navigate(HomeView.class));
+                                    UI.getCurrent().navigate(PremiumView.getRouteStatic(PremiumView.class), queryParameters);
+                                });
                             } else {
                                 dialog.setTriggerConfirmListenerOnClose(true);
                                 dialog.open(getTranslation("gift.sucessful.BASIC"), () -> UI.getCurrent().navigate(HomeView.class));
                             }
                         } else {
+                            LOGGER.error("Premium code could not be redemeed");
                             CustomNotification.showError(getTranslation("error"));
                         }
                     });
