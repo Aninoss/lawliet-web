@@ -77,10 +77,10 @@ public class DevelopmentVotesView extends PageLayout {
         }
 
         Calendar calendar = Calendar.getInstance();
-        int tempMonth = calendar.get(Calendar.MONTH) + 1;
-        int tempYear = calendar.get(Calendar.YEAR);
-        int month = tempMonth == 1 ? 12 : tempMonth;
-        int year = tempMonth == 1 ? tempYear - 1 : tempYear;
+        int month = calendar.get(Calendar.MONTH) + 1;
+        int year = calendar.get(Calendar.YEAR);
+        String filename = System.getenv("DEVVOTES_DIR") + "/" + month + "_" + year + "_" + getLocale().getLanguage() + ".properties";
+        File file = new File(filename);
 
         Map<String, Object> requestMap = Map.of(
                 "user_id", getSessionData().getDiscordUser().get().getId(),
@@ -100,12 +100,19 @@ public class DevelopmentVotesView extends PageLayout {
         pageHeader.getOuterLayout()
                 .add(generateNotificationField(dataJson.getBoolean("reminder_active")));
 
+        if (!file.exists()) {
+            Component label = generateLabel(getTranslation("devvotes.novotes"));
+            mainContent.add(label);
+            add(mainContent);
+            return;
+        }
+
         boolean votesOpen = dataJson.has("votes");
         int totalVotes = dataJson.has("total_votes") ? dataJson.getInt("total_votes") : -1;
         mainContent.add(
                 new H2(String.format("%02d / %d", month, year)),
                 new Text(getTranslation(votesOpen ? "devvotes.help" : "devvotes.results.help")),
-                generateVotes(month, year, dataJson, votesOpen, totalVotes)
+                generateVotes(file, dataJson, votesOpen, totalVotes)
         );
 
         if (votesOpen) {
@@ -175,7 +182,13 @@ public class DevelopmentVotesView extends PageLayout {
         return errorSpan;
     }
 
-    private Component generateVotes(int month, int year, JSONObject dataJson, boolean votesOpen, int totalVotes) throws IOException, JSONException {
+    private Component generateLabel(String error) {
+        Span span = new Span(error);
+        span.getStyle().set("margin-top", "35px");
+        return span;
+    }
+
+    private Component generateVotes(File file, JSONObject dataJson, boolean votesOpen, int totalVotes) throws IOException, JSONException {
         VerticalLayout mainLayout = new VerticalLayout();
         mainLayout.setPadding(true);
         mainLayout.getStyle().set("margin-top", "32px")
@@ -184,9 +197,6 @@ public class DevelopmentVotesView extends PageLayout {
                 .set("border-style", "solid")
                 .set("border-width", "2px")
                 .set("border-color", "var(--lumo-contrast-10pct)");
-
-        String filename = System.getenv("DEVVOTES_DIR") + "/" + month + "_" + year + "_" + getLocale().getLanguage() + ".properties";
-        File file = new File(filename);
 
         if (votesOpen) {
             JSONArray votesJson = dataJson.getJSONArray("votes");
