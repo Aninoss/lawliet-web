@@ -231,17 +231,15 @@ public class PremiumSubscriptionsPage extends PremiumPage {
             pricePeriodTextMap.put(level, period);
             content.add(period);
         }
-        content.add(generateBuyButton(level));
 
         Span desc = new Span(getTranslation("premium.desc." + level.name()));
         desc.getStyle().set("text-align", "center");
-        content.add(desc, generateButtonSeparator());
+        content.add(desc);
 
         if (level == SubLevel.PRO && sessionData.isLoggedIn()) {
             content.add(generateQuantityLayout());
         }
-
-        content.add(generateTierPerks(level));
+        content.add(generateBuyButton(level), generateButtonSeparator(), generateTierPerks(level));
         return content;
     }
 
@@ -384,7 +382,7 @@ public class PremiumSubscriptionsPage extends PremiumPage {
                 .set("overflow-y", "auto");
         preselectGuildsLayout.add(generatePreselectGuildComboBox(0));
 
-        controlLayout.add(quantityLayout, preselectGuildsLayout, generateButtonSeparator());
+        controlLayout.add(generateButtonSeparator(), quantityLayout, preselectGuildsLayout);
         return controlLayout;
     }
 
