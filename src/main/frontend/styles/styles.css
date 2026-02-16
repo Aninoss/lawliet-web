@@ -235,6 +235,10 @@ vaadin-details-summary {
     animation-delay: -0.15s;
 }
 
+vaadin-accordion-heading {
+    white-space: normal !important;
+}
+
 
 /* Keyframes */
 @keyframes lds-ring {

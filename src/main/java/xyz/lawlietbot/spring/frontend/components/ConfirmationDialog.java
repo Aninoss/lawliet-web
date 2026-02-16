@@ -5,7 +5,6 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -53,7 +52,7 @@ public class ConfirmationDialog extends Div {
     }
 
     private Component generateText(String text) {
-        Label textParagraph = new Label(text);
+        Div textParagraph = new Div(text);
         textParagraph.setWidthFull();
         textParagraph.getStyle().set("color", "black");
         return textParagraph;

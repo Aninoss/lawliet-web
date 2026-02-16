@@ -47,7 +47,7 @@ li.premium-entry {
     margin-right: 6px;
     flex-shrink: 0;
     height: 1em;
-    margin-top: 8px;
+    margin-top: 6px;
 }
 
 vaadin-accordion-panel > div > .prop-check {

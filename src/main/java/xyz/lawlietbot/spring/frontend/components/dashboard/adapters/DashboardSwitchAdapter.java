@@ -2,7 +2,6 @@ package xyz.lawlietbot.spring.frontend.components.dashboard.adapters;
 
 import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import dashboard.DashboardComponent;
@@ -15,7 +14,7 @@ import java.util.Objects;
 public class DashboardSwitchAdapter extends HorizontalLayout implements DashboardAdapter<DashboardSwitch> {
 
     private DashboardSwitch dashboardSwitch;
-    private final Label label = new Label();
+    private final Div label = new Div("");
     private final ToggleButton toggleButton = new ToggleButton();
 
     public DashboardSwitchAdapter(DashboardSwitch dashboardSwitch) {

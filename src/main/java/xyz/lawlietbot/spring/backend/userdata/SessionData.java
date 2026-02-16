@@ -11,7 +11,6 @@ import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import xyz.lawlietbot.spring.backend.util.StringUtil;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
@@ -26,14 +25,14 @@ public class SessionData implements Serializable {
     private final static Logger LOGGER = LoggerFactory.getLogger(SessionData.class);
 
     private OAuthBuilder builder;
-    private final String id;
+    private final UUID id;
     private DiscordUser discordUser = null;
     private String currentTarget = "";
     private ArrayList<String> errorMessages = new ArrayList<>();
 
     public SessionData() {
         VaadinSession.getCurrent().getSession().setAttribute("session", this);
-        id = StringUtil.getRandomString();
+        id = UUID.randomUUID();
         setData();
     }
 
@@ -44,11 +43,11 @@ public class SessionData implements Serializable {
 
     public String getLoginUrl() {
         builder = builder.setScopes(new String[]{"identify", "guilds"});
-        return builder.getAuthorizationUrl(id) + "&prompt=none";
+        return builder.getAuthorizationUrl(id.toString()) + "&prompt=none";
     }
 
     public boolean login(String code, String state) {
-        if (!state.equals(id)) {
+        if (!state.equals(id.toString())) {
             pushErrorMessage("login.error");
             return false;
         }
@@ -85,7 +84,7 @@ public class SessionData implements Serializable {
         }
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 

@@ -3,18 +3,10 @@ package xyz.lawlietbot.spring.backend.util;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
-import org.apache.commons.lang3.RandomStringUtils;
 
 public class StringUtil {
 
     private StringUtil(){}
-
-    public static String getRandomString() {
-        int length = 10;
-        boolean useLetters = true;
-        boolean useNumbers = false;
-        return RandomStringUtils.random(length, useLetters, useNumbers);
-    }
 
     public static String numToString(long n) {
         DecimalFormat formatter = new DecimalFormat("#,###", DecimalFormatSymbols.getInstance(Locale.US));

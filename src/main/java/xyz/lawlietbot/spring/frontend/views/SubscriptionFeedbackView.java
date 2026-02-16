@@ -4,7 +4,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -48,7 +48,7 @@ public class SubscriptionFeedbackView extends PageLayout implements HasUrlParame
         VerticalLayout layout = new VerticalLayout();
         layout.setPadding(false);
 
-        Label label = new Label(getTranslation("subfeedback.label"));
+        Div label = new Div(getTranslation("subfeedback.label"));
         layout.add(label);
 
         TextArea textArea = new TextArea();

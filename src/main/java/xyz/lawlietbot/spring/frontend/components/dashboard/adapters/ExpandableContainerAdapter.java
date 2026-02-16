@@ -19,7 +19,7 @@ public class ExpandableContainerAdapter extends Details implements DashboardAdap
         setSummary(header);
 
         Component bodyHidden = DashboardComponentConverter.convert(guildId, userId, expandableContainer.getChildren().get(1), dialog, fileCache);
-        setContent(bodyHidden);
+        add(bodyHidden);
     }
 
     @Override

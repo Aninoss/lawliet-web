@@ -121,7 +121,7 @@ public class PremiumUnlockPage extends PremiumPage {
         horizontalLayout.setPadding(true);
         horizontalLayout.setAlignItems(FlexComponent.Alignment.CENTER);
 
-        Label label = new Label(text);
+        Div label = new Div(text);
         horizontalLayout.add(label);
         horizontalLayout.setFlexGrow(1, label);
 
@@ -161,7 +161,7 @@ public class PremiumUnlockPage extends PremiumPage {
         horizontalLayout.setAlignItems(FlexComponent.Alignment.CENTER);
 
         if (guild == null) {
-            Label label = new Label(getTranslation("premium.notset"));
+            Div label = new Div(getTranslation("premium.notset"));
             label.addClassName(Styles.VISIBLE_NOT_SMALL);
             horizontalLayout.add(label);
 
@@ -198,7 +198,7 @@ public class PremiumUnlockPage extends PremiumPage {
                 horizontalLayout.add(guildIcon);
             }
 
-            Label label = new Label(guild.getName());
+            Div label = new Div(guild.getName());
             horizontalLayout.add(label);
             horizontalLayout.setFlexGrow(1, label);
 

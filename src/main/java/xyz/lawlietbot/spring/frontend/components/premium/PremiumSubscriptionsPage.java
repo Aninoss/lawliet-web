@@ -326,11 +326,11 @@ public class PremiumSubscriptionsPage extends PremiumPage {
         } else {
             buyButton.setText(getTranslation("premium.contact"));
             buyButton.addClickListener(e -> {
-                Label text1 = new Label(getTranslation("premium.contact.message"));
+                Div text1 = new Div(getTranslation("premium.contact.message"));
                 text1.setWidthFull();
                 text1.getStyle().set("color", "black");
 
-                Label text2 = new Label(getTranslation("premium.contact.messagejoin"));
+                Div text2 = new Div(getTranslation("premium.contact.messagejoin"));
                 text2.setWidthFull();
                 text2.getStyle().set("color", "black");
 

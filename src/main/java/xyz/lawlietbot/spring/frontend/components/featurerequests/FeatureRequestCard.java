@@ -5,7 +5,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -163,7 +162,7 @@ public class FeatureRequestCard extends Div {
 
     private void onBoostClick() {
         if (confirmationDialog != null && !uiData.isLite()) {
-            Label label = new Label(getTranslation("fr.boost.confirm", frEntry.getTitle()));
+            Div label = new Div(getTranslation("fr.boost.confirm", frEntry.getTitle()));
             label.add(new LineBreak());
             label.add(getTranslation("fr.boost.confirm.notpush"));
             label.getStyle().set("color", "black");

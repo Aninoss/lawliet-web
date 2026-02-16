@@ -1,24 +1,23 @@
 package xyz.lawlietbot.spring.frontend.components.featurerequests;
 
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import xyz.lawlietbot.spring.backend.util.StringUtil;
 import xyz.lawlietbot.spring.frontend.Styles;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.select.Select;
 import xyz.lawlietbot.spring.frontend.components.featurerequests.sort.FeatureRequestSort;
 
 public class FeatureRequestChangeSort extends VerticalLayout {
 
     private final HorizontalLayout content = new HorizontalLayout();
-    private Label pageIndicator;
-    private Label pageIndicatorMobile;
+    private Div pageIndicator;
+    private Div pageIndicatorMobile;
 
     public FeatureRequestChangeSort(OnSortChange listener, OnPagePrevious onPagePrevious, OnPageNext onPageNext,
                                     OnSearch onSearch, FeatureRequestSort[] comparators, FeatureRequestSort sortDefault,
@@ -51,9 +50,9 @@ public class FeatureRequestChangeSort extends VerticalLayout {
         Button buttonNext = new Button(VaadinIcon.ARROW_RIGHT.create(), click -> onPageNext.onPageNext());
         buttonNext.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
-        pageIndicator = new Label("");
+        pageIndicator = new Div("");
         pageIndicator.addClassNames(Styles.VISIBLE_NOT_SMALL);
-        pageIndicatorMobile = new Label("");
+        pageIndicatorMobile = new Div("");
         pageIndicatorMobile.addClassNames(Styles.VISIBLE_SMALL);
         content.add(buttonPrevious, pageIndicator, pageIndicatorMobile, buttonNext);
     }
@@ -83,7 +82,7 @@ public class FeatureRequestChangeSort extends VerticalLayout {
     }
 
     private void addDropdownMenu(OnSortChange listener, FeatureRequestSort[] comparators, FeatureRequestSort sortDefault) {
-        Label label = new Label(getTranslation("fr.sort.label"));
+        Div label = new Div(getTranslation("fr.sort.label"));
         label.addClassName(Styles.VISIBLE_NOT_SMALL);
         content.add(label);
         String[] options = getTranslation("fr.sort.options").split("\n");

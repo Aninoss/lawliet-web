@@ -225,7 +225,7 @@ vaadin-multi-select-combo-box.hide-toggle-button::part(toggle-button) {
     display: none;
 }
 
-.hide-overlay {
+vaadin-multi-select-combo-box.hide-overlay::part(overlay) {
     display: none;
 }
 

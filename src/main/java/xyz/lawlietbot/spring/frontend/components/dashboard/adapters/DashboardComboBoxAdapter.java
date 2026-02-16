@@ -61,8 +61,7 @@ public class DashboardComboBoxAdapter extends FlexLayout implements DashboardAda
                 }
             });
             if (dashboardComboBox.getAllowCustomValues()) {
-                multiselectComboBox.addClassName("hide-toggle-button");
-                multiselectComboBox.setOverlayClassName("hide-overlay");
+                multiselectComboBox.addClassNames("hide-toggle-button", "hide-overlay");
                 multiselectComboBox.addCustomValueSetListener(e -> {
                     if (multiselectComboBox.getSelectedItems().size() < dashboardComboBox.getMax()) {
                         multiselectComboBox.select(new DiscordEntity(e.getDetail(), e.getDetail()));
