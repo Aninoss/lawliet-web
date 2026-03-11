@@ -67,7 +67,7 @@ public class BotProsPanelsLayout extends VerticalLayout {
         return new BotProPanelInfo[]{
                 new BotProPanelInfo("fishery", true, VaadinIcon.TROPHY.create(), 150),
                 new BotProPanelInfo("alerts", true, VaadinIcon.BELL.create()),
-                new BotProPanelInfo("txt2img", true, VaadinIcon.PENCIL.create()),
+                new BotProPanelInfo("txt2img", false, VaadinIcon.PENCIL.create()),
                 new BotProPanelInfo("nsfw", false, VaadinIcon.MOON_O.create()),
                 new BotProPanelInfo("mod", true, VaadinIcon.SHIELD.create()),
                 new BotProPanelInfo("invitetracking", true, VaadinIcon.ENVELOPE.create()),
@@ -82,7 +82,7 @@ public class BotProsPanelsLayout extends VerticalLayout {
                 new BotProPanelInfo("roleplay", true, VaadinIcon.GROUP.create()),
                 new BotProPanelInfo("reminders", true, VaadinIcon.CLOCK.create()),
                 new BotProPanelInfo("mcdisplays", false, VaadinIcon.TRENDING_UP.create()),
-                new BotProPanelInfo("allfeatures", false, VaadinIcon.LINK.create(), allFeaturesButton)
+                new BotProPanelInfo("allfeatures", true, VaadinIcon.LINK.create(), allFeaturesButton)
         };
     }
 }
