@@ -79,31 +79,7 @@ function loadScript(url, callback)
     head.appendChild(script);
 }
 
-function openPaddle(environment, vendor, planId, quantity, locale, coupon, passthrough) {
-    loadScript("https://cdn.paddle.com/paddle/paddle.js", () => {
-        if (environment === "sandbox") {
-            Paddle.Environment.set(environment);
-        }
-        Paddle.Setup({
-            vendor: vendor,
-            eventCallback: function(eventData) {
-                if (eventData.event === "Checkout.Complete") {
-                    const checkoutId = eventData.eventData.checkout.id;
-                    window.location.href = "https://" + window.location.hostname + "/premium?paddle=" + checkoutId;
-                }
-            }
-        });
-        Paddle.Checkout.open({
-            product: planId,
-            quantity: quantity,
-            locale: locale,
-            passthrough: passthrough,
-            coupon: coupon
-        });
-    });
-}
-
-function openPaddleBilling(environment, clientToken, priceId, locale, coupon, discordId, discordTag, discordAvatar, type) {
+function openPaddleBilling(environment, clientToken, priceId, quantity, locale, coupon, discordId, discordTag, discordAvatar, presetGuilds, type) {
     loadScript("https://cdn.paddle.com/paddle/v2/paddle.js", () => {
         if (environment === "sandbox") {
             Paddle.Environment.set(environment);
@@ -124,12 +100,14 @@ function openPaddleBilling(environment, clientToken, priceId, locale, coupon, di
         });
         Paddle.Checkout.open({
             items: [{
-                priceId: priceId
+                priceId: priceId,
+                quantity: quantity
             }],
             customData: {
                 discordId: discordId,
                 discordTag: discordTag,
-                discordAvatar: discordAvatar
+                discordAvatar: discordAvatar,
+                presetGuilds: presetGuilds
             },
             discountCode: coupon
         });

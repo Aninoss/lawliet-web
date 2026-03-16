@@ -41,57 +41,42 @@ public class PaddleAPI {
         return run(request);
     }
 
-    public static JSONObject retrieveSubscriptionPrices(String customerIpAddress, int group) throws IOException {
-        StringBuilder productIds = new StringBuilder();
+    public static JSONObject retrieveProductPrices(String customerIpAddress, int group, String coupon) throws IOException {
+        JSONObject requestJson = new JSONObject();
+        requestJson.put("customer_ip_address", customerIpAddress);
+        requestJson.put("discount_id", coupon);
+
+        JSONArray itemsArray = new JSONArray();
+        for (ProductTxt2Img product : ProductTxt2Img.values()) {
+            JSONObject itemJson = new JSONObject();
+            itemJson.put("price_id", product.getPriceId());
+            itemJson.put("quantity", 1);
+            itemsArray.put(itemJson);
+        }
+        for (ProductPremium product : ProductPremium.values()) {
+            JSONObject itemJson = new JSONObject();
+            itemJson.put("price_id", product.getPriceId());
+            itemJson.put("quantity", 1);
+            itemsArray.put(itemJson);
+        }
         for (SubDuration duration : SubDuration.values()) {
             for (SubLevel level : SubLevel.values()) {
-                if (!productIds.isEmpty()) {
-                    productIds.append(",");
-                }
-                productIds.append(PaddleManager.getPlanId(duration, level, group));
+                JSONObject itemJson = new JSONObject();
+                itemJson.put("price_id", PaddleManager.getPlanId(duration, level, group));
+                itemJson.put("quantity", 1);
+                itemsArray.put(itemJson);
             }
         }
+        requestJson.put("items", itemsArray);
 
         Request request = new Request.Builder()
-                .url("https://" + System.getenv("PADDLE_SUBDOMAIN_PREFIX") + "checkout.paddle.com/api/2.0/prices?customer_ip=" + customerIpAddress + "&product_ids=" + productIds)
+                .url("https://" + System.getenv("PADDLE_SUBDOMAIN_BILLING") + ".paddle.com/pricing-preview")
+                .post(RequestBody.create(requestJson.toString(), MediaType.get("application/json")))
                 .addHeader("User-Agent", USER_AGENT)
+                .addHeader("Authorization", "Bearer " + System.getenv("PADDLE_AUTH"))
                 .build();
 
         return run(request);
-    }
-
-    public static JSONObject retrieveProductPrices(String customerIpAddress, String coupon) throws IOException {
-        try {
-            JSONObject requestJson = new JSONObject();
-            requestJson.put("customer_ip_address", customerIpAddress);
-            requestJson.put("discount_id", coupon);
-
-            JSONArray itemsArray = new JSONArray();
-            for (ProductTxt2Img product : ProductTxt2Img.values()) {
-                JSONObject itemJson = new JSONObject();
-                itemJson.put("price_id", product.getPriceId());
-                itemJson.put("quantity", 1);
-                itemsArray.put(itemJson);
-            }
-            for (ProductPremium product : ProductPremium.values()) {
-                JSONObject itemJson = new JSONObject();
-                itemJson.put("price_id", product.getPriceId());
-                itemJson.put("quantity", 1);
-                itemsArray.put(itemJson);
-            }
-            requestJson.put("items", itemsArray);
-
-            Request request = new Request.Builder()
-                    .url("https://" + System.getenv("PADDLE_SUBDOMAIN_BILLING") + ".paddle.com/pricing-preview")
-                    .post(RequestBody.create(requestJson.toString(), MediaType.get("application/json")))
-                    .addHeader("User-Agent", USER_AGENT)
-                    .addHeader("Authorization", "Bearer " + System.getenv("PADDLE_AUTH"))
-                    .build();
-
-            return run(request);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public static boolean subscriptionSetPaused(long subId, boolean paused) throws IOException {

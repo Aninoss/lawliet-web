@@ -59,7 +59,7 @@ public class PremiumProductsPage extends PremiumPage {
             add(premiumView.generateCouponField());
         }
 
-        PaddlePriceOverview paddlePriceOverview = PaddleManager.retrieveProductPrices(VaadinRequest.getCurrent().getHeader("CF-Connecting-IP"));
+        PaddlePriceOverview paddlePriceOverview = PaddleManager.retrievePrices(VaadinRequest.getCurrent().getHeader("CF-Connecting-IP"), 0);
         add(
                 createPremiumField(paddlePriceOverview),
                 createTxt2ImgField(paddlePriceOverview)
@@ -249,9 +249,6 @@ public class PremiumProductsPage extends PremiumPage {
             span.add(previousPriceSpan, new Text(" "));
         }
         span.add(currentPriceString);
-        if (!price.getIncludesVat()) {
-            span.add(" " + getTranslation("premium.products.vat"));
-        }
         return span;
     }
 
@@ -267,7 +264,7 @@ public class PremiumProductsPage extends PremiumPage {
             DiscordUser discordUser = sessionData.getDiscordUser().orElse(null);
             if (discordUser != null) {
                 try {
-                    PaddleManager.openPopupBilling(priceId, discordUser, getLocale(), type);
+                    PaddleManager.openPopupOneOff(priceId, discordUser, getLocale(), type);
                 } catch (Exception ex) {
                     LOGGER.error("Exception", ex);
                     CustomNotification.showError(getTranslation("error"));

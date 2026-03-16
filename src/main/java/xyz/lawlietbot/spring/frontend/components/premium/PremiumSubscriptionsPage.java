@@ -313,7 +313,7 @@ public class PremiumSubscriptionsPage extends PremiumPage {
                                 .map(g -> g.getValue().getId())
                                 .collect(Collectors.toList());
 
-                        PaddleManager.openPopup(durationSelect.getValue(), level, discordUser, value, presetGuildIds, getLocale(), group);
+                        PaddleManager.openPopupSubscription(durationSelect.getValue(), level, discordUser, value, presetGuildIds, getLocale(), group);
                         UICache.put(discordUser.getId(), UI.getCurrent());
                     } catch (Exception ex) {
                         LOGGER.error("Exception", ex);
@@ -399,14 +399,14 @@ public class PremiumSubscriptionsPage extends PremiumPage {
 
     private void refreshPremiumTiers() {
         SubDuration duration = durationSelect.getValue();
-        PaddlePriceOverview paddlePriceOverview = PaddleManager.retrieveSubscriptionPrices(VaadinRequest.getCurrent().getHeader("CF-Connecting-IP"), group);
+        PaddlePriceOverview paddlePriceOverview = PaddleManager.retrievePrices(VaadinRequest.getCurrent().getHeader("CF-Connecting-IP"), group);
         Currency currency = paddlePriceOverview.getCurrency();
         Map<String, PaddlePriceOverview.Price> priceMap = paddlePriceOverview.getPrices();
 
         for (SubLevel subLevel : priceTextMap.keySet()) {
-            long planId = PaddleManager.getPlanId(duration, subLevel, group);
+            String planId = PaddleManager.getPlanId(duration, subLevel, group);
 
-            PaddlePriceOverview.Price price = priceMap.get(String.valueOf(planId));
+            PaddlePriceOverview.Price price = priceMap.get(planId);
             double currentPrice = price.getCurrentPrice();
             double previousPrice = price.getPreviousPrice();
             if (subLevel == SubLevel.PRO && quantityNumberField != null) {
@@ -427,12 +427,12 @@ public class PremiumSubscriptionsPage extends PremiumPage {
                 previousPriceTextMap.get(subLevel)
                         .setVisible(false);
                 pricePeriodTextMap.get(subLevel)
-                        .setText(getTranslation(price.getIncludesVat() ? "premium.priceperiod.includesvat" : "premium.priceperiod", duration == SubDuration.YEARLY));
+                        .setText(getTranslation("premium.priceperiod", duration == SubDuration.YEARLY));
             } else {
                 priceTextMap.get(subLevel)
                         .setText(subLevel == SubLevel.ULTIMATE ? getTranslation("premium.price.ultimate", currentPriceString) : currentPriceString);
                 pricePeriodTextMap.get(subLevel)
-                        .setText(getTranslation(price.getIncludesVat() ? "premium.priceperiod.sale.includesvat" : "premium.priceperiod.sale", duration == SubDuration.YEARLY, previousPriceString));
+                        .setText(getTranslation("premium.priceperiod.sale", duration == SubDuration.YEARLY, previousPriceString));
 
                 Span previousPriceText = previousPriceTextMap.get(subLevel);
                 previousPriceText.setVisible(true);
@@ -502,7 +502,7 @@ public class PremiumSubscriptionsPage extends PremiumPage {
                 }
 
                 AccordionPanel accordionPanel = new AccordionPanel(content, unorderedList);
-                accordionPanel.addThemeVariants(DetailsVariant.REVERSE);
+                accordionPanel.addThemeVariants(DetailsVariant.LUMO_REVERSE);
                 accordionPanel.getStyle()
                         .set("width", "100%")
                         .set("border", "0");

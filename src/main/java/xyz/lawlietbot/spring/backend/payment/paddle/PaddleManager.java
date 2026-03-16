@@ -5,6 +5,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.jamiussiam.paddle.verifier.Verifier;
 import com.vaadin.flow.component.UI;
+import org.apache.tomcat.util.buf.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -12,7 +13,6 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.lawlietbot.spring.ExternalLinks;
-import xyz.lawlietbot.spring.backend.Pair;
 import xyz.lawlietbot.spring.backend.UICache;
 import xyz.lawlietbot.spring.backend.payment.Currency;
 import xyz.lawlietbot.spring.backend.payment.*;
@@ -29,6 +29,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 public class PaddleManager {
 
@@ -44,22 +45,13 @@ public class PaddleManager {
                     return new CompletableFuture<>();
                 }
             });
-    private final static LoadingCache<Pair<String, Integer>, JSONObject> subscriptionPricesCache = CacheBuilder.newBuilder()
+    private final static LoadingCache<IpGroupAndCoupon, JSONObject> pricesCache = CacheBuilder.newBuilder()
             .expireAfterWrite(Duration.ofMinutes(5))
             .build(new CacheLoader<>() {
                 @NotNull
                 @Override
-                public JSONObject load(@NotNull Pair<String, Integer> pair) throws Exception {
-                    return PaddleAPI.retrieveSubscriptionPrices(pair.getKey(), pair.getValue());
-                }
-            });
-    private final static LoadingCache<IpAndCoupon, JSONObject> productPricesCache = CacheBuilder.newBuilder()
-            .expireAfterWrite(Duration.ofMinutes(5))
-            .build(new CacheLoader<>() {
-                @NotNull
-                @Override
-                public JSONObject load(@NotNull IpAndCoupon ipAndCoupon) throws Exception {
-                    return PaddleAPI.retrieveProductPrices(ipAndCoupon.ipAddress, ipAndCoupon.coupon);
+                public JSONObject load(@NotNull PaddleManager.IpGroupAndCoupon ipGroupAndCoupon) throws Exception {
+                    return PaddleAPI.retrieveProductPrices(ipGroupAndCoupon.ipAddress, ipGroupAndCoupon.group, ipGroupAndCoupon.coupon);
                 }
             });
 
@@ -74,45 +66,12 @@ public class PaddleManager {
         paddleBillingWebhookVerifier = new PaddleBillingWebhookVerifier(System.getenv("PADDLE_BILLING_WEBHOOK_KEY"));
     }
 
-    public static PaddlePriceOverview retrieveSubscriptionPrices(String customerIpAddress, int group) {
+    public static PaddlePriceOverview retrievePrices(String customerIpAddress, int group) {
         customerIpAddress = Objects.requireNonNullElse(customerIpAddress, System.getenv("PADDLE_DEFAULT_IP"));
 
         JSONObject pricesJson;
         try {
-            pricesJson = subscriptionPricesCache.get(new Pair<>(customerIpAddress, group));
-            JSONArray productsJson = pricesJson.getJSONObject("response").getJSONArray("products");
-            HashMap<String, PaddlePriceOverview.Price> subscriptionPriceMap = new HashMap<>();
-
-            Currency currency = null;
-            for (int i = 0; i < productsJson.length(); i++) {
-                JSONObject productJson = productsJson.getJSONObject(i);
-                currency = Currency.valueOf(productJson.getString("currency"));
-                boolean includesVat = productJson.getBoolean("vendor_set_prices_included_tax");
-
-                long productId = productJson.getLong("product_id");
-                double currentPrice = productJson.getJSONObject("price").getDouble(includesVat ? "gross" : "net");
-                double previousPrice = currentPrice;
-                if (productIsInSale(String.valueOf(productId))) {
-                    currentPrice = currentPrice * (100 - Integer.parseInt(System.getenv("PADDLE_SALE_PERCENT"))) / 100.0;
-                }
-                subscriptionPriceMap.put(String.valueOf(productId), new PaddlePriceOverview.Price(currentPrice, previousPrice, includesVat));
-            }
-
-            return new PaddlePriceOverview(
-                    currency,
-                    subscriptionPriceMap
-            );
-        } catch (ExecutionException | JSONException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static PaddlePriceOverview retrieveProductPrices(String customerIpAddress) {
-        customerIpAddress = Objects.requireNonNullElse(customerIpAddress, System.getenv("PADDLE_DEFAULT_IP"));
-
-        JSONObject pricesJson;
-        try {
-            pricesJson = productPricesCache.get(new IpAndCoupon(customerIpAddress, System.getenv("PADDLE_SALE_DISCOUNT_ID"))).getJSONObject("data");
+            pricesJson = pricesCache.get(new IpGroupAndCoupon(customerIpAddress, group, System.getenv("PADDLE_SALE_DISCOUNT_ID"))).getJSONObject("data");
 
             JSONArray itemsJson = pricesJson.getJSONObject("details").getJSONArray("line_items");
             HashMap<String, PaddlePriceOverview.Price> productPriceMap = new HashMap<>();
@@ -124,20 +83,11 @@ public class PaddleManager {
                 JSONObject priceJson = itemJson.getJSONObject("price");
                 String priceId = priceJson.getString("id");
 
-                PaddlePriceOverview.Price price;
-                if (priceJson.getString("tax_mode").equals("external")) {
-                    price = new PaddlePriceOverview.Price(
-                            (Double.parseDouble(totalsJson.getString("subtotal")) - Double.parseDouble(totalsJson.getString("discount"))) / Math.pow(10, currency.getDecimalPlaces()),
-                            Double.parseDouble(totalsJson.getString("subtotal")) / Math.pow(10, currency.getDecimalPlaces()),
-                            false
-                    );
-                } else {
-                    price = new PaddlePriceOverview.Price(
-                            (Double.parseDouble(totalsJson.getString("total")) - Double.parseDouble(totalsJson.getString("discount"))) / Math.pow(10, currency.getDecimalPlaces()),
-                            Double.parseDouble(totalsJson.getString("total")) / Math.pow(10, currency.getDecimalPlaces()),
-                            true
-                    );
-                }
+                PaddlePriceOverview.Price price = new PaddlePriceOverview.Price(
+                        (Double.parseDouble(totalsJson.getString("total")) - Double.parseDouble(totalsJson.getString("discount"))) / Math.pow(10, currency.getDecimalPlaces()),
+                        Double.parseDouble(totalsJson.getString("total")) / Math.pow(10, currency.getDecimalPlaces()),
+                        true
+                );
                 productPriceMap.put(priceId, price);
             }
 
@@ -150,29 +100,35 @@ public class PaddleManager {
         }
     }
 
-    public static void openPopup(SubDuration duration, SubLevel level, DiscordUser discordUser, int quantity, List<Long> presetGuildIds, Locale locale, int group) {
-        long planId = PaddleManager.getPlanId(duration, level, group);
-        UI.getCurrent().getPage().executeJs("openPaddle($0, $1, $2, $3, $4, $5, $6)",
+    public static void openPopupSubscription(SubDuration duration, SubLevel level, DiscordUser discordUser, int quantity, List<Long> presetGuildIds, Locale locale, int group) {
+        String planId = PaddleManager.getPlanId(duration, level, group);
+        UI.getCurrent().getPage().executeJs("openPaddleBilling($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
                 System.getenv("PADDLE_ENVIRONMENT"),
-                Integer.parseInt(System.getenv("PADDLE_VENDOR_ID")),
-                (int) planId,
+                System.getenv("PADDLE_CLIENT_TOKEN"),
+                planId,
                 quantity,
                 locale.getLanguage(),
-                productIsInSale(String.valueOf(planId)) ? System.getenv("PADDLE_SALE_CODE") : null,
-                generatePassthrough(discordUser, presetGuildIds)
+                productIsInSale(planId) ? System.getenv("PADDLE_SALE_CODE") : null,
+                String.valueOf(discordUser.getId()),
+                discordUser.getUsername(),
+                discordUser.getUserAvatar(),
+                StringUtils.join(",", presetGuildIds.stream().map(String::valueOf).collect(Collectors.joining())),
+                "subscription"
         );
     }
 
-    public static void openPopupBilling(String priceId, DiscordUser discordUser, Locale locale, String type) {
-        UI.getCurrent().getPage().executeJs("openPaddleBilling($0, $1, $2, $3, $4, $5, $6, $7, $8)",
+    public static void openPopupOneOff(String priceId, DiscordUser discordUser, Locale locale, String type) {
+        UI.getCurrent().getPage().executeJs("openPaddleBilling($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
                 System.getenv("PADDLE_ENVIRONMENT"),
                 System.getenv("PADDLE_CLIENT_TOKEN"),
                 priceId,
+                1,
                 locale.getLanguage(),
                 productIsInSale(priceId) ? System.getenv("PADDLE_SALE_CODE") : null,
                 String.valueOf(discordUser.getId()),
                 discordUser.getUsername(),
                 discordUser.getUserAvatar(),
+                null,
                 type
         );
     }
@@ -368,7 +324,7 @@ public class PaddleManager {
         parameterMap.forEach((k, v) -> LOGGER.info("{}: {}", k, v[0]));
     }
 
-    public static long getPlanId(SubDuration duration, SubLevel level, int group) {
+    public static String getPlanId(SubDuration duration, SubLevel level, int group) {
         int i;
         if (duration == SubDuration.MONTHLY) {
             switch (level) {
@@ -385,7 +341,7 @@ public class PaddleManager {
                     break;
 
                 default:
-                    return 0L;
+                    return null;
             }
         } else {
             switch (level) {
@@ -402,30 +358,25 @@ public class PaddleManager {
                     break;
 
                 default:
-                    return 0L;
+                    return null;
             }
         }
 
-        return Long.parseLong(System.getenv("PADDLE_SUBSCRIPTION_IDS_" + group).split(",")[i]);
+        return System.getenv("PADDLE_PREMIUM_SUBSCRIPTION_IDS_" + group).split(",")[i];
     }
 
     public static SubLevel getSubLevelType(long planIdLong) {
         for (int i = 0; i < 2; i++) {
-            String subString = System.getenv("PADDLE_SUBSCRIPTION_IDS_" + i);
-            if (subString == null) {
-                continue;
-            }
-
-            String[] subIds = subString.split(",");
+            String[] classicSubIds = System.getenv("PADDLE_SUBSCRIPTION_IDS_" + i).split(",");
+            String[] billingSubIds = System.getenv("PADDLE_PREMIUM_SUBSCRIPTION_IDS_" + i).split(",");
             String planId = String.valueOf(planIdLong);
-
-            if (List.of(subIds[0], subIds[3]).contains(planId)) {
+            if (List.of(classicSubIds[0], classicSubIds[3], billingSubIds[0], billingSubIds[3]).contains(planId)) {
                 return SubLevel.BASIC;
             }
-            if (List.of(subIds[1], subIds[4]).contains(planId)) {
+            if (List.of(classicSubIds[1], classicSubIds[4], billingSubIds[1], billingSubIds[4]).contains(planId)) {
                 return SubLevel.PRO;
             }
-            if (List.of(subIds[2], subIds[5]).contains(planId)) {
+            if (List.of(classicSubIds[2], classicSubIds[5], billingSubIds[2], billingSubIds[5]).contains(planId)) {
                 return SubLevel.ULTIMATE;
             }
         }
@@ -456,13 +407,15 @@ public class PaddleManager {
         return saleProducts != null && Set.of(saleProducts.split(",")).contains(id);
     }
 
-    private static class IpAndCoupon {
+    private static class IpGroupAndCoupon {
 
         private final String ipAddress;
+        private final int group;
         private final String coupon;
 
-        public IpAndCoupon(String ipAddress, String coupon) {
+        public IpGroupAndCoupon(String ipAddress, int group, String coupon) {
             this.ipAddress = ipAddress;
+            this.group = group;
             this.coupon = coupon;
         }
 
@@ -470,13 +423,13 @@ public class PaddleManager {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            IpAndCoupon that = (IpAndCoupon) o;
-            return Objects.equals(ipAddress, that.ipAddress) && Objects.equals(coupon, that.coupon);
+            IpGroupAndCoupon that = (IpGroupAndCoupon) o;
+            return Objects.equals(ipAddress, that.ipAddress) && Objects.equals(group, that.group) && Objects.equals(coupon, that.coupon);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(ipAddress, coupon);
+            return Objects.hash(ipAddress, group, coupon);
         }
 
     }
