@@ -219,7 +219,7 @@ public class CustomRequestHandler implements RequestHandler {
                     .forEach(key -> bodyBuilder.append("&").append(key).append("=").append(URLEncoder.encode(parameterMap.get(key)[0], StandardCharsets.UTF_8)));
             String body = bodyBuilder.substring(1);
             if (PaddleManager.verifyWebhookData(body)) {
-                PaddleManager.registerSubscription(parameterMap);
+                PaddleManager.registerSubscriptionOld(parameterMap);
             } else {
                 response.setStatus(403);
             }

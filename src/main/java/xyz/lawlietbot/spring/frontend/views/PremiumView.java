@@ -144,14 +144,17 @@ public class PremiumView extends PageLayout implements HasUrlParameter<String> {
                     int paddleCheckoutWaitTimeMinutes = Integer.parseInt(Objects.requireNonNullElse(System.getenv("PADDLE_CHECKOUT_WAIT_TIME_MINUTES"), "1"));
                     PaddleManager.waitForCheckoutAsync(transactionId).get(paddleCheckoutWaitTimeMinutes, TimeUnit.MINUTES);
 
-                    String messageKey = parametersMap.get("type").get(0).equals("txt2img")
-                            ? "premium.buy.success.txt2img"
-                            : "premium.buy.success.premium";
+                    String type = parametersMap.get("type").get(0);
                     ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-                    confirmationDialog.open(getTranslation(messageKey), () -> {
+                    confirmationDialog.open(getTranslation("premium.buy.success." + type), () -> {
                     });
                     add(confirmationDialog);
-                    tabs.setSelectedIndex(1);
+
+                    switch (type) {
+                        case PaddleManager.TYPE_BASIC -> tabs.setSelectedIndex(0);
+                        case PaddleManager.TYPE_PRO -> tabs.setSelectedIndex(2);
+                        case PaddleManager.TYPE_TXT2IMG, PaddleManager.TYPE_PREMIUM -> tabs.setSelectedIndex(1);
+                    }
                 } catch (Throwable e) {
                     LOGGER.error("Could not load product", e);
                     CustomNotification.showError(getTranslation("error"));

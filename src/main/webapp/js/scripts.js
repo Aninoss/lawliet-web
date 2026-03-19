@@ -104,10 +104,12 @@ function openPaddleBilling(environment, clientToken, priceId, quantity, locale, 
                 quantity: quantity
             }],
             customData: {
-                discordId: discordId,
-                discordTag: discordTag,
-                discordAvatar: discordAvatar,
-                presetGuilds: presetGuilds
+                discord_id: discordId,
+                discord_tag: discordTag,
+                discord_avatar: discordAvatar,
+                locale: locale,
+                type: type,
+                preset_guilds: presetGuilds
             },
             discountCode: coupon
         });

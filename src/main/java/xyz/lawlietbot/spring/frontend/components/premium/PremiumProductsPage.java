@@ -199,7 +199,7 @@ public class PremiumProductsPage extends PremiumPage {
             buyLayout.setPadding(false);
             buyLayout.setJustifyContentMode(JustifyContentMode.END);
             buyLayout.setAlignItems(Alignment.CENTER);
-            buyLayout.add(generatePriceSpan(paddlePriceOverview, product.getPriceId()), generateBuyButton(product.getPriceId(), "premium"));
+            buyLayout.add(generatePriceSpan(paddlePriceOverview, product.getPriceId()), generateBuyButton(product.getPriceId(), PaddleManager.TYPE_PREMIUM));
             content.add(buyLayout);
 
             articles[i] = new Article(content);
@@ -225,7 +225,7 @@ public class PremiumProductsPage extends PremiumPage {
             buyLayout.setPadding(false);
             buyLayout.setJustifyContentMode(JustifyContentMode.END);
             buyLayout.setAlignItems(Alignment.CENTER);
-            buyLayout.add(generatePriceSpan(paddlePriceOverview, product.getPriceId()), generateBuyButton(product.getPriceId(), "txt2img"));
+            buyLayout.add(generatePriceSpan(paddlePriceOverview, product.getPriceId()), generateBuyButton(product.getPriceId(), PaddleManager.TYPE_TXT2IMG));
             content.add(buyLayout);
 
             articles[i] = new Article(content);
