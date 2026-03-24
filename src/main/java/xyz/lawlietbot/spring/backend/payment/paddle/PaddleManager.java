@@ -104,9 +104,9 @@ public class PaddleManager {
         }
     }
 
-    public static void openPopupSubscription(SubDuration duration, SubLevel level, DiscordUser discordUser, int quantity, List<Long> presetGuildIds, Locale locale, int group) {
+    public static void openPopupSubscription(SubDuration duration, SubLevel level, DiscordUser discordUser, int quantity, boolean unlocksGuilds, List<Long> presetGuildIds, Locale locale, int group) {
         String planId = PaddleManager.getPlanId(duration, level, group);
-        UI.getCurrent().getPage().executeJs("openPaddleBilling($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
+        UI.getCurrent().getPage().executeJs("openPaddleBilling($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
                 System.getenv("PADDLE_ENVIRONMENT"),
                 System.getenv("PADDLE_CLIENT_TOKEN"),
                 planId,
@@ -116,13 +116,14 @@ public class PaddleManager {
                 String.valueOf(discordUser.getId()),
                 discordUser.getUsername(),
                 discordUser.getUserAvatar(),
-                StringUtils.join(presetGuildIds.stream().map(String::valueOf).toList(), ','),
+                unlocksGuilds,
+                presetGuildIds != null ? StringUtils.join(presetGuildIds.stream().map(String::valueOf).toList(), ',') : null,
                 level.name().toLowerCase()
         );
     }
 
     public static void openPopupOneOff(String priceId, DiscordUser discordUser, Locale locale, String type) {
-        UI.getCurrent().getPage().executeJs("openPaddleBilling($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
+        UI.getCurrent().getPage().executeJs("openPaddleBilling($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
                 System.getenv("PADDLE_ENVIRONMENT"),
                 System.getenv("PADDLE_CLIENT_TOKEN"),
                 priceId,
@@ -132,6 +133,7 @@ public class PaddleManager {
                 String.valueOf(discordUser.getId()),
                 discordUser.getUsername(),
                 discordUser.getUserAvatar(),
+                null,
                 null,
                 type
         );
@@ -228,7 +230,7 @@ public class PaddleManager {
 
     public static void registerBilling(JSONObject json) {
         try {
-            LOGGER.info("--- NEW PAYMENT RECEIVED ---\n{}", json);
+            LOGGER.info("--- PADDLE BILLING NOTIFICATION RECEIVED ---\n{}", json);
 
             JSONObject data = json.getJSONObject("data");
             JSONObject itemData = data.getJSONArray("items").getJSONObject(0);
@@ -243,7 +245,7 @@ public class PaddleManager {
 
             try {
                 switch (customData.getString("type")) {
-                    case TYPE_BASIC, TYPE_PRO -> registerSubscription(data, priceData, customData, detailsTotalData, quantity, userId);
+                    case TYPE_BASIC, TYPE_PRO -> registerSubscription(json, data, priceData, customData, detailsTotalData, quantity, userId);
                     case TYPE_TXT2IMG -> registerTxt2Img(priceData, customData, detailsTotalData, quantity, userId);
                     case TYPE_PREMIUM -> registerPremiumCode(priceData, customData, detailsTotalData, quantity, userId);
                 }
@@ -258,22 +260,25 @@ public class PaddleManager {
         }
     }
 
-    private static void registerSubscription(JSONObject data, JSONObject priceData, JSONObject customData, JSONObject detailsTotalData, int quantity, long userId) {
+    private static void registerSubscription(JSONObject root, JSONObject data, JSONObject priceData, JSONObject customData, JSONObject detailsTotalData, int quantity, long userId) {
         UI ui = UICache.get(userId);
+        String eventType = root.getString("event_type");
+        if (!eventType.startsWith("subscription.")) {
+            return;
+        }
+        boolean created = eventType.equals("subscription.created");
+
         JSONObject json = new JSONObject();
-        json.put("user_id", userId);
+        json.put("data", data);
         json.put("title", ui != null ? ui.getTranslation("premium.usermessage.title") : null);
         json.put("description", ui != null ? ui.getTranslation("premium.usermessage.desc", ExternalLinks.LAWLIET_PREMIUM, ExternalLinks.BETA_SERVER_INVITE, ExternalLinks.LAWLIET_DEVELOPMENT_VOTES) : null);
-        json.put("subscription_id", data.getString("subscription_id"));
-        json.put("unlocks_server", priceData.getJSONObject("custom_data").getBoolean("unlocks_server"));
-        json.put("preset_guilds", customData.getString("preset_Guilds"));
-        json.put("quantity", quantity);
-        json.put("status", "active");
-        json.put("locale", customData.getString("locale"));
+        json.put("created", created);
         SendEvent.send(EventOut.PADDLE_BILLING, json).join();
 
-        sendNotification(detailsTotalData, customData, userId, priceData, quantity);
-        LOGGER.info("Subscription notification sent");
+        if (created) {
+            sendNotification(detailsTotalData, customData, userId, priceData, quantity);
+            LOGGER.info("Subscription notification sent");
+        }
     }
 
     private static void registerTxt2Img(JSONObject priceData, JSONObject customData, JSONObject detailsTotalData, int quantity, long userId) {

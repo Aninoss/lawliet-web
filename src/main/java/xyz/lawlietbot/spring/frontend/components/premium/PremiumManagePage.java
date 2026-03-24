@@ -3,7 +3,10 @@ package xyz.lawlietbot.spring.frontend.components.premium;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
@@ -12,6 +15,7 @@ import com.vaadin.flow.router.QueryParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.lawlietbot.spring.backend.Redirector;
+import xyz.lawlietbot.spring.backend.payment.PaddleBillingSubscription;
 import xyz.lawlietbot.spring.backend.payment.PremiumCode;
 import xyz.lawlietbot.spring.backend.payment.Subscription;
 import xyz.lawlietbot.spring.backend.payment.paddle.PaddleAPI;
@@ -49,19 +53,29 @@ public class PremiumManagePage extends PremiumPage {
     @Override
     public void build() {
         sessionData.getDiscordUser().ifPresent(user -> {
-            updateSubscriptionsContent(user, 0);
+            List<PaddleBillingSubscription> subs = SyncUtil.retrievePaddleBillingSubscriptions(user.getId(), null).join();
+            if (!subs.isEmpty()) {
+                Button moreButton = new Button(getTranslation("manage.more"));
+                moreButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+                add(new Anchor(System.getenv("PADDLE_CUSTOMER_PORTAL_LINK"), moreButton));
+            }
+
+            updateSubscriptionsContent(user, 0, subs.isEmpty());
             H2 h2 = new H2(getTranslation("manage.title.redeemedcodes"));
             h2.getStyle().set("margin-top", "2em");
             add(h2, generateCodesGrid(user.getId()));
         });
     }
 
-    private void updateSubscriptionsContent(DiscordUser user, long reloadSubId) {
+    private void updateSubscriptionsContent(DiscordUser user, long reloadSubId, boolean showEmptyText) {
         subscriptionsGridLayout.removeAll();
-        subscriptionsGridLayout.add(generateSubscriptionsGrid(user, reloadSubId));
+        Component component = generateSubscriptionsGrid(user, reloadSubId, showEmptyText);
+        if (component != null) {
+            subscriptionsGridLayout.add(component);
+        }
     }
 
-    private Component generateSubscriptionsGrid(DiscordUser user, long reloadSubId) {
+    private Component generateSubscriptionsGrid(DiscordUser user, long reloadSubId, boolean showEmptyText) {
         List<Subscription> subscriptionList = SyncUtil.retrievePaddleSubscriptions(user.getId(), reloadSubId).join();
         if (!subscriptionList.isEmpty()) {
             Grid<Subscription> grid = new Grid<>(Subscription.class, false);
@@ -87,7 +101,7 @@ public class PremiumManagePage extends PremiumPage {
                     .setAutoWidth(true);
             return grid;
         } else {
-            return new Div(new Text(getTranslation("manage.nosubs")));
+            return showEmptyText ? new Div(new Text(getTranslation("manage.nosubs"))) : null;
         }
     }
 
@@ -163,7 +177,7 @@ public class PremiumManagePage extends PremiumPage {
                             LOGGER.error("Exception on sub update", ioException);
                         }
                         if (success) {
-                            updateSubscriptionsContent(user, sub.getSubId());
+                            updateSubscriptionsContent(user, sub.getSubId(), true);
                             CustomNotification.showSuccess(getTranslation("manage.success"));
                             if (navigateToFeedbackPage) {
                                 QueryParameters queryParameters = new QueryParameters(Map.of("id", List.of(SubscriptionFeedbackIdManager.generateId())));

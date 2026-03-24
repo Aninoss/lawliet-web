@@ -307,13 +307,16 @@ public class PremiumSubscriptionsPage extends PremiumPage {
                 if (discordUser != null) {
                     try {
                         int value = extractValueFromQuantity(quantityNumberField.getValue());
-                        List<Long> presetGuildIds = preselectGuildsLayout.getChildren()
-                                .map(c -> (GuildComboBox) c)
-                                .filter(g -> g.getValue() != null)
-                                .map(g -> g.getValue().getId())
-                                .collect(Collectors.toList());
+                        List<Long> presetGuildIds = null;
+                        if (level == SubLevel.PRO) {
+                            presetGuildIds = preselectGuildsLayout.getChildren()
+                                    .map(c -> (GuildComboBox) c)
+                                    .filter(g -> g.getValue() != null)
+                                    .map(g -> g.getValue().getId())
+                                    .collect(Collectors.toList());
+                        }
 
-                        PaddleManager.openPopupSubscription(durationSelect.getValue(), level, discordUser, value, presetGuildIds, getLocale(), group);
+                        PaddleManager.openPopupSubscription(durationSelect.getValue(), level, discordUser, value, level == SubLevel.PRO, presetGuildIds, getLocale(), group);
                         UICache.put(discordUser.getId(), UI.getCurrent());
                     } catch (Exception ex) {
                         LOGGER.error("Exception", ex);

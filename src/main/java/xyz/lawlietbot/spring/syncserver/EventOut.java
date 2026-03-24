@@ -20,6 +20,7 @@ public enum EventOut {
     STRIPE,
     PADDLE,
     PADDLE_BILLING,
+    PADDLE_BILLING_SUBSCRIPTIONS,
     DASH_INIT,
     DASH_CAT_INIT,
     DASH_ACTION,

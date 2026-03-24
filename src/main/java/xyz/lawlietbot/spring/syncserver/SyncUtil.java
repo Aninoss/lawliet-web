@@ -3,6 +3,7 @@ package xyz.lawlietbot.spring.syncserver;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import xyz.lawlietbot.spring.backend.payment.PaddleBillingSubscription;
 import xyz.lawlietbot.spring.backend.payment.PremiumCode;
 import xyz.lawlietbot.spring.backend.payment.Subscription;
 
@@ -51,6 +52,33 @@ public class SyncUtil {
                                         subJson.getString("update_url"),
                                         subJson.getString("email")
                                 ));
+                            }
+                            return Collections.unmodifiableList(subscriptions);
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static CompletableFuture<List<PaddleBillingSubscription>> retrievePaddleBillingSubscriptions(long userId, String reloadSubscriptionId) {
+        try {
+            JSONObject json = new JSONObject();
+            json.put("user_id", userId);
+            if (reloadSubscriptionId != null) {
+                json.put("reload_subscription_id", reloadSubscriptionId);
+            }
+
+            return SendEvent.send(EventOut.PADDLE_BILLING_SUBSCRIPTIONS, json)
+                    .thenApply(r -> {
+                        try {
+                            JSONArray subsJson = r.getJSONArray("subscriptions");
+                            ArrayList<PaddleBillingSubscription> subscriptions = new ArrayList<>();
+                            for (int i = 0; i < subsJson.length(); i++) {
+                                JSONObject subJson = subsJson.getJSONObject(i);
+                                subscriptions.add(PaddleBillingSubscription.fromJson(subJson));
                             }
                             return Collections.unmodifiableList(subscriptions);
                         } catch (JSONException e) {
