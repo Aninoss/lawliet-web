@@ -24,7 +24,6 @@ import xyz.lawlietbot.spring.syncserver.SendEvent;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
-import java.text.NumberFormat;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -87,11 +86,20 @@ public class PaddleManager {
                 JSONObject priceJson = itemJson.getJSONObject("price");
                 String priceId = priceJson.getString("id");
 
-                PaddlePriceOverview.Price price = new PaddlePriceOverview.Price(
-                        (Double.parseDouble(totalsJson.getString("total")) - Double.parseDouble(totalsJson.getString("discount"))) / Math.pow(10, currency.getDecimalPlaces()),
-                        Double.parseDouble(totalsJson.getString("total")) / Math.pow(10, currency.getDecimalPlaces()),
-                        true
-                );
+                PaddlePriceOverview.Price price;
+                if (priceJson.getString("tax_mode").equals("external")) {
+                    price = new PaddlePriceOverview.Price(
+                            (Double.parseDouble(totalsJson.getString("subtotal")) - Double.parseDouble(totalsJson.getString("discount"))) / Math.pow(10, currency.getDecimalPlaces()),
+                            Double.parseDouble(totalsJson.getString("subtotal")) / Math.pow(10, currency.getDecimalPlaces()),
+                            false
+                    );
+                } else {
+                    price = new PaddlePriceOverview.Price(
+                            (Double.parseDouble(totalsJson.getString("total")) - Double.parseDouble(totalsJson.getString("discount"))) / Math.pow(10, currency.getDecimalPlaces()),
+                            Double.parseDouble(totalsJson.getString("total")) / Math.pow(10, currency.getDecimalPlaces()),
+                            true
+                    );
+                }
                 productPriceMap.put(priceId, price);
             }
 
@@ -104,9 +112,9 @@ public class PaddleManager {
         }
     }
 
-    public static void openPopupSubscription(SubDuration duration, SubLevel level, DiscordUser discordUser, int quantity, boolean unlocksGuilds, List<Long> presetGuildIds, Locale locale, int group) {
+    public static void openPopupSubscription(SubDuration duration, SubLevel level, DiscordUser discordUser, int quantity, List<Long> presetGuildIds, Locale locale, int group) {
         String planId = PaddleManager.getPlanId(duration, level, group);
-        UI.getCurrent().getPage().executeJs("openPaddleBilling($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
+        UI.getCurrent().getPage().executeJs("openPaddleBilling($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
                 System.getenv("PADDLE_ENVIRONMENT"),
                 System.getenv("PADDLE_CLIENT_TOKEN"),
                 planId,
@@ -116,14 +124,13 @@ public class PaddleManager {
                 String.valueOf(discordUser.getId()),
                 discordUser.getUsername(),
                 discordUser.getUserAvatar(),
-                unlocksGuilds,
                 presetGuildIds != null ? StringUtils.join(presetGuildIds.stream().map(String::valueOf).toList(), ',') : null,
                 level.name().toLowerCase()
         );
     }
 
     public static void openPopupOneOff(String priceId, DiscordUser discordUser, Locale locale, String type) {
-        UI.getCurrent().getPage().executeJs("openPaddleBilling($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
+        UI.getCurrent().getPage().executeJs("openPaddleBilling($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
                 System.getenv("PADDLE_ENVIRONMENT"),
                 System.getenv("PADDLE_CLIENT_TOKEN"),
                 priceId,
@@ -133,7 +140,6 @@ public class PaddleManager {
                 String.valueOf(discordUser.getId()),
                 discordUser.getUsername(),
                 discordUser.getUserAvatar(),
-                null,
                 null,
                 type
         );
@@ -214,8 +220,7 @@ public class PaddleManager {
                     discordId,
                     passthroughJson.has("discord_avatar") ? passthroughJson.getString("discord_avatar") : null,
                     checkoutJson.getJSONObject("checkout").getString("title"),
-                    quantity,
-                    checkoutJson.getJSONObject("order").getString("formatted_total")
+                    quantity
             );
             LOGGER.info("Subscription notification sent");
         } catch (JSONException e) {
@@ -236,35 +241,39 @@ public class PaddleManager {
             JSONObject itemData = data.getJSONArray("items").getJSONObject(0);
             JSONObject priceData = itemData.getJSONObject("price");
             JSONObject customData = data.getJSONObject("custom_data");
-            JSONObject detailsTotalData = data.getJSONObject("details").getJSONObject("totals");
+            JSONObject priceCustomData = priceData.getJSONObject("custom_data");
             int quantity = itemData.getInt("quantity");
             long userId = Long.parseLong(customData.getString("discord_id"));
 
-            String transactionId = data.getString("id");
+            String transactionId = data.getString(data.has("transaction_id") ? "transaction_id" : "id");
             CompletableFuture<Void> future = waitForCheckoutAsync(transactionId);
 
+            boolean accept = false;
             try {
-                switch (customData.getString("type")) {
-                    case TYPE_BASIC, TYPE_PRO -> registerSubscription(json, data, priceData, customData, detailsTotalData, quantity, userId);
-                    case TYPE_TXT2IMG -> registerTxt2Img(priceData, customData, detailsTotalData, quantity, userId);
-                    case TYPE_PREMIUM -> registerPremiumCode(priceData, customData, detailsTotalData, quantity, userId);
-                }
+                accept = switch (priceCustomData.getString("type")) {
+                    case TYPE_BASIC, TYPE_PRO -> registerSubscription(json, data, priceData, customData, quantity, userId);
+                    case TYPE_TXT2IMG -> registerTxt2Img(priceData, customData, quantity, userId);
+                    case TYPE_PREMIUM -> registerPremiumCode(priceData, customData, quantity, userId);
+                    default -> false;
+                };
             } catch (Throwable e) {
                 LOGGER.error("Error in new paddle billing payment", e);
                 throw e;
             } finally {
-                future.complete(null);
+                if (accept) {
+                    future.complete(null);
+                }
             }
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static void registerSubscription(JSONObject root, JSONObject data, JSONObject priceData, JSONObject customData, JSONObject detailsTotalData, int quantity, long userId) {
+    private static boolean registerSubscription(JSONObject root, JSONObject data, JSONObject priceData, JSONObject customData, int quantity, long userId) {
         UI ui = UICache.get(userId);
         String eventType = root.getString("event_type");
         if (!eventType.startsWith("subscription.")) {
-            return;
+            return false;
         }
         boolean created = eventType.equals("subscription.created");
 
@@ -276,12 +285,13 @@ public class PaddleManager {
         SendEvent.send(EventOut.PADDLE_BILLING, json).join();
 
         if (created) {
-            sendNotification(detailsTotalData, customData, userId, priceData, quantity);
+            sendNotification(customData, userId, priceData, quantity);
             LOGGER.info("Subscription notification sent");
         }
+        return true;
     }
 
-    private static void registerTxt2Img(JSONObject priceData, JSONObject customData, JSONObject detailsTotalData, int quantity, long userId) {
+    private static boolean registerTxt2Img(JSONObject priceData, JSONObject customData, int quantity, long userId) {
         int n = priceData.getJSONObject("custom_data").getInt("n") * quantity;
 
         JSONObject requestJson = new JSONObject();
@@ -293,11 +303,12 @@ public class PaddleManager {
             throw new RuntimeException("Paddle txt2img error");
         }
 
-        sendNotification(detailsTotalData, customData, userId, priceData, quantity);
+        sendNotification(customData, userId, priceData, quantity);
         LOGGER.info("Txt2img notification sent");
+        return true;
     }
 
-    private static void registerPremiumCode(JSONObject priceData, JSONObject customData, JSONObject detailsTotalData, int quantity, long userId) {
+    private static boolean registerPremiumCode(JSONObject priceData, JSONObject customData, int quantity, long userId) {
         ProductPremium product = ProductPremium.fromPriceId(priceData.getString("id"));
         JSONObject requestJson = new JSONObject();
         requestJson.put("user_id", userId);
@@ -310,25 +321,19 @@ public class PaddleManager {
             throw new RuntimeException("Paddle premium codes error");
         }
 
-        sendNotification(detailsTotalData, customData, userId, priceData, quantity);
+        sendNotification(customData, userId, priceData, quantity);
         LOGGER.info("Premium code notification sent");
+        return true;
     }
 
-    private static void sendNotification(JSONObject detailsTotalData, JSONObject customData, long userId, JSONObject priceData, int quantity) {
+    private static void sendNotification(JSONObject customData, long userId, JSONObject priceData, int quantity) {
         try {
-            Currency currency = Currency.valueOf(detailsTotalData.getString("currency_code"));
-            int total = detailsTotalData.getInt("grand_total");
-            String priceString = NumberFormat.getCurrencyInstance(Locale.ENGLISH)
-                    .format((double) total / Math.pow(10, currency.getDecimalPlaces()))
-                    .replace("¤", currency.getSymbol());
-
             WebhookNotifier.newSub(
                     customData.getString("discord_tag"),
                     userId,
                     customData.getString("discord_avatar"),
                     priceData.getString("description"),
-                    quantity,
-                    priceString
+                    quantity
             );
         } catch (JSONException e) {
             throw new RuntimeException(e);

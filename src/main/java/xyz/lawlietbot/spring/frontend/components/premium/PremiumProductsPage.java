@@ -249,6 +249,9 @@ public class PremiumProductsPage extends PremiumPage {
             span.add(previousPriceSpan, new Text(" "));
         }
         span.add(currentPriceString);
+        if (!price.getIncludesVat()) {
+            span.add(" " + getTranslation("premium.products.vat"));
+        }
         return span;
     }
 

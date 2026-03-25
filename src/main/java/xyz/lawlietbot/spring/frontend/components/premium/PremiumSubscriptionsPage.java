@@ -316,7 +316,7 @@ public class PremiumSubscriptionsPage extends PremiumPage {
                                     .collect(Collectors.toList());
                         }
 
-                        PaddleManager.openPopupSubscription(durationSelect.getValue(), level, discordUser, value, level == SubLevel.PRO, presetGuildIds, getLocale(), group);
+                        PaddleManager.openPopupSubscription(durationSelect.getValue(), level, discordUser, value, presetGuildIds, getLocale(), group);
                         UICache.put(discordUser.getId(), UI.getCurrent());
                     } catch (Exception ex) {
                         LOGGER.error("Exception", ex);
@@ -430,12 +430,12 @@ public class PremiumSubscriptionsPage extends PremiumPage {
                 previousPriceTextMap.get(subLevel)
                         .setVisible(false);
                 pricePeriodTextMap.get(subLevel)
-                        .setText(getTranslation("premium.priceperiod", duration == SubDuration.YEARLY));
+                        .setText(getTranslation(price.getIncludesVat() ? "premium.priceperiod.includesvat" : "premium.priceperiod", duration == SubDuration.YEARLY));
             } else {
                 priceTextMap.get(subLevel)
                         .setText(subLevel == SubLevel.ULTIMATE ? getTranslation("premium.price.ultimate", currentPriceString) : currentPriceString);
                 pricePeriodTextMap.get(subLevel)
-                        .setText(getTranslation("premium.priceperiod.sale", duration == SubDuration.YEARLY, previousPriceString));
+                        .setText(getTranslation(price.getIncludesVat() ? "premium.priceperiod.sale.includesvat" : "premium.priceperiod.sale", duration == SubDuration.YEARLY, previousPriceString));
 
                 Span previousPriceText = previousPriceTextMap.get(subLevel);
                 previousPriceText.setVisible(true);

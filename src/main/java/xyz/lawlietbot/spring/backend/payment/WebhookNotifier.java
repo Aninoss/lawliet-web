@@ -19,15 +19,14 @@ public class WebhookNotifier {
             .setAllowedMentions(AllowedMentions.all())
             .build();
 
-    public static void newSub(String userTag, long userId, String avatar, String level, int quantity, String totalPrice) {
+    public static void newSub(String userTag, long userId, String avatar, String level, int quantity) {
         String text = String.format(
-                "• User: %s｜%d｜<@%d>\n• Product: %s\n• Quantity: %d\n• Total: %s",
+                "• User: %s｜%d｜<@%d>\n• Product: %s\n• Quantity: %d",
                 userTag,
                 userId,
                 userId,
                 level,
-                quantity,
-                totalPrice
+                quantity
         );
 
         WebhookEmbed we = new WebhookEmbedBuilder()

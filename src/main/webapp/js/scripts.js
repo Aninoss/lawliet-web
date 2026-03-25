@@ -79,7 +79,7 @@ function loadScript(url, callback)
     head.appendChild(script);
 }
 
-function openPaddleBilling(environment, clientToken, priceId, quantity, locale, coupon, discordId, discordTag, discordAvatar, unlocksGuilds, presetGuilds, type) {
+function openPaddleBilling(environment, clientToken, priceId, quantity, locale, coupon, discordId, discordTag, discordAvatar, presetGuilds, type) {
     loadScript("https://cdn.paddle.com/paddle/v2/paddle.js", () => {
         if (environment === "sandbox") {
             Paddle.Environment.set(environment);
@@ -108,8 +108,6 @@ function openPaddleBilling(environment, clientToken, priceId, quantity, locale, 
                 discord_tag: discordTag,
                 discord_avatar: discordAvatar,
                 locale: locale,
-                type: type,
-                unlocks_guilds: unlocksGuilds,
                 preset_guilds: presetGuilds
             },
             discountCode: coupon
