@@ -43,7 +43,9 @@ public class PaddleAPI {
 
     public static JSONObject retrieveProductPrices(String customerIpAddress, int group, String coupon) throws IOException {
         JSONObject requestJson = new JSONObject();
-        requestJson.put("customer_ip_address", customerIpAddress);
+        if (customerIpAddress != null) {
+            requestJson.put("customer_ip_address", customerIpAddress);
+        }
         requestJson.put("discount_id", coupon);
 
         JSONArray itemsArray = new JSONArray();

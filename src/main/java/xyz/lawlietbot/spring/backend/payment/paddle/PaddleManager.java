@@ -72,13 +72,22 @@ public class PaddleManager {
     public static PaddlePriceOverview retrievePrices(String customerIpAddress, int group) {
         customerIpAddress = Objects.requireNonNullElse(customerIpAddress, System.getenv("PADDLE_DEFAULT_IP"));
 
-        JSONObject pricesJson;
         try {
-            pricesJson = pricesCache.get(new IpGroupAndCoupon(customerIpAddress, group, System.getenv("PADDLE_SALE_DISCOUNT_ID"))).getJSONObject("data");
+            JSONObject pricesJson = pricesCache.get(new IpGroupAndCoupon(customerIpAddress, group, System.getenv("PADDLE_SALE_DISCOUNT_ID")));
+            JSONObject pricesDataJson = null;
+            for (int i = 0; i < 2; i++) {
+                if (pricesJson.has("data")) {
+                    pricesDataJson = pricesJson.getJSONObject("data");
+                    break;
+                } else {
+                    LOGGER.error("Invalid paddle price data:\n{}", pricesJson);
+                    pricesJson = pricesCache.get(new IpGroupAndCoupon(null, group, System.getenv("PADDLE_SALE_DISCOUNT_ID")));
+                }
+            }
 
-            JSONArray itemsJson = pricesJson.getJSONObject("details").getJSONArray("line_items");
+            JSONArray itemsJson = pricesDataJson.getJSONObject("details").getJSONArray("line_items");
             HashMap<String, PaddlePriceOverview.Price> productPriceMap = new HashMap<>();
-            Currency currency = Currency.valueOf(pricesJson.getString("currency_code"));
+            Currency currency = Currency.valueOf(pricesDataJson.getString("currency_code"));
 
             for (int i = 0; i < itemsJson.length(); i++) {
                 JSONObject itemJson = itemsJson.getJSONObject(i);
@@ -104,7 +113,7 @@ public class PaddleManager {
             }
 
             return new PaddlePriceOverview(
-                    Currency.valueOf(pricesJson.getString("currency_code")),
+                    Currency.valueOf(pricesDataJson.getString("currency_code")),
                     productPriceMap
                     );
         } catch (ExecutionException | JSONException e) {
