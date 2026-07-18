@@ -79,16 +79,33 @@ public class PremiumSubscriptionsPage extends PremiumPage {
 
     @Override
     public void build() {
-        if (System.getenv("PADDLE_SALE_CODE") != null) {
-            add(premiumView.generateCouponField());
-        } else {
-            add(generateYearlySuggestionField());
+        try {
+            if (System.getenv("PADDLE_SALE_CODE") != null) {
+                add(premiumView.generateCouponField());
+            } else {
+                add(generateYearlySuggestionField());
+            }
+            if (!PRICE_TESTING || sessionData.isLoggedIn()) {
+                add(generateTiersCurrencyDurationField());
+            }
+            add(generateTiersTiers());
+            refreshPremiumTiers();
+        } catch (Throwable e) {
+            LOGGER.error("Failed to build premium page", e);
+            removeAll();
+
+            Div text = new Div(getTranslation("premium.error_patreon"));
+            text.getStyle().set("margin-top", "16px");
+            add(text);
+
+            Button patreonButton = new Button(getTranslation("premium.error_button"), VaadinIcon.ARROW_RIGHT.create());
+            patreonButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            patreonButton.setIconAfterText(true);
+
+            Anchor a = new Anchor("https://www.patreon.com/c/lawlietbot", patreonButton);
+            a.setTarget("_blank");
+            add(a);
         }
-        if (!PRICE_TESTING || sessionData.isLoggedIn()) {
-            add(generateTiersCurrencyDurationField());
-        }
-        add(generateTiersTiers());
-        refreshPremiumTiers();
     }
 
     private Component generateTiersCurrencyDurationField() {

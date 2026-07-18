@@ -55,15 +55,24 @@ public class PremiumProductsPage extends PremiumPage {
 
     @Override
     public void build() {
-        if (System.getenv("PADDLE_SALE_CODE") != null) {
-            add(premiumView.generateCouponField());
-        }
+        try {
+            if (System.getenv("PADDLE_SALE_CODE") != null) {
+                add(premiumView.generateCouponField());
+            }
 
-        PaddlePriceOverview paddlePriceOverview = PaddleManager.retrievePrices(VaadinRequest.getCurrent().getHeader("CF-Connecting-IP"), 0);
-        add(
-                createPremiumField(paddlePriceOverview),
-                createTxt2ImgField(paddlePriceOverview)
-        );
+            PaddlePriceOverview paddlePriceOverview = PaddleManager.retrievePrices(VaadinRequest.getCurrent().getHeader("CF-Connecting-IP"), 0);
+            add(
+                    createPremiumField(paddlePriceOverview),
+                    createTxt2ImgField(paddlePriceOverview)
+            );
+        } catch (Throwable e) {
+            LOGGER.error("Failed to build premium page", e);
+            removeAll();
+
+            Div text = new Div(getTranslation("premium.error"));
+            text.getStyle().set("margin-top", "16px");
+            add(text);
+        }
     }
 
     @Override

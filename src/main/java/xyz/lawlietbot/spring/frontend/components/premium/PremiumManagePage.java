@@ -52,19 +52,28 @@ public class PremiumManagePage extends PremiumPage {
 
     @Override
     public void build() {
-        sessionData.getDiscordUser().ifPresent(user -> {
-            List<PaddleBillingSubscription> subs = SyncUtil.retrievePaddleBillingSubscriptions(user.getId(), null).join();
-            if (!subs.isEmpty()) {
-                Button moreButton = new Button(getTranslation("manage.more"));
-                moreButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-                add(new Anchor(System.getenv("PADDLE_CUSTOMER_PORTAL_LINK"), moreButton));
-            }
+        try {
+            sessionData.getDiscordUser().ifPresent(user -> {
+                List<PaddleBillingSubscription> subs = SyncUtil.retrievePaddleBillingSubscriptions(user.getId(), null).join();
+                if (!subs.isEmpty()) {
+                    Button moreButton = new Button(getTranslation("manage.more"));
+                    moreButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+                    add(new Anchor(System.getenv("PADDLE_CUSTOMER_PORTAL_LINK"), moreButton));
+                }
 
-            updateSubscriptionsContent(user, 0, subs.isEmpty());
-            H2 h2 = new H2(getTranslation("manage.title.redeemedcodes"));
-            h2.getStyle().set("margin-top", "2em");
-            add(h2, generateCodesGrid(user.getId()));
-        });
+                updateSubscriptionsContent(user, 0, subs.isEmpty());
+                H2 h2 = new H2(getTranslation("manage.title.redeemedcodes"));
+                h2.getStyle().set("margin-top", "2em");
+                add(h2, generateCodesGrid(user.getId()));
+            });
+        } catch (Throwable e) {
+            LOGGER.error("Failed to build premium page", e);
+            removeAll();
+
+            Div text = new Div(getTranslation("premium.error"));
+            text.getStyle().set("margin-top", "16px");
+            add(text);
+        }
     }
 
     private void updateSubscriptionsContent(DiscordUser user, long reloadSubId, boolean showEmptyText) {
