@@ -102,7 +102,7 @@ public class PremiumSubscriptionsPage extends PremiumPage {
             patreonButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
             patreonButton.setIconAfterText(true);
 
-            Anchor a = new Anchor("https://www.patreon.com/c/lawlietbot", patreonButton);
+            Anchor a = new Anchor("https://patreon.com/lawlietbot", patreonButton);
             a.setTarget("_blank");
             add(a);
         }
