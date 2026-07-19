@@ -11,7 +11,7 @@ import java.util.Optional;
 public class UIData implements Serializable {
 
     private boolean lite;
-    private boolean noNSFW;
+    private boolean includeNsfwReferences;
     private Long userId = null;
 
     public void setLite(boolean lite) {
@@ -22,12 +22,12 @@ public class UIData implements Serializable {
         return lite;
     }
 
-    public void setNSFWDisabled(boolean noNSFW) {
-        this.noNSFW = noNSFW;
+    public void setIncludeNsfwReferences(boolean includeNsfwReferences) {
+        this.includeNsfwReferences = includeNsfwReferences;
     }
 
-    public boolean isNSFWDisabled() {
-        return noNSFW;
+    public boolean getIncludeNsfwReferences() {
+        return includeNsfwReferences;
     }
 
     public void login(long userId) {

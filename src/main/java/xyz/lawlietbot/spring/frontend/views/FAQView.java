@@ -6,6 +6,7 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
+import xyz.lawlietbot.spring.TranslationProvider;
 import xyz.lawlietbot.spring.backend.faq.FAQListContainer;
 import xyz.lawlietbot.spring.backend.faq.FAQListSlot;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
@@ -39,8 +40,10 @@ public class FAQView extends PageLayout {
     private void addEntries() {
         for(int i = 0; i < FAQListContainer.getInstance().size(); i++) {
             FAQListSlot slot = FAQListContainer.getInstance().get(i);
+            boolean containsNsfw = slot.getQuestion().get(TranslationProvider.LOCALE_EN).toLowerCase().contains("nsfw") ||
+                    slot.getAnswer().get(TranslationProvider.LOCALE_EN).toLowerCase().contains("nsfw");
 
-            if (i != 3 || !getUiData().isNSFWDisabled()) {
+            if (!containsNsfw || getUiData().getIncludeNsfwReferences()) {
                 H4 question = new H4(new Text(slot.getQuestion().get(getLocale())));
                 SpanWithLinebreaks answer = new SpanWithLinebreaks(slot.getAnswer().get(getLocale()));
 

@@ -1,6 +1,5 @@
 package xyz.lawlietbot.spring.frontend.components.commands;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.accordion.AccordionPanel;
@@ -13,6 +12,8 @@ import xyz.lawlietbot.spring.backend.userdata.UIData;
 import xyz.lawlietbot.spring.frontend.Styles;
 import xyz.lawlietbot.spring.frontend.views.CommandsView;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class CommandList extends VerticalLayout {
 
     private final Accordion accordion = new Accordion();
@@ -24,10 +25,10 @@ public class CommandList extends VerticalLayout {
         accordion.setWidthFull();
 
         for (CommandListCategory commandListCategory : CommandListContainer.getInstance().getCategories()) {
-            CommandCategoryLayout commandCategoryLayout = new CommandCategoryLayout(commandListCategory, !uiData.isNSFWDisabled());
+            CommandCategoryLayout commandCategoryLayout = new CommandCategoryLayout(commandListCategory, uiData.getIncludeNsfwReferences());
             parent.getCategories().add(commandCategoryLayout);
-            if (commandListCategory.hasCommands(!uiData.isNSFWDisabled())) {
-                AccordionPanel accordionPanel = new AccordionPanel(commandCategoryLayout.getSummaryText(commandListCategory.size(!uiData.isNSFWDisabled())), commandCategoryLayout);
+            if (commandListCategory.hasCommands(uiData.getIncludeNsfwReferences())) {
+                AccordionPanel accordionPanel = new AccordionPanel(commandCategoryLayout.getSummaryText(commandListCategory.size(uiData.getIncludeNsfwReferences())), commandCategoryLayout);
                 accordionPanel.setId("category-panel-" + commandListCategory.getId());
                 accordion.add(accordionPanel);
                 commandCategoryLayout.setAccordionPanel(accordionPanel);
@@ -48,7 +49,7 @@ public class CommandList extends VerticalLayout {
         notesLayout.getStyle().set("margin-top", "2em");
 
         for (CommandIcon.Type type : CommandIcon.Type.values()) {
-            if (type != CommandIcon.Type.NSFW || !uiData.isNSFWDisabled()) {
+            if (type != CommandIcon.Type.NSFW || uiData.getIncludeNsfwReferences()) {
                 CommandIcon commandIcon = new CommandIcon(type);
                 commandIcon.getStyle()
                         .set("margin-left", "0")

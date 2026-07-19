@@ -52,7 +52,7 @@ public class CommandListSlot {
     }
 
     public boolean isNsfw() {
-        return nsfw;
+        return nsfw || trigger.contains("nsfw");
     }
 
     public void setNsfw(boolean nsfw) {

@@ -116,7 +116,7 @@ public class MainLayout extends FlexLayout implements RouterLayout, BeforeEnterO
         Map<String, List<String>> parameterMap = queryParameters.getParameters();
 
         uiData.setLite(parameterMapIsTrue(parameterMap, "lite"));
-        uiData.setNSFWDisabled(parameterMapIsTrue(parameterMap, "nonsfw"));
+        uiData.setIncludeNsfwReferences(parameterMapIsTrue(parameterMap, "include_nsfw_references"));
     }
 
     private boolean parameterMapIsTrue(Map<String, List<String>> parametersMap, String key) {

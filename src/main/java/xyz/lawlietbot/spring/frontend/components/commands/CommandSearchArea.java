@@ -26,7 +26,7 @@ public class CommandSearchArea extends PageHeader {
         searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
         searchField.setClearButtonVisible(true);
         searchField.setWidthFull();
-        int n = CommandListContainer.getInstance().allCommandsSize(!uiData.isNSFWDisabled());
+        int n = CommandListContainer.getInstance().allCommandsSize(uiData.getIncludeNsfwReferences());
         Div searchResults = new Div(new Text(getTranslation("commands.searchresults", n != 1, n)));
         searchResults.setId("commands-resultslabel");
         searchField.setPlaceholder(getTranslation("commands.search"));
@@ -45,7 +45,7 @@ public class CommandSearchArea extends PageHeader {
 
         getInnerLayout().add(searchField, searchResults);
 
-        if (uiData.isNSFWDisabled()) {
+        if (!uiData.getIncludeNsfwReferences()) {
             getInnerLayout().add(new IconLabel(VaadinIcon.WARNING.create(), getTranslation("commands.hide")));
         }
     }
