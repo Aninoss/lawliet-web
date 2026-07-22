@@ -3,10 +3,7 @@ package xyz.lawlietbot.spring.frontend.components.premium;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
@@ -15,7 +12,6 @@ import com.vaadin.flow.router.QueryParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.lawlietbot.spring.backend.Redirector;
-import xyz.lawlietbot.spring.backend.payment.PaddleBillingSubscription;
 import xyz.lawlietbot.spring.backend.payment.PremiumCode;
 import xyz.lawlietbot.spring.backend.payment.Subscription;
 import xyz.lawlietbot.spring.backend.payment.paddle.PaddleAPI;
@@ -52,28 +48,10 @@ public class PremiumManagePage extends PremiumPage {
 
     @Override
     public void build() {
-        try {
-            sessionData.getDiscordUser().ifPresent(user -> {
-                List<PaddleBillingSubscription> subs = SyncUtil.retrievePaddleBillingSubscriptions(user.getId(), null).join();
-                if (!subs.isEmpty()) {
-                    Button moreButton = new Button(getTranslation("manage.more"));
-                    moreButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-                    add(new Anchor(System.getenv("PADDLE_CUSTOMER_PORTAL_LINK"), moreButton));
-                }
-
-                updateSubscriptionsContent(user, 0, subs.isEmpty());
-                H2 h2 = new H2(getTranslation("manage.title.redeemedcodes"));
-                h2.getStyle().set("margin-top", "2em");
-                add(h2, generateCodesGrid(user.getId()));
-            });
-        } catch (Throwable e) {
-            LOGGER.error("Failed to build premium page", e);
-            removeAll();
-
-            Div text = new Div(getTranslation("premium.error"));
-            text.getStyle().set("margin-top", "16px");
-            add(text);
-        }
+        removeAll();
+        Div text = new Div(getTranslation("premium.error"));
+        text.getStyle().set("margin-top", "16px");
+        add(text);
     }
 
     private void updateSubscriptionsContent(DiscordUser user, long reloadSubId, boolean showEmptyText) {
