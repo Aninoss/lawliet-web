@@ -56,11 +56,21 @@ public class PageHeader extends Div {
 
         titleLayout.add(innerLayout);
         outerLayout.add(titleLayout);
-        Arrays.stream(components).forEach(component -> {
-            if (component != null) outerLayout.add(component);
-        });
+        Arrays.stream(components).forEach(this::addComponent);
 
         add(outerLayout);
+    }
+
+    public void addComponent(Component component) {
+        if (component != null) {
+            outerLayout.add(component);
+        }
+    }
+
+    public void addComponentInnerLayer(Component component) {
+        if (component != null) {
+            innerLayout.add(component);
+        }
     }
 
     private void addBackButton(Class<? extends PageLayout> clazz) {

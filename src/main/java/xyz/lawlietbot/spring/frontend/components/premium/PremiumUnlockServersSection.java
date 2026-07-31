@@ -8,6 +8,7 @@ import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,32 +32,36 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class PremiumUnlockPage extends PremiumPage {
+public class PremiumUnlockServersSection extends VerticalLayout {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(PremiumUnlockPage.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(PremiumUnlockServersSection.class);
 
     private final SessionData sessionData;
     private final ConfirmationDialog dialog;
+    private final VerticalLayout mainLayout = new VerticalLayout();
     private final ArrayList<Card> cards = new ArrayList<>();
     private final HashMap<Integer, GuildComboBox> comboBoxMap = new HashMap<>();
     private ArrayList<Guild> availableGuilds;
     private UserPremium userPremium;
 
-    public PremiumUnlockPage(SessionData sessionData, ConfirmationDialog dialog) {
+    public PremiumUnlockServersSection(SessionData sessionData, ConfirmationDialog dialog) {
         this.sessionData = sessionData;
         this.dialog = dialog;
-
         setPadding(true);
-        getStyle().set("margin-top", "16px");
-    }
-
-    @Override
-    public void build() {
+        addClassName("section");
+        add(generateMainContent());
         update();
     }
 
-    public void update() {
-        removeAll();
+    public Component generateMainContent() {
+        mainLayout.setPadding(false);
+        mainLayout.addClassName(Styles.APP_WIDTH);
+        return mainLayout;
+    }
+
+    private void update() {
+        mainLayout.removeAll();
+        mainLayout.add(generateTitle());
 
         if (sessionData.getDiscordUser().map(DiscordUser::hasGuilds).orElse(false)) {
             try {
@@ -84,24 +89,38 @@ public class PremiumUnlockPage extends PremiumPage {
             }
         }
 
-        add(generatePremiumSubtitle());
+        mainLayout.add(generateDescription());
+        if (sessionData.isLoggedIn()) {
+            mainLayout.add(generateHelp());
+        }
         if (userPremium != null) {
             if (!userPremium.getSlots().isEmpty()) {
                 for (int i = 0; i < userPremium.getSlots().size(); i++) {
-                    add(generatePremiumSlot(i));
+                    mainLayout.add(generatePremiumSlot(i));
                 }
             } else {
-                add(generateNoPremiumCard(getTranslation("premium.slots.noslots"), false));
+                mainLayout.add(generateNoPremiumCard(getTranslation("premium.slots.noslots"), false));
             }
         } else {
-            add(generateNoPremiumCard(getTranslation("logout.status"), true));
+            mainLayout.add(generateNoPremiumCard(getTranslation("logout.status"), true));
         }
     }
 
-    private Component generatePremiumSubtitle() {
-        Paragraph p = new Paragraph(getTranslation("premium.subtitle"));
-        p.getStyle().set("margin-top", "0");
-        return p;
+    private Component generateTitle() {
+        String text = getTranslation("premium.step3");
+        H2 title = new H2(text);
+        title.addClassName("section-title");
+        return title;
+    }
+
+    private Component generateDescription() {
+        Div div = new Div(getTranslation("premium.subtitle"));
+        div.getStyle().set("margin-top", "0");
+        return div;
+    }
+
+    private Component generateHelp() {
+        return new Div(getTranslation("premium.help"));
     }
 
     private Component generateNoPremiumCard(String text, boolean withLoginButton) {
@@ -170,7 +189,7 @@ public class PremiumUnlockPage extends PremiumPage {
             guildLayout.setAlignItems(FlexComponent.Alignment.CENTER);
             guildLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
-            GuildComboBox guildComboBox = new GuildComboBox();
+            GuildComboBox guildComboBox = new GuildComboBox(getTranslation("premium.server"));
             guildComboBox.getStyle().set("max-width", "300px");
             guildComboBox.setItems(availableGuilds);
             guildLayout.add(guildComboBox);
@@ -227,7 +246,7 @@ public class PremiumUnlockPage extends PremiumPage {
             outerSpan.setWidthFull();
             outerSpan.getStyle().set("color", "black");
             Span innerSpan = new Span(getTranslation("premium.confirm.warning"));
-            innerSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+            innerSpan.getStyle().set("color", "var(--lumo-error-color)");
             outerSpan.add(innerSpan);
 
             dialog.open(outerSpan, () -> {
@@ -292,4 +311,5 @@ public class PremiumUnlockPage extends PremiumPage {
             return false;
         }
     }
+
 }

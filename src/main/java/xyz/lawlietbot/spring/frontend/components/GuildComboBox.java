@@ -11,9 +11,9 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 
 public class GuildComboBox extends ComboBox<Guild> {
 
-    public GuildComboBox() {
+    public GuildComboBox(String placeholder) {
         setItemLabelGenerator((ItemLabelGenerator<Guild>) Guild::getName);
-        setPlaceholder(getTranslation("premium.server"));
+        setPlaceholder(placeholder);
         setRenderer(new ComponentRenderer<>(guild -> {
             HorizontalLayout layout = new HorizontalLayout();
             layout.setAlignItems(FlexComponent.Alignment.CENTER);

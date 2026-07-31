@@ -4,19 +4,15 @@ import com.vaadin.flow.server.RequestHandler;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinSession;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xyz.lawlietbot.spring.backend.payment.paddle.PaddleManager;
 import xyz.lawlietbot.spring.backend.userdata.SessionData;
 import xyz.lawlietbot.spring.syncserver.EventOut;
 import xyz.lawlietbot.spring.syncserver.SendEvent;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -55,14 +51,6 @@ public class CustomRequestHandler implements RequestHandler {
                 handleInvite(response, request.getParameterMap());
                 return true;
 
-            case "/paddle":
-                handlePaddle(request, response);
-                return true;
-
-            case "/paddle_billing":
-                handlePaddleBilling(request, response);
-                return true;
-
             default:
                 return false;
         }
@@ -71,13 +59,12 @@ public class CustomRequestHandler implements RequestHandler {
     private void addHeaders(VaadinResponse response) {
         response.setHeader(
                 "Content-Security-Policy",
-                "default-src data: 'self' https://widgetbot.io https://e.widgetbot.io ws://localhost:35729/ https://www.paypal.com https://*.paddle.com https://sandbox-create-checkout.paddle.com https://create-checkout.paddle.com https://sandbox-buy.paddle.com https://buy.paddle.com https://*.profitwell.com; " +
-                        "img-src 'self' https://*.lawlietbot.xyz/ https://cdn.discordapp.com/ https://*.donmai.us/ https://*.rule34.xxx/ https://*.paheal.net/ https://realbooru.com/ https://*.e621.net/ https://safebooru.org/ https://www.paypal.com https://cdn.paddle.com https://*.profitwell.com https://dna8twue3dlxq.cloudfront.net; " +
+                "default-src data: 'self' ws://localhost:35729/ h; " +
+                        "img-src 'self' https://*.lawlietbot.xyz/ https://cdn.discordapp.com/ https://*.donmai.us/ https://*.rule34.xxx/ https://*.paheal.net/ https://realbooru.com/ https://*.e621.net/ https://safebooru.org/; " +
                         "media-src 'self' https://*.lawlietbot.xyz/ https://*.donmai.us/ https://*.rule34.xxx/ https://*.paheal.net/ https://realbooru.com/ https://*.e621.net/ https://safebooru.org/; " +
                         "object-src 'self'; " +
-                        "script-src 'unsafe-inline' 'unsafe-eval' 'self' ajax.cloudflare.com https://cdn.jsdelivr.net https://www.paypal.com https://*.paddle.com https://*.profitwell.com https://polyfill.io https://*.googleapis.com https://*.sentry-cdn.com; " +
-                        "style-src https://*.paddle.com https://*.profitwell.com 'unsafe-inline' 'self'; " +
-                        "frame-src https://*.paddle.com; " +
+                        "script-src 'unsafe-inline' 'unsafe-eval' 'self' ajax.cloudflare.com; " +
+                        "style-src 'unsafe-inline' 'self'; " +
                         "frame-ancestors https://top.gg https://discords.com https://wumpus.store; " +
                         "base-uri 'self'"
         );
@@ -208,38 +195,6 @@ public class CustomRequestHandler implements RequestHandler {
                 SendEvent.send(EventOut.INVITE, Map.of("type", type))
                         .exceptionally(ExceptionLogger.get());
             }
-        }
-    }
-
-    private void handlePaddle(VaadinRequest request, VaadinResponse response) {
-        try {
-            StringBuilder bodyBuilder = new StringBuilder();
-            Map<String, String[]> parameterMap = request.getParameterMap();
-            parameterMap.keySet()
-                    .forEach(key -> bodyBuilder.append("&").append(key).append("=").append(URLEncoder.encode(parameterMap.get(key)[0], StandardCharsets.UTF_8)));
-            String body = bodyBuilder.substring(1);
-            if (PaddleManager.verifyWebhookData(body)) {
-                PaddleManager.registerSubscriptionOld(parameterMap);
-            } else {
-                response.setStatus(403);
-            }
-        } catch (IOException e) {
-            LOGGER.error("Error while handling Paddle", e);
-            response.setStatus(500);
-        }
-    }
-
-    private void handlePaddleBilling(VaadinRequest request, VaadinResponse response) {
-        try (BufferedReader br = request.getReader()) {
-            String body = br.lines().collect(Collectors.joining("\n"));
-            if (PaddleManager.verifyBillingWebhookData(body, request.getHeader("Paddle-Signature"))) {
-                PaddleManager.registerBilling(new JSONObject(body));
-            } else {
-                response.setStatus(403);
-            }
-        } catch (IOException | JSONException e) {
-            LOGGER.error("Error while handling Paddle Billing", e);
-            response.setStatus(500);
         }
     }
 

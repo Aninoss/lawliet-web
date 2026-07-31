@@ -65,7 +65,7 @@ public class DashboardView extends PageLayout implements HasUrlParameter<Long> {
     private final VerticalLayout tabsLayout = new VerticalLayout();
     private final Tabs categoryTabs = new Tabs();
     private final VerticalLayout premiumUnlockedLayout = new VerticalLayout();
-    private final GuildComboBox guildComboBox = new GuildComboBox();
+    private final GuildComboBox guildComboBox = new GuildComboBox(getTranslation("dash.server"));
     private final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
     private List<DashboardInitData.Category> categoryList;
     private String autoCategoryId = null;

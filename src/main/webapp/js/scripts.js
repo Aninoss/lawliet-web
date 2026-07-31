@@ -79,64 +79,6 @@ function loadScript(url, callback)
     head.appendChild(script);
 }
 
-function openPaddleBilling(environment, clientToken, priceId, quantity, locale, coupon, discordId, discordTag, discordAvatar, presetGuilds, type) {
-    loadScript("https://cdn.paddle.com/paddle/v2/paddle.js", () => {
-        if (environment === "sandbox") {
-            Paddle.Environment.set(environment);
-        }
-        Paddle.Setup({
-            token: clientToken,
-            checkout: {
-                settings: {
-                    locale: locale
-                }
-            },
-            eventCallback: function (eventData) {
-                if (eventData.name === "checkout.completed") {
-                    const transactionId = eventData.data.transaction_id;
-                    window.location.href = "https://" + window.location.hostname + "/premium?paddle_billing=" + transactionId + "&type=" + type;
-                }
-            }
-        });
-        Paddle.Checkout.open({
-            items: [{
-                priceId: priceId,
-                quantity: quantity
-            }],
-            customData: {
-                discord_id: discordId,
-                discord_tag: discordTag,
-                discord_avatar: discordAvatar,
-                locale: locale,
-                preset_guilds: presetGuilds
-            },
-            discountCode: coupon
-        });
-    });
-}
-
-function openPaddleCustom(environment, vendor, id) {
-    loadScript("https://cdn.paddle.com/paddle/paddle.js", () => {
-        let subdomainPrefix = "";
-        if (environment === "sandbox") {
-            Paddle.Environment.set(environment);
-            subdomainPrefix = "sandbox-";
-        }
-        Paddle.Setup({
-            vendor: vendor,
-            eventCallback: function (eventData) {
-                if (eventData.event === "Checkout.Complete") {
-                    const checkoutId = eventData.eventData.checkout.id;
-                    window.location.href = "https://" + window.location.hostname + "/premium?paddle=" + checkoutId;
-                }
-            }
-        });
-        Paddle.Checkout.open({
-            override: 'https://' + subdomainPrefix + 'create-checkout.paddle.com/checkout/custom/' + id
-        });
-    });
-}
-
 function scrollToElement(elementId) {
     const element = document.getElementById(elementId);
     element.scrollIntoView();

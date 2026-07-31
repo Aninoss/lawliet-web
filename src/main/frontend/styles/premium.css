@@ -80,48 +80,6 @@ vaadin-accordion-panel > div > .prop-check {
     margin-bottom: 12px;
 }
 
-#paddle-popup {
-    position: fixed;
-    z-index: 7;
-    left: 0;
-    top: 0;
-    pointer-events: all;
-    background-color: rgba(0, 0, 0, 0.25);
-    -webkit-animation: background-fadein 0.5s;
-    -moz-animation: background-fadein 0.5s;
-    -o-animation: background-fadein 0.5s;
-    animation: background-fadein 0.5s;
-}
-
-#paddle-main {
-    z-index: 8;
-    margin-left: auto;
-    margin-right: 0;
-    max-width: 550px;
-    height: 100vh;
-    background-color: white;
-    overflow-y: auto;
-    box-shadow: var(--lumo-box-shadow-l);
-    -webkit-animation: slidein 0.5s;
-    -moz-animation: slidein 0.5s;
-    -o-animation: slidein 0.5s;
-    animation: slidein 0.5s;
-}
-
-#paddle-header {
-    padding-bottom: 32px;
-    margin-bottom: 8px;
-    background-image: radial-gradient(circle at 29% 55%, hsla(329, 0%, 99%, 0.05) 0%, hsla(329, 0%, 99%, 0.05) 4%, transparent 4%, transparent 44%, transparent 44%, transparent 100%), radial-gradient(circle at 85% 89%, hsla(329, 0%, 99%, 0.05) 0%, hsla(329, 0%, 99%, 0.05) 51%, transparent 51%, transparent 52%, transparent 52%, transparent 100%), radial-gradient(circle at 6% 90%, hsla(329, 0%, 99%, 0.05) 0%, hsla(329, 0%, 99%, 0.05) 53%, transparent 53%, transparent 64%, transparent 64%, transparent 100%), radial-gradient(circle at 35% 75%, hsla(329, 0%, 99%, 0.05) 0%, hsla(329, 0%, 99%, 0.05) 6%, transparent 6%, transparent 98%, transparent 98%, transparent 100%), radial-gradient(circle at 56% 75%, hsla(329, 0%, 99%, 0.05) 0%, hsla(329, 0%, 99%, 0.05) 16%, transparent 16%, transparent 23%, transparent 23%, transparent 100%), radial-gradient(circle at 42% 0%, hsla(329, 0%, 99%, 0.05) 0%, hsla(329, 0%, 99%, 0.05) 3%, transparent 3%, transparent 26%, transparent 26%, transparent 100%), radial-gradient(circle at 29% 28%, hsla(329, 0%, 99%, 0.05) 0%, hsla(329, 0%, 99%, 0.05) 51%, transparent 51%, transparent 75%, transparent 75%, transparent 100%), radial-gradient(circle at 77% 21%, hsla(329, 0%, 99%, 0.05) 0%, hsla(329, 0%, 99%, 0.05) 35%, transparent 35%, transparent 55%, transparent 55%, transparent 100%), radial-gradient(circle at 65% 91%, hsla(329, 0%, 99%, 0.05) 0%, hsla(329, 0%, 99%, 0.05) 46%, transparent 46%, transparent 76%, transparent 76%, transparent 100%), linear-gradient(45deg, rgb(42,127,239),rgb(42,127,239));
-}
-
-#paddle-title {
-    margin-top: 16px;
-}
-
-.paddle-container {
-    width: 100%;
-}
-
 #notification-field {
     width: 100%;
     border-radius: 8px;
@@ -149,6 +107,21 @@ vaadin-accordion-panel > div > .prop-check {
 .previous-price {
     text-decoration: line-through;
     color: var(--lumo-disabled-text-color);
+}
+
+.section-subtext {
+    font-size: 85%;
+    color: var(--secondary-text-color)
+}
+
+.section {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+}
+
+.section-title {
+    margin-bottom: 1em;
+    font-size: 150%;
 }
 
 @keyframes background-fadein {
@@ -222,11 +195,6 @@ vaadin-accordion-panel > div > .prop-check {
         transform: translateX(0);
     }
 }
-
-.paddle-frame-overlay {
-    color-scheme: light dark;
-}
-
 
 @media (min-width: 700px) {
 
