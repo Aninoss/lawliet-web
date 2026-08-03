@@ -5,7 +5,8 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 public enum SubTier {
 
     BASIC(3, new int[]{ 4928466 }, false, VaadinIcon.FIRE),
-    PRO(5, new int[]{ 5074151, 5074320, 5080986 }, true, VaadinIcon.ROCKET);
+    PRO(5, new int[]{ 5074151, 5074320, 5080986 }, true, VaadinIcon.ROCKET),
+    PRO_PLUS(7, new int[]{ 6044874, 5080991, 29260507 }, false, VaadinIcon.DIAMOND);
 
     private final int price;
     private final int[] ids;

@@ -39,7 +39,8 @@ public class PremiumTiersSection extends VerticalLayout {
     private final Map<SubTier, Span> pricePeriodTextMap = new HashMap<>();
     private final Map<SubTier, Anchor> buttonAnchorMap = new HashMap<>();
     private HorizontalLayout yearlySuggestionField;
-    private NumberField quantityNumberField;
+    private NumberField proQuantityNumberField;
+    private NumberField proPlusQuantityNumberField;
 
     public PremiumTiersSection() {
         setPadding(true);
@@ -127,10 +128,11 @@ public class PremiumTiersSection extends VerticalLayout {
 
         for (SubTier tier : SubTier.values()) {
             double currentPrice = tier.getPrice() * duration.getPriceFactor();
-            int quantity = 1;
-            if (tier == SubTier.PRO && quantityNumberField != null) {
-                quantity = quantityNumberField.getValue().intValue();
-            }
+            int quantity = switch (tier) {
+                case PRO -> proQuantityNumberField != null ? proQuantityNumberField.getValue().intValue() : 1;
+                case PRO_PLUS -> proPlusQuantityNumberField != null ? proPlusQuantityNumberField.getValue().intValue() : 1;
+                default -> 1;
+            };
             currentPrice *= quantity;
 
             NumberFormat formatter = NumberFormat.getCurrencyInstance(getLocale());
@@ -171,6 +173,12 @@ public class PremiumTiersSection extends VerticalLayout {
             content.getStyle().set("border-color", "rgb(var(--warning-color-rgb))");
         }
 
+        Icon icon = tier.getVaadinIcon().create();
+        icon.setSize("64px");
+        icon.getStyle().set("margin-top", "24px")
+                .set("margin-bottom", "12px");
+        content.add(icon);
+
         HorizontalLayout titleLayout = new HorizontalLayout();
         titleLayout.setPadding(false);
         titleLayout.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -195,12 +203,6 @@ public class PremiumTiersSection extends VerticalLayout {
         }
         content.add(titleLayout);
 
-        Icon icon = tier.getVaadinIcon().create();
-        icon.setSize("64px");
-        icon.getStyle().set("margin-bottom", "24px")
-                .set("margin-top", "24px");
-        content.add(icon);
-
         HorizontalLayout priceLayout = new HorizontalLayout();
         priceLayout.setAlignItems(Alignment.END);
         priceLayout.setPadding(false);
@@ -220,31 +222,33 @@ public class PremiumTiersSection extends VerticalLayout {
                 .set("text-align", "center");
         pricePeriodTextMap.put(tier, period);
         priceLayout.add(period);
-        content.add(priceLayout);
+        content.add(priceLayout, generateButtonSeparator());
+
+        switch (tier) {
+            case PRO -> {
+                proQuantityNumberField = generateQuantityNumberField(SubTier.PRO.getIds().length);
+                content.add(proQuantityNumberField);
+            }
+            case PRO_PLUS -> {
+                proPlusQuantityNumberField = generateQuantityNumberField(SubTier.PRO_PLUS.getIds().length);
+                content.add(proPlusQuantityNumberField);
+            }
+        }
 
         Span desc = new Span(getTranslation("premium.desc." + tier.name()));
         desc.getStyle().set("text-align", "center");
-        content.add(desc);
-
-        if (tier == SubTier.PRO) {
-            content.add(generateQuantityLayout());
-        }
-        content.add(generateBuyButton(tier), generateButtonSeparator(), generateTierPerks(tier));
+        content.add(generateBuyButton(tier), desc, generateButtonSeparator(), generateTierPerks(tier));
         return content;
     }
 
-    private Component generateQuantityLayout() {
-        VerticalLayout controlLayout = new VerticalLayout();
-        controlLayout.setPadding(false);
-        controlLayout.setWidthFull();
-
-        quantityNumberField = new NumberField();
+    private NumberField generateQuantityNumberField(int size) {
+        NumberField quantityNumberField = new NumberField();
         quantityNumberField.getStyle().set("margin-top", "-6px");
         quantityNumberField.setWidthFull();
         quantityNumberField.setValue(1d);
         quantityNumberField.setStepButtonsVisible(true);
         quantityNumberField.setMin(1);
-        quantityNumberField.setMax(SubTier.PRO.getIds().length);
+        quantityNumberField.setMax(size);
         quantityNumberField.setStep(1);
         quantityNumberField.setLabel(getTranslation("premium.servers"));
         quantityNumberField.addValueChangeListener(e -> {
@@ -252,18 +256,7 @@ public class PremiumTiersSection extends VerticalLayout {
             quantityNumberField.setValue((double) value);
             refreshPremiumTiers();
         });
-
-        HorizontalLayout quantityLayout = new HorizontalLayout();
-        quantityLayout.setPadding(false);
-        quantityLayout.setSpacing(false);
-        quantityLayout.setWidthFull();
-        quantityLayout.setAlignItems(FlexComponent.Alignment.END);
-        quantityLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        quantityLayout.getStyle().set("margin-top", "0");
-        quantityLayout.add(quantityNumberField);
-
-        controlLayout.add(generateButtonSeparator(), quantityLayout);
-        return controlLayout;
+        return quantityNumberField;
     }
 
     private Component generateBuyButton(SubTier tier) {
@@ -303,6 +296,8 @@ public class PremiumTiersSection extends VerticalLayout {
             String linkUrl = null;
             if (i == 2 && tier == SubTier.PRO) {
                 linkUrl = ExternalLinks.LAWLIET_PREMIUM_COMMANDS;
+            } else if (i == 2 && tier == SubTier.PRO_PLUS) {
+                linkUrl = ExternalLinks.LAWLIET_WEB_DASHBOARD;
             } else if (i == 3 && tier == SubTier.BASIC) {
                 linkUrl = ExternalLinks.LAWLIET_DEVELOPMENT_VOTES;
             } else if (i == 4 && tier == SubTier.BASIC) {

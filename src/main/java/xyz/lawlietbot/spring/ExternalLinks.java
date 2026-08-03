@@ -7,6 +7,7 @@ public interface ExternalLinks {
     String LAWLIET_PREMIUM = "https://lawlietbot.xyz/premium";
     String LAWLIET_PREMIUM_COMMANDS = "https://lawlietbot.xyz/commands?c=patreon_only";
     String LAWLIET_DEVELOPMENT_VOTES = "https://lawlietbot.xyz/developmentvotes";
+    String LAWLIET_WEB_DASHBOARD = "https://lawlietbot.xyz/dashboard";
     String LAWLIET_FEATURE_REQUESTS = "https://lawlietbot.xyz/featurerequests";
     String LAWLIET_GIFT = "https://lawlietbot.xyz/gift/";
     String PATREON_CONNECTED_APPS_SETTINGS = "https://www.patreon.com/settings/apps/discord";
