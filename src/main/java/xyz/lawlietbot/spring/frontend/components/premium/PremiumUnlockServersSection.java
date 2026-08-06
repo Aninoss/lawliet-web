@@ -66,22 +66,24 @@ public class PremiumUnlockServersSection extends VerticalLayout {
         if (sessionData.getDiscordUser().map(DiscordUser::hasGuilds).orElse(false)) {
             try {
                 DiscordUser discordUser = sessionData.getDiscordUser().get();
-                UserPremium userPremium = SendEvent.send(EventOut.PREMIUM, Map.of("user_id", discordUser.getId()))
+                this.userPremium = SendEvent.send(EventOut.PREMIUM, Map.of("user_id", discordUser.getId()))
                         .thenApply(jsonResponse -> {
                             ArrayList<Long> slots = new ArrayList<>();
-                            try {
-                                JSONArray jsonSlots = jsonResponse.getJSONArray("slots");
-                                for (int i = 0; i < jsonSlots.length(); i++) {
-                                    slots.add(jsonSlots.getLong(i));
-                                }
+                            ArrayList<Long> slotsPlus = new ArrayList<>();
 
-                                return new UserPremium(discordUser.getId(), slots);
-                            } catch (JSONException e) {
-                                throw new RuntimeException(e);
+                            JSONArray jsonSlots = jsonResponse.getJSONArray("slots");
+                            for (int i = 0; i < jsonSlots.length(); i++) {
+                                slots.add(jsonSlots.getLong(i));
                             }
+
+                            JSONArray jsonSlotsPlus = jsonResponse.getJSONArray("slots_plus");
+                            for (int i = 0; i < jsonSlotsPlus.length(); i++) {
+                                slotsPlus.add(jsonSlotsPlus.getLong(i));
+                            }
+
+                            return new UserPremium(discordUser.getId(), slots, slotsPlus);
                         })
                         .get(5, TimeUnit.SECONDS);
-                this.userPremium = userPremium;
                 this.availableGuilds = new ArrayList<>(discordUser.getGuilds());
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 LOGGER.error("Could not load slots", e);
@@ -94,9 +96,13 @@ public class PremiumUnlockServersSection extends VerticalLayout {
             mainLayout.add(generateHelp());
         }
         if (userPremium != null) {
-            if (!userPremium.getSlots().isEmpty()) {
+            if (!userPremium.getSlots().isEmpty() || !userPremium.getSlotsPlus().isEmpty()) {
+                int index = 0;
                 for (int i = 0; i < userPremium.getSlots().size(); i++) {
-                    mainLayout.add(generatePremiumSlot(i));
+                    mainLayout.add(generatePremiumSlot(userPremium.getSlots(), false, index++, i));
+                }
+                for (int i = 0; i < userPremium.getSlotsPlus().size(); i++) {
+                    mainLayout.add(generatePremiumSlot(userPremium.getSlotsPlus(), true, index++, i));
                 }
             } else {
                 mainLayout.add(generateNoPremiumCard(getTranslation("premium.slots.noslots"), false));
@@ -115,12 +121,16 @@ public class PremiumUnlockServersSection extends VerticalLayout {
 
     private Component generateDescription() {
         Div div = new Div(getTranslation("premium.subtitle"));
-        div.getStyle().set("margin-top", "0");
+        div.getStyle().set("margin-top", "0")
+                .set("margin-bottom", "var(--lumo-space-m)");
         return div;
     }
 
     private Component generateHelp() {
-        return new Div(getTranslation("premium.help"));
+        Div div = new Div(getTranslation("premium.help"));
+        div.getStyle().set("margin-top", "0")
+                .set("margin-bottom", "var(--lumo-space-m)");
+        return div;
     }
 
     private Component generateNoPremiumCard(String text, boolean withLoginButton) {
@@ -154,8 +164,8 @@ public class PremiumUnlockServersSection extends VerticalLayout {
         return horizontalLayout;
     }
 
-    private Component generatePremiumSlot(int i) {
-        long guildId = userPremium.getSlots().get(i);
+    private Component generatePremiumSlot(ArrayList<Long> slots, boolean plus, int index, int slotPosition) {
+        long guildId = slots.get(slotPosition);
         Guild guild = sessionData.getDiscordUser().map(u -> u.getGuildById(guildId)).orElse(null);
         if (guild == null && guildId != 0) {
             guild = new Guild();
@@ -168,20 +178,20 @@ public class PremiumUnlockServersSection extends VerticalLayout {
         card.setHeight("72px");
         card.getStyle().set("margin-bottom", "-8px");
 
-        card.add(generateCardContent(guild, i, true));
+        card.add(generateCardContent(slots, plus, guild, index, slotPosition, true));
         cards.add(card);
         return card;
     }
 
-    private HorizontalLayout generateCardContent(Guild guild, int i, boolean init) {
+    private HorizontalLayout generateCardContent(ArrayList<Long> slots, boolean plus, Guild guild, int index, int slotPosition, boolean init) {
         HorizontalLayout horizontalLayout = new HorizontalLayout();
         horizontalLayout.setSizeFull();
         horizontalLayout.setPadding(true);
         horizontalLayout.setAlignItems(FlexComponent.Alignment.CENTER);
 
+        String subscriptionName = plus ? getTranslation("premium.tier.PRO_PLUS") : getTranslation("premium.tier.PRO");
         if (guild == null) {
-            Div label = new Div(getTranslation("premium.notset"));
-            label.addClassName(Styles.VISIBLE_NOT_SMALL);
+            Div label = new Div(subscriptionName);
             horizontalLayout.add(label);
 
             HorizontalLayout guildLayout = new HorizontalLayout();
@@ -193,12 +203,12 @@ public class PremiumUnlockServersSection extends VerticalLayout {
             guildComboBox.getStyle().set("max-width", "300px");
             guildComboBox.setItems(availableGuilds);
             guildLayout.add(guildComboBox);
-            comboBoxMap.put(i, guildComboBox);
+            comboBoxMap.put(index, guildComboBox);
 
             Button button = new Button(VaadinIcon.PLUS.create());
             button.addClickListener(e -> {
                 if (guildComboBox.getValue() != null) {
-                    onAdd(guildComboBox.getValue(), i);
+                    onAdd(slots, plus, guildComboBox.getValue(), index, slotPosition);
                 }
             });
             button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -208,7 +218,7 @@ public class PremiumUnlockServersSection extends VerticalLayout {
             horizontalLayout.add(guildLayout);
             horizontalLayout.setFlexGrow(1, guildLayout);
         } else {
-            comboBoxMap.remove(i);
+            comboBoxMap.remove(index);
             availableGuilds.remove(guild);
             if (guild.getIcon() != null) {
                 Image guildIcon = new Image(guild.getIcon(), "Server Icon");
@@ -217,14 +227,14 @@ public class PremiumUnlockServersSection extends VerticalLayout {
                 horizontalLayout.add(guildIcon);
             }
 
-            Div label = new Div(guild.getName());
+            Div label = new Div(subscriptionName + ": " + guild.getName());
             horizontalLayout.add(label);
             horizontalLayout.setFlexGrow(1, label);
 
             Button button = new Button(getTranslation("premium.remove"), VaadinIcon.CLOSE_SMALL.create());
             button.setEnabled(init);
             button.addThemeVariants(ButtonVariant.LUMO_ERROR);
-            button.addClickListener(e -> onRemove(i));
+            button.addClickListener(e -> onRemove(slots, plus, index, slotPosition));
             horizontalLayout.add(button);
         }
 
@@ -240,7 +250,7 @@ public class PremiumUnlockServersSection extends VerticalLayout {
         });
     }
 
-    private void onAdd(Guild guild, int i) {
+    private void onAdd(ArrayList<Long> slots, boolean plus, Guild guild, int index, int slotPosition) {
         if (!dialog.isOpened()) {
             Span outerSpan = new Span(getTranslation("premium.confirm") + " ");
             outerSpan.setWidthFull();
@@ -251,12 +261,12 @@ public class PremiumUnlockServersSection extends VerticalLayout {
 
             dialog.open(outerSpan, () -> {
                 long guildId = guild.getId();
-                if (modify(i, guildId)) {
+                if (modify(plus, slotPosition, guildId)) {
                     availableGuilds.remove(guild);
-                    userPremium.setSlot(i, guildId);
-                    Card card = cards.get(i);
+                    slots.set(slotPosition, guildId);
+                    Card card = cards.get(index);
                     card.removeAll();
-                    card.add(generateCardContent(guild, i, false));
+                    card.add(generateCardContent(slots, plus, guild, index, slotPosition, false));
                     refreshComboBoxes();
                 }
             }, () -> {
@@ -264,28 +274,29 @@ public class PremiumUnlockServersSection extends VerticalLayout {
         }
     }
 
-    private void onRemove(int i) {
-        if (modify(i, 0)) {
-            long guildId = userPremium.getSlots().get(i);
+    private void onRemove(ArrayList<Long> slots, boolean plus, int index, int slotPosition) {
+        if (modify(plus, slotPosition, 0)) {
+            long guildId = slots.get(slotPosition);
             sessionData.getDiscordUser().map(u -> u.getGuildById(guildId))
                     .ifPresent(guild -> availableGuilds.add(guild));
-            userPremium.setSlot(i, 0);
+            slots.set(slotPosition, 0L);
 
-            Card card = cards.get(i);
+            Card card = cards.get(index);
             card.removeAll();
-            card.add(generateCardContent(null, i, false));
+            card.add(generateCardContent(slots, plus,null, index, slotPosition, false));
             refreshComboBoxes();
         }
     }
 
-    private boolean modify(int slot, long guildId) {
+    private boolean modify(boolean plus, int slotPosition, long guildId) {
         try {
             long userId = userPremium.getUserId();
 
             JSONObject json = new JSONObject();
             json.put("user_id", userId);
-            json.put("slot", slot);
+            json.put("slot", slotPosition);
             json.put("guild_id", guildId);
+            json.put("plus", plus);
 
             boolean success = SendEvent.send(EventOut.PREMIUM_MODIFY, json)
                     .thenApply(r -> {
