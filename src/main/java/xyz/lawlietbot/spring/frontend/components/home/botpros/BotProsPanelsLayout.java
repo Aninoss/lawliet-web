@@ -67,7 +67,6 @@ public class BotProsPanelsLayout extends VerticalLayout {
         return new BotProPanelInfo[]{
                 new BotProPanelInfo("fishery", true, VaadinIcon.TROPHY.create(), 150),
                 new BotProPanelInfo("alerts", true, VaadinIcon.BELL.create()),
-                new BotProPanelInfo("txt2img", false, VaadinIcon.PENCIL.create()),
                 new BotProPanelInfo("nsfw", false, VaadinIcon.MOON_O.create()),
                 new BotProPanelInfo("mod", true, VaadinIcon.SHIELD.create()),
                 new BotProPanelInfo("invitetracking", true, VaadinIcon.ENVELOPE.create()),
