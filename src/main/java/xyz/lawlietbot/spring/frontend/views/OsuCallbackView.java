@@ -35,6 +35,7 @@ public class OsuCallbackView extends PageLayout implements BeforeEnterObserver {
         QueryParameters queryParameters = location.getQueryParameters();
         Map<String, List<String>> parametersMap = queryParameters.getParameters();
 
+        System.out.println("- " + parametersMap.getOrDefault("state", List.of("")).getFirst());
         JSONObject responseJson = SendEvent.sendToAnyCluster(EventOut.OSU_CALLBACK, Map.of(
                 "code", parametersMap.getOrDefault("code", List.of("")).getFirst(),
                 "encrypted_user_id", parametersMap.getOrDefault("state", List.of("")).getFirst()
