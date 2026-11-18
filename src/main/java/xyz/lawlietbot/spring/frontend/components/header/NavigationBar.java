@@ -1,15 +1,16 @@
 package xyz.lawlietbot.spring.frontend.components.header;
 
-import com.vaadin.flow.component.tabs.TabsVariant;
-import xyz.lawlietbot.spring.backend.userdata.UIData;
-import xyz.lawlietbot.spring.ExternalLinks;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.RouterLink;
+import xyz.lawlietbot.spring.ExternalLinks;
+import xyz.lawlietbot.spring.backend.userdata.UIData;
+import xyz.lawlietbot.spring.frontend.components.premium.PremiumTiersSection;
 import xyz.lawlietbot.spring.frontend.views.*;
 
 public class NavigationBar extends Tabs implements AfterNavigationObserver {
@@ -23,7 +24,7 @@ public class NavigationBar extends Tabs implements AfterNavigationObserver {
                 new NavigationBarLink(FAQView.class),
                 new NavigationBarLink(FeatureRequestsView.class),
                 new NavigationBarLink(DashboardView.class),
-                new NavigationBarLink(PremiumView.class),
+                new NavigationBarLink(PremiumView.class).addNotificationIcon(!PremiumTiersSection.DISCOUNT_CODE.isEmpty()),
                 new NavigationBarLink(uiData.getBotInviteUrl(), "invite"),
                 new NavigationBarLink(ExternalLinks.SERVER_INVITE_URL, "server"),
         };
@@ -31,8 +32,12 @@ public class NavigationBar extends Tabs implements AfterNavigationObserver {
         for(NavigationBarLink navigationBarLink: navigationBarLinks) {
             if (!navigationBarLink.isHiddenInLiteVersion() || !uiData.isLite()) {
                 Tab tab = new Tab();
-                if (navigationBarLink.getRouterLink().isPresent()) tab.add(navigationBarLink.getRouterLink().get());
-                else if (navigationBarLink.getAnchor().isPresent()) tab.add(navigationBarLink.getAnchor().get());
+                if (navigationBarLink.getRouterLink().isPresent()) {
+                    tab.add(navigationBarLink.getRouterLink().get());
+                }
+                else if (navigationBarLink.getAnchor().isPresent()) {
+                    tab.add(navigationBarLink.getAnchor().get());
+                }
                 add(tab);
             }
         }

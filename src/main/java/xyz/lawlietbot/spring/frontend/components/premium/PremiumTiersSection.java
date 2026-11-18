@@ -25,18 +25,25 @@ import xyz.lawlietbot.spring.backend.payment.SubTier;
 import xyz.lawlietbot.spring.backend.util.StringUtil;
 import xyz.lawlietbot.spring.frontend.PatreonIcon;
 import xyz.lawlietbot.spring.frontend.Styles;
+import xyz.lawlietbot.spring.frontend.components.SpanWithLinebreaks;
 
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 public class PremiumTiersSection extends VerticalLayout {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PremiumTiersSection.class);
+    public final static String DISCOUNT_CODE = Objects.requireNonNullElse(System.getenv("DISCOUNT_CODE"), "");
+    public final static int DISCOUNT_PERCENT = Integer.parseInt(Objects.requireNonNullElse(System.getenv("DISCOUNT_PERCENT"), "0"));
 
     private final Select<SubDuration> durationSelect = new Select<>();
     private final Map<SubTier, H2> priceTextMap = new HashMap<>();
-    private final Map<SubTier, Span> pricePeriodTextMap = new HashMap<>();
+    private final Map<SubTier, Span> pricePreviousTextMap = new HashMap<>();
+    private final Map<SubTier, Span> pricePeriodMap = new HashMap<>();
+    private final Map<SubTier, Span> priceSaleMap = new HashMap<>();
     private final Map<SubTier, Anchor> buttonAnchorMap = new HashMap<>();
     private HorizontalLayout yearlySuggestionField;
     private NumberField proQuantityNumberField;
@@ -54,7 +61,7 @@ public class PremiumTiersSection extends VerticalLayout {
         mainLayout.setPadding(false);
         mainLayout.addClassName(Styles.APP_WIDTH);
         mainLayout.add(generateTitle());
-        mainLayout.add(generateYearlySuggestionField());
+        mainLayout.add(DISCOUNT_CODE.isEmpty() ? generateYearlySuggestionField() : generateDiscountField());
         mainLayout.add(generateTiersCurrencyDurationField());
         mainLayout.add(generateTiersTiers());
         return mainLayout;
@@ -72,7 +79,7 @@ public class PremiumTiersSection extends VerticalLayout {
         yearlySuggestionField.setPadding(false);
         yearlySuggestionField.setId("notification-field");
 
-        Icon icon = VaadinIcon.INFO_CIRCLE_O.create();
+        Icon icon = VaadinIcon.INFO_CIRCLE.create();
         icon.setId("notification-icon");
         yearlySuggestionField.add(icon);
 
@@ -90,6 +97,27 @@ public class PremiumTiersSection extends VerticalLayout {
 
         yearlySuggestionField.add(content);
         return yearlySuggestionField;
+    }
+
+    private Component generateDiscountField() {
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.setPadding(false);
+        layout.setId("notification-field");
+        layout.getStyle().set("border-color", "rgb(var(--warning-color-rgb))");
+
+        Icon icon = VaadinIcon.INFO_CIRCLE.create();
+        icon.setId("notification-icon");
+        icon.getStyle().set("color", "rgb(var(--warning-color-rgb))");
+        layout.add(icon);
+
+        VerticalLayout textLayout = new VerticalLayout();
+        textLayout.setPadding(false);
+
+        H4 title = new H4(getTranslation("premium.discount.title"));
+        Span text = new SpanWithLinebreaks(getTranslation("premium.discount.text", String.valueOf(DISCOUNT_PERCENT), DISCOUNT_CODE));
+        textLayout.add(title, text);
+        layout.add(textLayout);
+        return layout;
     }
 
     private Component generateTiersCurrencyDurationField() {
@@ -110,14 +138,13 @@ public class PremiumTiersSection extends VerticalLayout {
 
         durationSelect.setItemLabelGenerator((ItemLabelGenerator<SubDuration>) duration -> getTranslation("premium.duration." + duration.name()));
         durationSelect.setItems(SubDuration.values());
-        durationSelect.setValue(SubDuration.MONTHLY);
+        durationSelect.setValue(DISCOUNT_CODE.isEmpty() ? SubDuration.MONTHLY : SubDuration.ANNUALLY);
         durationSelect.addValueChangeListener(e -> {
             if (e.getValue() == SubDuration.ANNUALLY && yearlySuggestionField != null) {
                 yearlySuggestionField.getStyle().set("display", "none");
             }
             refreshPremiumTiers();
         });
-        durationSelect.setMaxWidth("150px");
         content.add(durationSelect);
 
         return content;
@@ -127,24 +154,33 @@ public class PremiumTiersSection extends VerticalLayout {
         SubDuration duration = durationSelect.getValue();
 
         for (SubTier tier : SubTier.values()) {
-            double currentPrice = tier.getPrice() * duration.getPriceFactor();
+            double originalPrice = tier.getPrice() * duration.getPriceFactor();
             int quantity = switch (tier) {
                 case PRO -> proQuantityNumberField != null ? proQuantityNumberField.getValue().intValue() : 1;
                 case PRO_PLUS -> proPlusQuantityNumberField != null ? proPlusQuantityNumberField.getValue().intValue() : 1;
                 default -> 1;
             };
-            currentPrice *= quantity;
+            originalPrice *= quantity;
+            double effectivePrice = DISCOUNT_CODE.isEmpty() ? originalPrice : originalPrice * (100 - DISCOUNT_PERCENT) / 100.0;
 
-            NumberFormat formatter = NumberFormat.getCurrencyInstance(getLocale());
-            formatter.setMaximumFractionDigits(0);
+            NumberFormat originalFormatter = NumberFormat.getCurrencyInstance(getLocale());
+            originalFormatter.setMaximumFractionDigits((originalPrice % 1) == 0 ? 0 : 2);
+            String originalPriceString = originalFormatter.format(originalPrice)
+                    .replace("¤", "$");
 
-            String currentPriceString = formatter.format(currentPrice)
+            NumberFormat effectiveFormatter = NumberFormat.getCurrencyInstance(getLocale());
+            effectiveFormatter.setMaximumFractionDigits((effectivePrice % 1) == 0 ? 0 : 2);
+            String effectivePriceString = effectiveFormatter.format(effectivePrice)
                     .replace("¤", "$");
 
             priceTextMap.get(tier)
-                    .setText(currentPriceString);
-            pricePeriodTextMap.get(tier)
-                    .setText(getTranslation("premium.priceperiod", duration == SubDuration.ANNUALLY));
+                    .setText(effectivePriceString);
+            Optional.ofNullable(pricePreviousTextMap.get(tier))
+                    .ifPresent(t -> t.setText(originalPriceString));
+            Optional.ofNullable(pricePeriodMap.get(tier))
+                    .ifPresent(t -> t.setText(getTranslation("premium.priceperiod", duration == SubDuration.ANNUALLY)));
+            Optional.ofNullable(priceSaleMap.get(tier))
+                    .ifPresent(t -> t.setText(getTranslation("premium.priceperiod.sale", duration == SubDuration.ANNUALLY, originalPriceString)));
             buttonAnchorMap.get(tier)
                     .setHref("https://www.patreon.com/checkout/lawlietbot?rid=" + tier.getIds()[quantity - 1] + "&cadence=" + duration.getCadence());
         }
@@ -216,13 +252,32 @@ public class PremiumTiersSection extends VerticalLayout {
         priceTextMap.put(tier, price);
         priceLayout.add(price);
 
-        Span period = new Span("");
-        period.getStyle().set("margin", "0 0 0 0.3em")
-                .set("color", "var(--secondary-text-color)")
-                .set("text-align", "center");
-        pricePeriodTextMap.put(tier, period);
-        priceLayout.add(period);
-        content.add(priceLayout, generateButtonSeparator());
+        if (DISCOUNT_CODE.isEmpty()) {
+            Span period = new Span("");
+            period.getStyle().set("margin", "0 0 0 0.3em")
+                    .set("color", "var(--secondary-text-color)")
+                    .set("text-align", "center");
+            pricePeriodMap.put(tier, period);
+            priceLayout.add(period);
+        } else {
+            Span previous = new Span("");
+            previous.getStyle().set("margin", "0 0 0 0.3em")
+                    .set("color", "var(--secondary-text-color)")
+                    .set("font-size", "150%")
+                    .set("text-align", "center")
+                    .set("text-decoration-line", "line-through");
+            pricePreviousTextMap.put(tier, previous);
+            priceLayout.add(previous);
+        }
+        content.add(priceLayout);
+
+        if (!DISCOUNT_CODE.isEmpty()) {
+            Span period2 = new Span("");
+            period2.getStyle().set("margin", "0")
+                    .set("color", "var(--secondary-text-color)");
+            priceSaleMap.put(tier, period2);
+            content.add(period2, generateButtonSeparator());
+        }
 
         switch (tier) {
             case PRO -> {

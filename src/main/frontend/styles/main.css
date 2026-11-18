@@ -72,7 +72,7 @@
     margin-top: var(--lumo-space-m);
 }
 
-.attention-circle {
+.navigation-notification-icon {
     margin-top: 4px;
     color: rgb(var(--warning-color-rgb));
     height: 1em;

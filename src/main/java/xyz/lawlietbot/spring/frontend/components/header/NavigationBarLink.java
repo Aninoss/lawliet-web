@@ -34,10 +34,10 @@ public class NavigationBarLink {
         hiddenInLiteVersion = page.isAnnotationPresent(NoLiteAccess.class);
     }
 
-    public NavigationBarLink focus(boolean focus) {
-        if (focus && routerLink != null) {
+    public NavigationBarLink addNotificationIcon(boolean enabled) {
+        if (enabled && routerLink != null) {
             Icon icon = VaadinIcon.EXCLAMATION_CIRCLE.create();
-            icon.addClassName("attention-circle");
+            icon.addClassName("navigation-notification-icon");
             routerLink.addComponentAsFirst(icon);
         }
         return this;
@@ -60,4 +60,5 @@ public class NavigationBarLink {
     public boolean isHiddenInLiteVersion() {
         return hiddenInLiteVersion;
     }
+
 }
