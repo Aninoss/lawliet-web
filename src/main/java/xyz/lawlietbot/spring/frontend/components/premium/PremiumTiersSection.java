@@ -116,6 +116,12 @@ public class PremiumTiersSection extends VerticalLayout {
         H4 title = new H4(getTranslation("premium.discount.title"));
         Span text = new SpanWithLinebreaks(getTranslation("premium.discount.text", String.valueOf(DISCOUNT_PERCENT), DISCOUNT_CODE));
         textLayout.add(title, text);
+
+        Button switchButton = new Button(getTranslation("premium.suggestyearly.button"));
+        switchButton.getStyle().set("margin-top", "8px");
+        switchButton.addClickListener(e -> durationSelect.setValue(SubDuration.ANNUALLY));
+        textLayout.add(switchButton);
+
         layout.add(textLayout);
         return layout;
     }
@@ -138,7 +144,7 @@ public class PremiumTiersSection extends VerticalLayout {
 
         durationSelect.setItemLabelGenerator((ItemLabelGenerator<SubDuration>) duration -> getTranslation("premium.duration." + duration.name()));
         durationSelect.setItems(SubDuration.values());
-        durationSelect.setValue(DISCOUNT_CODE.isEmpty() ? SubDuration.MONTHLY : SubDuration.ANNUALLY);
+        durationSelect.setValue(SubDuration.MONTHLY);
         durationSelect.addValueChangeListener(e -> {
             if (e.getValue() == SubDuration.ANNUALLY && yearlySuggestionField != null) {
                 yearlySuggestionField.getStyle().set("display", "none");
